@@ -8,8 +8,13 @@
 			body{
 				margin: 0;
 				overflow: hidden;
-				transform: rotate(90deg);
 				/* 隐藏body窗口区域滚动条 */
+			}
+			@media screen and (orientation:portrait){
+				body{
+					animation: rot 1s;
+					animation-fill-mode: forwards;
+				}
 			}
 			h1{
 				position: absolute;
@@ -21,9 +26,42 @@
 				color: #fff;
 				background-color: #000;
 			}
+			
+			@keyframes rot{
+				from {
+					transform: rotate(0deg);
+				}
+				to {
+					transform: rotate(90deg);
+				}
+			}
+			@-moz-keyframes rot{ /* Firefox */
+				from {
+					transform: rotate(0deg);
+				}
+				to {
+					transform: rotate(90deg);
+				}
+			}
+			@-webkit-keyframes rot{ /* Safari 和 Chrome */
+				from {
+					transform: rotate(0deg);
+				}
+				to {
+					transform: rotate(90deg);
+				}
+			}
+			@-o-keyframes rot{ /* Opera */
+				from {
+					transform: rotate(0deg);
+				}
+				to {
+					transform: rotate(90deg);
+				}
+			}
 		</style>
-		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
-		<script>new VConsole();</script>
+		<!-- <script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
+		<script>new VConsole();</script> -->
 		<script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
 		<script src="./node_modules/stats.js/build/stats.min.js"></script>
 		<script src="./node_modules/dat.gui/build/dat.gui.min.js"></script>
@@ -31,7 +69,8 @@
 		<script src="./node_modules/three/examples/js/controls/PointerLockControls.js"></script>
 	</head>
 
-	<body>
+	<body bgcolor="black">
+		<div id="pointer-lock-element"></div>
 		<h1 id="schedule">
 			<span id="schedule_message">贴图加载中……</span><br/>
 			主进度：<span id="schedule1">0</span>%<br/>
@@ -263,8 +302,8 @@ let camera = new THREE.OrthographicCamera(-s * k, s * k, s, -s, 1, 1000);
 camera.position.set(0, 200, 0); //设置相机位置
 camera.lookAt(scene.position); //设置相机方向(指向的场景对象) */
 
-const WIDTH = window.innerHeight,
-	HEIGHT = window.innerWidth;
+const WIDTH = window.innerHeight>window.innerWidth? window.innerHeight: window.innerWidth,
+	HEIGHT = window.innerHeight>window.innerWidth? window.innerWidth: window.innerHeight;
 let camera = new THREE.PerspectiveCamera(45, WIDTH/HEIGHT, 1, 1000*100);
 //								 view_angle, aspect, near, far(1km)
 camera.position.set(0, 300, 0); //设置相机位置
@@ -395,7 +434,7 @@ function render() {
 	let h = new Date().getHours();
 	if (h > 20 | h < 5){ // 天黑
 		renderer.setClearColor("#334", 1);
-	}else if (h > 18 | h < 7){ // 日出/日落
+	}else if (h > 15 | h < 7){ // 日出/日落
 		renderer.setClearColor("#b23", 1);
 	}else{
 		renderer.setClearColor("#eef", 1);
@@ -460,9 +499,19 @@ document.onkeydown = function (e){
 			console.log("keydown:", e.keyCode);
 			break;
 	}
-	watcher.pos.x += x*10;
-	watcher.pos.y += y*10;
-	watcher.pos.z += z*10;
+	watcher.pos.x += x*3.6;
+	watcher.pos.y += y*3.6;
+	watcher.pos.z += z*3.6;
+	setTimeout(()=>{
+		watcher.pos.x += x*3.6;
+		watcher.pos.y += y*3.6;
+		watcher.pos.z += z*3.6;
+	}, 300);
+	setTimeout(()=>{
+		watcher.pos.x += x*3.6;
+		watcher.pos.y += y*3.6;
+		watcher.pos.z += z*3.6;
+	}, 600);
 }
 
 
@@ -716,8 +765,8 @@ $("canvas:eq(0)").on('touchcancel', function (e){
 function get_choice_object(phone, x, y){
 	let raycaster = new THREE.Raycaster(); //光线投射，用于确定鼠标点击位置
 	let mouse = new THREE.Vector2(); //创建二维平面
-	mouse.x = 2*(x/WIDTH)-1;
-	mouse.y = -2*(y/HEIGHT)+2;
+	mouse.x = phone? 2*(x/WIDTH)-1: 0;
+	mouse.y = phone? -2*(y/HEIGHT)+2: 0;
 	//mouse.x = phone? (x/window.innerWidth)*0.9-0.6: 0;
 	//mouse.y = phone? (y/window.innerHeight)*1.8-0.6: 0;
 	console.log("get:", x, y, mouse.x, mouse.y);
@@ -742,6 +791,137 @@ document.oncontextmenu = function (e){
 document.onselectstart = function (){
 	return false;
 };
+
+
+
+                                                var element = document.body;
+
+                                                //输入锁定改变事件
+                                                var pointerlockchange = function pointerlockchange() {
+                                                            if (document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element) {
+console.log(802)
+                                                                        /* _this.controlsEnabled = true;
+                                                                        _this.controls.enabled = true;
+
+                                                                        blocker.style.display = 'none'; */
+                                                            } else {
+console.log(808)
+                                                                       /* _this.controls.enabled = false;
+
+                                                                        blocker.style.display = 'block';
+
+                                                                        instructions.style.display = ''; */
+                                                            }
+                                                };
+
+                                                //输入锁定改变错误
+                                                var pointerlockerror = function pointerlockerror() {
+console.log("error")
+                                                            instructions.style.display = '';
+                                                };
+
+                                                // Hook pointer lock state change events
+                                                document.addEventListener('pointerlockchange', pointerlockchange, false);
+                                                document.addEventListener('mozpointerlockchange', pointerlockchange, false);
+                                                document.addEventListener('webkitpointerlockchange', pointerlockchange, false);
+
+                                                document.addEventListener('pointerlockerror', pointerlockerror, false);
+                                                document.addEventListener('mozpointerlockerror', pointerlockerror, false);
+                                                document.addEventListener('webkitpointerlockerror', pointerlockerror, false);
+
+                                                document.addEventListener('keydown', function (event) {
+                                                            // return _this.onKeyDown(event);
+                                                }, false);
+                                                document.addEventListener('keyup', function (event) {
+                                                            // return _this.onKeyUp(event);
+                                                }, false);
+
+                                                //遮罩层事件
+                                                element.addEventListener('click', function () {
+
+                                                            // instructions.style.display = 'none';
+
+                                                            // Ask the browser to lock the pointer
+                                                            //请求指针锁定
+                                                            element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
+                                                            element.requestPointerLock();
+                                                }, false);
+
+
+/* // 注意: 截止本文撰写时, 仅有 Mozilla 和 WebKit 支持指针锁定。
+
+// 我们将要使之全屏并指针锁定的元素。
+var elem;
+
+document.addEventListener("mousemove", function(e) {
+  var movementX = e.movementX       ||
+                  e.mozMovementX    ||
+                  e.webkitMovementX ||
+                  0,
+      movementY = e.movementY       ||
+                  e.mozMovementY    ||
+                  e.webkitMovementY ||
+                  0;
+
+  // 打印鼠标移动的增量值。
+  console.log("movementX=" + movementX, "movementY=" + movementY);
+}, false);
+
+function fullscreenChange() {
+  if (document.webkitFullscreenElement === elem ||
+      document.mozFullscreenElement === elem ||
+      document.mozFullScreenElement === elem) { // 较旧的 API 大写 'S'.
+    // 元素进入全屏模式了，现在我们可以请求指针锁定。
+    elem.requestPointerLock = elem.requestPointerLock    ||
+                              elem.mozRequestPointerLock ||
+                              elem.webkitRequestPointerLock;
+    elem.requestPointerLock();
+  }
+}
+
+document.addEventListener('fullscreenchange', fullscreenChange, false);
+document.addEventListener('mozfullscreenchange', fullscreenChange, false);
+document.addEventListener('webkitfullscreenchange', fullscreenChange, false);
+
+function pointerLockChange() {
+  if (document.mozPointerLockElement === elem ||
+      document.webkitPointerLockElement === elem) {
+    console.log("指针锁定成功了。");
+  } else {
+    console.log("指针锁定已丢失。");
+  }
+}
+
+document.addEventListener('pointerlockchange', pointerLockChange, false);
+document.addEventListener('mozpointerlockchange', pointerLockChange, false);
+document.addEventListener('webkitpointerlockchange', pointerLockChange, false);
+
+function pointerLockError() {
+  console.log("锁定指针时出错。");
+}
+
+document.addEventListener('pointerlockerror', pointerLockError, false);
+document.addEventListener('mozpointerlockerror', pointerLockError, false);
+document.addEventListener('webkitpointerlockerror', pointerLockError, false);
+
+function lockPointer() {
+  elem = $("canvas")[0];
+  // 开始于使元素进入全屏模式。目前的实现
+  // 要求元素在请求指针锁定前要处于全屏模式下
+  // -- 这在以后可能会发生改变。
+  elem.requestFullscreen = elem.requestFullscreen    ||
+                           elem.mozRequestFullscreen ||
+                           elem.mozRequestFullScreen || // 较旧的 API 把 ‘S’ 大写
+                           elem.webkitRequestFullscreen;
+  elem.requestFullscreen();
+}
+document.body.addEventListener("mousedown", function(){
+	lockPointer();
+	console.log(13);
+},true);
+ */
+
+
 </script>
 	</body>
 </html>
