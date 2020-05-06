@@ -90,8 +90,7 @@
 	</head>
 
 	<body bgcolor="black">
-		<div id="pointer-lock-element"></div>
-		<h1 id="schedule">
+		<h1 id="schedule" style="z-index: 2;">
 			<span id="schedule_message">贴图加载中……</span><br/>
 			主进度：<span id="schedule1">0</span>%<br/>
 			次进度：<span id="schedule2">0</span>%
@@ -146,6 +145,16 @@ if ((/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 	mouse.style.cursor = "none";
 	
 	document.body.appendChild(mouse);
+	
+	
+	let help = document.createElement("h1");
+	help.innerHTML = `
+		W/↑:前进; S/↓:后退; A/←:左; D/→:右; 空格:跳跃; shift:<br/>
+		请先点击任意处以开始游戏`
+	;
+	help.style.opacity = 0.5;
+	help.id = "help";
+	document.body.appendChild(help);
 }
 
 
@@ -181,7 +190,7 @@ const blocks = [
 		texture: []
 	},
 	{
-		name: "岩石",
+		name: "圆石",
 		texture: []
 	}
 ];
@@ -246,24 +255,25 @@ gui.add(window, "backup");
 * 创建场景对象Scene
 */
 let scene = new THREE.Scene();
-scene.fog = new THREE.Fog( 0xffffff, 0.01, 50*100);
+scene.fog = new THREE.Fog("#fff", 0.01, 200*100);
 //						 雾气颜色，近处的距离，远处的距离(66m)
 let scene_folder = gui.addFolder("场景(scene)");
 	let scene_fog_folder = scene_folder.addFolder("雾(fog)");
 		scene_fog_folder.open();
-		scene_fog_folder.add(scene.fog, "far", 10*100, 100*100);
+		scene_fog_folder.add(scene.fog, "far", 10*100, 1000*100);
 		scene_fog_folder.add(scene.fog, "near", 0.001, 1);
+		scene_fog_folder.addColor(scene.fog, "color");
 
 /**
 * 创建网格模型
 */
 let meshs = [];
 for (let x=-10; x<=10; x++){
-		meshs[x] = [];
-		for (let y=0; y<=20; y++){
-			meshs[x][y] = [];
-		}
+	meshs[x] = [];
+	for (let y=0; y<=20; y++){
+		meshs[x][y] = [];
 	}
+}
 let block_geometry = new THREE.BoxGeometry(100, 100, 100);
 // TextureLoader创建一个纹理加载器对象，可以加载图片作为几何体纹理
 let textureLoader = new THREE.TextureLoader();
@@ -316,6 +326,7 @@ for (let i=1; i<blocks.length; i++){
 								mesh.receiveShadow = true;
 								
 								scene.add(mesh); //网格模型添加到场景中
+								meshs[x][y][z] = mesh;
 							/* }else if (
 								every[x+1][y][z] == 0 |
 								every[x-1][y][z] == 0 |
@@ -367,7 +378,7 @@ scene.add(floor_mesh); */
 
 // 改变AxesHelper构造函数的参数，可以改变三维坐标轴的大小
 // 参数设置坐标轴大小:1000
-var axesHelper = new THREE.AxesHelper(1000);
+var axesHelper = new THREE.AxesHelper(1666);
 scene.add(axesHelper);
 /*let line = [];
 let line_geometry = [];
@@ -411,20 +422,29 @@ point.position.set(0, 10*100, 0); //点光源位置
 scene.add(point); //点光源添加到场景中*/
 
 //平行光
-var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-directionalLight.position.set(0, 1, 1);
+var directionalLight = new THREE.DirectionalLight("#fff", 1);
+directionalLight.position.set(2, 1, 2);
 directionalLight.castShadow = true;
-directionalLight.shadow.mapSize.width = 512;  // default
-directionalLight.shadow.mapSize.height = 512; // default
+directionalLight.onlyShadow = true;
+directionalLight.shadow.mapSize.width = Math.pow(2,12);  // default:512
+directionalLight.shadow.mapSize.height = Math.pow(2,12); // default:512
 directionalLight.shadow.camera.near = 0.5;
-directionalLight.shadow.camera.far = 100*100;
-directionalLight.shadow.camera.left = -100*100;
-directionalLight.shadow.camera.right = 100*100;
-directionalLight.shadow.camera.top = 100*100;
-directionalLight.shadow.camera.bottom = -100*100;
+directionalLight.shadow.camera.far = 200*100;
+directionalLight.shadow.camera.left = -200*100;
+directionalLight.shadow.camera.right = 200*100;
+directionalLight.shadow.camera.top = 200*100;
+directionalLight.shadow.camera.bottom = -200*100;
 scene.add(directionalLight);
 // 光照指向平地
 //directionalLight.target = ;
+//辅助线
+var directionalLight_CameraHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
+scene.add(directionalLight_CameraHelper);
+
+//户外光源
+var hemiLight = new THREE.HemisphereLight('#87ceeb', '#f5deb3', 0.4/*"#aaf", "#888", 1*/);
+hemiLight.position.set(0,500,0);
+scene.add(hemiLight);
 
 //环境光
 let ambient = new THREE.AmbientLight(0x444444);
@@ -465,6 +485,20 @@ renderer.shadowMapEnabled = true; //阴影
 //执行渲染操作   指定场景、相机作为参数
 renderer.render(scene, camera);
 
+
+setTimeout(function(){
+	let h = new Date().getHours();
+	if (h > 20 | h < 5){ // 天黑
+		ambient.color = new THREE.Color("#223");
+		renderer.setClearColor("#334", 1);
+	}else if (h > 15 | h < 7){ // 日出/日落
+		ambient.color = new THREE.Color("#f9a");
+		renderer.setClearColor("#a34", 1);
+	}else{
+		ambient.color = new THREE.Color("#aac");
+		renderer.setClearColor("#eef", 1);
+	}
+}, 0);
 setInterval(function(){
 	let h = new Date().getHours();
 	if (h > 20 | h < 5){ // 天黑
@@ -499,7 +533,7 @@ let watcher = {
 	},
 	pos: camera.position,
 	lookAt: {
-		left_right: 220,
+		left_right: 0,
 		top_bottom: -30
 	},
 	look: {
@@ -650,20 +684,46 @@ choice_folder.open();
 		choice_position_folder.add(choice_object?choice_object.object.position:{x:0,y:0,z:0}, "y", -1000, 1000, 100).listen();
 		choice_position_folder.add(choice_object?choice_object.object.position:{x:0,y:0,z:0}, "z", -1000, 1000, 100).listen();
 	choice_folder.add(choice_object.faceIndex?choice_object:{faceIndex:-1}, "faceIndex", 0, 12).listen(); */
-let x0 = null, y0 = null;
-$("body").on("mousemove", function (e){
+/* let mouse = {
+	x0: null,
+	y0: null
+}; */
+document.addEventListener("mousemove", function (e){
 	if (stop)
 		return;
+		
+	let dx =
+		e.movementX ||
+		e.mozMovementX ||
+		e.webkitMovementX ||
+		0
+	;
+	let dy =
+		e.movementY ||
+		e.mozMovementY ||
+		e.webkitMovementY ||
+		0
+	;
 	
-	let [x, y] = [e.pageX, e.pageY];
-	console.log("mousemove:", x, y);
+	console.log(
+		e.movementX,
+		e.mozMovementX,
+		e.webkitMovementX
+	)
+	// 打印鼠标移动的增量值。
+	console.log("mousemove:", dx, dy);
+	/* let [x, y] = [e.pageX, e.pageY];
+	console.log("mousemove:", x, y); */
 	
 	// choice_object = get_choice_object()?get_choice_object()[1]:undefined;
 	
-	if ( Math.sqrt(Math.pow(x-x0,2)+Math.pow(y-y0,2)) <= 100 & x0 !== null & y0 !== null ){
-		let [dx, dy] = [x-x0, y-y0];
-		[x0, y0] = [x, y];
-		console.log("move:", dx, dy);
+	/* if (
+		Math.sqrt(Math.pow(dx,2)+Math.pow(dy.y0,2)) <= 100 & //
+		mouse.x0 !== null & mouse.y0 !== null
+	){ */
+		// let [dx, dy] = [x-mouse.x0, y-mouse.y0];
+		// [mouse.x0, mouse.y0] = [x, y];
+		// console.log("move:", dx, dy);
 		watcher.lookAt.left_right += dx/document.getElementsByTagName("canvas")[0].offsetWidth*360;
 		watcher.lookAt.top_bottom -= dy/document.getElementsByTagName("canvas")[0].offsetHeight*360;
 		
@@ -674,14 +734,14 @@ $("body").on("mousemove", function (e){
 			while (watcher.lookAt.left_right < 0)
 				watcher.lookAt.left_right += 360;
 		
-		if (watcher.lookAt.top_bottom > 90)
-			watcher.lookAt.top_bottom = 90;
-		if (watcher.lookAt.top_bottom < -90)
-			watcher.lookAt.top_bottom = -90;
+		if (watcher.lookAt.top_bottom > 89.9)
+			watcher.lookAt.top_bottom = 89.9;
+		if (watcher.lookAt.top_bottom < -89.9)
+			watcher.lookAt.top_bottom = -89.9;
 		
-	}
+	// }
 	
-	[x0,y0] = [x, y];
+	// [mouse.x0,mouse.y0] = [x, y];
 });
 
 $("canvas:eq(0)").on("mousedown", function (e){
@@ -832,7 +892,7 @@ $("canvas:eq(0)").on("mousedown", function (e){
 /**
 * Touch
 */
-let move = {
+let touch = {
 	x0: null,
 	y0: null,
 	x: null,
@@ -847,17 +907,17 @@ $("#control").on("touchstart", function(e){
 	let y = e.originalEvent.targetTouches[0].clientY;
 	console.log("touchstart(control):", x, y);
 	
-	[move.x0, move.y0] = [x, y];
+	[touch.x0, touch.y0] = [x, y];
 	
-	move.loop = setInterval(function(){
+	touch.loop = setInterval(function(){
 		if (
-			move.x0 !== null &
-			move.y0 !== null &
-			move.x !== null &
-			move.y !== null
+			touch.x0 !== null &
+			touch.y0 !== null &
+			touch.x !== null &
+			touch.y !== null
 		){
-			let dx = move.x-move.x0;
-			let dy = move.y-move.y0;
+			let dx = touch.x-touch.x0;
+			let dy = touch.y-touch.y0;
 			let r = (
 				dx>0? Math.atan(dy/dx)+Math.PI/2:
 				dx<0? Math.atan(dy/dx)-Math.PI/2:
@@ -908,7 +968,7 @@ $("#control").on("touchmove", function(e){
 	let y = e.originalEvent.targetTouches[0].clientY;
 	console.log("touchmove(control):", x, y);
 	
-	[move.x, move.y] = [x, y];
+	[touch.x, touch.y] = [x, y];
 	
 	return false;
 });
@@ -920,10 +980,10 @@ $("#control").on("touchend", function(e){
 	let y = e.originalEvent.changedTouches[0].clientY;
 	console.log("touchend(control):", x, y);
 	
-	[move.x0, move.y0, move.x, move.y] = [null, null, null, null];
-	clearInterval(move.loop);
+	[touch.x0, touch.y0, touch.x, touch.y] = [null, null, null, null];
+	clearInterval(touch.loop);
 	
-	console.log(move)
+	console.log(touch)
 	
 	return false;
 });
@@ -1025,10 +1085,10 @@ $("canvas:eq(0)").on("touchmove", function (e){
 		while (watcher.lookAt.left_right < 0)
 			watcher.lookAt.left_right += 360;
 	
-	if (watcher.lookAt.top_bottom > 90)
-		watcher.lookAt.top_bottom = 90;
-	if (watcher.lookAt.top_bottom < -90)
-		watcher.lookAt.top_bottom = -90;
+	if (watcher.lookAt.top_bottom > 89.9)
+		watcher.lookAt.top_bottom = 89.9;
+	if (watcher.lookAt.top_bottom < -89.9)
+		watcher.lookAt.top_bottom = -89.9;
 	
 	if (Math.sqrt(
 		Math.pow(touch_start.pos.x-x, 2)+
@@ -1221,66 +1281,28 @@ document.onselectstart = function (){
 
 
 
-                                          /*      var element = document.body;
+//输入锁定改变事件
+var pointerlockchange = function pointerlockchange() {
+	if (
+		document.pointerLockElement === document.body ||
+		document.mozPointerLockElement === document.body ||
+		document.webkitPointerLockElement === document.body
+	){
+		$("#help").css("display", "none");
+		console.log("yes");
+	}else{
+		$("#help").css("display", "inline-block");
+		console.log("no");
+	}
+};
 
-                                                //输入锁定改变事件
-                                                var pointerlockchange = function pointerlockchange() {
-                                                            if (document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element) {
-console.log("yes")
-                                                                        // _this.controlsEnabled = true;
-                                                                        // _this.controls.enabled = true;
+//输入锁定改变错误
+var pointerlockerror = function pointerlockerror() {
+	console.error("鼠标锁定错误");
+	alert("鼠标锁定错误\n请重试或切换/升级浏览器");
+};
 
-                                                                        // blocker.style.display = 'none';
-                                                            } else {
-console.log("no")
-                                                                       // _this.controls.enabled = false;
-
-                                                                       //  blocker.style.display = 'block';
-
-                                                                       //  instructions.style.display = '';
-                                                            }
-                                                };
-
-                                                //输入锁定改变错误
-                                                var pointerlockerror = function pointerlockerror() {
-console.log("error")
-                                                            instructions.style.display = '';
-                                                };
-
-                                                // Hook pointer lock state change events
-                                                document.addEventListener('pointerlockchange', pointerlockchange, false);
-                                                document.addEventListener('mozpointerlockchange', pointerlockchange, false);
-                                                document.addEventListener('webkitpointerlockchange', pointerlockchange, false);
-
-                                                document.addEventListener('pointerlockerror', pointerlockerror, false);
-                                                document.addEventListener('mozpointerlockerror', pointerlockerror, false);
-                                                document.addEventListener('webkitpointerlockerror', pointerlockerror, false);
-
-                                                document.addEventListener('keydown', function (event) {
-                                                            // return _this.onKeyDown(event);
-                                                }, false);
-                                                document.addEventListener('keyup', function (event) {
-                                                            // return _this.onKeyUp(event);
-                                                }, false);
-
-                                                //遮罩层事件
-                                                element.addEventListener('click', function () {
-
-                                                            // instructions.style.display = 'none';
-
-                                                            // Ask the browser to lock the pointer
-                                                            //请求指针锁定
-                                                            element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
-                                                            element.requestPointerLock();
-                                                }, false); */
-
-
-/* // 注意: 截止本文撰写时, 仅有 Mozilla 和 WebKit 支持指针锁定。
-
-// 我们将要使之全屏并指针锁定的元素。
-var elem;
-
-document.addEventListener("mousemove", function(e) {
+/* document.addEventListener("mousemove", function(e) {
   var movementX = e.movementX       ||
                   e.mozMovementX    ||
                   e.webkitMovementX ||
@@ -1292,62 +1314,35 @@ document.addEventListener("mousemove", function(e) {
 
   // 打印鼠标移动的增量值。
   console.log("movementX=" + movementX, "movementY=" + movementY);
+}, false); */
+
+// Hook pointer lock state change events
+document.addEventListener("pointerlockchange", pointerlockchange, false);
+document.addEventListener("mozpointerlockchange", pointerlockchange, false);
+document.addEventListener("webkitpointerlockchange", pointerlockchange, false);
+
+document.addEventListener("pointerlockerror", pointerlockerror, false);
+document.addEventListener("mozpointerlockerror", pointerlockerror, false);
+document.addEventListener("webkitpointerlockerror", pointerlockerror, false);
+
+//遮罩层事件
+$("#help")[0].addEventListener("click", function (){
+	if (stop){ //请求解除指针锁定
+		document.exitPointerLock =
+			document.exitPointerLock ||
+			document.mozExitPointerLock ||
+			document.webkitExitPointerLock
+		;
+		document.exitPointerLock();
+	}else{ //请求指针锁定
+		document.body.requestPointerLock =
+			document.body.requestPointerLock ||
+			document.body.mozRequestPointerLock ||
+			document.body.webkitRequestPointerLock
+		;
+		document.body.requestPointerLock();
+	}
 }, false);
-
-function fullscreenChange() {
-  if (document.webkitFullscreenElement === elem ||
-      document.mozFullscreenElement === elem ||
-      document.mozFullScreenElement === elem) { // 较旧的 API 大写 'S'.
-    // 元素进入全屏模式了，现在我们可以请求指针锁定。
-    elem.requestPointerLock = elem.requestPointerLock    ||
-                              elem.mozRequestPointerLock ||
-                              elem.webkitRequestPointerLock;
-    elem.requestPointerLock();
-  }
-}
-
-document.addEventListener('fullscreenchange', fullscreenChange, false);
-document.addEventListener('mozfullscreenchange', fullscreenChange, false);
-document.addEventListener('webkitfullscreenchange', fullscreenChange, false);
-
-function pointerLockChange() {
-  if (document.mozPointerLockElement === elem ||
-      document.webkitPointerLockElement === elem) {
-    console.log("指针锁定成功了。");
-  } else {
-    console.log("指针锁定已丢失。");
-  }
-}
-
-document.addEventListener('pointerlockchange', pointerLockChange, false);
-document.addEventListener('mozpointerlockchange', pointerLockChange, false);
-document.addEventListener('webkitpointerlockchange', pointerLockChange, false);
-
-function pointerLockError() {
-  console.log("锁定指针时出错。");
-}
-
-document.addEventListener('pointerlockerror', pointerLockError, false);
-document.addEventListener('mozpointerlockerror', pointerLockError, false);
-document.addEventListener('webkitpointerlockerror', pointerLockError, false);
-
-function lockPointer() {
-  elem = $("canvas")[0];
-  // 开始于使元素进入全屏模式。目前的实现
-  // 要求元素在请求指针锁定前要处于全屏模式下
-  // -- 这在以后可能会发生改变。
-  elem.requestFullscreen = elem.requestFullscreen    ||
-                           elem.mozRequestFullscreen ||
-                           elem.mozRequestFullScreen || // 较旧的 API 把 ‘S’ 大写
-                           elem.webkitRequestFullscreen;
-  elem.requestFullscreen();
-}
-document.body.addEventListener("mousedown", function(){
-	lockPointer();
-	console.log(13);
-},true);
- */
-
 </script>
 	</body>
 </html>
