@@ -637,11 +637,16 @@ if (localStorage.getItem("我的世界.存档.玩家.朝向")){
 let watcher_folder = gui.addFolder("玩家/观察者(watcher)");
 watcher_folder.open();
 	watcher_folder.add(window, "stop").listen();
-	let watcher_position_folder = watcher_folder.addFolder("位置/像素");
+	let watcher_position_folder = watcher_folder.addFolder("位置/px");
 	watcher_position_folder.open();
-		watcher_position_folder.add(watcher.pos, "x", -1000, 1000, 10).listen();
-		watcher_position_folder.add(watcher.pos, "y", -1000, 1000, 10).listen();
-		watcher_position_folder.add(watcher.pos, "z", -1000, 1000, 10).listen();
+		watcher_position_folder.add(watcher.pos, "x", -1000, 1000, 0.01).listen();
+		watcher_position_folder.add(watcher.pos, "y", -1000, 1000, 0.01).listen();
+		watcher_position_folder.add(watcher.pos, "z", -1000, 1000, 0.01).listen();
+	let watcher_v_folder = watcher_folder.addFolder("速度/(px/s)");
+	watcher_v_folder.open();
+		watcher_v_folder.add(watcher.v, "x", -100, 100, 0.01).listen();
+		watcher_v_folder.add(watcher.v, "y", -100, 100, 0.01).listen();
+		watcher_v_folder.add(watcher.v, "z", -100, 100, 0.01).listen();
 	let watcher_lookAt_folder = watcher_folder.addFolder("朝向（球坐标系）");
 		watcher_lookAt_folder.add(watcher.lookAt, "left_right", 0, 360).listen();
 		watcher_lookAt_folder.add(watcher.lookAt, "top_bottom", -90, 90).listen();
@@ -653,7 +658,7 @@ watcher_folder.open();
 
 
 let T0 = new Date();//上次时间
-function render() {
+function render(){
 	let t = new Date()-T0;//时间差
 	T0 = new Date();//把本次时间赋值给上次时间
 	requestAnimationFrame(render);
@@ -694,12 +699,117 @@ function render() {
 		){ //脚被卡住
 			console.warn("脚被卡住？");
 		}
-	}catch(err){
+	}catch(err){}
+	
+	if (!stop){
+		watcher.v.y -= 9.8*t/1000;
+		let kf = 0.66; //空气阻力系数
+		watcher.v.x += kf*1*watcher.v.x*(watcher.v.x>0?-1:1);
+		watcher.v.y += kf*0.2*watcher.v.y*(watcher.v.y>0?-1:1);
+		watcher.v.z += kf*0.5*watcher.v.z*(watcher.v.z>0?-1:1);
 		
+		//x
+		if (watcher.v.y > 0){ //向前
+			for (var i=watcher.pos.x; i<=watcher.pos.x+watcher.v.x*t; i+=100){
+				try{
+					if (
+						every
+							[Math.round(i/100)]
+							[Math.round(watcher.pos.y/100)]
+							[Math.round(watcher.pos.z/100)]
+						!=
+							0
+					){
+						watcher.v.x = 0;
+						console.log("撞到脸，s:"+((watcher.pos.x+watcher.v.x*t)-i));
+						break;
+					}
+					if (
+						every
+							[Math.round(i/100)]
+							[Math.round(watcher.pos.y/100)-1]
+							[Math.round(watcher.pos.z/100)]
+						!=
+							0
+					){
+						watcher.v.x = 0;
+						console.log("撞到脚，s:"+((watcher.pos.x+watcher.v.x*t)-i));
+						break;
+					}
+				}catch(err){}
+			}
+			watcher.pos.x = i;
+		}else if (watcher.v.x < 0){ //向后
+			for (var i=watcher.pos.x; i>=watcher.pos.x+watcher.v.x*t; i-=100){
+				try{
+					if (
+						every
+							[Math.round(i/100)]
+							[Math.round(watcher.pos.y/100)]
+							[Math.round(watcher.pos.z/100)]
+						!=
+							0
+					){
+						watcher.v.x = 0;
+						console.log("撞到后脑，s:"+(i-(watcher.pos.x+watcher.v.x*t)));
+						break;
+					}
+					if (
+						every
+							[Math.round(i/100)]
+							[Math.round(watcher.pos.y/100)-1]
+							[Math.round(watcher.pos.z/100)]
+						!=
+							0
+					){
+						watcher.v.x = 0;
+						console.log("撞到脚，s:"+(i-(watcher.pos.x+watcher.v.x*t)));
+						break;
+					}
+				}catch(err){}
+			}
+			watcher.pos.x = i;
+		}
+		//y
+		if (watcher.v.y < 0){ //向下
+			for (var i=watcher.pos.y-200; i>=watcher.pos.y-200+watcher.v.y*t; i-=100){
+				try{
+					if (
+						every
+							[Math.round(watcher.pos.x/100)]
+							[Math.round(i/100)]
+							[Math.round(watcher.pos.z/100)]
+						!=
+							0
+					){
+						watcher.v.y = 0;
+						console.log("撞到地面，s:"+(i-(watcher.pos.y-200+watcher.v.y*t)));
+						break;
+					}
+				}catch(err){}
+			}
+			watcher.pos.y = i+200;
+		}else if (watcher.v.y > 0){ //向上
+			for (var i=watcher.pos.y; i<=watcher.pos.y+watcher.v.y*t; i+=100){
+				try{
+					if (
+						every
+							[Math.round(watcher.pos.x/100)]
+							[Math.round(i/100)]
+							[Math.round(watcher.pos.z/100)]
+						!=
+							0
+					){
+						watcher.v.y = 0;
+						console.log("撞到天花板，s:"+((watcher.pos.y-200+watcher.v.y*t)-i));
+						break;
+					}
+				}catch(err){}
+			}
+			watcher.pos.y = i;
+		}
 	}
-	/* for (let i=watcher.pos.y-200; i<=watcher.pos.y-watcher.v.y*t; i-=100){
-		
-	} */
+	
 	
 	/* watcher.pos.x += watcher.v.x*t;
 	watcher.pos.y += watcher.v.y*t;
@@ -780,19 +890,18 @@ document.addEventListener("keydown", function (e){
 			console.log("keydown:", e.keyCode);
 			break;
 	}
-	watcher.pos.x += x*3.6;
-	watcher.pos.y += y*3.6;
-	watcher.pos.z += z*3.6;
-	setTimeout(()=>{
-		watcher.pos.x += x*3.6;
-		watcher.pos.y += y*3.6;
-		watcher.pos.z += z*3.6;
-	}, 300);
-	setTimeout(()=>{
-		watcher.pos.x += x*3.6;
-		watcher.pos.y += y*3.6;
-		watcher.pos.z += z*3.6;
-	}, 600);
+	watcher.v.x += x;
+	if (
+		every
+			[Math.round(watcher.pos.x/100)]
+			[Math.round(watcher.pos.y/100)-2]
+			[Math.round(watcher.pos.z/100)]
+		!=
+			0
+	){ //脚下有方块
+		watcher.v.y += y;
+	}
+	watcher.v.z += z;
 });
 
 
