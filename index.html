@@ -10,12 +10,11 @@
 				overflow: hidden;
 				/* 隐藏body窗口区域滚动条 */
 			}
-			/* @media screen and (orientation:portrait){
-				body{
-					animation: rot 1s;
-					animation-fill-mode: forwards;
+			@media not screen and (orientation:portrait){ /* 电脑 */
+				#warning{
+					display: none;
 				}
-			} */
+			}
 			h1{
 				position: absolute;
 				width: 100%;
@@ -80,9 +79,12 @@
 				}
 			}
 		</style>
-		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
-		<script>new VConsole();</script>
-		<script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+		
+		<script src="./node_modules/jquery/dist/jquery.min.js"></script>
+		<script>
+		if (typeof(require) != "undefined")
+			window.$ = window.jQuery = require("./node_modules/jquery/dist/jquery.min.js");
+		</script>
 		<script src="./node_modules/stats.js/build/stats.min.js"></script>
 		<script src="./node_modules/dat.gui/build/dat.gui.min.js"></script>
 		<script src="./node_modules/three/build/three.min.js"></script>
@@ -95,14 +97,19 @@
 			主进度：<span id="schedule1">0</span>%<br/>
 			次进度：<span id="schedule2">0</span>%
 		</h1>
+		<h1 id="warning" style="z-index: 1;">
+			推荐使用横屏运行（启用浏览器横屏或下载apk）<br/>
+			<button onclick="this.parentElement.remove();">继续竖屏</button>
+		</h1>
+		<noscript><h1 style="z-index: 3;">你的浏览器不支持JavaScript，无法运行！</h1></noscript>
 <script>
 /**
 * 判断手机电脑
 */
-if ((/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
+if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 		navigator.userAgent.toLowerCase()
 	)
-)){ //手机
+){ //手机
 	let control = document.createElement("div");
 	let jump = document.createElement("div");
 	
@@ -111,6 +118,13 @@ if ((/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 	
 	document.body.appendChild(control);
 	document.body.appendChild(jump);
+	
+	let vconsole = document.create("script");
+	vconsole.src = "https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js";
+	vconsole.onload = function(){
+		new VConsole();
+	};
+	document.body.appendChild(vconsole);
 }else{ //电脑
 	let mouse = document.createElement("div");
 	let parts = [
@@ -150,11 +164,79 @@ if ((/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 	let help = document.createElement("h1");
 	help.innerHTML = `
 		W/↑:前进; S/↓:后退; A/←:左; D/→:右; 空格:跳跃; shift:<br/>
-		请先点击任意处以开始游戏`
+		Esc: 退出锁定鼠标并保存游戏<br/>
+		请先点击任意处锁定鼠标以开始游戏`
 	;
 	help.style.opacity = 0.5;
 	help.id = "help";
 	document.body.appendChild(help);
+	
+	//遮罩层事件
+	help.addEventListener("click", function (){
+		/* if (stop){ //请求解除指针锁定
+			document.exitPointerLock =
+				document.exitPointerLock ||
+				document.mozExitPointerLock ||
+				document.webkitExitPointerLock
+			;
+			document.exitPointerLock();
+		}else{ */ 
+			//请求指针锁定
+			document.body.requestPointerLock =
+				document.body.requestPointerLock ||
+				document.body.mozRequestPointerLock ||
+				document.body.webkitRequestPointerLock
+			;
+			document.body.requestPointerLock();
+			stop = false;
+		// }
+	}, false);
+	
+	//输入锁定改变事件
+	let pointerlockchange = function () {
+		if (
+			document.pointerLockElement === document.body ||
+			document.mozPointerLockElement === document.body ||
+			document.webkitPointerLockElement === document.body
+		){
+			console.log("yes");
+			stop = false;
+			$("#help").css("display", "none");
+		}else{
+			console.log("no");
+			stop = true;
+			$("#help").css("display", "inline-block");
+		}
+	};
+	
+	//输入锁定改变错误
+	let pointerlockerror = function () {
+		console.error("鼠标锁定错误");
+		alert("鼠标锁定错误\n请重试或切换/升级浏览器");
+	};
+	
+	/* document.addEventListener("mousemove", function(e) {
+	  var movementX = e.movementX       ||
+	                  e.mozMovementX    ||
+	                  e.webkitMovementX ||
+	                  0,
+	      movementY = e.movementY       ||
+	                  e.mozMovementY    ||
+	                  e.webkitMovementY ||
+	                  0;
+	
+	  // 打印鼠标移动的增量值。
+	  console.log("movementX=" + movementX, "movementY=" + movementY);
+	}, false); */
+	
+	// Hook pointer lock state change events
+	document.addEventListener("pointerlockchange", pointerlockchange, false);
+	document.addEventListener("mozpointerlockchange", pointerlockchange, false);
+	document.addEventListener("webkitpointerlockchange", pointerlockchange, false);
+	
+	document.addEventListener("pointerlockerror", pointerlockerror, false);
+	document.addEventListener("mozpointerlockerror", pointerlockerror, false);
+	document.addEventListener("webkitpointerlockerror", pointerlockerror, false);
 }
 
 
@@ -172,7 +254,7 @@ gui.close();
 /**
 * 初始化
 */
-var stop = false;
+var stop = true;
 const blocks = [
 	{
 		name: "空气"
@@ -591,9 +673,37 @@ function render() {
 	watcher.look.y = y;
 	watcher.look.z = z;
 	
-	watcher.pos.x += watcher.v.x*t;
+	try{
+		if (
+			every
+				[Math.round(watcher.pos.x/100)]
+				[Math.round(watcher.pos.y/100)]
+				[Math.round(watcher.pos.z/100)]
+			!=
+				0
+		){ //头被卡住
+			console.warn("头被卡住？");
+		}
+		if (
+			every
+				[Math.round(watcher.pos.x/100)]
+				[Math.round(watcher.pos.y/100)-1]
+				[Math.round(watcher.pos.z/100)]
+			!=
+				0
+		){ //脚被卡住
+			console.warn("脚被卡住？");
+		}
+	}catch(err){
+		
+	}
+	/* for (let i=watcher.pos.y-200; i<=watcher.pos.y-watcher.v.y*t; i-=100){
+		
+	} */
+	
+	/* watcher.pos.x += watcher.v.x*t;
 	watcher.pos.y += watcher.v.y*t;
-	watcher.pos.z += watcher.v.z*t;
+	watcher.pos.z += watcher.v.z*t; */
 	
 	stats.update();
 }
@@ -604,17 +714,11 @@ function render() {
 /* let controls = new THREE.OrbitControls(camera,renderer.domElement);//创建控件对象
 controls.addEventListener('change', render);//监听鼠标、键盘事件 */
 
-document.onkeydown = function (e){
-	if (e.keyCode == 27){ //ESC
-	console.log("ESC:", e.keyCode);
-		stop = !stop;
-		$("canvas:eq(0),#mouse").css("cursor",stop?"default":"none");
-		
-		backup();
-		
-		return;
-	}
+document.addEventListener("keydown", function (e){
 	let x=0, y=0, z=0;
+	
+	console.log(e.keyCode)
+	
 	switch (e.keyCode){
 		case 87:
 		case 38: //前
@@ -648,12 +752,30 @@ document.onkeydown = function (e){
 			console.log("down:", e.keyCode);
 			y = -1;
 			break;
+		case 27: //ESC
+			console.log("ESC:", e.keyCode);
+			stop = true;
+			$("canvas:eq(0),#mouse").css("cursor", "default");
+			
+			backup();
+			
+			//解除鼠标锁定
+			document.exitPointerLock =
+				document.exitPointerLock ||
+				document.mozExitPointerLock ||
+				document.webkitExitPointerLock
+			;
+			document.exitPointerLock();
+			
+			return;
 		case 121: //F10
+			console.log("F10:", e.keyCode);
 			if (gui.closed){
 				gui.open();
 			}else{
 				gui.close();
 			}
+			return;
 		default:
 			console.log("keydown:", e.keyCode);
 			break;
@@ -671,7 +793,7 @@ document.onkeydown = function (e){
 		watcher.pos.y += y*3.6;
 		watcher.pos.z += z*3.6;
 	}, 600);
-}
+});
 
 
 /* let choice_object = get_choice_object()?get_choice_object()[1]:undefined;
@@ -744,8 +866,11 @@ document.addEventListener("mousemove", function (e){
 	// [mouse.x0,mouse.y0] = [x, y];
 });
 
-$("canvas:eq(0)").on("mousedown", function (e){
+document.addEventListener("mousedown", function (e){
 	if (stop)
+		return;
+	
+	if (e.path[0].tagName != "BODY")
 		return;
 	
 	if (e.button == 0){ //左键（删除）
@@ -1021,7 +1146,7 @@ let touch_start = {
 	pos: {x: null, y: null},
 	id: null
 };
-$("canvas:eq(0)").on("touchstart", function (e){
+$("body").on("touchstart", function (e){
 	if (stop)
 		return;
 	
@@ -1061,7 +1186,7 @@ $("canvas:eq(0)").on("touchstart", function (e){
 	
 	return false;
 });
-$("canvas:eq(0)").on("touchmove", function (e){
+$("body").on("touchmove", function (e){
 	if (stop)
 		return false;
 	
@@ -1099,7 +1224,7 @@ $("canvas:eq(0)").on("touchmove", function (e){
 	}
 	return false;
 });
-$("canvas:eq(0)").on('touchend', function (e){
+$("body").on('touchend', function (e){
 	if (stop)
 		return;
 	
@@ -1233,7 +1358,7 @@ $("canvas:eq(0)").on('touchend', function (e){
 		}
 	}
 });
-$("canvas:eq(0)").on('touchcancel', function (e){
+$("body").on('touchcancel', function (e){
 	if (stop)
 		return;
 	
@@ -1278,71 +1403,6 @@ document.oncontextmenu = function (e){
 document.onselectstart = function (){
 	return false;
 };
-
-
-
-//输入锁定改变事件
-var pointerlockchange = function pointerlockchange() {
-	if (
-		document.pointerLockElement === document.body ||
-		document.mozPointerLockElement === document.body ||
-		document.webkitPointerLockElement === document.body
-	){
-		$("#help").css("display", "none");
-		console.log("yes");
-	}else{
-		$("#help").css("display", "inline-block");
-		console.log("no");
-	}
-};
-
-//输入锁定改变错误
-var pointerlockerror = function pointerlockerror() {
-	console.error("鼠标锁定错误");
-	alert("鼠标锁定错误\n请重试或切换/升级浏览器");
-};
-
-/* document.addEventListener("mousemove", function(e) {
-  var movementX = e.movementX       ||
-                  e.mozMovementX    ||
-                  e.webkitMovementX ||
-                  0,
-      movementY = e.movementY       ||
-                  e.mozMovementY    ||
-                  e.webkitMovementY ||
-                  0;
-
-  // 打印鼠标移动的增量值。
-  console.log("movementX=" + movementX, "movementY=" + movementY);
-}, false); */
-
-// Hook pointer lock state change events
-document.addEventListener("pointerlockchange", pointerlockchange, false);
-document.addEventListener("mozpointerlockchange", pointerlockchange, false);
-document.addEventListener("webkitpointerlockchange", pointerlockchange, false);
-
-document.addEventListener("pointerlockerror", pointerlockerror, false);
-document.addEventListener("mozpointerlockerror", pointerlockerror, false);
-document.addEventListener("webkitpointerlockerror", pointerlockerror, false);
-
-//遮罩层事件
-$("#help")[0].addEventListener("click", function (){
-	if (stop){ //请求解除指针锁定
-		document.exitPointerLock =
-			document.exitPointerLock ||
-			document.mozExitPointerLock ||
-			document.webkitExitPointerLock
-		;
-		document.exitPointerLock();
-	}else{ //请求指针锁定
-		document.body.requestPointerLock =
-			document.body.requestPointerLock ||
-			document.body.mozRequestPointerLock ||
-			document.body.webkitRequestPointerLock
-		;
-		document.body.requestPointerLock();
-	}
-}, false);
 </script>
 	</body>
 </html>
