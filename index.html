@@ -5,6 +5,19 @@
 		<meta content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
 		<title>我的世界</title>
 		<style>
+			@font-face{
+				font-family:kt; /*楷体*/
+				src:url("./fonts/kt.ttf");
+			}
+			@font-face{
+				font-family:hwxk; /*华文楷体*/
+				src:url("./fonts/hwxk.ttf");
+			}
+			@font-face{
+				font-family:fzybxskt; /*方正硬笔行书楷体*/
+				src:url("./fonts/fzybxskt.ttf");
+			}
+			
 			body{
 				margin: 0;
 				overflow: hidden;
@@ -18,12 +31,23 @@
 			h1{
 				position: absolute;
 				width: 100%;
-				height: 80%;
+				height: 100%;
 				margin: 0;
-				padding-top: 20%;
+				font-family: kt;
+				/*padding-top: 20%;*/
 				text-align: center;
 				color: #fff;
 				background-color: #000;
+			}
+			h1:before{
+				content: "\a\a";
+				white-space: pre;
+			}
+			b{
+				font-family: hwxk;
+			}
+			*{
+				font-family: fzybxskt;
 			}
 			#control{
 				position: absolute;
@@ -95,13 +119,47 @@
 		<h1 id="schedule" style="z-index: 2;">
 			<span id="schedule_message">贴图加载中……</span><br/>
 			主进度：<span id="schedule1">0</span>%<br/>
-			次进度：<span id="schedule2">0</span>%
+			次进度：<span id="schedule2">0</span>%<br/>
+			<b>生命诚可贵，生命只有一次，请珍爱生命</b>
 		</h1>
 		<h1 id="warning" style="z-index: 1;">
 			推荐使用横屏运行（启用浏览器横屏或下载apk）<br/>
 			<button onclick="this.parentElement.remove();">继续竖屏</button>
 		</h1>
 		<noscript><h1 style="z-index: 3;">你的浏览器不支持JavaScript，无法运行！</h1></noscript>
+<script>
+function websocket(...data){
+	for (var i in data)
+		data[i]=encodeURIComponent(data[i]);
+	console.log(data);
+	var element=document.createElement("script");
+	element.src="websocket://"+data.join("/");
+	document.body.append(element);
+	document.body.removeChild(element);
+}
+Android = {
+	file: {
+		write: function(address, value, func){
+			var callback = "_"+Number(new Date());
+			Android.callback[callback] = func;
+			websocket("file", "write", address, value, callback);
+		}
+	},
+	system: {
+		exit: function(func){
+			var callback = "_"+Number(new Date());
+			Android.callback[callback] = func;
+			websocket("system", "exit", callback);
+		},
+		notice: function(msg, func){
+			var callback = "_"+Number(new Date());
+			Android.callback[callback] = func;
+			websocket("system", "notice", msg, callback);
+		}
+	},
+	callback: {}
+};
+</script>
 <script>
 var stop = true;
 /**
@@ -445,6 +503,11 @@ for (let i=1; i<blocks.length; i++){
 					clearInterval(loop);
 					delete loop;
 					delete x;
+					//Android.callback.a = function(v){alert(v);};
+					//websocket("memory_card", "root_address", "a");
+					Android.system.notice("hello", function(){alert("ok");});
+					console.log(Android);
+					//websocket("system", "exit", "a");
 				}
 			},0);
 		});
@@ -523,8 +586,8 @@ scene.add(directionalLight);
 // 光照指向平地
 //directionalLight.target = ;
 //辅助线
-var directionalLight_CameraHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
-scene.add(directionalLight_CameraHelper);
+//var directionalLight_CameraHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
+//scene.add(directionalLight_CameraHelper);
 
 //户外光源
 var hemiLight = new THREE.HemisphereLight('#87ceeb', '#f5deb3', 0.4/*"#aaf", "#888", 1*/);
@@ -548,14 +611,16 @@ let camera = new THREE.OrthographicCamera(-s * k, s * k, s, -s, 1, 1000);
 camera.position.set(0, 200, 0); //设置相机位置
 camera.lookAt(scene.position); //设置相机方向(指向的场景对象) */
 
-const WIDTH = window.innerWidth,
+let WIDTH = window.innerWidth,
 	HEIGHT = window.innerHeight;
 
 let camera = new THREE.PerspectiveCamera(45, WIDTH/HEIGHT, 1, 1000*100);
 //								 view_angle, aspect, near, far(1km)
 camera.position.set(0, 300, 0); //设置相机位置
 camera.lookAt(scene.position); //设置相机方向(指向的场景对象)
-
+setTimeout(function(){
+	console.info(camera);
+},1000);
 
 /**
 * 创建渲染器对象
@@ -570,6 +635,12 @@ renderer.shadowMapEnabled = true; //阴影
 //执行渲染操作   指定场景、相机作为参数
 renderer.render(scene, camera);
 
+window.onresize = function(){
+	WIDTH = window.innerWidth;
+	HEIGHT = window.innerHeight;
+	camera.aspect = WIDTH/HEIGHT;
+	renderer.setSize(WIDTH, HEIGHT);
+};
 
 setTimeout(function(){
 	let h = new Date().getHours();
@@ -590,7 +661,7 @@ setInterval(function(){
 		ambient.color = new THREE.Color("#223");
 		renderer.setClearColor("#334", 1);
 	}else if (h > 15 | h < 7){ // 日出/日落
-		ambient.color = new THREE.Color("#a23");
+		ambient.color = new THREE.Color("#f9a");
 		renderer.setClearColor("#a34", 1);
 	}else{
 		ambient.color = new THREE.Color("#aac");
@@ -706,7 +777,7 @@ function render(){
 	
 	if (!stop){
 		watcher.v.y -= 9.8*t/1000;
-		let kf = 60; //空气阻力系数
+		let kf = 16; //空气阻力系数
 		watcher.v.x -=
 			Math.abs(kf*0.25*watcher.v.x*t/1000) < Math.abs(watcher.v.x)?
 				kf*0.25*watcher.v.x*t/1000
