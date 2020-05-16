@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
-		<meta content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
+		<meta content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
 		<title>我的世界</title>
 		<style>
 			body{
@@ -18,7 +18,7 @@
 			h1{
 				position: absolute;
 				width: 100%;
-				height: 100%;
+				height: 80%;
 				margin: 0;
 				padding-top: 20%;
 				text-align: center;
@@ -37,12 +37,12 @@
 			}
 			#jump{
 				position: absolute;
-				bottom: 20%;
+				bottom: 16%;
 				right: 10%;
 				background: #aaa;
 				opacity: 0.66;
-				width: 36px;
-				height: 36px;
+				width: 46px;
+				height: 46px;
 				border-radius: 50%;
 			}
 			
@@ -80,17 +80,17 @@
 			}
 		</style>
 		
-		<script src="./node_modules/jquery/dist/jquery.min.js"></script>
+		<script src="./js/jquery.min.js"></script>
 		<script>
 		if (typeof(require) != "undefined")
-			window.$ = window.jQuery = require("./node_modules/jquery/dist/jquery.min.js");
+			window.$ = window.jQuery = require("./js/jquery.min.js");
 		</script>
-		<script src="./node_modules/stats.js/build/stats.min.js"></script>
-		<script src="./node_modules/dat.gui/build/dat.gui.min.js"></script>
-		<script src="./node_modules/three/build/three.min.js"></script>
-		<script src="./node_modules/three/examples/js/controls/PointerLockControls.js"></script>
+		<script src="./js/stats.min.js"></script>
+		<script src="./js/dat.gui.min.js"></script>
+		<script src="./js/three.min.js"></script>
+		<!--<script src="./node_modules/three/examples/js/controls/PointerLockControls.js"></script>-->
 	</head>
-
+	
 	<body bgcolor="black">
 		<h1 id="schedule" style="z-index: 2;">
 			<span id="schedule_message">贴图加载中……</span><br/>
@@ -103,6 +103,7 @@
 		</h1>
 		<noscript><h1 style="z-index: 3;">你的浏览器不支持JavaScript，无法运行！</h1></noscript>
 <script>
+var stop = true;
 /**
 * 判断手机电脑
 */
@@ -119,7 +120,9 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 	document.body.appendChild(control);
 	document.body.appendChild(jump);
 	
-	let vconsole = document.create("script");
+	stop = false;
+	
+	let vconsole = document.createElement("script");
 	vconsole.src = "https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js";
 	vconsole.onload = function(){
 		new VConsole();
@@ -255,7 +258,6 @@ gui.close();
 /**
 * 初始化
 */
-var stop = true;
 const blocks = [
 	{
 		name: "空气"
@@ -704,22 +706,22 @@ function render(){
 	
 	if (!stop){
 		watcher.v.y -= 9.8*t/1000;
-		let kf = 26; //空气阻力系数
+		let kf = 16; //空气阻力系数
 		watcher.v.x -=
-			Math.abs(kf*1*watcher.v.x*t/1000) < Math.abs(watcher.v.x)?
-				kf*1*watcher.v.x*t/1000
+			Math.abs(kf*0.25*watcher.v.x*t/1000) < Math.abs(watcher.v.x)?
+				kf*0.25*watcher.v.x*t/1000
 			:
 				watcher.v.x
 		;
 		watcher.v.y -=
-			Math.abs(kf*0.2*watcher.v.y*t/1000) < Math.abs(watcher.v.y)?
-				kf*0.2*watcher.v.y*t/1000
+			Math.abs(kf*0.05*watcher.v.y*t/1000) < Math.abs(watcher.v.y)?
+				kf*0.05*watcher.v.y*t/1000
 			:
 				watcher.v.y
 		;
 		watcher.v.z -=
-			Math.abs(kf*0.6*watcher.v.z*t/1000) < Math.abs(watcher.v.z)?
-				kf*0.6*watcher.v.z*t/1000
+			Math.abs(kf*0.25*watcher.v.z*t/1000) < Math.abs(watcher.v.z)?
+				kf*0.25*watcher.v.z*t/1000
 			:
 				watcher.v.z
 		;
@@ -1055,7 +1057,7 @@ document.addEventListener("keydown", function (e){
 			!=
 				0
 		){ //脚下有方块
-			watcher.v.y += y;
+			watcher.v.y += y*2;
 		}
 	}catch(err){}
 	watcher.pos.z += z*10;
@@ -1320,34 +1322,101 @@ $("#control").on("touchstart", function(e){
 				Math.pow(dx, 2)+
 				Math.pow(dy, 2)
 			);
-			console.log(Math.atan(dy/dx)*180/Math.PI,r*180/Math.PI)
+			l = l>50? 50: l/3;
+			console.log(Math.atan(dy/dx)*180/Math.PI,r*180/Math.PI);
 			let x = Math.cos( watcher.lookAt.left_right/180*Math.PI+r )*l;
 			let z = Math.sin( watcher.lookAt.left_right/180*Math.PI+r )*l;
 			
-			watcher.pos.x += x/6;
-			watcher.pos.z += z/6;
-			setTimeout(function(){
-				watcher.pos.x += x/6;
-				watcher.pos.z += z/6;
-			}, 50);
-			setTimeout(function(){
-				watcher.pos.x += x/6;
-				watcher.pos.z += z/6;
-			}, 100);
-			setTimeout(function(){
-				watcher.pos.x += x/6;
-				watcher.pos.z += z/6;
-			}, 150);
-			setTimeout(function(){
-				watcher.pos.x += x/6;
-				watcher.pos.z += z/6;
-			}, 200);
-			setTimeout(function(){
-				watcher.pos.x += x/6;
-				watcher.pos.z += z/6;
-			}, 250);
+			if (x > 0){
+				for (var i=watcher.pos.x; i<=watcher.pos.x+x; i+=1){
+					try{
+						if (
+							every
+								[Math.round(i/100)]
+								[Math.round(watcher.pos.y/100)]
+								[Math.round(watcher.pos.z/100)]
+							!=
+								0
+						) break;
+						if (
+							every
+								[Math.round(i/100)]
+								[Math.round(watcher.pos.y/100)-1]
+								[Math.round(watcher.pos.z/100)]
+							!=
+								0
+						) break;
+					}catch(err){}
+				}
+			}else{
+				for (var i=watcher.pos.x; i>=watcher.pos.x+x; i-=1){
+					try{
+						if (
+							every
+								[Math.round(i/100)]
+								[Math.round(watcher.pos.y/100)]
+								[Math.round(watcher.pos.z/100)]
+							!=
+								0
+						) break;
+						if (
+							every
+								[Math.round(i/100)]
+								[Math.round(watcher.pos.y/100)-1]
+								[Math.round(watcher.pos.z/100)]
+							!=
+								0
+						) break;
+					}catch(err){}
+				}
+			}
+			if (z > 0){
+				for (var j=watcher.pos.z; j<=watcher.pos.z+z; j+=1){
+					try{
+						if (
+							every
+								[Math.round(watcher.pos.x/100)]
+								[Math.round(watcher.pos.y/100)]
+								[Math.round(j/100)]
+							!=
+								0
+						) break;
+						if (
+							every
+								[Math.round(watcher.pos.x/100)]
+								[Math.round(watcher.pos.y/100)-1]
+								[Math.round(j/100)]
+							!=
+								0
+						) break;
+					}catch(err){}
+				}
+			}else{
+				for (var j=watcher.pos.z; j>=watcher.pos.z+z; j-=1){
+					try{
+						if (
+							every
+								[Math.round(watcher.pos.x/100)]
+								[Math.round(watcher.pos.y/100)]
+								[Math.round(j/100)]
+							!=
+								0
+						) break;
+						if (
+							every
+								[Math.round(watcher.pos.x/100)]
+								[Math.round(watcher.pos.y/100)-1]
+								[Math.round(j/100)]
+							!=
+								0
+						) break;
+					}catch(err){}
+				}
+			}
+			watcher.pos.x += (i-watcher.pos.x)*(Math.random()*0.2+0.9);
+			watcher.pos.z += (j-watcher.pos.z)*(Math.random()*0.2+0.9);
 		}
-	}, 300);
+	}, 100);
 	
 	return false;
 });
@@ -1379,29 +1448,22 @@ $("#control").on("touchend", function(e){
 	return false;
 });
 
-$("#jump").click(function(){
+
+$("#jump").on("touchstart", function(){
 	console.log("jump");
 	
-	watcher.pos.y += 49;
-	setTimeout(function(){
-		watcher.pos.y += 36;
-	}, 200);
-	setTimeout(function(){
-		watcher.pos.y += 25;
-	}, 400);
-	setTimeout(function(){
-		watcher.pos.y += 16;
-	}, 600);
-	setTimeout(function(){
-		watcher.pos.y += 9;
-	}, 800);
-	setTimeout(function(){
-		watcher.pos.y += 4;
-	}, 1000);
-	setTimeout(function(){
-		watcher.pos.y += 1;
-	}, 1200);
-	
+	try{
+		if (
+			every
+				[Math.round(watcher.pos.x/100)]
+				[Math.round(watcher.pos.y/100)-2]
+				[Math.round(watcher.pos.z/100)]
+			!=
+				0
+		){ //脚下有方块
+			watcher.v.y += 2;
+		}
+	}catch(err){}
 	
 	return false;
 });
@@ -1412,7 +1474,7 @@ let touch_start = {
 	pos: {x: null, y: null},
 	id: null
 };
-$("body").on("touchstart", function (e){
+$("canvas:eq(0)").on("touchstart", function (e){
 	if (stop)
 		return;
 	
@@ -1452,7 +1514,7 @@ $("body").on("touchstart", function (e){
 	
 	return false;
 });
-$("body").on("touchmove", function (e){
+$("canvas:eq(0)").on("touchmove", function (e){
 	if (stop)
 		return false;
 	
@@ -1490,7 +1552,7 @@ $("body").on("touchmove", function (e){
 	}
 	return false;
 });
-$("body").on('touchend', function (e){
+$("canvas:eq(0)").on('touchend', function (e){
 	if (stop)
 		return;
 	
@@ -1624,7 +1686,7 @@ $("body").on('touchend', function (e){
 		}
 	}
 });
-$("body").on('touchcancel', function (e){
+$("canvas:eq(0)").on('touchcancel', function (e){
 	if (stop)
 		return;
 	
