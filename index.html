@@ -706,7 +706,7 @@ function render(){
 	
 	if (!stop){
 		watcher.v.y -= 9.8*t/1000;
-		let kf = 16; //空气阻力系数
+		let kf = 60; //空气阻力系数
 		watcher.v.x -=
 			Math.abs(kf*0.25*watcher.v.x*t/1000) < Math.abs(watcher.v.x)?
 				kf*0.25*watcher.v.x*t/1000
