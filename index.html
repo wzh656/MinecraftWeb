@@ -150,14 +150,8 @@ Android = {
 			var callback = "_"+Number(new Date());
 			Android.callback[callback] = func;
 			websocket("system", "exit", callback);
-		},
-		notice: function(msg, func){
-			var callback = "_"+Number(new Date());
-			Android.callback[callback] = func;
-			websocket("system", "notice", msg, callback);
 		}
-	},
-	callback: {}
+	}
 };
 </script>
 <script>
@@ -184,6 +178,8 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 	vconsole.src = "https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js";
 	vconsole.onload = function(){
 		new VConsole();
+		document.getElementById("__vconsole").childNodes[1].style.opacity = 0.5;
+		document.getElementById("__vconsole").childNodes[1].style.borderRadius = "66px";
 	};
 	document.body.appendChild(vconsole);
 }else{ //电脑
@@ -503,11 +499,6 @@ for (let i=1; i<blocks.length; i++){
 					clearInterval(loop);
 					delete loop;
 					delete x;
-					//Android.callback.a = function(v){alert(v);};
-					//websocket("memory_card", "root_address", "a");
-					Android.system.notice("hello", function(){alert("ok");});
-					console.log(Android);
-					//websocket("system", "exit", "a");
 				}
 			},0);
 		});
@@ -799,7 +790,7 @@ function render(){
 		
 		//x
 		if (watcher.v.x > 0){ //向前
-			for (var i=watcher.pos.x; i<=watcher.pos.x+watcher.v.x*t; i+=100){
+			for (var i=watcher.pos.x; i<=watcher.pos.x+watcher.v.x*t; i+=1){
 				try{
 					if (
 						every
@@ -829,7 +820,7 @@ function render(){
 			}
 			watcher.pos.x = i;
 		}else if (watcher.v.x < 0){ //向后
-			for (var i=watcher.pos.x; i>=watcher.pos.x+watcher.v.x*t; i-=100){
+			for (var i=watcher.pos.x; i>=watcher.pos.x+watcher.v.x*t; i-=1){
 				try{
 					if (
 						every
@@ -861,7 +852,7 @@ function render(){
 		}
 		//y
 		if (watcher.v.y > 0){ //向上
-			for (var i=watcher.pos.y; i<=watcher.pos.y+watcher.v.y*t; i+=100){
+			for (var i=watcher.pos.y; i<=watcher.pos.y+watcher.v.y*t; i+=1){
 				try{
 					if (
 						every
@@ -881,7 +872,7 @@ function render(){
 			}
 			watcher.pos.y = i;
 		}else if (watcher.v.y < 0){ //向下
-			for (var i=watcher.pos.y-200; i>=watcher.pos.y-200+watcher.v.y*t; i-=100){
+			for (var i=watcher.pos.y-200; i>=watcher.pos.y-200+watcher.v.y*t; i-=1){
 				try{
 					if (
 						every
@@ -903,7 +894,7 @@ function render(){
 		}
 		//z
 		if (watcher.v.z > 0){ //向右
-			for (var i=watcher.pos.z; i<=watcher.pos.z+watcher.v.z*t; i+=100){
+			for (var i=watcher.pos.z; i<=watcher.pos.z+watcher.v.z*t; i+=1){
 				try{
 					if (
 						every
@@ -933,7 +924,7 @@ function render(){
 			}
 			watcher.pos.z = i;
 		}else if (watcher.v.z < 0){ //向左
-			for (var i=watcher.pos.z; i>=watcher.pos.z+watcher.v.z*t; i-=100){
+			for (var i=watcher.pos.z; i>=watcher.pos.z+watcher.v.z*t; i-=1){
 				try{
 					if (
 						every
