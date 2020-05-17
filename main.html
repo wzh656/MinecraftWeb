@@ -123,7 +123,7 @@
 			<b>生命诚可贵，生命只有一次，请珍爱生命</b>
 		</h1>
 		<h1 id="warning" style="z-index: 1;">
-			推荐使用横屏运行（启用浏览器横屏或<a href="https://github.com/wzh656/MinecraftWeb/releases/download/v0.3.2-alpha/default.apk">下载apk</a>）<br/>
+			推荐使用横屏运行（启用浏览器横屏或<a href="https://github.com/wzh656/MinecraftWeb/releases/download/v0.3.2-alpha/Minecraft_v0.3.2-alpha.apk">下载apk</a>）<br/>
 			<button onclick="this.parentElement.remove();">继续竖屏</button>
 		</h1>
 		<noscript><h1 style="z-index: 3;">你的浏览器不支持JavaScript，无法运行！</h1></noscript>
@@ -966,71 +966,78 @@ function render(){
 /* let controls = new THREE.OrbitControls(camera,renderer.domElement);//创建控件对象
 controls.addEventListener('change', render);//监听鼠标、键盘事件 */
 
+let keydown = new Set();
 document.addEventListener("keydown", function (e){
+	if (stop)
+		return;
+
+	keydown.add(e.keyCode);
+});
+document.addEventListener("keyup", function (e){
+	keydown.delete(e.keyCode);
+});
+setInterval(function(){
+	if (stop)
+		keydown = new Set();
+
 	let x=0, y=0, z=0;
 	
-	console.log(e.keyCode)
+	if (keydown.size)
+		console.log("keydown:", keydown);
 	
-	switch (e.keyCode){
-		case 87:
-		case 38: //前
-			console.log("front:", e.keyCode);
-			x = Math.cos( (watcher.lookAt.left_right+0) /180*Math.PI);
-			z = Math.sin( (watcher.lookAt.left_right+0) /180*Math.PI);
-			break;
-		case 83:
-		case 40: //后
-			console.log("behind:", e.keyCode);
-			x = Math.cos( (watcher.lookAt.left_right+180) /180*Math.PI);
-			z = Math.sin( (watcher.lookAt.left_right+180) /180*Math.PI);
-			break;
-		case 65:
-		case 37: //左
-			console.log("left:", e.keyCode);
-			x = Math.cos( (watcher.lookAt.left_right-90) /180*Math.PI);
-			z = Math.sin( (watcher.lookAt.left_right-90) /180*Math.PI);
-			break;
-		case 68:
-		case 39: //右
-			console.log("right:", e.keyCode);
-			x = Math.cos( (watcher.lookAt.left_right+90) /180*Math.PI);
-			z = Math.sin( (watcher.lookAt.left_right+90) /180*Math.PI);
-			break;
-		case 32: //上
-			console.log("up:", e.keyCode);
-			y = 1;
-			break;
-		case 16: //下
-			console.log("down:", e.keyCode);
-			y = -1;
-			break;
-		case 27: //ESC
-			console.log("ESC:", e.keyCode);
-			stop = true;
-			$("canvas:eq(0),#mouse").css("cursor", "default");
-			
-			backup();
-			
-			//解除鼠标锁定
-			document.exitPointerLock =
-				document.exitPointerLock ||
-				document.mozExitPointerLock ||
-				document.webkitExitPointerLock
-			;
-			document.exitPointerLock();
-			
-			return;
-		case 121: //F10
-			console.log("F10:", e.keyCode);
-			if (gui.closed){
-				gui.open();
-			}else{
-				gui.close();
-			}
-			return;
-		default:
-			console.log("keydown:", e.keyCode);
-			break;
+	if (keydown.has(87) | keydown.has(38)){ //前
+		console.log("front:", keydown);
+		x += Math.cos( (watcher.lookAt.left_right+0) /180*Math.PI)*(Math.random()*0.2+0.9);
+		z += Math.sin( (watcher.lookAt.left_right+0) /180*Math.PI)*(Math.random()*0.2+0.9);
+	}
+	if (keydown.has(83) | keydown.has(40)){ //后
+		console.log("behind:", keydown);
+		x += Math.cos( (watcher.lookAt.left_right+180) /180*Math.PI)*(Math.random()*0.2+0.9);
+		z += Math.sin( (watcher.lookAt.left_right+180) /180*Math.PI)*(Math.random()*0.2+0.9);
+	}
+	if (keydown.has(65) | keydown.has(37)){ //左
+		console.log("left:", keydown);
+		x += Math.cos( (watcher.lookAt.left_right-90) /180*Math.PI)*(Math.random()*0.2+0.9);
+		z += Math.sin( (watcher.lookAt.left_right-90) /180*Math.PI)*(Math.random()*0.2+0.9);
+	}
+	if (keydown.has(68) | keydown.has(39)){ //右
+		console.log("right:", keydown);
+		x += Math.cos( (watcher.lookAt.left_right+90) /180*Math.PI)*(Math.random()*0.2+0.9);
+		z += Math.sin( (watcher.lookAt.left_right+90) /180*Math.PI)*(Math.random()*0.2+0.9);
+	}
+	if (keydown.has(32)){ //上
+		console.log("up:", keydown);
+		y += 1*(Math.random()*0.2+0.9);
+	}
+	if (keydown.has(16)){ //下
+		console.log("down:", keydown);
+		y += -1*(Math.random()*0.2+0.9);
+	}
+	if (keydown.has(27)){ //ESC
+		console.log("ESC:", keydown);
+		stop = true;
+		$("canvas:eq(0),#mouse").css("cursor", "default");
+		
+		backup();
+		
+		//解除鼠标锁定
+		document.exitPointerLock =
+			document.exitPointerLock ||
+			document.mozExitPointerLock ||
+			document.webkitExitPointerLock
+		;
+		document.exitPointerLock();
+		
+		return;
+	}
+	if (keydown.has(121)){ //F10
+		console.log("F10:", keydown);
+		if (gui.closed){
+			gui.open();
+		}else{
+			gui.close();
+		}
+		return;
 	}
 	
 	/* try{
@@ -1123,7 +1130,7 @@ document.addEventListener("keydown", function (e){
 		}
 	}catch(err){}
 	watcher.pos.z += z*10;
-});
+},32.6);
 
 
 /* let choice_object = get_choice_object()?get_choice_object()[1]:undefined;
