@@ -1,9 +1,10 @@
 # 我的世界（仿）
-提示：部分功能未完善，存在少量问题未解决
 
+运行：  
 + [web版](https://wzh656.github.io/MinecraftWeb/main.html)
-+ [手机版(apk)](https://github.com/wzh656/MinecraftWeb/releases/download/v0.3.2-alpha/Minecraft_v0.3.2-alpha.apk)
++ [手机版(apk)v0.3.2-alpha（非最新）](https://github.com/wzh656/MinecraftWeb/releases/download/v0.3.2-alpha/Minecraft_v0.3.2-alpha.apk)
 
+提示：部分功能未完善，存在少量问题未解决
 
 # 说明（终于补上了）：
 ## ㈠先不管那些调试工具，懒得删（跟桌子好学的）
@@ -59,12 +60,12 @@
 
 ## ㈦关于运行
 1.网页版运行：当前可以直接访问 <https://wzh656.github.io/MinecraftWeb/main.html> 运行，注意，部分垃̶圾̶浏览器可能不支持。还有竖屏时会有一个提示使用横屏或者下载，最好点击关闭，直接竖屏（虽然竖屏的我的世界有点怪），因为不知道横屏为什么会变形，and下载的是v0.3.2版，现在有更新版（至少是v0.3.3，解决了穿透方块的问题）了  
-2.手机apk软件运行（[点击下载](https://github.com/wzh656/MinecraftWeb/releases/download/v0.3.2-alpha/Minecraft_v0.3.2-alpha.apk)）：直接转横屏运行（不会变形），并且运行之后会在“存储卡/Android/data/com.wzh656.mc”文件夹下创建一个“temp”临时文件夹，卸载后将自动删除。  
+2.手机apk软件运行（[点击下载v0.3.2-alpha版（非最新）](https://github.com/wzh656/MinecraftWeb/releases/download/v0.3.2-alpha/Minecraft_v0.3.2-alpha.apk)）：直接转横屏运行（不会变形），并且运行之后会在“存储卡/Android/data/com.wzh656.mc”文件夹下创建一个“temp”临时文件夹，卸载后将自动删除。  
 
 
 ## ㈧关于效果（图片）
 
-<img alt="效果图片1" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/1.jpg" />
-<img alt="效果图片2" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/2.jpg" />
-<img alt="效果图片3" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/3.jpg" />
-<img alt="效果图片4" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/4.jpg" />
+<img alt="效果图片1" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/1.jpg" />  
+<img alt="效果图片2" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/2.jpg" />  
+<img alt="效果图片3" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/3.jpg" />  
+<img alt="效果图片4" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/4.jpg" />  
