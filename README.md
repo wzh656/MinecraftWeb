@@ -60,7 +60,7 @@
 
 ## ㈧关于效果（图片）
 
-![效果图片1](https://wzh656.github.io/MinecraftWeb/img/effect/1.jpg)
-![效果图片2](https://wzh656.github.io/MinecraftWeb/img/effect/2.jpg)
-![效果图片3](https://wzh656.github.io/MinecraftWeb/img/effect/3.jpg)
-![效果图片4](https://wzh656.github.io/MinecraftWeb/img/effect/4.jpg)
+<img alt="效果图片1" src="https://wzh656.github.io/MinecraftWeb/img/effect/1.jpg" />
+<img alt="效果图片2" src="https://wzh656.github.io/MinecraftWeb/img/effect/2.jpg" />
+<img alt="效果图片3" src="https://wzh656.github.io/MinecraftWeb/img/effect/3.jpg" />
+<img alt="效果图片4" src="https://wzh656.github.io/MinecraftWeb/img/effect/4.jpg" />
