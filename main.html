@@ -1,0 +1,1798 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+		<title>我的世界</title>
+		<style>
+			@font-face{
+				font-family:kt; /*楷体*/
+				src:url("./fonts/kt.ttf");
+			}
+			@font-face{
+				font-family:hwxk; /*华文楷体*/
+				src:url("./fonts/hwxk.ttf");
+			}
+			@font-face{
+				font-family:fzybxskt; /*方正硬笔行书楷体*/
+				src:url("./fonts/fzybxskt.ttf");
+			}
+			
+			body{
+				margin: 0;
+				overflow: hidden;
+				/* 隐藏body窗口区域滚动条 */
+			}
+			@media not screen and (orientation:portrait){ /* 电脑 */
+				#warning{
+					display: none;
+				}
+			}
+			h1{
+				position: absolute;
+				width: 100%;
+				height: 100%;
+				margin: 0;
+				font-family: kt;
+				/*padding-top: 20%;*/
+				text-align: center;
+				color: #fff;
+				background-color: #000;
+			}
+			h1:before{
+				content: "\a\a";
+				white-space: pre;
+			}
+			b{
+				font-family: hwxk;
+			}
+			*{
+				font-family: fzybxskt;
+			}
+			#control{
+				position: absolute;
+				bottom: 16%;
+				left: 10%;
+				background: #aaa;
+				opacity: 0.66;
+				width: 66px;
+				height: 66px;
+				border-radius: 50%;
+			}
+			#jump{
+				position: absolute;
+				bottom: 16%;
+				right: 10%;
+				background: #aaa;
+				opacity: 0.66;
+				width: 46px;
+				height: 46px;
+				border-radius: 50%;
+			}
+			
+			@keyframes rot{
+				from {
+					transform: rotate(0deg);
+				}
+				to {
+					transform: rotate(90deg);
+				}
+			}
+			@-moz-keyframes rot{ /* Firefox */
+				from {
+					transform: rotate(0deg);
+				}
+				to {
+					transform: rotate(90deg);
+				}
+			}
+			@-webkit-keyframes rot{ /* Safari 和 Chrome */
+				from {
+					transform: rotate(0deg);
+				}
+				to {
+					transform: rotate(90deg);
+				}
+			}
+			@-o-keyframes rot{ /* Opera */
+				from {
+					transform: rotate(0deg);
+				}
+				to {
+					transform: rotate(90deg);
+				}
+			}
+		</style>
+		
+		<script src="./js/jquery.min.js"></script>
+		<script>
+		if (typeof(require) != "undefined")
+			window.$ = window.jQuery = require("./js/jquery.min.js");
+		</script>
+		<script src="./js/stats.min.js"></script>
+		<script src="./js/dat.gui.min.js"></script>
+		<script src="./js/three.min.js"></script>
+		<!--<script src="./node_modules/three/examples/js/controls/PointerLockControls.js"></script>-->
+	</head>
+	
+	<body bgcolor="black">
+		<h1 id="schedule" style="z-index: 2;">
+			<span id="schedule_message">贴图加载中……</span><br/>
+			主进度：<span id="schedule1">0</span>%<br/>
+			次进度：<span id="schedule2">0</span>%<br/>
+			<b>生命诚可贵，生命只有一次，请珍爱生命</b>
+		</h1>
+		<h1 id="warning" style="z-index: 1;">
+			推荐使用横屏运行（启用浏览器横屏或<a href="https://github.com/wzh656/MinecraftWeb/releases/download/v0.3.2-alpha/default.apk">下载apk</a>）<br/>
+			<button onclick="this.parentElement.remove();">继续竖屏</button>
+		</h1>
+		<noscript><h1 style="z-index: 3;">你的浏览器不支持JavaScript，无法运行！</h1></noscript>
+<script>
+function websocket(...data){
+	for (var i in data)
+		data[i]=encodeURIComponent(data[i]);
+	console.log(data);
+	var element=document.createElement("script");
+	element.src="websocket://"+data.join("/");
+	document.body.append(element);
+	document.body.removeChild(element);
+}
+Android = {
+	file: {
+		write: function(address, value, func){
+			var callback = "_"+Number(new Date());
+			Android.callback[callback] = func;
+			websocket("file", "write", address, value, callback);
+		}
+	},
+	system: {
+		exit: function(func){
+			var callback = "_"+Number(new Date());
+			Android.callback[callback] = func;
+			websocket("system", "exit", callback);
+		}
+	}
+};
+</script>
+<script>
+var stop = true;
+/**
+* 判断手机电脑
+*/
+if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
+		navigator.userAgent.toLowerCase()
+	)
+){ //手机
+	let control = document.createElement("div");
+	let jump = document.createElement("div");
+	
+	control.id = "control";
+	jump.id = "jump";
+	
+	document.body.appendChild(control);
+	document.body.appendChild(jump);
+	
+	stop = false;
+	
+	let vconsole = document.createElement("script");
+	vconsole.src = "https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js";
+	vconsole.onload = function(){
+		new VConsole();
+		document.getElementById("__vconsole").childNodes[1].style.opacity = 0.5;
+		document.getElementById("__vconsole").childNodes[1].style.borderRadius = "66px";
+	};
+	document.body.appendChild(vconsole);
+}else{ //电脑
+	let mouse = document.createElement("div");
+	let parts = [
+		document.createElement("div"),	//竖
+		document.createElement("div")	//横
+	];
+	parts[0].style.width = "2px";
+	parts[0].style.height = "30px";
+	parts[0].style.backgroundColor = "#ffffffaa";
+	parts[0].style.position = "absolute";
+	parts[0].style.left = "50%";
+	parts[0].style.top = "50%";
+	parts[0].style.transform = "translate(-50%,-50%)";
+	
+	parts[1].style.width = "30px";
+	parts[1].style.height = "2px";
+	parts[1].style.backgroundColor = "#ffffffaa";
+	parts[1].style.position = "absolute";
+	parts[1].style.left = "50%";
+	parts[1].style.top = "50%";
+	parts[1].style.transform = "translate(-50%,-50%)";
+	
+	mouse.appendChild(parts[0]);
+	mouse.appendChild(parts[1]);
+	mouse.style.width = "30px";
+	mouse.style.height = "30px";
+	mouse.style.position = "absolute";
+	mouse.style.left = "50%";
+	mouse.style.top = "50%";
+	mouse.style.transform = "translate(-50%,-50%)";
+	mouse.id = "mouse";
+	mouse.style.cursor = "none";
+	
+	document.body.appendChild(mouse);
+	
+	
+	let help = document.createElement("h1");
+	help.innerHTML = `
+		W/↑:前进; S/↓:后退; A/←:左; D/→:右; 空格:跳跃; shift:<br/>
+		Esc: 退出锁定鼠标并保存游戏<br/>
+		请先点击任意处锁定鼠标以开始游戏`
+	;
+	help.style.opacity = 0.5;
+	help.id = "help";
+	document.body.appendChild(help);
+	
+	//遮罩层事件
+	help.addEventListener("click", function (){
+		/* if (stop){ //请求解除指针锁定
+			document.exitPointerLock =
+				document.exitPointerLock ||
+				document.mozExitPointerLock ||
+				document.webkitExitPointerLock
+			;
+			document.exitPointerLock();
+		}else{ */ 
+			//请求指针锁定
+			document.body.requestPointerLock =
+				document.body.requestPointerLock ||
+				document.body.mozRequestPointerLock ||
+				document.body.webkitRequestPointerLock
+			;
+			document.body.requestPointerLock();
+			stop = false;
+		// }
+	}, false);
+	
+	//输入锁定改变事件
+	let pointerlockchange = function () {
+		if (
+			document.pointerLockElement === document.body ||
+			document.mozPointerLockElement === document.body ||
+			document.webkitPointerLockElement === document.body
+		){ //已锁定
+			console.log("yes");
+			stop = false;
+			$("#help").css("display", "none");
+		}else{ //未锁定
+			console.log("no");
+			stop = true;
+			$("#help").css("display", "inline-block");
+			backup();
+		}
+	};
+	
+	//输入锁定改变错误
+	let pointerlockerror = function () {
+		console.error("鼠标锁定错误");
+		alert("鼠标锁定错误\n请重试或切换/升级浏览器");
+	};
+	
+	/* document.addEventListener("mousemove", function(e) {
+	  var movementX = e.movementX       ||
+	                  e.mozMovementX    ||
+	                  e.webkitMovementX ||
+	                  0,
+	      movementY = e.movementY       ||
+	                  e.mozMovementY    ||
+	                  e.webkitMovementY ||
+	                  0;
+	
+	  // 打印鼠标移动的增量值。
+	  console.log("movementX=" + movementX, "movementY=" + movementY);
+	}, false); */
+	
+	// Hook pointer lock state change events
+	document.addEventListener("pointerlockchange", pointerlockchange, false);
+	document.addEventListener("mozpointerlockchange", pointerlockchange, false);
+	document.addEventListener("webkitpointerlockchange", pointerlockchange, false);
+	
+	document.addEventListener("pointerlockerror", pointerlockerror, false);
+	document.addEventListener("mozpointerlockerror", pointerlockerror, false);
+	document.addEventListener("webkitpointerlockerror", pointerlockerror, false);
+}
+
+
+/**
+* dat.gui
+*/
+let gui = new dat.GUI({
+	name: "信息",
+	useLocalStorage: false, // 使用LocalStorage来存储
+	closeOnTop: true // 关闭按钮是否在顶部
+});
+gui.close();
+
+
+/**
+* 初始化
+*/
+const blocks = [
+	{
+		name: "空气"
+	},
+	{
+		name: "草方块",
+		texture: []
+	},
+	{
+		name: "木板",
+		texture: []
+	},
+	{
+		name: "石头",
+		texture: []
+	},
+	{
+		name: "圆石",
+		texture: []
+	}
+];
+
+let every = [];
+if (localStorage.getItem("我的世界.存档.方块")){
+	let arr = JSON.parse(localStorage.getItem("我的世界.存档.方块"));
+	let index = 0;
+	for (let x=-10; x<=10; x++){
+		every[x] = [];
+		for (let y=0; y<=20; y++){
+			every[x][y] = [];
+			for (let z=-10; z<=10; z++){
+				every[x][y][z] = arr[index];
+				index++;
+			}
+		}
+	}
+}else{
+	for (let x=-10; x<=10; x++){
+		every[x] = [];
+		for (let y=0; y<=20; y++){
+			every[x][y] = [];
+			for (let z=-10; z<=10; z++){
+				if (y == 0){
+					every[x][y][z] = 3;
+				}else if (y == 1){
+					if (x < 0){
+						every[x][y][z] = 1;
+					}else if (x > 6){
+						every[x][y][z] = 2;
+					}else{
+						every[x][y][z] = 4;
+					}
+				}else{
+					every[x][y][z] = 0;
+				}
+			}
+		}
+	}
+}
+
+function backup(){
+	let arr = [];
+	for (let x=-10; x<=10; x++){
+		for (let y=0; y<=20; y++){
+			for (let z=-10; z<=10; z++){
+				arr.push(every[x][y][z]);
+			}
+		}
+	}
+	localStorage.setItem("我的世界.存档.方块", JSON.stringify(arr));
+	localStorage.setItem("我的世界.存档.玩家.位置", JSON.stringify(watcher.pos));
+	localStorage.setItem("我的世界.存档.玩家.朝向", JSON.stringify(watcher.lookAt));
+	console.log("备份成功");
+}
+setInterval(backup, 60*1000);
+gui.add(window, "backup");
+
+
+/**
+* 创建场景对象Scene
+*/
+let scene = new THREE.Scene();
+scene.fog = new THREE.Fog("#fff", 0.01, 200*100);
+//						 雾气颜色，近处的距离，远处的距离(66m)
+let scene_folder = gui.addFolder("场景(scene)");
+	let scene_fog_folder = scene_folder.addFolder("雾(fog)");
+		scene_fog_folder.open();
+		scene_fog_folder.add(scene.fog, "far", 10*100, 1000*100);
+		scene_fog_folder.add(scene.fog, "near", 0.001, 1);
+		scene_fog_folder.addColor(scene.fog, "color");
+
+/**
+* 创建网格模型
+*/
+let meshs = [];
+for (let x=-10; x<=10; x++){
+	meshs[x] = [];
+	for (let y=0; y<=20; y++){
+		meshs[x][y] = [];
+	}
+}
+let block_geometry = new THREE.BoxGeometry(100, 100, 100);
+// TextureLoader创建一个纹理加载器对象，可以加载图片作为几何体纹理
+let textureLoader = new THREE.TextureLoader();
+let num = 0;
+for (let i=1; i<blocks.length; i++){
+	for (let j=1; j<=6; j++){
+		textureLoader.load(`./img/blocks/${blocks[i].name}/${j}.png`, function (texture){
+			blocks[i].texture[j] = texture;
+			
+			if (blocks[i].texture.length < 7)
+				return;
+			//单个block加载完毕
+			for (let k=1;k<blocks[i].texture.length;k++)
+				if (blocks[i].texture[k] == undefined)
+					return;
+			blocks[i].material = [
+				new THREE.MeshLambertMaterial({ map: blocks[i].texture[1] }),
+				new THREE.MeshLambertMaterial({ map: blocks[i].texture[2] }),
+				new THREE.MeshLambertMaterial({ map: blocks[i].texture[3] }),
+				new THREE.MeshLambertMaterial({ map: blocks[i].texture[4] }),
+				new THREE.MeshLambertMaterial({ map: blocks[i].texture[5] }),
+				new THREE.MeshLambertMaterial({ map: blocks[i].texture[6] })
+			]; //材质对象Material
+			delete blocks[i].texture;
+			document.getElementById("schedule2").innerHTML = Math.round(i/6*100*100)/100;
+			
+			for (let k=1; k<blocks.length; k++)
+				if (blocks[k].material == undefined)
+					return;
+			//所有block加载完毕
+			document.getElementById("schedule_message").innerHTML = "载入方块中……";
+			document.getElementById("schedule1").innerHTML = "50";
+			x = -10;
+			loop = setInterval(function (){
+				for (let y=0; y<=20; y++){
+					for (let z=-10; z<=10; z++){
+						document.getElementById("schedule2").innerHTML = Math.round((x+10)/20*100*100)/100;
+						if (every[x][y][z] != 0){ //非真空
+							/* if (
+								x == -10 | x == 10 |
+								y == 0 | y == 20 |
+								z == -10 | z == 10
+							){ //区块边缘 */
+								let mesh = new THREE.Mesh(block_geometry, blocks[ every[x][y][z] ].material); //网格模型对象Mesh
+								mesh.position.x = x*100;
+								mesh.position.y = y*100;
+								mesh.position.z = z*100;
+								
+								mesh.castShadow = true;
+								mesh.receiveShadow = true;
+								
+								scene.add(mesh); //网格模型添加到场景中
+								meshs[x][y][z] = mesh;
+							/* }else if (
+								every[x+1][y][z] == 0 |
+								every[x-1][y][z] == 0 |
+								every[x][y+1][z] == 0 |
+								every[x][y-1][z] == 0 |
+								every[x][y][z+1] == 0 |
+								every[x][y][z-1] == 0
+							){ //至少一个面露出
+								let mesh = new THREE.Mesh(block_geometry, blocks[ every[x][y][z] ].material); //网格模型对象Mesh
+								mesh.position.x = x*100;
+								mesh.position.y = y*100;
+								mesh.position.z = z*100;
+								
+								mesh.castShadow = true;
+								mesh.receiveShadow = true;
+								
+								scene.add(mesh); //网格模型添加到场景中
+							} */
+						}
+					}
+				}
+				
+				x++;
+				console.log("loading:", x);
+				if (x > 10){
+					console.log("achieve loading");
+					document.getElementById("schedule1").innerHTML = "100";
+					//纹理贴图加载成功后，调用渲染函数执行渲染操作
+					render();
+					document.getElementById("schedule").remove();
+					clearInterval(loop);
+					delete loop;
+					delete x;
+				}
+			},0);
+		});
+	}
+}
+
+/* let floor_geometry = new THREE.PlaneGeometry(1000, 1000, 6, 6);
+let floor_material = new THREE.MeshBasicMaterial({ color:"#fff"});
+//floor_material.wireframe = true; //仅框架
+floor_mesh = new THREE.Mesh(floor_geometry, floor_material);
+// 由于平地添加后默认是在正前方 所以需要旋转一下
+floor_mesh.rotation.x = -0.5 * Math.PI;
+floor_mesh.position.y = -10;
+scene.add(floor_mesh); */
+
+
+// 改变AxesHelper构造函数的参数，可以改变三维坐标轴的大小
+// 参数设置坐标轴大小:1000
+var axesHelper = new THREE.AxesHelper(1666);
+scene.add(axesHelper);
+/*let line = [];
+let line_geometry = [];
+let line_material = [];
+
+line_geometry[0] = new THREE.Geometry();
+line_geometry[0].vertices.push(new THREE.Vector3( -1000, 0, 0) );
+line_geometry[0].vertices.push(new THREE.Vector3( 1000, 0, 0) );
+line_material[0] = new THREE.LineBasicMaterial({
+	color: 0xffffff
+});
+line[0] = new THREE.Line(line_geometry[0], line_material[0]);
+scene.add(line[0]);
+
+line_geometry[1] = new THREE.Geometry();
+line_geometry[1].vertices.push(new THREE.Vector3( 0, 1000, 0) );
+line_geometry[1].vertices.push(new THREE.Vector3( 0, -1000, 0) );
+line_material[1] = new THREE.LineBasicMaterial({
+	color: 0xffffff
+});
+line[1] = new THREE.Line(line_geometry[1], line_material[1]);
+scene.add(line[1]);
+
+line_geometry[2] = new THREE.Geometry();
+line_geometry[2].vertices.push(new THREE.Vector3( 0, 0, 1000) );
+line_geometry[2].vertices.push(new THREE.Vector3( 0, 0, -1000) );
+line_material[2] = new THREE.LineBasicMaterial({
+	color: 0xffffff
+});
+line[2] = new THREE.Line(line_geometry[2], line_material[2]);
+scene.add(line[2]);*/
+
+
+/**
+* 光源设置
+*/
+
+/*//点光源
+let point = new THREE.PointLight(0xffffff);
+point.position.set(0, 10*100, 0); //点光源位置
+scene.add(point); //点光源添加到场景中*/
+
+//平行光
+var directionalLight = new THREE.DirectionalLight("#fff", 1);
+directionalLight.position.set(2, 1, 2);
+directionalLight.castShadow = true;
+directionalLight.onlyShadow = true;
+directionalLight.shadow.mapSize.width = Math.pow(2,12);  // default:512
+directionalLight.shadow.mapSize.height = Math.pow(2,12); // default:512
+directionalLight.shadow.camera.near = 0.5;
+directionalLight.shadow.camera.far = 200*100;
+directionalLight.shadow.camera.left = -200*100;
+directionalLight.shadow.camera.right = 200*100;
+directionalLight.shadow.camera.top = 200*100;
+directionalLight.shadow.camera.bottom = -200*100;
+scene.add(directionalLight);
+// 光照指向平地
+//directionalLight.target = ;
+//辅助线
+//var directionalLight_CameraHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
+//scene.add(directionalLight_CameraHelper);
+
+//户外光源
+var hemiLight = new THREE.HemisphereLight('#87ceeb', '#f5deb3', 0.4/*"#aaf", "#888", 1*/);
+hemiLight.position.set(0,500,0);
+scene.add(hemiLight);
+
+//环境光
+let ambient = new THREE.AmbientLight(0x444444);
+scene.add(ambient);
+
+
+/**
+* 相机设置
+*/
+/* let width = window.innerWidth; //窗口宽度
+let height = window.innerHeight; //窗口高度
+let k = width / height; //窗口宽高比
+let s = 1000; //三维场景显示范围控制系数，系数越大，显示的范围越大
+//创建相机对象
+let camera = new THREE.OrthographicCamera(-s * k, s * k, s, -s, 1, 1000);
+camera.position.set(0, 200, 0); //设置相机位置
+camera.lookAt(scene.position); //设置相机方向(指向的场景对象) */
+
+let WIDTH = window.innerWidth,
+	HEIGHT = window.innerHeight;
+
+let camera = new THREE.PerspectiveCamera(45, WIDTH/HEIGHT, 1, 1000*100);
+//								 view_angle, aspect, near, far(1km)
+camera.position.set(0, 300, 0); //设置相机位置
+camera.lookAt(scene.position); //设置相机方向(指向的场景对象)
+setTimeout(function(){
+	console.info(camera);
+},1000);
+
+/**
+* 创建渲染器对象
+*/
+let renderer = new THREE.WebGLRenderer();
+renderer.setSize(WIDTH, HEIGHT);//设置渲染区域尺寸
+renderer.setClearColor("#eef", 1); //设置背景颜色
+renderer.domElement.style.margin = "0";
+document.body.appendChild(renderer.domElement); //body元素中插入canvas对象
+renderer.domElement.style.cursor = "none";
+renderer.shadowMapEnabled = true; //阴影
+//执行渲染操作   指定场景、相机作为参数
+renderer.render(scene, camera);
+
+window.onresize = function(){
+	WIDTH = window.innerWidth;
+	HEIGHT = window.innerHeight;
+	camera.aspect = WIDTH/HEIGHT;
+	renderer.setSize(WIDTH, HEIGHT);
+};
+
+setTimeout(function(){
+	let h = new Date().getHours();
+	if (h > 20 | h < 5){ // 天黑
+		ambient.color = new THREE.Color("#223");
+		renderer.setClearColor("#334", 1);
+	}else if (h > 15 | h < 7){ // 日出/日落
+		ambient.color = new THREE.Color("#f9a");
+		renderer.setClearColor("#a34", 1);
+	}else{
+		ambient.color = new THREE.Color("#aac");
+		renderer.setClearColor("#eef", 1);
+	}
+}, 0);
+setInterval(function(){
+	let h = new Date().getHours();
+	if (h > 20 | h < 5){ // 天黑
+		ambient.color = new THREE.Color("#223");
+		renderer.setClearColor("#334", 1);
+	}else if (h > 15 | h < 7){ // 日出/日落
+		ambient.color = new THREE.Color("#f9a");
+		renderer.setClearColor("#a34", 1);
+	}else{
+		ambient.color = new THREE.Color("#aac");
+		renderer.setClearColor("#eef", 1);
+	}
+}, 60*1000);
+
+
+/**
+* stats
+*/
+let stats = new Stats();
+stats.showPanel(0);
+document.body.appendChild(stats.dom);
+
+
+/**
+* 玩家(watcher)
+*/
+let watcher = {
+	v: {
+		x: 0,
+		y: 0,
+		z: 0
+	},
+	pos: camera.position,
+	lookAt: {
+		left_right: 0,
+		top_bottom: -30
+	},
+	look: {
+		x: 1,
+		y: 0,
+		z: 0
+	}
+};
+if (localStorage.getItem("我的世界.存档.玩家.位置")){
+	watcher.pos.x = JSON.parse(localStorage.getItem("我的世界.存档.玩家.位置")).x;
+	watcher.pos.y = JSON.parse(localStorage.getItem("我的世界.存档.玩家.位置")).y;
+	watcher.pos.z = JSON.parse(localStorage.getItem("我的世界.存档.玩家.位置")).z;
+}
+if (localStorage.getItem("我的世界.存档.玩家.朝向")){
+	watcher.lookAt.left_right = JSON.parse(localStorage.getItem("我的世界.存档.玩家.朝向")).left_right;
+	watcher.lookAt.top_bottom = JSON.parse(localStorage.getItem("我的世界.存档.玩家.朝向")).top_bottom;
+}
+
+let watcher_folder = gui.addFolder("玩家/观察者(watcher)");
+watcher_folder.open();
+	watcher_folder.add(window, "stop").listen();
+	let watcher_position_folder = watcher_folder.addFolder("位置/px");
+	watcher_position_folder.open();
+		watcher_position_folder.add(watcher.pos, "x", -1000, 1000, 0.01).listen();
+		watcher_position_folder.add(watcher.pos, "y", -1000, 1000, 0.01).listen();
+		watcher_position_folder.add(watcher.pos, "z", -1000, 1000, 0.01).listen();
+	let watcher_v_folder = watcher_folder.addFolder("速度/(px/s)");
+	watcher_v_folder.open();
+		watcher_v_folder.add(watcher.v, "x", -10, 10,1e-3).listen();
+		watcher_v_folder.add(watcher.v, "y", -10, 10,1e-3).listen();
+		watcher_v_folder.add(watcher.v, "z", -10, 10,1e-3).listen();
+	let watcher_lookAt_folder = watcher_folder.addFolder("朝向（球坐标系）");
+		watcher_lookAt_folder.add(watcher.lookAt, "left_right", 0, 360).listen();
+		watcher_lookAt_folder.add(watcher.lookAt, "top_bottom", -90, 90).listen();
+	let watcher_look_folder = watcher_folder.addFolder("朝向（笛卡尔坐标系）");
+	watcher_look_folder.open();
+		watcher_look_folder.add(watcher.look, "x", 0, 1, 0.01).listen();
+		watcher_look_folder.add(watcher.look, "y", 0, 1, 0.01).listen();
+		watcher_look_folder.add(watcher.look, "z", 0, 1, 0.01).listen();
+
+
+let T0 = new Date();//上次时间
+function render(){
+	let t = new Date()-T0;//时间差
+	T0 = new Date();//把本次时间赋值给上次时间
+	requestAnimationFrame(render);
+	renderer.render(scene, camera);//执行渲染操作
+	
+	let x =
+		Math.cos(watcher.lookAt.left_right/180*Math.PI)*
+		Math.cos(watcher.lookAt.top_bottom/180*Math.PI)
+	;
+	let z =
+		Math.sin(watcher.lookAt.left_right/180*Math.PI)*
+		Math.cos(watcher.lookAt.top_bottom/180*Math.PI)
+	;
+	let y = Math.sin(watcher.lookAt.top_bottom/180*Math.PI);
+	camera.lookAt(watcher.pos.x+x, watcher.pos.y+y, watcher.pos.z+z);
+	watcher.look.x = x;
+	watcher.look.y = y;
+	watcher.look.z = z;
+	
+	try{
+		if (
+			every
+				[Math.round(watcher.pos.x/100)]
+				[Math.round(watcher.pos.y/100)]
+				[Math.round(watcher.pos.z/100)]
+			!=
+				0
+		){ //头被卡住
+			console.warn("头被卡住？");
+		}
+		if (
+			every
+				[Math.round(watcher.pos.x/100)]
+				[Math.round(watcher.pos.y/100)-1]
+				[Math.round(watcher.pos.z/100)]
+			!=
+				0
+		){ //脚被卡住
+			console.warn("脚被卡住？");
+		}
+	}catch(err){}
+	
+	if (!stop){
+		watcher.v.y -= 9.8*t/1000;
+		let kf = 16; //空气阻力系数
+		watcher.v.x -=
+			Math.abs(kf*0.25*watcher.v.x*t/1000) < Math.abs(watcher.v.x)?
+				kf*0.25*watcher.v.x*t/1000
+			:
+				watcher.v.x
+		;
+		watcher.v.y -=
+			Math.abs(kf*0.05*watcher.v.y*t/1000) < Math.abs(watcher.v.y)?
+				kf*0.05*watcher.v.y*t/1000
+			:
+				watcher.v.y
+		;
+		watcher.v.z -=
+			Math.abs(kf*0.25*watcher.v.z*t/1000) < Math.abs(watcher.v.z)?
+				kf*0.25*watcher.v.z*t/1000
+			:
+				watcher.v.z
+		;
+		
+		//x
+		if (watcher.v.x > 0){ //向前
+			for (var i=watcher.pos.x; i<=watcher.pos.x+watcher.v.x*t; i+=1){
+				try{
+					if (
+						every
+							[Math.round(i/100)]
+							[Math.round(watcher.pos.y/100)]
+							[Math.round(watcher.pos.z/100)]
+						!=
+							0
+					){
+						watcher.v.x = 0;
+						console.log("撞到脸，s:"+((watcher.pos.x+watcher.v.x*t)-i));
+						break;
+					}
+					if (
+						every
+							[Math.round(i/100)]
+							[Math.round(watcher.pos.y/100)-1]
+							[Math.round(watcher.pos.z/100)]
+						!=
+							0
+					){
+						watcher.v.x = 0;
+						console.log("撞到脚，s:"+((watcher.pos.x+watcher.v.x*t)-i));
+						break;
+					}
+				}catch(err){}
+			}
+			watcher.pos.x = i;
+		}else if (watcher.v.x < 0){ //向后
+			for (var i=watcher.pos.x; i>=watcher.pos.x+watcher.v.x*t; i-=1){
+				try{
+					if (
+						every
+							[Math.round(i/100)]
+							[Math.round(watcher.pos.y/100)]
+							[Math.round(watcher.pos.z/100)]
+						!=
+							0
+					){
+						watcher.v.x = 0;
+						console.log("撞到后脑，s:"+(i-(watcher.pos.x+watcher.v.x*t)));
+						break;
+					}
+					if (
+						every
+							[Math.round(i/100)]
+							[Math.round(watcher.pos.y/100)-1]
+							[Math.round(watcher.pos.z/100)]
+						!=
+							0
+					){
+						watcher.v.x = 0;
+						console.log("撞到脚，s:"+(i-(watcher.pos.x+watcher.v.x*t)));
+						break;
+					}
+				}catch(err){}
+			}
+			watcher.pos.x = i;
+		}
+		//y
+		if (watcher.v.y > 0){ //向上
+			for (var i=watcher.pos.y; i<=watcher.pos.y+watcher.v.y*t; i+=1){
+				try{
+					if (
+						every
+							[Math.round(watcher.pos.x/100)]
+							[Math.round(i/100)]
+							[Math.round(watcher.pos.z/100)]
+						!=
+							0
+					){
+						watcher.v.y = 0;
+						let s = (watcher.pos.y-200+watcher.v.y*t)-i;
+						if (s)
+							console.log("撞到天花板，s:", s);
+						break;
+					}
+				}catch(err){}
+			}
+			watcher.pos.y = i;
+		}else if (watcher.v.y < 0){ //向下
+			for (var i=watcher.pos.y-200; i>=watcher.pos.y-200+watcher.v.y*t; i-=1){
+				try{
+					if (
+						every
+							[Math.round(watcher.pos.x/100)]
+							[Math.round(i/100)]
+							[Math.round(watcher.pos.z/100)]
+						!=
+							0
+					){
+						watcher.v.y = 0;
+						let s = i-(watcher.pos.y-200+watcher.v.y*t);
+						if (s)
+							console.log("撞到地面，s:", s);
+						break;
+					}
+				}catch(err){}
+			}
+			watcher.pos.y = i+200;
+		}
+		//z
+		if (watcher.v.z > 0){ //向右
+			for (var i=watcher.pos.z; i<=watcher.pos.z+watcher.v.z*t; i+=1){
+				try{
+					if (
+						every
+							[Math.round(i/100)]
+							[Math.round(watcher.pos.y/100)]
+							[Math.round(watcher.pos.z/100)]
+						!=
+							0
+					){
+						watcher.v.z = 0;
+						console.log("撞到头，s:"+((watcher.pos.z+watcher.v.z*t)-i));
+						break;
+					}
+					if (
+						every
+							[Math.round(i/100)]
+							[Math.round(watcher.pos.y/100)-1]
+							[Math.round(watcher.pos.z/100)]
+						!=
+							0
+					){
+						watcher.v.z = 0;
+						console.log("撞到腿，s:"+((watcher.pos.z+watcher.v.z*t)-i));
+						break;
+					}
+				}catch(err){}
+			}
+			watcher.pos.z = i;
+		}else if (watcher.v.z < 0){ //向左
+			for (var i=watcher.pos.z; i>=watcher.pos.z+watcher.v.z*t; i-=1){
+				try{
+					if (
+						every
+							[Math.round(i/100)]
+							[Math.round(watcher.pos.y/100)]
+							[Math.round(watcher.pos.z/100)]
+						!=
+							0
+					){
+						watcher.v.z = 0;
+						console.log("撞到头，s:"+(i-(watcher.pos.z+watcher.v.z*t)));
+						break;
+					}
+					if (
+						every
+							[Math.round(i/100)]
+							[Math.round(watcher.pos.y/100)-1]
+							[Math.round(watcher.pos.z/100)]
+						!=
+							0
+					){
+						watcher.v.z = 0;
+						console.log("撞到腿，s:"+(i-(watcher.pos.z+watcher.v.z*t)));
+						break;
+					}
+				}catch(err){}
+			}
+			watcher.pos.z = i;
+		}
+	}
+	
+	
+	stats.update();
+}
+// render();
+// 间隔30ms周期性调用函数fun
+//setInterval("render()",16.7)
+
+/* let controls = new THREE.OrbitControls(camera,renderer.domElement);//创建控件对象
+controls.addEventListener('change', render);//监听鼠标、键盘事件 */
+
+document.addEventListener("keydown", function (e){
+	let x=0, y=0, z=0;
+	
+	console.log(e.keyCode)
+	
+	switch (e.keyCode){
+		case 87:
+		case 38: //前
+			console.log("front:", e.keyCode);
+			x = Math.cos( (watcher.lookAt.left_right+0) /180*Math.PI);
+			z = Math.sin( (watcher.lookAt.left_right+0) /180*Math.PI);
+			break;
+		case 83:
+		case 40: //后
+			console.log("behind:", e.keyCode);
+			x = Math.cos( (watcher.lookAt.left_right+180) /180*Math.PI);
+			z = Math.sin( (watcher.lookAt.left_right+180) /180*Math.PI);
+			break;
+		case 65:
+		case 37: //左
+			console.log("left:", e.keyCode);
+			x = Math.cos( (watcher.lookAt.left_right-90) /180*Math.PI);
+			z = Math.sin( (watcher.lookAt.left_right-90) /180*Math.PI);
+			break;
+		case 68:
+		case 39: //右
+			console.log("right:", e.keyCode);
+			x = Math.cos( (watcher.lookAt.left_right+90) /180*Math.PI);
+			z = Math.sin( (watcher.lookAt.left_right+90) /180*Math.PI);
+			break;
+		case 32: //上
+			console.log("up:", e.keyCode);
+			y = 1;
+			break;
+		case 16: //下
+			console.log("down:", e.keyCode);
+			y = -1;
+			break;
+		case 27: //ESC
+			console.log("ESC:", e.keyCode);
+			stop = true;
+			$("canvas:eq(0),#mouse").css("cursor", "default");
+			
+			backup();
+			
+			//解除鼠标锁定
+			document.exitPointerLock =
+				document.exitPointerLock ||
+				document.mozExitPointerLock ||
+				document.webkitExitPointerLock
+			;
+			document.exitPointerLock();
+			
+			return;
+		case 121: //F10
+			console.log("F10:", e.keyCode);
+			if (gui.closed){
+				gui.open();
+			}else{
+				gui.close();
+			}
+			return;
+		default:
+			console.log("keydown:", e.keyCode);
+			break;
+	}
+	
+	/* try{
+		if (
+			every
+				[Math.round(watcher.pos.x/100)]
+				[Math.round(watcher.pos.y/100)]
+				[Math.round(watcher.pos.z/100)]
+			!=
+				0
+		){ //头被卡住
+			x = 0;
+			z = 0;
+		}
+	}catch(err){}
+	try{
+		if (
+			every
+				[Math.round(watcher.pos.x/100)]
+				[Math.round(watcher.pos.y/100)-1]
+				[Math.round(watcher.pos.z/100)]
+			!=
+				0
+		){ //脚被卡住
+			x = 0;
+			z = 0;
+		}
+	}catch(err){} */
+	try{
+		if (
+			every
+				[Math.round((watcher.pos.x+x)/100)]
+				[Math.round(watcher.pos.y/100)]
+				[Math.round(watcher.pos.z/100)]
+			!=
+				0
+		){ //无法向X移动
+			x = 0;
+		}
+	}catch(err){}
+	try{
+		if (
+			every
+				[Math.round((watcher.pos.x+x)/100)]
+				[Math.round(watcher.pos.y/100)-1]
+				[Math.round(watcher.pos.z/100)]
+			!=
+				0
+		){ //无法向X移动
+			x = 0;
+		}
+	}catch(err){}
+	
+	try{
+		if (
+			every
+				[Math.round(watcher.pos.x/100)]
+				[Math.round(watcher.pos.y/100)]
+				[Math.round((watcher.pos.z+z)/100)]
+			!=
+				0
+		){ //无法向Z移动
+			z = 0;
+		}
+	}catch(err){}
+	try{
+		if (
+			every
+				[Math.round(watcher.pos.x/100)]
+				[Math.round(watcher.pos.y/100)-1]
+				[Math.round((watcher.pos.z+z)/100)]
+			!=
+				0
+		){ //无法向Z移动
+			z = 0;
+		}
+	}catch(err){}
+	
+	watcher.pos.x += x*10;
+	try{
+		if (
+			every
+				[Math.round(watcher.pos.x/100)]
+				[Math.round(watcher.pos.y/100)-2]
+				[Math.round(watcher.pos.z/100)]
+			!=
+				0
+		){ //脚下有方块
+			watcher.v.y += y*2;
+		}
+	}catch(err){}
+	watcher.pos.z += z*10;
+});
+
+
+/* let choice_object = get_choice_object()?get_choice_object()[1]:undefined;
+
+let choice_folder = gui.addFolder("选择物体");
+choice_folder.open();
+	choice_position_folder = choice_folder.addFolder("位置");
+	choice_position_folder.open();
+		choice_position_folder.add(choice_object?choice_object.object.position:{x:0,y:0,z:0}, "x", -1000, 1000, 100).listen();
+		choice_position_folder.add(choice_object?choice_object.object.position:{x:0,y:0,z:0}, "y", -1000, 1000, 100).listen();
+		choice_position_folder.add(choice_object?choice_object.object.position:{x:0,y:0,z:0}, "z", -1000, 1000, 100).listen();
+	choice_folder.add(choice_object.faceIndex?choice_object:{faceIndex:-1}, "faceIndex", 0, 12).listen(); */
+/* let mouse = {
+	x0: null,
+	y0: null
+}; */
+document.addEventListener("mousemove", function (e){
+	if (stop)
+		return;
+		
+	let dx =
+		e.movementX ||
+		e.mozMovementX ||
+		e.webkitMovementX ||
+		0
+	;
+	let dy =
+		e.movementY ||
+		e.mozMovementY ||
+		e.webkitMovementY ||
+		0
+	;
+	
+	console.log(
+		e.movementX,
+		e.mozMovementX,
+		e.webkitMovementX
+	)
+	// 打印鼠标移动的增量值。
+	console.log("mousemove:", dx, dy);
+	/* let [x, y] = [e.pageX, e.pageY];
+	console.log("mousemove:", x, y); */
+	
+	// choice_object = get_choice_object()?get_choice_object()[1]:undefined;
+	
+	/* if (
+		Math.sqrt(Math.pow(dx,2)+Math.pow(dy.y0,2)) <= 100 & //
+		mouse.x0 !== null & mouse.y0 !== null
+	){ */
+		// let [dx, dy] = [x-mouse.x0, y-mouse.y0];
+		// [mouse.x0, mouse.y0] = [x, y];
+		// console.log("move:", dx, dy);
+		watcher.lookAt.left_right += dx/document.getElementsByTagName("canvas")[0].offsetWidth*360;
+		watcher.lookAt.top_bottom -= dy/document.getElementsByTagName("canvas")[0].offsetHeight*360;
+		
+		if (watcher.lookAt.left_right > 360)
+			while (watcher.lookAt.left_right > 360)
+				watcher.lookAt.left_right -= 360;
+		if (watcher.lookAt.left_right < 0)
+			while (watcher.lookAt.left_right < 0)
+				watcher.lookAt.left_right += 360;
+		
+		if (watcher.lookAt.top_bottom > 89.9)
+			watcher.lookAt.top_bottom = 89.9;
+		if (watcher.lookAt.top_bottom < -89.9)
+			watcher.lookAt.top_bottom = -89.9;
+		
+	// }
+	
+	// [mouse.x0,mouse.y0] = [x, y];
+});
+
+document.addEventListener("mousedown", function (e){
+	if (stop)
+		return;
+	
+	if (e.path[0].tagName != "BODY")
+		return;
+	
+	if (e.button == 0){ //左键（删除）
+		let click = get_choice_object();
+		for (let i in click){
+			if (click[i].faceIndex){
+				if (click[i].object instanceof THREE.Mesh){
+					if (Math.sqrt(
+						Math.pow(click[i].object.position.x - watcher.pos.x, 2)+
+						Math.pow(click[i].object.position.y - watcher.pos.y, 2)+
+						Math.pow(click[i].object.position.z - watcher.pos.z, 2)
+					) < 500){ //距离小于500
+						console.log("delete:", click[i].object.position);
+						scene.remove(click[i].object);
+						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = 0;
+						/* if (
+							every[ click[i].object.position.x/100+1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] 
+						) */
+						break;
+					}
+				}
+			}
+		}
+	}else if (e.button == 2){ //右键（放置）
+		let click = get_choice_object();
+		for (let i in click){
+			if (click[i].object instanceof THREE.Mesh){
+				if (click[i].faceIndex == 0 | click[i].faceIndex == 1){
+					if (Math.sqrt(
+						Math.pow((click[i].object.position.x+100) - watcher.pos.x, 2)+
+						Math.pow(click[i].object.position.y - watcher.pos.y, 2)+
+						Math.pow(click[i].object.position.z - watcher.pos.z, 2)
+					) < 500){ //距离<500
+						let mesh = new THREE.Mesh(block_geometry, blocks[3].material); //石头
+						mesh.position.x = click[i].object.position.x+100;
+						mesh.position.y = click[i].object.position.y;
+						mesh.position.z = click[i].object.position.z;
+						
+						mesh.castShadow = true;
+						mesh.receiveShadow = true;
+						
+						scene.add(mesh); //网格模型添加到场景中
+						every[ click[i].object.position.x/100+1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = 3;
+						break;
+					}
+				}else if (click[i].faceIndex == 2 | click[i].faceIndex == 3){
+					if (Math.sqrt(
+						Math.pow((click[i].object.position.x-100) - watcher.pos.x, 2)+
+						Math.pow(click[i].object.position.y - watcher.pos.y, 2)+
+						Math.pow(click[i].object.position.z - watcher.pos.z, 2)
+					) < 500){ //距离<500
+						let mesh = new THREE.Mesh(block_geometry, blocks[3].material); //石头
+						mesh.position.x = click[i].object.position.x-100;
+						mesh.position.y = click[i].object.position.y;
+						mesh.position.z = click[i].object.position.z;
+						
+						mesh.castShadow = true;
+						mesh.receiveShadow = true;
+						
+						scene.add(mesh); //网格模型添加到场景中
+						every[ click[i].object.position.x/100-1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = 3;
+						break;
+					}
+				}else if (click[i].faceIndex == 4 | click[i].faceIndex == 5){
+					if (Math.sqrt(
+						Math.pow(click[i].object.position.x - watcher.pos.x, 2)+
+					 	Math.pow((click[i].object.position.y+100) - watcher.pos.y, 2)+
+						Math.pow(click[i].object.position.z - watcher.pos.z, 2)
+					) < 500){ //距离<500
+						let mesh = new THREE.Mesh(block_geometry, blocks[3].material); //石头
+						mesh.position.x = click[i].object.position.x;
+						mesh.position.y = click[i].object.position.y+100;
+						mesh.position.z = click[i].object.position.z;
+						
+						mesh.castShadow = true;
+						mesh.receiveShadow = true;
+						
+						scene.add(mesh); //网格模型添加到场景中
+						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100+1 ][ click[i].object.position.z/100 ] = 3;
+						break;
+					}
+				}else if (click[i].faceIndex == 6 | click[i].faceIndex == 7){
+					if (Math.sqrt(
+						Math.pow(click[i].object.position.x - watcher.pos.x, 2)+
+						Math.pow((click[i].object.position.y-100) - watcher.pos.y, 2)+
+						Math.pow(click[i].object.position.z - watcher.pos.z, 2)
+					) < 500){ //距离<500
+						let mesh = new THREE.Mesh(block_geometry, blocks[3].material); //石头
+						mesh.position.x = click[i].object.position.x;
+						mesh.position.y = click[i].object.position.y-100;
+						mesh.position.z = click[i].object.position.z;
+						
+						mesh.castShadow = true;
+						mesh.receiveShadow = true;
+						
+						scene.add(mesh); //网格模型添加到场景中
+						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100-1 ][ click[i].object.position.z/100 ] = 3;
+						break;
+					}
+				}else if (click[i].faceIndex == 8 | click[i].faceIndex == 9){
+					if (Math.sqrt(
+						Math.pow(click[i].object.position.x - watcher.pos.x, 2)+
+						Math.pow(click[i].object.position.y - watcher.pos.y, 2)+
+						Math.pow((click[i].object.position.z+100) - watcher.pos.z, 2)
+					) < 500){ //距离<500
+						let mesh = new THREE.Mesh(block_geometry, blocks[3].material); //石头
+						mesh.position.x = click[i].object.position.x;
+						mesh.position.y = click[i].object.position.y;
+						mesh.position.z = click[i].object.position.z+100;
+						
+						mesh.castShadow = true;
+						mesh.receiveShadow = true;
+						
+						scene.add(mesh); //网格模型添加到场景中
+						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100+1 ] = 3;
+						break;
+					}
+				}else if (click[i].faceIndex == 10 | click[i].faceIndex == 11){
+					if (Math.sqrt(
+						Math.pow(click[i].object.position.x - watcher.pos.x, 2)+
+						Math.pow(click[i].object.position.y - watcher.pos.y, 2)+
+						Math.pow((click[i].object.position.z-100) - watcher.pos.z, 2)
+					) < 500){ //距离<500
+						let mesh = new THREE.Mesh(block_geometry, blocks[3].material); //石头
+						mesh.position.x = click[i].object.position.x;
+						mesh.position.y = click[i].object.position.y;
+						mesh.position.z = click[i].object.position.z-100;
+						
+						mesh.castShadow = true;
+						mesh.receiveShadow = true;
+						
+						scene.add(mesh); //网格模型添加到场景中
+						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100-1 ] = 3;
+						break;
+					}
+				}
+			}
+		}
+	}
+	return false;
+});
+
+
+/**
+* Touch
+*/
+let touch = {
+	x0: null,
+	y0: null,
+	x: null,
+	y: null,
+	loop: null
+};
+$("#control").on("touchstart", function(e){
+	if (stop)
+		return;
+	
+	let x = e.originalEvent.targetTouches[0].clientX;
+	let y = e.originalEvent.targetTouches[0].clientY;
+	console.log("touchstart(control):", x, y);
+	
+	[touch.x0, touch.y0] = [x, y];
+	
+	touch.loop = setInterval(function(){
+		if (
+			touch.x0 !== null &
+			touch.y0 !== null &
+			touch.x !== null &
+			touch.y !== null
+		){
+			let dx = touch.x-touch.x0;
+			let dy = touch.y-touch.y0;
+			let r = (
+				dx>0? Math.atan(dy/dx)+Math.PI/2:
+				dx<0? Math.atan(dy/dx)-Math.PI/2:
+					dy>0? 0:
+					dy<0? 180:
+					0
+			);
+			let l = Math.sqrt(
+				Math.pow(dx, 2)+
+				Math.pow(dy, 2)
+			);
+			l = l>50? 50: l/3;
+			console.log(Math.atan(dy/dx)*180/Math.PI,r*180/Math.PI);
+			let x = Math.cos( watcher.lookAt.left_right/180*Math.PI+r )*l;
+			let z = Math.sin( watcher.lookAt.left_right/180*Math.PI+r )*l;
+			
+			if (x > 0){
+				for (var i=watcher.pos.x; i<=watcher.pos.x+x; i+=1){
+					try{
+						if (
+							every
+								[Math.round(i/100)]
+								[Math.round(watcher.pos.y/100)]
+								[Math.round(watcher.pos.z/100)]
+							!=
+								0
+						) break;
+						if (
+							every
+								[Math.round(i/100)]
+								[Math.round(watcher.pos.y/100)-1]
+								[Math.round(watcher.pos.z/100)]
+							!=
+								0
+						) break;
+					}catch(err){}
+				}
+			}else{
+				for (var i=watcher.pos.x; i>=watcher.pos.x+x; i-=1){
+					try{
+						if (
+							every
+								[Math.round(i/100)]
+								[Math.round(watcher.pos.y/100)]
+								[Math.round(watcher.pos.z/100)]
+							!=
+								0
+						) break;
+						if (
+							every
+								[Math.round(i/100)]
+								[Math.round(watcher.pos.y/100)-1]
+								[Math.round(watcher.pos.z/100)]
+							!=
+								0
+						) break;
+					}catch(err){}
+				}
+			}
+			if (z > 0){
+				for (var j=watcher.pos.z; j<=watcher.pos.z+z; j+=1){
+					try{
+						if (
+							every
+								[Math.round(watcher.pos.x/100)]
+								[Math.round(watcher.pos.y/100)]
+								[Math.round(j/100)]
+							!=
+								0
+						) break;
+						if (
+							every
+								[Math.round(watcher.pos.x/100)]
+								[Math.round(watcher.pos.y/100)-1]
+								[Math.round(j/100)]
+							!=
+								0
+						) break;
+					}catch(err){}
+				}
+			}else{
+				for (var j=watcher.pos.z; j>=watcher.pos.z+z; j-=1){
+					try{
+						if (
+							every
+								[Math.round(watcher.pos.x/100)]
+								[Math.round(watcher.pos.y/100)]
+								[Math.round(j/100)]
+							!=
+								0
+						) break;
+						if (
+							every
+								[Math.round(watcher.pos.x/100)]
+								[Math.round(watcher.pos.y/100)-1]
+								[Math.round(j/100)]
+							!=
+								0
+						) break;
+					}catch(err){}
+				}
+			}
+			watcher.pos.x += (i-watcher.pos.x)*(Math.random()*0.2+0.9);
+			watcher.pos.z += (j-watcher.pos.z)*(Math.random()*0.2+0.9);
+		}
+	}, 100);
+	
+	return false;
+});
+$("#control").on("touchmove", function(e){
+	if (stop)
+		return;
+	
+	let x = e.originalEvent.targetTouches[0].clientX;
+	let y = e.originalEvent.targetTouches[0].clientY;
+	console.log("touchmove(control):", x, y);
+	
+	[touch.x, touch.y] = [x, y];
+	
+	return false;
+});
+$("#control").on("touchend", function(e){
+	if (stop)
+		return;
+	
+	let x = e.originalEvent.changedTouches[0].clientX;
+	let y = e.originalEvent.changedTouches[0].clientY;
+	console.log("touchend(control):", x, y);
+	
+	[touch.x0, touch.y0, touch.x, touch.y] = [null, null, null, null];
+	clearInterval(touch.loop);
+	
+	console.log(touch)
+	
+	return false;
+});
+
+
+$("#jump").on("touchstart", function(){
+	console.log("jump");
+	
+	try{
+		if (
+			every
+				[Math.round(watcher.pos.x/100)]
+				[Math.round(watcher.pos.y/100)-2]
+				[Math.round(watcher.pos.z/100)]
+			!=
+				0
+		){ //脚下有方块
+			watcher.v.y += 2;
+		}
+	}catch(err){}
+	
+	return false;
+});
+
+
+let touch_start = {
+	t: null,
+	pos: {x: null, y: null},
+	id: null
+};
+$("canvas:eq(0)").on("touchstart", function (e){
+	if (stop)
+		return;
+	
+	let x = e.originalEvent.targetTouches[0].pageX;
+	let y = e.originalEvent.targetTouches[0].pageY;
+	console.log("touchstart:", x, y, Number(new Date()));
+	
+	[x0,y0] = [x, y];
+	
+	touch_start.t = new Date();
+	touch_start.pos = {x,y};
+	touch_start.id = setTimeout(()=>{ //长按（删除）
+		touch_start.id = null;
+		if (Math.sqrt(
+			Math.pow(touch_start.pos.x-x, 2)+
+			Math.pow(touch_start.pos.y-y, 2)
+		) < 36){ //误差36px
+			let click = get_choice_object(true, x, y);
+			for (let i in click){
+				if (click[i].faceIndex){
+					if (click[i].object instanceof THREE.Mesh){
+						if (Math.sqrt(
+							Math.pow(click[i].object.position.x - watcher.pos.x, 2)+
+							Math.pow(click[i].object.position.y - watcher.pos.y, 2)+
+							Math.pow(click[i].object.position.z - watcher.pos.z, 2)
+						) < 500){ //距离小于500
+							console.log("delete:", click[i].object.position);
+							scene.remove(click[i].object);
+							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = 0;
+							break;
+						}
+					}
+				}
+			}
+		}
+	}, 1000);
+	
+	return false;
+});
+$("canvas:eq(0)").on("touchmove", function (e){
+	if (stop)
+		return false;
+	
+	if (x0 === null | y0 === null)
+		return false;
+	
+	let x = e.originalEvent.targetTouches[0].pageX;
+	let y = e.originalEvent.targetTouches[0].pageY;
+	console.log("touchmove:", x, y);
+	
+	let [dx, dy] = [x-x0, y-y0];
+	[x0, y0] = [x, y];
+	console.log("move:", dx, dy);
+	watcher.lookAt.left_right += dx/document.getElementsByTagName("canvas")[0].offsetWidth*90;
+	watcher.lookAt.top_bottom -= dy/document.getElementsByTagName("canvas")[0].offsetHeight*90;
+	
+	if (watcher.lookAt.left_right > 360)
+		while (watcher.lookAt.left_right > 360)
+			watcher.lookAt.left_right -= 360;
+	if (watcher.lookAt.left_right < 0)
+		while (watcher.lookAt.left_right < 0)
+			watcher.lookAt.left_right += 360;
+	
+	if (watcher.lookAt.top_bottom > 89.9)
+		watcher.lookAt.top_bottom = 89.9;
+	if (watcher.lookAt.top_bottom < -89.9)
+		watcher.lookAt.top_bottom = -89.9;
+	
+	if (Math.sqrt(
+		Math.pow(touch_start.pos.x-x, 2)+
+		Math.pow(touch_start.pos.y-y, 2)
+	) >= 100){ //误差100px
+		touch_start.pos.x = -666;
+		touch_start.pos.y = -666;
+	}
+	return false;
+});
+$("canvas:eq(0)").on('touchend', function (e){
+	if (stop)
+		return;
+	
+	let x = e.originalEvent.changedTouches[0].pageX;
+	let y = e.originalEvent.changedTouches[0].pageY;
+	console.log("touchend:", x, y, Number(new Date()));
+	
+	x0 = null, y0 = null;
+	
+	if (touch_start.id !== null){ //短按（放置）
+		clearTimeout(touch_start.id);
+		touch_start.id = null;
+		if (Math.sqrt(
+			Math.pow(touch_start.pos.x-x, 2)+
+			Math.pow(touch_start.pos.y-y, 2)
+		) < 36){ //误差36px
+			let click = get_choice_object(true, x, y);
+			for (let i in click){
+				if (click[i].object instanceof THREE.Mesh){
+					if (click[i].faceIndex == 0 | click[i].faceIndex == 1){
+						if (Math.sqrt(
+							Math.pow((click[i].object.position.x+100) - watcher.pos.x, 2)+
+							Math.pow(click[i].object.position.y - watcher.pos.y, 2)+
+							Math.pow(click[i].object.position.z - watcher.pos.z, 2)
+						) < 500){ //距离<500
+							let mesh = new THREE.Mesh(block_geometry, blocks[3].material); //石头
+							mesh.position.x = click[i].object.position.x+100;
+							mesh.position.y = click[i].object.position.y;
+							mesh.position.z = click[i].object.position.z;
+							
+							mesh.castShadow = true;
+							mesh.receiveShadow = true;
+							
+							scene.add(mesh); //网格模型添加到场景中
+							every[ click[i].object.position.x/100+1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = 3;
+							break;
+						}
+					}else if (click[i].faceIndex == 2 | click[i].faceIndex == 3){
+						if (Math.sqrt(
+							Math.pow((click[i].object.position.x-100) - watcher.pos.x, 2)+
+							Math.pow(click[i].object.position.y - watcher.pos.y, 2)+
+							Math.pow(click[i].object.position.z - watcher.pos.z, 2)
+						) < 500){ //距离<500
+							let mesh = new THREE.Mesh(block_geometry, blocks[3].material); //石头
+							mesh.position.x = click[i].object.position.x-100;
+							mesh.position.y = click[i].object.position.y;
+							mesh.position.z = click[i].object.position.z;
+							
+							mesh.castShadow = true;
+							mesh.receiveShadow = true;
+							
+							scene.add(mesh); //网格模型添加到场景中
+							every[ click[i].object.position.x/100-1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = 3;
+							break;
+						}
+					}else if (click[i].faceIndex == 4 | click[i].faceIndex == 5){
+						if (Math.sqrt(
+								Math.pow(click[i].object.position.x - watcher.pos.x, 2)+
+						 	Math.pow((click[i].object.position.y+100) - watcher.pos.y, 2)+
+							Math.pow(click[i].object.position.z - watcher.pos.z, 2)
+						) < 500){ //距离<500
+							let mesh = new THREE.Mesh(block_geometry, blocks[3].material); //石头
+							mesh.position.x = click[i].object.position.x;
+							mesh.position.y = click[i].object.position.y+100;
+							mesh.position.z = click[i].object.position.z;
+							
+							mesh.castShadow = true;
+							mesh.receiveShadow = true;
+							
+							scene.add(mesh); //网格模型添加到场景中
+							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100+1 ][ click[i].object.position.z/100 ] = 3;
+							break;
+						}
+					}else if (click[i].faceIndex == 6 | click[i].faceIndex == 7){
+							if (Math.sqrt(
+							Math.pow(click[i].object.position.x - watcher.pos.x, 2)+
+							Math.pow((click[i].object.position.y-100) - watcher.pos.y, 2)+
+							Math.pow(click[i].object.position.z - watcher.pos.z, 2)
+						) < 500){ //距离<500
+							let mesh = new THREE.Mesh(block_geometry, blocks[3].material); //石头
+							mesh.position.x = click[i].object.position.x;
+							mesh.position.y = click[i].object.position.y-100;
+							mesh.position.z = click[i].object.position.z;
+							
+							mesh.castShadow = true;
+							mesh.receiveShadow = true;
+							
+							scene.add(mesh); //网格模型添加到场景中
+							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100-1 ][ click[i].object.position.z/100 ] = 3;
+							break;
+						}
+					}else if (click[i].faceIndex == 8 | click[i].faceIndex == 9){
+						if (Math.sqrt(
+							Math.pow(click[i].object.position.x - watcher.pos.x, 2)+
+							Math.pow(click[i].object.position.y - watcher.pos.y, 2)+
+							Math.pow((click[i].object.position.z+100) - watcher.pos.z, 2)
+						) < 500){ //距离<500
+							let mesh = new THREE.Mesh(block_geometry, blocks[3].material); //石头
+							mesh.position.x = click[i].object.position.x;
+							mesh.position.y = click[i].object.position.y;
+							mesh.position.z = click[i].object.position.z+100;
+							
+							mesh.castShadow = true;
+							mesh.receiveShadow = true;
+							
+							scene.add(mesh); //网格模型添加到场景中
+							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100+1 ] = 3;
+							break;
+						}
+					}else if (click[i].faceIndex == 10 | click[i].faceIndex == 11){
+						if (Math.sqrt(
+							Math.pow(click[i].object.position.x - watcher.pos.x, 2)+
+							Math.pow(click[i].object.position.y - watcher.pos.y, 2)+
+							Math.pow((click[i].object.position.z-100) - watcher.pos.z, 2)
+						) < 500){ //距离<500
+							let mesh = new THREE.Mesh(block_geometry, blocks[3].material); //石头
+							mesh.position.x = click[i].object.position.x;
+							mesh.position.y = click[i].object.position.y;
+							mesh.position.z = click[i].object.position.z-100;
+							
+							mesh.castShadow = true;
+							mesh.receiveShadow = true;
+							
+							scene.add(mesh); //网格模型添加到场景中
+							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100-1 ] = 3;
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+});
+$("canvas:eq(0)").on('touchcancel', function (e){
+	if (stop)
+		return;
+	
+	let x = e.originalEvent.changedTouches[0].pageX;
+	let y = e.originalEvent.changedTouches[0].pageY;
+	console.log("touchcancel:", x, y, Number(new Date()));
+	
+	x0 = null, y0 = null;
+	
+	if (touch_start.id !== null){ //短按（放置）
+		clearTimeout(touch_start.id);
+	}
+});
+
+
+function get_choice_object(phone, x, y){
+	let raycaster = new THREE.Raycaster(); //光线投射，用于确定鼠标点击位置
+	let mouse = new THREE.Vector2(); //创建二维平面
+	mouse.x = phone? 2*(x/WIDTH)-1: 0;
+	mouse.y = phone? -2*(y/HEIGHT)+1: 0;
+	//mouse.x = phone? (x/window.innerWidth)*0.9-0.6: 0;
+	//mouse.y = phone? (y/window.innerHeight)*1.8-0.6: 0;
+	console.log("get:", x, y, mouse.x, mouse.y);
+	//以camera为z坐标，确定所点击物体的3D空间位置
+	raycaster.setFromCamera(mouse, camera);
+	//确定所点击位置上的物体数量
+	let intersects = raycaster.intersectObjects(scene.children);
+	//选中后进行的操作
+	if(intersects.length){
+		return intersects;
+	}
+	return undefined;
+}
+
+//屏蔽鼠标右键
+document.oncontextmenu = function (e){
+	//var e = e || window.event;
+	//e.returnValue = false;
+	return false;
+};
+//屏蔽选择文字
+document.onselectstart = function (){
+	return false;
+};
+</script>
+	</body>
+</html>
