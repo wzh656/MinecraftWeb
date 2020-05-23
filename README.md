@@ -70,4 +70,3 @@
 <img alt="效果图片2" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/2.jpg" />  
 <img alt="效果图片3" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/3.jpg" />  
 <img alt="效果图片4" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/4.jpg" />  
-
