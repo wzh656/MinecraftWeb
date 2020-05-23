@@ -4,6 +4,10 @@
 		<meta charset="UTF-8" />
 		<meta content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
 		<title>我的世界</title>
+		
+		<!--icon-->
+		<link rel="icon" href="./img/icon.png" type="image/x-icon"/>
+		
 		<style>
 			@font-face{
 				font-family:kt; /*楷体*/
@@ -16,6 +20,18 @@
 			@font-face{
 				font-family:fzybxskt; /*方正硬笔行书楷体*/
 				src:url("./fonts/fzybxskt.ttf");
+			}
+			@font-face{
+				font-family:fzqtjt; /*方正启体简体*/
+				src:url("./fonts/fzqtjt.ttf");
+			}
+			@font-face{
+				font-family:qq1; /*QQ*/
+				src:url("./fonts/qq1.ttf");
+			}
+			@font-face{
+				font-family:qq2; /*QQ*/
+				src:url("./fonts/qq2.ttf");
 			}
 			
 			body{
@@ -33,7 +49,8 @@
 				width: 100%;
 				height: 100%;
 				margin: 0;
-				font-family: kt;
+				/*font-size: 8.6vw;*/
+				font-family: qq1;
 				/*padding-top: 20%;*/
 				text-align: center;
 				color: #fff;
@@ -44,10 +61,21 @@
 				white-space: pre;
 			}
 			b{
+				font-family: fzqtjt;
+			}
+			span{
+				font-family: kt;
+			}
+			button{
+				width: 80%;
+				height: 60px;
+				position: relative;
+				top: 26px;
+				font-size: 26px;
 				font-family: hwxk;
 			}
 			*{
-				font-family: fzybxskt;
+				font-family: qq2;
 			}
 			#control{
 				position: absolute;
@@ -109,6 +137,7 @@
 		if (typeof(require) != "undefined")
 			window.$ = window.jQuery = require("./js/jquery.min.js");
 		</script>
+		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
 		<script src="./js/stats.min.js"></script>
 		<script src="./js/dat.gui.min.js"></script>
 		<script src="./js/three.min.js"></script>
@@ -126,8 +155,49 @@
 			推荐使用横屏运行（启用浏览器横屏或<a href="https://github.com/wzh656/MinecraftWeb/releases/download/v0.3.2-alpha/Minecraft_v0.3.2-alpha.apk">下载apk</a>）<br/>
 			<button onclick="this.parentElement.remove();">继续竖屏</button>
 		</h1>
+		<audio id="bgm" autoplay perload loop style="display: none;" src="./music/1.m4a"></audio>
+		<!--<audio id="bgm" autoplay perload loop style="display: none;" src="https://vdse.bdstatic.com/876934f28995e8042230ec598237c67e.mp4?authorization=bce-auth-v1/fb297a5cc0fb434c971b8fa103e8dd7b/2017-05-11T09:02:31Z/-1//ab5b458a478fae53b754e194ab270b96f23aa23ba71c2e63b06fc06d0543040c"></audio>-->
 		<noscript><h1 style="z-index: 3;">你的浏览器不支持JavaScript，无法运行！</h1></noscript>
 <script>
+document.addEventListener("touchstart", function(){
+	if (bgm.paused){ //未播放
+		let bgm = document.getElementById("bgm");
+		let random = Math.random();
+		if (random < 0.5){
+			bgm.volume = 1;
+			bgm.src = "./music/1.m4a";
+			bgm.play();
+			console.info("bgm begin(1):"+new Date());
+		}else{
+			bgm.volume = 1;
+			bgm.src = "./music/2.m4a";
+			bgm.play();
+			console.info("bgm begin(2):"+new Date());
+		}
+	}else{
+		bgm.play();
+	}
+});
+document.addEventListener("mousedown", function(){
+	if (bgm.paused){ //未播放
+		let bgm = document.getElementById("bgm");
+		let random = Math.random();
+		if (random < 0.5){
+			bgm.volume = 1;
+			bgm.src = "./music/1.m4a";
+			bgm.play();
+			console.info("bgm begin(1):"+new Date());
+		}else{
+			bgm.volume = 1;
+			bgm.src = "./music/2.m4a";
+			bgm.play();
+			console.info("bgm begin(2):"+new Date());
+		}
+	}else{
+		bgm.play();
+	}
+});
+
 function websocket(...data){
 	for (var i in data)
 		data[i]=encodeURIComponent(data[i]);
@@ -398,9 +468,8 @@ scene.fog = new THREE.Fog("#fff", 0.01, 200*100);
 //						 雾气颜色，近处的距离，远处的距离(66m)
 let scene_folder = gui.addFolder("场景(scene)");
 	let scene_fog_folder = scene_folder.addFolder("雾(fog)");
-		scene_fog_folder.open();
-		scene_fog_folder.add(scene.fog, "far", 10*100, 1000*100);
-		scene_fog_folder.add(scene.fog, "near", 0.001, 1);
+		scene_fog_folder.add(scene.fog, "far", 15*100, 1000*100, 100);
+		scene_fog_folder.add(scene.fog, "near", 0.001, 10);
 		scene_fog_folder.addColor(scene.fog, "color");
 
 /**
@@ -559,11 +628,12 @@ scene.add(line[2]);*/
 let point = new THREE.PointLight(0xffffff);
 point.position.set(0, 10*100, 0); //点光源位置
 scene.add(point); //点光源添加到场景中*/
+let scene_light_folder = scene_folder.addFolder("光源(light)");
 
 //平行光
 var directionalLight = new THREE.DirectionalLight("#fff", 1);
 directionalLight.position.set(2, 1, 2);
-directionalLight.castShadow = true;
+directionalLight.castShadow = false;
 directionalLight.onlyShadow = true;
 directionalLight.shadow.mapSize.width = Math.pow(2,12);  // default:512
 directionalLight.shadow.mapSize.height = Math.pow(2,12); // default:512
@@ -576,6 +646,16 @@ directionalLight.shadow.camera.bottom = -200*100;
 scene.add(directionalLight);
 // 光照指向平地
 //directionalLight.target = ;
+let scene_light_directionalLight_folder = scene_light_folder.addFolder("平行光(directionalLight)");
+	scene_light_directionalLight_folder.add(directionalLight, "castShadow");
+	let scene_light_directionalLight_mapSize_folder = scene_light_directionalLight_folder.addFolder("阴影贴图大小(mapSize)");
+		scene_light_directionalLight_mapSize_folder.add(directionalLight.shadow.mapSize, "width", Math.pow(2,9), Math.pow(2,12), Math.pow(2,9));
+		scene_light_directionalLight_mapSize_folder.add(directionalLight.shadow.mapSize, "height", Math.pow(2,9), Math.pow(2,12), Math.pow(2,9));
+	let scene_light_directionalLight_position_folder = scene_light_directionalLight_folder.addFolder("位置(position)");
+		scene_light_directionalLight_position_folder.add(directionalLight.position, "x", -3, 3, 0.1);
+		scene_light_directionalLight_position_folder.add(directionalLight.position, "y", -3, 3, 0.1);
+		scene_light_directionalLight_position_folder.add(directionalLight.position, "z", -3, 3, 0.1);
+
 //辅助线
 //var directionalLight_CameraHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
 //scene.add(directionalLight_CameraHelper);
@@ -585,10 +665,18 @@ var hemiLight = new THREE.HemisphereLight('#87ceeb', '#f5deb3', 0.4/*"#aaf", "#8
 hemiLight.position.set(0,500,0);
 scene.add(hemiLight);
 
+let scene_light_hemiLight_folder = scene_light_folder.addFolder("户外光源(hemiLight)");
+	let scene_light_hemiLight_position_folder = scene_light_hemiLight_folder.addFolder("位置(position)");
+		scene_light_hemiLight_position_folder.add(hemiLight.position, "x", -3, 3, 0.1);
+		scene_light_hemiLight_position_folder.add(hemiLight.position, "y", -3, 3, 0.1);
+		scene_light_hemiLight_position_folder.add(hemiLight.position, "z", -3, 3, 0.1);
+
 //环境光
 let ambient = new THREE.AmbientLight(0x444444);
 scene.add(ambient);
 
+let scene_light_ambient_folder = scene_light_folder.addFolder("环境光(ambient)");
+	scene_light_ambient_folder.addColor(ambient, "color");
 
 /**
 * 相机设置
@@ -609,9 +697,9 @@ let camera = new THREE.PerspectiveCamera(45, WIDTH/HEIGHT, 1, 1000*100);
 //								 view_angle, aspect, near, far(1km)
 camera.position.set(0, 300, 0); //设置相机位置
 camera.lookAt(scene.position); //设置相机方向(指向的场景对象)
-setTimeout(function(){
+/*setTimeout(function(){
 	console.info(camera);
-},1000);
+},1000);*/
 
 /**
 * 创建渲染器对象
@@ -626,39 +714,119 @@ renderer.shadowMapEnabled = true; //阴影
 //执行渲染操作   指定场景、相机作为参数
 renderer.render(scene, camera);
 
+renderer.color = {
+	get clearColor(){
+		return renderer.getClearColor();
+	},
+	set clearColor(value){
+		console.log(value)
+		renderer.setClearColor(
+			"rgb("+
+				Math.round(value.r)+","+
+				Math.round(value.g)+","+
+				Math.round(value.b)+
+			")"
+		, 1);
+	}
+};
+let renderer_folder = gui.addFolder("渲染器(renderer)");
+	renderer_folder.addColor(renderer.color, "clearColor");
+
 window.onresize = function(){
+	if (
+		Math.abs((window.innerWidth-WIDTH)/WIDTH) > 0.1 |
+		Math.abs((window.innerHeight-HEIGHT)/HEIGHT) > 0.1
+	){
+		/*if (confirm("屏幕尺寸变化过大，会导致画面扭曲。\n是否立即保存并刷新？")){
+			backup();
+			location.reload();
+		}*/
+	}
 	WIDTH = window.innerWidth;
 	HEIGHT = window.innerHeight;
 	camera.aspect = WIDTH/HEIGHT;
 	renderer.setSize(WIDTH, HEIGHT);
 };
 
+function sigmod(x){
+	return 1 / ( 1+Math.pow(Math.E, -x) );
+}
+//0~5.25	5.25	7		7~17.35	17.35	19		19~24
+//天黑		开始日出	日出结束	白天	开始日落	日落结束	天黑
 setTimeout(function(){
-	let h = new Date().getHours();
-	if (h > 20 | h < 5){ // 天黑
+	let h = new Date();
+	//h = h.getSeconds()/60*24;
+	h = h.getHours() + h.getMinutes()/60 + h.getSeconds()/3600;
+	if (h > 19 | h < 5.25){ // 天黑
 		ambient.color = new THREE.Color("#223");
-		renderer.setClearColor("#334", 1);
-	}else if (h > 15 | h < 7){ // 日出/日落
+		//renderer.setClearColor("#334", 1);
+	}else if (h > 17.35 | h < 7){ // 日出/日落
 		ambient.color = new THREE.Color("#f9a");
-		renderer.setClearColor("#a34", 1);
+		//renderer.setClearColor("#a34", 1);
 	}else{
 		ambient.color = new THREE.Color("#aac");
-		renderer.setClearColor("#eef", 1);
+		//renderer.setClearColor("#eef", 1);
 	}
+	renderer.setClearColor(
+		h < 5.25 | h > 19? //天黑
+			"#112"
+		:h < 7? //日出
+			"rgb(" +
+				Math.round(sigmod(-(4.0+5.5)/2*2.5+2.5*h)*240+15) + ","+
+				Math.round(sigmod(-(4.5+6.5)/2*2.5+2.5*h)*240+15) + "," +
+				Math.round(sigmod(-(5.0+7.0)/2*2.5+2.5*h)*225+30) +
+			")"
+		:h > 17.35? //日落
+			"rgb(" +
+				Math.round(sigmod((4.3+6.0+12*2)/2*2.5-2.5*h)*240+15) + ","+
+				Math.round(sigmod((4.8+6.5+12*2)/2*2.5-2.5*h)*240+15) + "," +
+				Math.round(sigmod((5.3+7.0+12*2)/2*2.5-2.5*h)*225+30) +
+			")"
+		: //白天
+			"#eef"
+	, 1);
 }, 0);
 setInterval(function(){
-	let h = new Date().getHours();
-	if (h > 20 | h < 5){ // 天黑
+	let h = new Date();
+	//h = h.getSeconds()/60*24;
+	h = h.getHours() + h.getMinutes()/60 + h.getSeconds()/3600;
+	if (h > 19 | h < 5.25){ // 天黑
 		ambient.color = new THREE.Color("#223");
-		renderer.setClearColor("#334", 1);
-	}else if (h > 15 | h < 7){ // 日出/日落
+		//renderer.setClearColor("#334", 1);
+	}else if (h > 17.35 | h < 7){ // 日出/日落
 		ambient.color = new THREE.Color("#f9a");
-		renderer.setClearColor("#a34", 1);
-	}else{
+		//renderer.setClearColor("#a34", 1);
+	}else{ //白天
 		ambient.color = new THREE.Color("#aac");
-		renderer.setClearColor("#eef", 1);
+		//renderer.setClearColor("#eef", 1);
 	}
-}, 60*1000);
+	renderer.setClearColor(
+		h < 5.25 | h > 19? //天黑
+			"#112"
+		:h < 7? //日出
+			"rgb(" +
+				Math.round(sigmod(-(4.0+6.0)/2*2.5+2.5*h)*240+15) + ","+
+				Math.round(sigmod(-(4.5+6.5)/2*2.5+2.5*h)*240+15) + "," +
+				Math.round(sigmod(-(5.0+7.0)/2*2.5+2.5*h)*225+30) +
+			")"
+		:h > 17.35? //日落
+			"rgb(" +
+				Math.round(sigmod((4.3+6.0+12*2)/2*2.5-2.5*h)*240+15) + ","+
+				Math.round(sigmod((4.8+6.5+12*2)/2*2.5-2.5*h)*240+15) + "," +
+				Math.round(sigmod((5.3+7.0+12*2)/2*2.5-2.5*h)*225+30) +
+			")"
+		: //白天
+			"#eef"
+	, 1);
+	console.log(
+		"time:"+h,
+		(4.3+6+12*2)/2*2.5-2.5*h,
+		(5.3+7+12*2)/2*2.5-2.5*h,
+		"r:"+sigmod((4.3+6+12*2)/2*2.5-2.5*h)*240+15,
+		"g:"+sigmod((5.3+7+12*2)/2*2.5-2.5*h)*240+15,
+		"b:"+sigmod((5.3+7+12*2)/2*2.5-2.5*h)*225+30
+	);
+}, 5*1000); // 5s/次
 
 
 /**
@@ -729,20 +897,6 @@ function render(){
 	requestAnimationFrame(render);
 	renderer.render(scene, camera);//执行渲染操作
 	
-	let x =
-		Math.cos(watcher.lookAt.left_right/180*Math.PI)*
-		Math.cos(watcher.lookAt.top_bottom/180*Math.PI)
-	;
-	let z =
-		Math.sin(watcher.lookAt.left_right/180*Math.PI)*
-		Math.cos(watcher.lookAt.top_bottom/180*Math.PI)
-	;
-	let y = Math.sin(watcher.lookAt.top_bottom/180*Math.PI);
-	camera.lookAt(watcher.pos.x+x, watcher.pos.y+y, watcher.pos.z+z);
-	watcher.look.x = x;
-	watcher.look.y = y;
-	watcher.look.z = z;
-	
 	try{
 		if (
 			every
@@ -767,8 +921,8 @@ function render(){
 	}catch(err){}
 	
 	if (!stop){
-		watcher.v.y -= 9.8*t/1000;
-		let kf = 16; //空气阻力系数
+		watcher.v.y -= 9.8*t/1000*(Math.random()*0.2+0.9);
+		let kf = 16*(Math.random()*0.2+0.9); //空气阻力系数
 		watcher.v.x -=
 			Math.abs(kf*0.25*watcher.v.x*t/1000) < Math.abs(watcher.v.x)?
 				kf*0.25*watcher.v.x*t/1000
@@ -790,7 +944,7 @@ function render(){
 		
 		//x
 		if (watcher.v.x > 0){ //向前
-			for (var i=watcher.pos.x; i<=watcher.pos.x+watcher.v.x*t; i+=1){
+			for (var i=watcher.pos.x; i<=watcher.pos.x+watcher.v.x*t; i+=2){
 				try{
 					if (
 						every
@@ -820,7 +974,7 @@ function render(){
 			}
 			watcher.pos.x = i;
 		}else if (watcher.v.x < 0){ //向后
-			for (var i=watcher.pos.x; i>=watcher.pos.x+watcher.v.x*t; i-=1){
+			for (var i=watcher.pos.x; i>=watcher.pos.x+watcher.v.x*t; i-=2){
 				try{
 					if (
 						every
@@ -852,7 +1006,7 @@ function render(){
 		}
 		//y
 		if (watcher.v.y > 0){ //向上
-			for (var i=watcher.pos.y; i<=watcher.pos.y+watcher.v.y*t; i+=1){
+			for (var i=watcher.pos.y; i<=watcher.pos.y+watcher.v.y*t; i+=3){
 				try{
 					if (
 						every
@@ -872,7 +1026,7 @@ function render(){
 			}
 			watcher.pos.y = i;
 		}else if (watcher.v.y < 0){ //向下
-			for (var i=watcher.pos.y-200; i>=watcher.pos.y-200+watcher.v.y*t; i-=1){
+			for (var i=watcher.pos.y-200; i>=watcher.pos.y-200+watcher.v.y*t; i-=3){
 				try{
 					if (
 						every
@@ -894,7 +1048,7 @@ function render(){
 		}
 		//z
 		if (watcher.v.z > 0){ //向右
-			for (var i=watcher.pos.z; i<=watcher.pos.z+watcher.v.z*t; i+=1){
+			for (var i=watcher.pos.z; i<=watcher.pos.z+watcher.v.z*t; i+=2){
 				try{
 					if (
 						every
@@ -924,7 +1078,7 @@ function render(){
 			}
 			watcher.pos.z = i;
 		}else if (watcher.v.z < 0){ //向左
-			for (var i=watcher.pos.z; i>=watcher.pos.z+watcher.v.z*t; i-=1){
+			for (var i=watcher.pos.z; i>=watcher.pos.z+watcher.v.z*t; i-=2){
 				try{
 					if (
 						every
@@ -1066,6 +1220,8 @@ setInterval(function(){
 			z = 0;
 		}
 	}catch(err){} */
+	x *= 10;
+	z *= 10;
 	try{
 		if (
 			every
@@ -1116,7 +1272,7 @@ setInterval(function(){
 		}
 	}catch(err){}
 	
-	watcher.pos.x += x*10;
+	watcher.pos.x += x*(Math.random()*0.2+0.9);
 	try{
 		if (
 			every
@@ -1126,10 +1282,10 @@ setInterval(function(){
 			!=
 				0
 		){ //脚下有方块
-			watcher.v.y += y*2;
+			watcher.v.y += y*2*(Math.random()*0.2+0.9);
 		}
 	}catch(err){}
-	watcher.pos.z += z*10;
+	watcher.pos.z += z*(Math.random()*0.2+0.9);
 },32.6);
 
 
@@ -1147,6 +1303,22 @@ choice_folder.open();
 	x0: null,
 	y0: null
 }; */
+function look_refresh(){
+	let x =
+		Math.cos(watcher.lookAt.left_right/180*Math.PI)*
+		Math.cos(watcher.lookAt.top_bottom/180*Math.PI)
+	;
+	let z =
+		Math.sin(watcher.lookAt.left_right/180*Math.PI)*
+		Math.cos(watcher.lookAt.top_bottom/180*Math.PI)
+	;
+	let y = Math.sin(watcher.lookAt.top_bottom/180*Math.PI);
+	camera.lookAt(watcher.pos.x+x, watcher.pos.y+y, watcher.pos.z+z);
+	watcher.look.x = x;
+	watcher.look.y = y;
+	watcher.look.z = z;
+}
+look_refresh();
 document.addEventListener("mousemove", function (e){
 	if (stop)
 		return;
@@ -1198,6 +1370,7 @@ document.addEventListener("mousemove", function (e){
 		if (watcher.lookAt.top_bottom < -89.9)
 			watcher.lookAt.top_bottom = -89.9;
 		
+		look_refresh(); //刷新
 	// }
 	
 	// [mouse.x0,mouse.y0] = [x, y];
@@ -1397,7 +1570,7 @@ $("#control").on("touchstart", function(e){
 			let z = Math.sin( watcher.lookAt.left_right/180*Math.PI+r )*l;
 			
 			if (x > 0){
-				for (var i=watcher.pos.x; i<=watcher.pos.x+x; i+=1){
+				for (var i=watcher.pos.x; i<=watcher.pos.x+x; i+=2){
 					try{
 						if (
 							every
@@ -1418,7 +1591,7 @@ $("#control").on("touchstart", function(e){
 					}catch(err){}
 				}
 			}else{
-				for (var i=watcher.pos.x; i>=watcher.pos.x+x; i-=1){
+				for (var i=watcher.pos.x; i>=watcher.pos.x+x; i-=2){
 					try{
 						if (
 							every
@@ -1440,7 +1613,7 @@ $("#control").on("touchstart", function(e){
 				}
 			}
 			if (z > 0){
-				for (var j=watcher.pos.z; j<=watcher.pos.z+z; j+=1){
+				for (var j=watcher.pos.z; j<=watcher.pos.z+z; j+=2){
 					try{
 						if (
 							every
@@ -1461,7 +1634,7 @@ $("#control").on("touchstart", function(e){
 					}catch(err){}
 				}
 			}else{
-				for (var j=watcher.pos.z; j>=watcher.pos.z+z; j-=1){
+				for (var j=watcher.pos.z; j>=watcher.pos.z+z; j-=2){
 					try{
 						if (
 							every
@@ -1530,7 +1703,7 @@ $("#jump").on("touchstart", function(){
 			!=
 				0
 		){ //脚下有方块
-			watcher.v.y += 2;
+			watcher.v.y += 2*(Math.random()*0.2+0.9);
 		}
 	}catch(err){}
 	
@@ -1611,6 +1784,9 @@ $("canvas:eq(0)").on("touchmove", function (e){
 		watcher.lookAt.top_bottom = 89.9;
 	if (watcher.lookAt.top_bottom < -89.9)
 		watcher.lookAt.top_bottom = -89.9;
+	
+	look_refresh(); //刷新
+	
 	
 	if (Math.sqrt(
 		Math.pow(touch_start.pos.x-x, 2)+
