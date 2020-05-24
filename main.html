@@ -4,10 +4,6 @@
 		<meta charset="UTF-8" />
 		<meta content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
 		<title>我的世界</title>
-		
-		<!--icon-->
-		<link rel="icon" href="./img/icon.png" type="image/x-icon"/>
-		
 		<style>
 			@font-face{
 				font-family:kt; /*楷体*/
@@ -98,37 +94,18 @@
 				border-radius: 50%;
 			}
 			
-			@keyframes rot{
-				from {
-					transform: rotate(0deg);
-				}
-				to {
-					transform: rotate(90deg);
-				}
+			#tools{
+				position: absolute;
+				bottom: 0px;
+				margin: 0 auto;
 			}
-			@-moz-keyframes rot{ /* Firefox */
-				from {
-					transform: rotate(0deg);
-				}
-				to {
-					transform: rotate(90deg);
-				}
-			}
-			@-webkit-keyframes rot{ /* Safari 和 Chrome */
-				from {
-					transform: rotate(0deg);
-				}
-				to {
-					transform: rotate(90deg);
-				}
-			}
-			@-o-keyframes rot{ /* Opera */
-				from {
-					transform: rotate(0deg);
-				}
-				to {
-					transform: rotate(90deg);
-				}
+			#tools > div{
+				width: 66px;
+				height: 66px;
+				display: inline-block;
+				border-color: #aaaaaaaa;
+				border-width: 3px;
+				border-style: inset;
 			}
 		</style>
 		
@@ -145,6 +122,12 @@
 	</head>
 	
 	<body bgcolor="black">
+		<div id="tools">
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
+		</div>
 		<h1 id="schedule" style="z-index: 2;">
 			<span id="schedule_message">贴图加载中……</span><br/>
 			主进度：<span id="schedule1">0</span>%<br/>
@@ -159,70 +142,22 @@
 		<!--<audio id="bgm" autoplay perload loop style="display: none;" src="https://vdse.bdstatic.com/876934f28995e8042230ec598237c67e.mp4?authorization=bce-auth-v1/fb297a5cc0fb434c971b8fa103e8dd7b/2017-05-11T09:02:31Z/-1//ab5b458a478fae53b754e194ab270b96f23aa23ba71c2e63b06fc06d0543040c"></audio>-->
 		<noscript><h1 style="z-index: 3;">你的浏览器不支持JavaScript，无法运行！</h1></noscript>
 <script>
-document.addEventListener("touchstart", function(){
-	if (bgm.paused){ //未播放
-		let bgm = document.getElementById("bgm");
-		let random = Math.random();
-		if (random < 0.5){
-			bgm.volume = 1;
-			bgm.src = "./music/1.m4a";
-			bgm.play();
-			console.info("bgm begin(1):"+new Date());
-		}else{
-			bgm.volume = 1;
-			bgm.src = "./music/2.m4a";
-			bgm.play();
-			console.info("bgm begin(2):"+new Date());
-		}
-	}else{
+function playBGM(){
+	let bgm = document.getElementById("bgm");
+	let random = Math.random();
+	if (random < 0.5){
+		bgm.volume = 1;
+		bgm.src = "./music/1.m4a";
 		bgm.play();
-	}
-});
-document.addEventListener("mousedown", function(){
-	if (bgm.paused){ //未播放
-		let bgm = document.getElementById("bgm");
-		let random = Math.random();
-		if (random < 0.5){
-			bgm.volume = 1;
-			bgm.src = "./music/1.m4a";
-			bgm.play();
-			console.info("bgm begin(1):"+new Date());
-		}else{
-			bgm.volume = 1;
-			bgm.src = "./music/2.m4a";
-			bgm.play();
-			console.info("bgm begin(2):"+new Date());
-		}
+		console.info("bgm begin(1):"+new Date());
 	}else{
+		bgm.volume = 1;
+		bgm.src = "./music/2.m4a";
 		bgm.play();
+		console.info("bgm begin(2):"+new Date());
 	}
-});
-
-function websocket(...data){
-	for (var i in data)
-		data[i]=encodeURIComponent(data[i]);
-	console.log(data);
-	var element=document.createElement("script");
-	element.src="websocket://"+data.join("/");
-	document.body.append(element);
-	document.body.removeChild(element);
 }
-Android = {
-	file: {
-		write: function(address, value, func){
-			var callback = "_"+Number(new Date());
-			Android.callback[callback] = func;
-			websocket("file", "write", address, value, callback);
-		}
-	},
-	system: {
-		exit: function(func){
-			var callback = "_"+Number(new Date());
-			Android.callback[callback] = func;
-			websocket("system", "exit", callback);
-		}
-	}
-};
+document.addEventListener("plusready", playBGM);
 </script>
 <script>
 var stop = true;
@@ -316,6 +251,7 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 			;
 			document.body.requestPointerLock();
 			stop = false;
+			playBGM();
 		// }
 	}, false);
 	
@@ -387,19 +323,38 @@ const blocks = [
 		name: "空气"
 	},
 	{
+		face: ["side.png", "side.png", "up.png", "down.png", "side.png", "side.png"],
 		name: "草方块",
 		texture: []
 	},
 	{
+		face: ["face.png", "face.png", "face.png", "face.png", "face.png", "face.png"],
 		name: "木板",
 		texture: []
 	},
 	{
+		face: ["face.png", "face.png", "face.png", "face.png", "face.png", "face.png"],
 		name: "石头",
 		texture: []
 	},
 	{
+		face: ["face.png", "face.png", "face.png", "face.png", "face.png", "face.png"],
 		name: "圆石",
+		texture: []
+	},
+	{
+		face: ["face.png", "face.png", "face.png", "face.png", "face.png", "face.png"],
+		name: "沙子",
+		texture: []
+	},
+	{
+		face: ["face.png", "face.png", "face.png", "face.png", "face.png", "face.png"],
+		name: "砖",
+		texture: []
+	},
+	{
+		face: ["side.png", "side.png", "up.png", "down.png", "side.png", "side.png"],
+		name: "仙人掌",
 		texture: []
 	}
 ];
@@ -487,29 +442,29 @@ let block_geometry = new THREE.BoxGeometry(100, 100, 100);
 let textureLoader = new THREE.TextureLoader();
 let num = 0;
 for (let i=1; i<blocks.length; i++){
-	for (let j=1; j<=6; j++){
-		textureLoader.load(`./img/blocks/${blocks[i].name}/${j}.png`, function (texture){
+	for (let j=0; j<6; j++){
+		textureLoader.load(`./img/blocks/${i}/${blocks[i].face[j]}`, function (texture){
 			blocks[i].texture[j] = texture;
 			
-			if (blocks[i].texture.length < 7)
+			if (blocks[i].texture.length < 6)
 				return;
-			//单个block加载完毕
-			for (let k=1;k<blocks[i].texture.length;k++)
-				if (blocks[i].texture[k] == undefined)
+			for (let k=0; k<blocks[i].texture.length; k++)
+				if (!blocks[i].texture[k])
 					return;
+			//单个block加载完毕
 			blocks[i].material = [
+				new THREE.MeshLambertMaterial({ map: blocks[i].texture[0] }),
 				new THREE.MeshLambertMaterial({ map: blocks[i].texture[1] }),
 				new THREE.MeshLambertMaterial({ map: blocks[i].texture[2] }),
 				new THREE.MeshLambertMaterial({ map: blocks[i].texture[3] }),
 				new THREE.MeshLambertMaterial({ map: blocks[i].texture[4] }),
-				new THREE.MeshLambertMaterial({ map: blocks[i].texture[5] }),
-				new THREE.MeshLambertMaterial({ map: blocks[i].texture[6] })
+				new THREE.MeshLambertMaterial({ map: blocks[i].texture[5] })
 			]; //材质对象Material
 			delete blocks[i].texture;
 			document.getElementById("schedule2").innerHTML = Math.round(i/6*100*100)/100;
 			
 			for (let k=1; k<blocks.length; k++)
-				if (blocks[k].material == undefined)
+				if (!blocks[k].material)
 					return;
 			//所有block加载完毕
 			document.getElementById("schedule_message").innerHTML = "载入方块中……";
@@ -1320,9 +1275,13 @@ function look_refresh(){
 }
 look_refresh();
 document.addEventListener("mousemove", function (e){
-	if (stop)
+	/* if (stop)
+		return; */
+	
+	if (e.path[0] != document.getElementById("help") & e.path[0] != document.body){
 		return;
-		
+	}
+	
 	let dx =
 		e.movementX ||
 		e.mozMovementX ||
@@ -1380,7 +1339,7 @@ document.addEventListener("mousedown", function (e){
 	if (stop)
 		return;
 	
-	if (e.path[0].tagName != "BODY")
+	if (e.path[0] !== document.body)
 		return;
 	
 	if (e.button == 0){ //左键（删除）
@@ -1527,7 +1486,7 @@ document.addEventListener("mousedown", function (e){
 /**
 * Touch
 */
-let touch = {
+let touch_control = {
 	x0: null,
 	y0: null,
 	x: null,
@@ -1542,17 +1501,17 @@ $("#control").on("touchstart", function(e){
 	let y = e.originalEvent.targetTouches[0].clientY;
 	console.log("touchstart(control):", x, y);
 	
-	[touch.x0, touch.y0] = [x, y];
+	[touch_control.x0, touch_control.y0] = [x, y];
 	
-	touch.loop = setInterval(function(){
+	touch_control.loop = setInterval(function(){
 		if (
-			touch.x0 !== null &
-			touch.y0 !== null &
-			touch.x !== null &
-			touch.y !== null
+			touch_control.x0 !== null &
+			touch_control.y0 !== null &
+			touch_control.x !== null &
+			touch_control.y !== null
 		){
-			let dx = touch.x-touch.x0;
-			let dy = touch.y-touch.y0;
+			let dx = touch_control.x-touch_control.x0;
+			let dy = touch_control.y-touch_control.y0;
 			let r = (
 				dx>0? Math.atan(dy/dx)+Math.PI/2:
 				dx<0? Math.atan(dy/dx)-Math.PI/2:
@@ -1670,7 +1629,7 @@ $("#control").on("touchmove", function(e){
 	let y = e.originalEvent.targetTouches[0].clientY;
 	console.log("touchmove(control):", x, y);
 	
-	[touch.x, touch.y] = [x, y];
+	[touch_control.x, touch_control.y] = [x, y];
 	
 	return false;
 });
@@ -1682,10 +1641,10 @@ $("#control").on("touchend", function(e){
 	let y = e.originalEvent.changedTouches[0].clientY;
 	console.log("touchend(control):", x, y);
 	
-	[touch.x0, touch.y0, touch.x, touch.y] = [null, null, null, null];
-	clearInterval(touch.loop);
+	touch_control.x0 = touch_control.y0 = touch_control.x = touch_control.y = null;
+	clearInterval(touch_control.loop);
 	
-	console.log(touch)
+	console.log(touch_control)
 	
 	return false;
 });
@@ -1711,7 +1670,7 @@ $("#jump").on("touchstart", function(){
 });
 
 
-let touch_start = {
+let touch_screen = {
 	t: null,
 	pos: {x: null, y: null},
 	id: null
@@ -1726,13 +1685,13 @@ $("canvas:eq(0)").on("touchstart", function (e){
 	
 	[x0,y0] = [x, y];
 	
-	touch_start.t = new Date();
-	touch_start.pos = {x,y};
-	touch_start.id = setTimeout(()=>{ //长按（删除）
-		touch_start.id = null;
+	touch_screen.t = new Date();
+	touch_screen.pos = {x,y};
+	touch_screen.id = setTimeout(()=>{ //长按（删除）
+		touch_screen.id = null;
 		if (Math.sqrt(
-			Math.pow(touch_start.pos.x-x, 2)+
-			Math.pow(touch_start.pos.y-y, 2)
+			Math.pow(touch_screen.pos.x-x, 2)+
+			Math.pow(touch_screen.pos.y-y, 2)
 		) < 36){ //误差36px
 			let click = get_choice_object(true, x, y);
 			for (let i in click){
@@ -1789,11 +1748,11 @@ $("canvas:eq(0)").on("touchmove", function (e){
 	
 	
 	if (Math.sqrt(
-		Math.pow(touch_start.pos.x-x, 2)+
-		Math.pow(touch_start.pos.y-y, 2)
+		Math.pow(touch_screen.pos.x-x, 2)+
+		Math.pow(touch_screen.pos.y-y, 2)
 	) >= 100){ //误差100px
-		touch_start.pos.x = -666;
-		touch_start.pos.y = -666;
+		touch_screen.pos.x = -666;
+		touch_screen.pos.y = -666;
 	}
 	return false;
 });
@@ -1807,12 +1766,12 @@ $("canvas:eq(0)").on('touchend', function (e){
 	
 	x0 = null, y0 = null;
 	
-	if (touch_start.id !== null){ //短按（放置）
-		clearTimeout(touch_start.id);
-		touch_start.id = null;
+	if (touch_screen.id !== null){ //短按（放置）
+		clearTimeout(touch_screen.id);
+		touch_screen.id = null;
 		if (Math.sqrt(
-			Math.pow(touch_start.pos.x-x, 2)+
-			Math.pow(touch_start.pos.y-y, 2)
+			Math.pow(touch_screen.pos.x-x, 2)+
+			Math.pow(touch_screen.pos.y-y, 2)
 		) < 36){ //误差36px
 			let click = get_choice_object(true, x, y);
 			for (let i in click){
@@ -1941,8 +1900,8 @@ $("canvas:eq(0)").on('touchcancel', function (e){
 	
 	x0 = null, y0 = null;
 	
-	if (touch_start.id !== null){ //短按（放置）
-		clearTimeout(touch_start.id);
+	if (touch_screen.id !== null){ //短按（放置）
+		clearTimeout(touch_screen.id);
 	}
 });
 
