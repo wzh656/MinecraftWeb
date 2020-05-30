@@ -9,7 +9,7 @@ let win
 function createWindow () {
 	// 创建浏览器窗口.
 	win = new BrowserWindow({
-		width: 1000, height: 700, autoHideMenuBar :true
+		/* width: 1000, height: 700, */ autoHideMenuBar :true
 	});
 	
 	//win.setProgressBar(0.5); //进度条
@@ -20,7 +20,7 @@ function createWindow () {
 	win.loadURL("file://"+__dirname+"/main.html")
 
 	// 打开开发工具
-	win.webContents.openDevTools()
+	//win.webContents.openDevTools()
 
 	win.on('closed', () => {
 		// 取消引用窗口对象, 如果你的应用程序支持多窗口，通常你会储存windows在数组中，这是删除相应元素的时候。

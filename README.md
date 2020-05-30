@@ -69,6 +69,7 @@
 > 0.4.1版
 
 <img alt="效果图片" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/8.jpg" />  
+<img alt="效果图片（火柴盒）" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/9.jpg" />  
 
 > 0.4.0版
 

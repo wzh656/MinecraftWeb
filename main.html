@@ -210,7 +210,7 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 	];
 	parts[0].style.width = "2px";
 	parts[0].style.height = "30px";
-	parts[0].style.backgroundColor = "#ffffffaa";
+	parts[0].style.backgroundColor = "rgba(255, 255, 255, 0.666666)";
 	parts[0].style.position = "absolute";
 	parts[0].style.left = "50%";
 	parts[0].style.top = "50%";
@@ -218,7 +218,7 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 	
 	parts[1].style.width = "30px";
 	parts[1].style.height = "2px";
-	parts[1].style.backgroundColor = "#ffffffaa";
+	parts[1].style.backgroundColor = "rgba(255, 255, 255, 0.666666)";
 	parts[1].style.position = "absolute";
 	parts[1].style.left = "50%";
 	parts[1].style.top = "50%";
@@ -284,7 +284,7 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 			console.log("no");
 			stop = true;
 			$("#help").css("display", "inline-block");
-			backup();
+			save();
 		}
 	};
 	
@@ -412,7 +412,7 @@ if (localStorage.getItem("我的世界.存档.方块")){
 	}
 }
 
-function backup(){
+function save(){
 	let arr = [];
 	for (let x=-10; x<=10; x++){
 		for (let y=0; y<=20; y++){
@@ -422,12 +422,12 @@ function backup(){
 		}
 	}
 	localStorage.setItem("我的世界.存档.方块", JSON.stringify(arr));
-	localStorage.setItem("我的世界.存档.玩家.位置", JSON.stringify(watcher.pos));
-	localStorage.setItem("我的世界.存档.玩家.朝向", JSON.stringify(watcher.lookAt));
+	localStorage.setItem("我的世界.存档.玩家.位置", JSON.stringify(camera.userData.pos));
+	localStorage.setItem("我的世界.存档.玩家.朝向", JSON.stringify(camera.userData.lookAt));
 	console.log("备份成功");
 }
-setInterval(backup, 60*1000);
-gui.add(window, "backup");
+setInterval(save, 60*1000);
+gui.add(window, "save").name("保存");
 
 
 /**
@@ -663,7 +663,7 @@ camera.lookAt(scene.position); //设置相机方向(指向的场景对象) */
 let WIDTH = window.innerWidth,
 	HEIGHT = window.innerHeight;
 
-let camera = new THREE.PerspectiveCamera(45, WIDTH/HEIGHT, 1, 1000*100);
+var camera = new THREE.PerspectiveCamera(45, WIDTH/HEIGHT, 1, 1000*100);
 //								 view_angle, aspect, near, far(1km)
 camera.position.set(0, 350, 0); //设置相机位置
 camera.lookAt(scene.position); //设置相机方向(指向的场景对象)
@@ -707,10 +707,10 @@ window.onresize = function(){
 		Math.abs((window.innerWidth-WIDTH)/WIDTH) > 0.1 |
 		Math.abs((window.innerHeight-HEIGHT)/HEIGHT) > 0.1
 	){
-		/*if (confirm("屏幕尺寸变化过大，会导致画面扭曲。\n是否立即保存并刷新？")){
-			backup();
+		if (confirm("屏幕尺寸变化过大，会导致画面扭曲。\n是否立即保存并刷新？")){
+			save();
 			location.reload();
-		}*/
+		}
 	}
 	WIDTH = window.innerWidth;
 	HEIGHT = window.innerHeight;
@@ -808,15 +808,16 @@ document.body.appendChild(stats.dom);
 
 
 /**
-* 玩家(watcher)
+* 玩家(camera)
 */
-let watcher = {
+camera.userData = {
 	v: {
 		x: 0,
 		y: 0,
 		z: 0
 	},
 	pos: camera.position,
+	up: camera.up,
 	lookAt: {
 		left_right: 0,
 		top_bottom: -30
@@ -829,69 +830,75 @@ let watcher = {
 	tools: [1,2,5,6],
 	choice: 2
 };
-for (let i in watcher.tools){
-	if (watcher.tools[i] != 0){
-		$("#tools > img")[i].src = "./img/blocks/"+watcher.tools[i]+"/"+blocks[watcher.tools[i]].face[0];
-	}
-	if (i == watcher.choice){
-		$("#tools > img")[i].style.borderColor = "#fff";
+for (let i in camera.userData.tools){
+	if (camera.userData.tools[i] != 0){
+		$("#tools > img")[i].src = "./img/blocks/"+camera.userData.tools[i]+"/"+blocks[camera.userData.tools[i]].face[0];
 	}
 	$("#tools > img")[i].onclick = ()=>{
-		$("#tools > img")[watcher.choice].style.borderColor = "#aaa";
-		watcher.choice = i;
-		$("#tools > img")[watcher.choice].style.borderColor = "#fff";
+		camera.userData.choice = i;
+		tools_choice_refreash();
 	};
 }
-if (localStorage.getItem("我的世界.存档.玩家.位置")){
-	watcher.pos.x = JSON.parse(localStorage.getItem("我的世界.存档.玩家.位置")).x;
-	watcher.pos.y = JSON.parse(localStorage.getItem("我的世界.存档.玩家.位置")).y;
-	watcher.pos.z = JSON.parse(localStorage.getItem("我的世界.存档.玩家.位置")).z;
-}
-if (localStorage.getItem("我的世界.存档.玩家.朝向")){
-	watcher.lookAt.left_right = JSON.parse(localStorage.getItem("我的世界.存档.玩家.朝向")).left_right;
-	watcher.lookAt.top_bottom = JSON.parse(localStorage.getItem("我的世界.存档.玩家.朝向")).top_bottom;
+tools_choice_refreash();
+function tools_choice_refreash(){
+	for (let i in camera.userData.tools){
+		$("#tools > img")[i].style.borderColor = (i == camera.userData.choice)? "#fff": "#aaa";
+		$("#tools > img")[i].style.borderSize = (i == camera.userData.choice)? "6": "3";
+	}
 }
 
-let watcher_folder = gui.addFolder("玩家/观察者(watcher)");
-watcher_folder.open();
-	watcher_folder.add(window, "stop").listen();
-	let watcher_position_folder = watcher_folder.addFolder("位置/px");
-	watcher_position_folder.open();
-		watcher_position_folder.add(watcher.pos, "x", -1000, 1000, 0.01).listen();
-		watcher_position_folder.add(watcher.pos, "y", -1000, 1000, 0.01).listen();
-		watcher_position_folder.add(watcher.pos, "z", -1000, 1000, 0.01).listen();
-	let watcher_v_folder = watcher_folder.addFolder("速度/(px/s)");
-	watcher_v_folder.open();
-		watcher_v_folder.add(watcher.v, "x", -10, 10,1e-3).listen();
-		watcher_v_folder.add(watcher.v, "y", -10, 10,1e-3).listen();
-		watcher_v_folder.add(watcher.v, "z", -10, 10,1e-3).listen();
-	let watcher_lookAt_folder = watcher_folder.addFolder("朝向（球坐标系）");
-		watcher_lookAt_folder.add(watcher.lookAt, "left_right", 0, 360).listen().name("左右（水平）");
-		watcher_lookAt_folder.add(watcher.lookAt, "top_bottom", -90, 90).listen().name("上下（竖直）");
-	let watcher_look_folder = watcher_folder.addFolder("朝向（笛卡尔坐标系）");
-	watcher_look_folder.open();
-		watcher_look_folder.add(watcher.look, "x", 0, 1, 0.01).listen();
-		watcher_look_folder.add(watcher.look, "y", 0, 1, 0.01).listen();
-		watcher_look_folder.add(watcher.look, "z", 0, 1, 0.01).listen();
-	let watcher_tools_folder = watcher_folder.addFolder("工具栏(tools)");
-	watcher_tools_folder.open();
-		watcher_tools_folder.add(watcher, "choice", 0, 3, 1).listen().name("选择工具").onChange(function(value){
-			for (let i in watcher.tools)
+if (localStorage.getItem("我的世界.存档.玩家.位置")){
+	camera.userData.pos.x = JSON.parse(localStorage.getItem("我的世界.存档.玩家.位置")).x;
+	camera.userData.pos.y = JSON.parse(localStorage.getItem("我的世界.存档.玩家.位置")).y;
+	camera.userData.pos.z = JSON.parse(localStorage.getItem("我的世界.存档.玩家.位置")).z;
+}
+if (localStorage.getItem("我的世界.存档.玩家.朝向")){
+	camera.userData.lookAt.left_right = JSON.parse(localStorage.getItem("我的世界.存档.玩家.朝向")).left_right;
+	camera.userData.lookAt.top_bottom = JSON.parse(localStorage.getItem("我的世界.存档.玩家.朝向")).top_bottom;
+}
+
+let camera_folder = gui.addFolder("玩家/观察者(camera)");
+camera_folder.open();
+	camera_folder.add(window, "stop").listen();
+	let camera_position_folder = camera_folder.addFolder("位置/px");
+	camera_position_folder.open();
+		camera_position_folder.add(camera.userData.pos, "x", -1000, 1000, 0.01).listen();
+		camera_position_folder.add(camera.userData.pos, "y", -1000, 1000, 0.01).listen();
+		camera_position_folder.add(camera.userData.pos, "z", -1000, 1000, 0.01).listen();
+	let camera_v_folder = camera_folder.addFolder("速度/(px/s)");
+		camera_v_folder.add(camera.userData.v, "x", -10, 10,1e-3).listen();
+		camera_v_folder.add(camera.userData.v, "y", -10, 10,1e-3).listen();
+		camera_v_folder.add(camera.userData.v, "z", -10, 10,1e-3).listen();
+	let camera_lookAt_folder = camera_folder.addFolder("朝向（球坐标系）");
+		camera_lookAt_folder.add(camera.userData.lookAt, "left_right", 0, 360).listen().name("左右（水平）");
+		camera_lookAt_folder.add(camera.userData.lookAt, "top_bottom", -90, 90).listen().name("上下（竖直）");
+	let camera_look_folder = camera_folder.addFolder("朝向（笛卡尔坐标系）");
+		camera_look_folder.add(camera.userData.look, "x", 0, 1, 0.01).listen();
+		camera_look_folder.add(camera.userData.look, "y", 0, 1, 0.01).listen();
+		camera_look_folder.add(camera.userData.look, "z", 0, 1, 0.01).listen();
+	let camera_up_folder = camera_folder.addFolder("天旋地转（小心头晕）");
+		camera_up_folder.add(camera.userData.up, "x", -1, 1, 0.01);
+		camera_up_folder.add(camera.userData.up, "y", -1, 1, 0.01);
+		camera_up_folder.add(camera.userData.up, "z", -1, 1, 0.01);
+	let camera_tools_folder = camera_folder.addFolder("工具栏(tools)");
+	camera_tools_folder.open();
+		camera_tools_folder.add(camera.userData, "choice", 0, 3, 1).listen().name("选择工具").onChange(function(value){
+			for (let i in camera.userData.tools)
 				$("#tools > img")[i].style.borderColor = i==value? "#fff": "#aaa";
 		});
-		let watcher_tools_things_folder = watcher_tools_folder.addFolder("物品");
-		watcher_tools_things_folder.open();
-			watcher_tools_things_folder.add(watcher.tools, 0, 0, 7, 1).listen().onChange(function(value){
-				$("#tools > img")[0].src = value==0? "": "./img/blocks/"+watcher.tools[0]+"/"+blocks[value].face[0];
+		let camera_tools_things_folder = camera_tools_folder.addFolder("物品");
+		camera_tools_things_folder.open();
+			camera_tools_things_folder.add(camera.userData.tools, 0, 0, 7, 1).listen().onChange(function(value){
+				$("#tools > img")[0].src = value==0? "": "./img/blocks/"+camera.userData.tools[0]+"/"+blocks[value].face[0];
 			});
-			watcher_tools_things_folder.add(watcher.tools, 1, 0, 7, 1).listen().onChange(function(value){
-				$("#tools > img")[1].src = value==0? "": "./img/blocks/"+watcher.tools[1]+"/"+blocks[value].face[0];
+			camera_tools_things_folder.add(camera.userData.tools, 1, 0, 7, 1).listen().onChange(function(value){
+				$("#tools > img")[1].src = value==0? "": "./img/blocks/"+camera.userData.tools[1]+"/"+blocks[value].face[0];
 			});
-			watcher_tools_things_folder.add(watcher.tools, 2, 0, 7, 1).listen().onChange(function(value){
-				$("#tools > img")[2].src = value==0? "": "./img/blocks/"+watcher.tools[2]+"/"+blocks[value].face[0];
+			camera_tools_things_folder.add(camera.userData.tools, 2, 0, 7, 1).listen().onChange(function(value){
+				$("#tools > img")[2].src = value==0? "": "./img/blocks/"+camera.userData.tools[2]+"/"+blocks[value].face[0];
 			});
-			watcher_tools_things_folder.add(watcher.tools, 3, 0, 7, 1).listen().onChange(function(value){
-				$("#tools > img")[3].src = value==0? "": "./img/blocks/"+watcher.tools[3]+"/"+blocks[value].face[0];
+			camera_tools_things_folder.add(camera.userData.tools, 3, 0, 7, 1).listen().onChange(function(value){
+				$("#tools > img")[3].src = value==0? "": "./img/blocks/"+camera.userData.tools[3]+"/"+blocks[value].face[0];
 			});
 
 let T0 = new Date();//上次时间
@@ -904,9 +911,9 @@ function render(){
 	try{
 		if (
 			every
-				[Math.round(watcher.pos.x/100)]
-				[Math.round(watcher.pos.y/100)]
-				[Math.round(watcher.pos.z/100)]
+				[Math.round(camera.userData.pos.x/100)]
+				[Math.round(camera.userData.pos.y/100)]
+				[Math.round(camera.userData.pos.z/100)]
 			!=
 				0
 		){ //头被卡住
@@ -914,9 +921,9 @@ function render(){
 		}
 		if (
 			every
-				[Math.round(watcher.pos.x/100)]
-				[Math.round(watcher.pos.y/100)-1]
-				[Math.round(watcher.pos.z/100)]
+				[Math.round(camera.userData.pos.x/100)]
+				[Math.round(camera.userData.pos.y/100)-1]
+				[Math.round(camera.userData.pos.z/100)]
 			!=
 				0
 		){ //脚被卡住
@@ -925,192 +932,192 @@ function render(){
 	}catch(err){}
 	
 	if (!stop){
-		watcher.v.y -= 9.8*t/1000*(Math.random()*0.2+0.9);
+		camera.userData.v.y -= 9.8*t/1000*(Math.random()*0.2+0.9);
 		let kf = 16*(Math.random()*0.2+0.9); //空气阻力系数
-		watcher.v.x -=
-			Math.abs(kf*0.25*watcher.v.x*t/1000) < Math.abs(watcher.v.x)?
-				kf*0.25*watcher.v.x*t/1000
+		camera.userData.v.x -=
+			Math.abs(kf*0.25*camera.userData.v.x*t/1000) < Math.abs(camera.userData.v.x)?
+				kf*0.25*camera.userData.v.x*t/1000
 			:
-				watcher.v.x
+				camera.userData.v.x
 		;
-		watcher.v.y -=
-			Math.abs(kf*0.05*watcher.v.y*t/1000) < Math.abs(watcher.v.y)?
-				kf*0.05*watcher.v.y*t/1000
+		camera.userData.v.y -=
+			Math.abs(kf*0.05*camera.userData.v.y*t/1000) < Math.abs(camera.userData.v.y)?
+				kf*0.05*camera.userData.v.y*t/1000
 			:
-				watcher.v.y
+				camera.userData.v.y
 		;
-		watcher.v.z -=
-			Math.abs(kf*0.25*watcher.v.z*t/1000) < Math.abs(watcher.v.z)?
-				kf*0.25*watcher.v.z*t/1000
+		camera.userData.v.z -=
+			Math.abs(kf*0.25*camera.userData.v.z*t/1000) < Math.abs(camera.userData.v.z)?
+				kf*0.25*camera.userData.v.z*t/1000
 			:
-				watcher.v.z
+				camera.userData.v.z
 		;
 		
 		//x
-		if (watcher.v.x > 0){ //向前
-			for (var i=watcher.pos.x; i<=watcher.pos.x+watcher.v.x*t; i+=2){
+		if (camera.userData.v.x > 0){ //向前
+			for (var i=camera.userData.pos.x; i<=camera.userData.pos.x+camera.userData.v.x*t; i+=2){
 				try{
 					if (
 						every
 							[Math.round(i/100)]
-							[Math.round(watcher.pos.y/100)]
-							[Math.round(watcher.pos.z/100)]
+							[Math.round(camera.userData.pos.y/100)]
+							[Math.round(camera.userData.pos.z/100)]
 						!=
 							0
 					){
-						watcher.v.x = 0;
-						console.log("撞到脸，s:"+((watcher.pos.x+watcher.v.x*t)-i));
+						camera.userData.v.x = 0;
+						console.log("撞到脸，s:"+((camera.userData.pos.x+camera.userData.v.x*t)-i));
 						break;
 					}
 					if (
 						every
 							[Math.round(i/100)]
-							[Math.round(watcher.pos.y/100)-1]
-							[Math.round(watcher.pos.z/100)]
+							[Math.round(camera.userData.pos.y/100)-1]
+							[Math.round(camera.userData.pos.z/100)]
 						!=
 							0
 					){
-						watcher.v.x = 0;
-						console.log("撞到脚，s:"+((watcher.pos.x+watcher.v.x*t)-i));
+						camera.userData.v.x = 0;
+						console.log("撞到脚，s:"+((camera.userData.pos.x+camera.userData.v.x*t)-i));
 						break;
 					}
 				}catch(err){}
 			}
-			watcher.pos.x = i;
-		}else if (watcher.v.x < 0){ //向后
-			for (var i=watcher.pos.x; i>=watcher.pos.x+watcher.v.x*t; i-=2){
+			camera.userData.pos.x = i;
+		}else if (camera.userData.v.x < 0){ //向后
+			for (var i=camera.userData.pos.x; i>=camera.userData.pos.x+camera.userData.v.x*t; i-=2){
 				try{
 					if (
 						every
 							[Math.round(i/100)]
-							[Math.round(watcher.pos.y/100)]
-							[Math.round(watcher.pos.z/100)]
+							[Math.round(camera.userData.pos.y/100)]
+							[Math.round(camera.userData.pos.z/100)]
 						!=
 							0
 					){
-						watcher.v.x = 0;
-						console.log("撞到后脑，s:"+(i-(watcher.pos.x+watcher.v.x*t)));
+						camera.userData.v.x = 0;
+						console.log("撞到后脑，s:"+(i-(camera.userData.pos.x+camera.userData.v.x*t)));
 						break;
 					}
 					if (
 						every
 							[Math.round(i/100)]
-							[Math.round(watcher.pos.y/100)-1]
-							[Math.round(watcher.pos.z/100)]
+							[Math.round(camera.userData.pos.y/100)-1]
+							[Math.round(camera.userData.pos.z/100)]
 						!=
 							0
 					){
-						watcher.v.x = 0;
-						console.log("撞到脚，s:"+(i-(watcher.pos.x+watcher.v.x*t)));
+						camera.userData.v.x = 0;
+						console.log("撞到脚，s:"+(i-(camera.userData.pos.x+camera.userData.v.x*t)));
 						break;
 					}
 				}catch(err){}
 			}
-			watcher.pos.x = i;
+			camera.userData.pos.x = i;
 		}
 		//y
-		if (watcher.v.y > 0){ //向上
-			for (var i=watcher.pos.y; i<=watcher.pos.y+watcher.v.y*t; i+=3){
+		if (camera.userData.v.y > 0){ //向上
+			for (var i=camera.userData.pos.y; i<=camera.userData.pos.y+camera.userData.v.y*t; i+=3){
 				try{
 					if (
 						every
-							[Math.round(watcher.pos.x/100)]
+							[Math.round(camera.userData.pos.x/100)]
 							[Math.round(i/100)]
-							[Math.round(watcher.pos.z/100)]
+							[Math.round(camera.userData.pos.z/100)]
 						!=
 							0
 					){
-						watcher.v.y = 0;
-						let s = (watcher.pos.y-200+watcher.v.y*t)-i;
+						camera.userData.v.y = 0;
+						let s = (camera.userData.pos.y-150+camera.userData.v.y*t)-i;
 						if (s)
 							console.log("撞到天花板，s:", s);
 						break;
 					}
 				}catch(err){}
 			}
-			watcher.pos.y = i;
-		}else if (watcher.v.y < 0){ //向下
-			for (var i=watcher.pos.y-200; i>=watcher.pos.y-200+watcher.v.y*t; i-=3){
+			camera.userData.pos.y = i;
+		}else if (camera.userData.v.y < 0){ //向下
+			for (var i=camera.userData.pos.y-150; i>=camera.userData.pos.y-150+camera.userData.v.y*t; i-=3){
 				try{
 					if (
 						every
-							[Math.round(watcher.pos.x/100)]
+							[Math.round(camera.userData.pos.x/100)]
 							[Math.round(i/100)]
-							[Math.round(watcher.pos.z/100)]
+							[Math.round(camera.userData.pos.z/100)]
 						!=
 							0
 					){
-						watcher.v.y = 0;
-						let s = i-(watcher.pos.y-200+watcher.v.y*t);
+						camera.userData.v.y = 0;
+						let s = i-(camera.userData.pos.y-150+camera.userData.v.y*t);
 						if (s)
 							console.log("撞到地面，s:", s);
 						break;
 					}
 				}catch(err){}
 			}
-			watcher.pos.y = i+200;
+			camera.userData.pos.y = i+150;
 		}
 		//z
-		if (watcher.v.z > 0){ //向右
-			for (var i=watcher.pos.z; i<=watcher.pos.z+watcher.v.z*t; i+=2){
+		if (camera.userData.v.z > 0){ //向右
+			for (var i=camera.userData.pos.z; i<=camera.userData.pos.z+camera.userData.v.z*t; i+=2){
 				try{
 					if (
 						every
 							[Math.round(i/100)]
-							[Math.round(watcher.pos.y/100)]
-							[Math.round(watcher.pos.z/100)]
+							[Math.round(camera.userData.pos.y/100)]
+							[Math.round(camera.userData.pos.z/100)]
 						!=
 							0
 					){
-						watcher.v.z = 0;
-						console.log("撞到头，s:"+((watcher.pos.z+watcher.v.z*t)-i));
+						camera.userData.v.z = 0;
+						console.log("撞到头，s:"+((camera.userData.pos.z+camera.userData.v.z*t)-i));
 						break;
 					}
 					if (
 						every
 							[Math.round(i/100)]
-							[Math.round(watcher.pos.y/100)-1]
-							[Math.round(watcher.pos.z/100)]
+							[Math.round(camera.userData.pos.y/100)-1]
+							[Math.round(camera.userData.pos.z/100)]
 						!=
 							0
 					){
-						watcher.v.z = 0;
-						console.log("撞到腿，s:"+((watcher.pos.z+watcher.v.z*t)-i));
+						camera.userData.v.z = 0;
+						console.log("撞到腿，s:"+((camera.userData.pos.z+camera.userData.v.z*t)-i));
 						break;
 					}
 				}catch(err){}
 			}
-			watcher.pos.z = i;
-		}else if (watcher.v.z < 0){ //向左
-			for (var i=watcher.pos.z; i>=watcher.pos.z+watcher.v.z*t; i-=2){
+			camera.userData.pos.z = i;
+		}else if (camera.userData.v.z < 0){ //向左
+			for (var i=camera.userData.pos.z; i>=camera.userData.pos.z+camera.userData.v.z*t; i-=2){
 				try{
 					if (
 						every
 							[Math.round(i/100)]
-							[Math.round(watcher.pos.y/100)]
-							[Math.round(watcher.pos.z/100)]
+							[Math.round(camera.userData.pos.y/100)]
+							[Math.round(camera.userData.pos.z/100)]
 						!=
 							0
 					){
-						watcher.v.z = 0;
-						console.log("撞到头，s:"+(i-(watcher.pos.z+watcher.v.z*t)));
+						camera.userData.v.z = 0;
+						console.log("撞到头，s:"+(i-(camera.userData.pos.z+camera.userData.v.z*t)));
 						break;
 					}
 					if (
 						every
 							[Math.round(i/100)]
-							[Math.round(watcher.pos.y/100)-1]
-							[Math.round(watcher.pos.z/100)]
+							[Math.round(camera.userData.pos.y/100)-1]
+							[Math.round(camera.userData.pos.z/100)]
 						!=
 							0
 					){
-						watcher.v.z = 0;
-						console.log("撞到腿，s:"+(i-(watcher.pos.z+watcher.v.z*t)));
+						camera.userData.v.z = 0;
+						console.log("撞到腿，s:"+(i-(camera.userData.pos.z+camera.userData.v.z*t)));
 						break;
 					}
 				}catch(err){}
 			}
-			watcher.pos.z = i;
+			camera.userData.pos.z = i;
 		}
 	}
 	
@@ -1145,23 +1152,23 @@ setInterval(function(){
 	
 	if (keydown.has(87) | keydown.has(38)){ //前
 		console.log("front:", keydown);
-		x += Math.cos( (watcher.lookAt.left_right+0) /180*Math.PI)*(Math.random()*0.2+0.9);
-		z += Math.sin( (watcher.lookAt.left_right+0) /180*Math.PI)*(Math.random()*0.2+0.9);
+		x += Math.cos( (camera.userData.lookAt.left_right+0) /180*Math.PI)*(Math.random()*0.2+0.9);
+		z += Math.sin( (camera.userData.lookAt.left_right+0) /180*Math.PI)*(Math.random()*0.2+0.9);
 	}
 	if (keydown.has(83) | keydown.has(40)){ //后
 		console.log("behind:", keydown);
-		x += Math.cos( (watcher.lookAt.left_right+180) /180*Math.PI)*(Math.random()*0.2+0.9);
-		z += Math.sin( (watcher.lookAt.left_right+180) /180*Math.PI)*(Math.random()*0.2+0.9);
+		x += Math.cos( (camera.userData.lookAt.left_right+180) /180*Math.PI)*(Math.random()*0.2+0.9);
+		z += Math.sin( (camera.userData.lookAt.left_right+180) /180*Math.PI)*(Math.random()*0.2+0.9);
 	}
 	if (keydown.has(65) | keydown.has(37)){ //左
 		console.log("left:", keydown);
-		x += Math.cos( (watcher.lookAt.left_right-90) /180*Math.PI)*(Math.random()*0.2+0.9);
-		z += Math.sin( (watcher.lookAt.left_right-90) /180*Math.PI)*(Math.random()*0.2+0.9);
+		x += Math.cos( (camera.userData.lookAt.left_right-90) /180*Math.PI)*(Math.random()*0.2+0.9);
+		z += Math.sin( (camera.userData.lookAt.left_right-90) /180*Math.PI)*(Math.random()*0.2+0.9);
 	}
 	if (keydown.has(68) | keydown.has(39)){ //右
 		console.log("right:", keydown);
-		x += Math.cos( (watcher.lookAt.left_right+90) /180*Math.PI)*(Math.random()*0.2+0.9);
-		z += Math.sin( (watcher.lookAt.left_right+90) /180*Math.PI)*(Math.random()*0.2+0.9);
+		x += Math.cos( (camera.userData.lookAt.left_right+90) /180*Math.PI)*(Math.random()*0.2+0.9);
+		z += Math.sin( (camera.userData.lookAt.left_right+90) /180*Math.PI)*(Math.random()*0.2+0.9);
 	}
 	if (keydown.has(32)){ //上
 		console.log("up:", keydown);
@@ -1176,7 +1183,7 @@ setInterval(function(){
 		stop = true;
 		$("canvas:eq(0),#mouse").css("cursor", "default");
 		
-		backup();
+		save();
 		
 		//解除鼠标锁定
 		document.exitPointerLock =
@@ -1201,9 +1208,9 @@ setInterval(function(){
 	/* try{
 		if (
 			every
-				[Math.round(watcher.pos.x/100)]
-				[Math.round(watcher.pos.y/100)]
-				[Math.round(watcher.pos.z/100)]
+				[Math.round(camera.userData.pos.x/100)]
+				[Math.round(camera.userData.pos.y/100)]
+				[Math.round(camera.userData.pos.z/100)]
 			!=
 				0
 		){ //头被卡住
@@ -1214,9 +1221,9 @@ setInterval(function(){
 	try{
 		if (
 			every
-				[Math.round(watcher.pos.x/100)]
-				[Math.round(watcher.pos.y/100)-1]
-				[Math.round(watcher.pos.z/100)]
+				[Math.round(camera.userData.pos.x/100)]
+				[Math.round(camera.userData.pos.y/100)-1]
+				[Math.round(camera.userData.pos.z/100)]
 			!=
 				0
 		){ //脚被卡住
@@ -1229,9 +1236,9 @@ setInterval(function(){
 	try{
 		if (
 			every
-				[Math.round((watcher.pos.x+x)/100)]
-				[Math.round(watcher.pos.y/100)]
-				[Math.round(watcher.pos.z/100)]
+				[Math.round((camera.userData.pos.x+x)/100)]
+				[Math.round(camera.userData.pos.y/100)]
+				[Math.round(camera.userData.pos.z/100)]
 			!=
 				0
 		){ //无法向X移动
@@ -1241,9 +1248,9 @@ setInterval(function(){
 	try{
 		if (
 			every
-				[Math.round((watcher.pos.x+x)/100)]
-				[Math.round(watcher.pos.y/100)-1]
-				[Math.round(watcher.pos.z/100)]
+				[Math.round((camera.userData.pos.x+x)/100)]
+				[Math.round(camera.userData.pos.y/100)-1]
+				[Math.round(camera.userData.pos.z/100)]
 			!=
 				0
 		){ //无法向X移动
@@ -1254,9 +1261,9 @@ setInterval(function(){
 	try{
 		if (
 			every
-				[Math.round(watcher.pos.x/100)]
-				[Math.round(watcher.pos.y/100)]
-				[Math.round((watcher.pos.z+z)/100)]
+				[Math.round(camera.userData.pos.x/100)]
+				[Math.round(camera.userData.pos.y/100)]
+				[Math.round((camera.userData.pos.z+z)/100)]
 			!=
 				0
 		){ //无法向Z移动
@@ -1266,9 +1273,9 @@ setInterval(function(){
 	try{
 		if (
 			every
-				[Math.round(watcher.pos.x/100)]
-				[Math.round(watcher.pos.y/100)-1]
-				[Math.round((watcher.pos.z+z)/100)]
+				[Math.round(camera.userData.pos.x/100)]
+				[Math.round(camera.userData.pos.y/100)-1]
+				[Math.round((camera.userData.pos.z+z)/100)]
 			!=
 				0
 		){ //无法向Z移动
@@ -1276,20 +1283,20 @@ setInterval(function(){
 		}
 	}catch(err){}
 	
-	watcher.pos.x += x*(Math.random()*0.2+0.9);
+	camera.userData.pos.x += x*(Math.random()*0.2+0.9);
 	try{
 		if (
 			every
-				[Math.round(watcher.pos.x/100)]
-				[Math.round(watcher.pos.y/100)-2]
-				[Math.round(watcher.pos.z/100)]
+				[Math.round(camera.userData.pos.x/100)]
+				[Math.round(camera.userData.pos.y/100)-2]
+				[Math.round(camera.userData.pos.z/100)]
 			!=
 				0
 		){ //脚下有方块
-			watcher.v.y += y*2*(Math.random()*0.2+0.9);
+			camera.userData.v.y += y*2*(Math.random()*0.2+0.9);
 		}
 	}catch(err){}
-	watcher.pos.z += z*(Math.random()*0.2+0.9);
+	camera.userData.pos.z += z*(Math.random()*0.2+0.9);
 },32.6);
 
 
@@ -1309,18 +1316,18 @@ choice_folder.open();
 }; */
 function look_refresh(){
 	let x =
-		Math.cos(watcher.lookAt.left_right/180*Math.PI)*
-		Math.cos(watcher.lookAt.top_bottom/180*Math.PI)
+		Math.cos(camera.userData.lookAt.left_right/180*Math.PI)*
+		Math.cos(camera.userData.lookAt.top_bottom/180*Math.PI)
 	;
 	let z =
-		Math.sin(watcher.lookAt.left_right/180*Math.PI)*
-		Math.cos(watcher.lookAt.top_bottom/180*Math.PI)
+		Math.sin(camera.userData.lookAt.left_right/180*Math.PI)*
+		Math.cos(camera.userData.lookAt.top_bottom/180*Math.PI)
 	;
-	let y = Math.sin(watcher.lookAt.top_bottom/180*Math.PI);
-	camera.lookAt(watcher.pos.x+x, watcher.pos.y+y, watcher.pos.z+z);
-	watcher.look.x = x;
-	watcher.look.y = y;
-	watcher.look.z = z;
+	let y = Math.sin(camera.userData.lookAt.top_bottom/180*Math.PI);
+	camera.lookAt(camera.userData.pos.x+x, camera.userData.pos.y+y, camera.userData.pos.z+z);
+	camera.userData.look.x = x;
+	camera.userData.look.y = y;
+	camera.userData.look.z = z;
 }
 look_refresh();
 document.addEventListener("mousemove", function (e){
@@ -1363,25 +1370,60 @@ document.addEventListener("mousemove", function (e){
 		// let [dx, dy] = [x-mouse.x0, y-mouse.y0];
 		// [mouse.x0, mouse.y0] = [x, y];
 		// console.log("move:", dx, dy);
-		watcher.lookAt.left_right += dx/document.getElementsByTagName("canvas")[0].offsetWidth*360;
-		watcher.lookAt.top_bottom -= dy/document.getElementsByTagName("canvas")[0].offsetHeight*360;
+		camera.userData.lookAt.left_right += dx/document.getElementsByTagName("canvas")[0].offsetWidth*360;
+		camera.userData.lookAt.top_bottom -= dy/document.getElementsByTagName("canvas")[0].offsetHeight*360;
 		
-		if (watcher.lookAt.left_right > 360)
-			while (watcher.lookAt.left_right > 360)
-				watcher.lookAt.left_right -= 360;
-		if (watcher.lookAt.left_right < 0)
-			while (watcher.lookAt.left_right < 0)
-				watcher.lookAt.left_right += 360;
+		if (camera.userData.lookAt.left_right > 360)
+			while (camera.userData.lookAt.left_right > 360)
+				camera.userData.lookAt.left_right -= 360;
+		if (camera.userData.lookAt.left_right < 0)
+			while (camera.userData.lookAt.left_right < 0)
+				camera.userData.lookAt.left_right += 360;
 		
-		if (watcher.lookAt.top_bottom > 89.9)
-			watcher.lookAt.top_bottom = 89.9;
-		if (watcher.lookAt.top_bottom < -89.9)
-			watcher.lookAt.top_bottom = -89.9;
+		if (camera.userData.lookAt.top_bottom > 89.9)
+			camera.userData.lookAt.top_bottom = 89.9;
+		if (camera.userData.lookAt.top_bottom < -89.9)
+			camera.userData.lookAt.top_bottom = -89.9;
 		
 		look_refresh(); //刷新
 	// }
 	
 	// [mouse.x0,mouse.y0] = [x, y];
+});
+
+$(document).on('mousewheel DOMMouseScroll',function(event){ //on也可以 bind监听
+	//Chorme
+	let wheel = event.originalEvent.wheelDelta;
+	let detal = event.originalEvent.detail;
+	let up = function(){
+		camera.userData.choice --;
+		if (camera.userData.choice < 0)
+			camera.userData.choice = 3;
+	};
+	let down = function(){
+		camera.userData.choice ++;
+		if (camera.userData.choice > 3)
+			camera.userData.choice = 0;
+	};
+	if (event.originalEvent.wheelDelta){ //判断浏览器IE,谷歌滚轮事件
+		if (wheel > 0) { //当滑轮向上滚动时
+			up();
+			tools_choice_refreash();
+		}  
+		if (wheel < 0) { //当滑轮向下滚动时
+			down();
+			tools_choice_refreash();
+		}  
+	}else if (event.originalEvent.detail){ //Firefox滚轮事件
+		if (detal > 0) { //当滑轮向下滚动时
+			down();
+			tools_choice_refreash();
+		}
+		if (detal < 0) { //当滑轮向上滚动时
+			up();
+			tools_choice_refreash();
+		}
+	}  
 });
 
 document.addEventListener("mousedown", function (e){
@@ -1397,9 +1439,9 @@ document.addEventListener("mousedown", function (e){
 			if (click[i].faceIndex){
 				if (click[i].object instanceof THREE.Mesh){
 					if (Math.sqrt(
-						Math.pow(click[i].object.position.x - watcher.pos.x, 2)+
-						Math.pow(click[i].object.position.y - watcher.pos.y, 2)+
-						Math.pow(click[i].object.position.z - watcher.pos.z, 2)
+						Math.pow(click[i].object.position.x - camera.userData.pos.x, 2)+
+						Math.pow(click[i].object.position.y - camera.userData.pos.y, 2)+
+						Math.pow(click[i].object.position.z - camera.userData.pos.z, 2)
 					) < 500){ //距离小于500
 						console.log("delete:", click[i].object.position);
 						scene.remove(click[i].object);
@@ -1412,17 +1454,17 @@ document.addEventListener("mousedown", function (e){
 				}
 			}
 		}
-	}else if (e.button == 2 & watcher.tools[watcher.choice] != 0){ //右键（放置）
+	}else if (e.button == 2 & camera.userData.tools[camera.userData.choice] != 0){ //右键（放置）
 		let click = get_choice_object();
 		for (let i in click){
 			if (click[i].object instanceof THREE.Mesh){
 				if (click[i].faceIndex == 0 | click[i].faceIndex == 1){
 					if (Math.sqrt(
-						Math.pow((click[i].object.position.x+100) - watcher.pos.x, 2)+
-						Math.pow(click[i].object.position.y - watcher.pos.y, 2)+
-						Math.pow(click[i].object.position.z - watcher.pos.z, 2)
+						Math.pow((click[i].object.position.x+100) - camera.userData.pos.x, 2)+
+						Math.pow(click[i].object.position.y - camera.userData.pos.y, 2)+
+						Math.pow(click[i].object.position.z - camera.userData.pos.z, 2)
 					) < 500){ //距离<500
-						let mesh = new THREE.Mesh(block_geometry, blocks[ watcher.tools[watcher.choice] ].material);
+						let mesh = new THREE.Mesh(block_geometry, blocks[ camera.userData.tools[camera.userData.choice] ].material);
 						mesh.position.x = click[i].object.position.x+100;
 						mesh.position.y = click[i].object.position.y;
 						mesh.position.z = click[i].object.position.z;
@@ -1431,16 +1473,16 @@ document.addEventListener("mousedown", function (e){
 						mesh.receiveShadow = true;
 						
 						scene.add(mesh); //网格模型添加到场景中
-						every[ click[i].object.position.x/100+1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = watcher.tools[watcher.choice];
+						every[ click[i].object.position.x/100+1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = camera.userData.tools[camera.userData.choice];
 						break;
 					}
 				}else if (click[i].faceIndex == 2 | click[i].faceIndex == 3){
 					if (Math.sqrt(
-						Math.pow((click[i].object.position.x-100) - watcher.pos.x, 2)+
-						Math.pow(click[i].object.position.y - watcher.pos.y, 2)+
-						Math.pow(click[i].object.position.z - watcher.pos.z, 2)
+						Math.pow((click[i].object.position.x-100) - camera.userData.pos.x, 2)+
+						Math.pow(click[i].object.position.y - camera.userData.pos.y, 2)+
+						Math.pow(click[i].object.position.z - camera.userData.pos.z, 2)
 					) < 500){ //距离<500
-						let mesh = new THREE.Mesh(block_geometry, blocks[ watcher.tools[watcher.choice]].material);
+						let mesh = new THREE.Mesh(block_geometry, blocks[ camera.userData.tools[camera.userData.choice]].material);
 						mesh.position.x = click[i].object.position.x-100;
 						mesh.position.y = click[i].object.position.y;
 						mesh.position.z = click[i].object.position.z;
@@ -1449,16 +1491,16 @@ document.addEventListener("mousedown", function (e){
 						mesh.receiveShadow = true;
 						
 						scene.add(mesh); //网格模型添加到场景中
-						every[ click[i].object.position.x/100-1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = watcher.tools[watcher.choice];
+						every[ click[i].object.position.x/100-1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = camera.userData.tools[camera.userData.choice];
 						break;
 					}
 				}else if (click[i].faceIndex == 4 | click[i].faceIndex == 5){
 					if (Math.sqrt(
-						Math.pow(click[i].object.position.x - watcher.pos.x, 2)+
-					 	Math.pow((click[i].object.position.y+100) - watcher.pos.y, 2)+
-						Math.pow(click[i].object.position.z - watcher.pos.z, 2)
+						Math.pow(click[i].object.position.x - camera.userData.pos.x, 2)+
+					 	Math.pow((click[i].object.position.y+100) - camera.userData.pos.y, 2)+
+						Math.pow(click[i].object.position.z - camera.userData.pos.z, 2)
 					) < 500){ //距离<500
-						let mesh = new THREE.Mesh(block_geometry, blocks[ watcher.tools[watcher.choice]].material);
+						let mesh = new THREE.Mesh(block_geometry, blocks[ camera.userData.tools[camera.userData.choice]].material);
 						mesh.position.x = click[i].object.position.x;
 						mesh.position.y = click[i].object.position.y+100;
 						mesh.position.z = click[i].object.position.z;
@@ -1467,16 +1509,16 @@ document.addEventListener("mousedown", function (e){
 						mesh.receiveShadow = true;
 						
 						scene.add(mesh); //网格模型添加到场景中
-						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100+1 ][ click[i].object.position.z/100 ] = watcher.tools[watcher.choice];
+						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100+1 ][ click[i].object.position.z/100 ] = camera.userData.tools[camera.userData.choice];
 						break;
 					}
 				}else if (click[i].faceIndex == 6 | click[i].faceIndex == 7){
 					if (Math.sqrt(
-						Math.pow(click[i].object.position.x - watcher.pos.x, 2)+
-						Math.pow((click[i].object.position.y-100) - watcher.pos.y, 2)+
-						Math.pow(click[i].object.position.z - watcher.pos.z, 2)
+						Math.pow(click[i].object.position.x - camera.userData.pos.x, 2)+
+						Math.pow((click[i].object.position.y-100) - camera.userData.pos.y, 2)+
+						Math.pow(click[i].object.position.z - camera.userData.pos.z, 2)
 					) < 500){ //距离<500
-						let mesh = new THREE.Mesh(block_geometry, blocks[ watcher.tools[watcher.choice]].material);
+						let mesh = new THREE.Mesh(block_geometry, blocks[ camera.userData.tools[camera.userData.choice]].material);
 						mesh.position.x = click[i].object.position.x;
 						mesh.position.y = click[i].object.position.y-100;
 						mesh.position.z = click[i].object.position.z;
@@ -1485,16 +1527,16 @@ document.addEventListener("mousedown", function (e){
 						mesh.receiveShadow = true;
 						
 						scene.add(mesh); //网格模型添加到场景中
-						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100-1 ][ click[i].object.position.z/100 ] = watcher.tools[watcher.choice];
+						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100-1 ][ click[i].object.position.z/100 ] = camera.userData.tools[camera.userData.choice];
 						break;
 					}
 				}else if (click[i].faceIndex == 8 | click[i].faceIndex == 9){
 					if (Math.sqrt(
-						Math.pow(click[i].object.position.x - watcher.pos.x, 2)+
-						Math.pow(click[i].object.position.y - watcher.pos.y, 2)+
-						Math.pow((click[i].object.position.z+100) - watcher.pos.z, 2)
+						Math.pow(click[i].object.position.x - camera.userData.pos.x, 2)+
+						Math.pow(click[i].object.position.y - camera.userData.pos.y, 2)+
+						Math.pow((click[i].object.position.z+100) - camera.userData.pos.z, 2)
 					) < 500){ //距离<500
-						let mesh = new THREE.Mesh(block_geometry, blocks[ watcher.tools[watcher.choice]].material);
+						let mesh = new THREE.Mesh(block_geometry, blocks[ camera.userData.tools[camera.userData.choice]].material);
 						mesh.position.x = click[i].object.position.x;
 						mesh.position.y = click[i].object.position.y;
 						mesh.position.z = click[i].object.position.z+100;
@@ -1503,16 +1545,16 @@ document.addEventListener("mousedown", function (e){
 						mesh.receiveShadow = true;
 						
 						scene.add(mesh); //网格模型添加到场景中
-						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100+1 ] = watcher.tools[watcher.choice];
+						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100+1 ] = camera.userData.tools[camera.userData.choice];
 						break;
 					}
 				}else if (click[i].faceIndex == 10 | click[i].faceIndex == 11){
 					if (Math.sqrt(
-						Math.pow(click[i].object.position.x - watcher.pos.x, 2)+
-						Math.pow(click[i].object.position.y - watcher.pos.y, 2)+
-						Math.pow((click[i].object.position.z-100) - watcher.pos.z, 2)
+						Math.pow(click[i].object.position.x - camera.userData.pos.x, 2)+
+						Math.pow(click[i].object.position.y - camera.userData.pos.y, 2)+
+						Math.pow((click[i].object.position.z-100) - camera.userData.pos.z, 2)
 					) < 500){ //距离<500
-						let mesh = new THREE.Mesh(block_geometry, blocks[ watcher.tools[watcher.choice]].material);
+						let mesh = new THREE.Mesh(block_geometry, blocks[ camera.userData.tools[camera.userData.choice]].material);
 						mesh.position.x = click[i].object.position.x;
 						mesh.position.y = click[i].object.position.y;
 						mesh.position.z = click[i].object.position.z-100;
@@ -1521,7 +1563,7 @@ document.addEventListener("mousedown", function (e){
 						mesh.receiveShadow = true;
 						
 						scene.add(mesh); //网格模型添加到场景中
-						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100-1 ] = watcher.tools[watcher.choice];
+						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100-1 ] = camera.userData.tools[camera.userData.choice];
 						break;
 					}
 				}
@@ -1574,46 +1616,46 @@ $("#control").on("touchstart", function(e){
 			);
 			l = l>50? 50: l/3;
 			console.log(Math.atan(dy/dx)*180/Math.PI,r*180/Math.PI);
-			let x = Math.cos( watcher.lookAt.left_right/180*Math.PI+r )*l;
-			let z = Math.sin( watcher.lookAt.left_right/180*Math.PI+r )*l;
+			let x = Math.cos( camera.userData.lookAt.left_right/180*Math.PI+r )*l;
+			let z = Math.sin( camera.userData.lookAt.left_right/180*Math.PI+r )*l;
 			
 			if (x > 0){
-				for (var i=watcher.pos.x; i<=watcher.pos.x+x; i+=2){
+				for (var i=camera.userData.pos.x; i<=camera.userData.pos.x+x; i+=2){
 					try{
 						if (
 							every
 								[Math.round(i/100)]
-								[Math.round(watcher.pos.y/100)]
-								[Math.round(watcher.pos.z/100)]
+								[Math.round(camera.userData.pos.y/100)]
+								[Math.round(camera.userData.pos.z/100)]
 							!=
 								0
 						) break;
 						if (
 							every
 								[Math.round(i/100)]
-								[Math.round(watcher.pos.y/100)-1]
-								[Math.round(watcher.pos.z/100)]
+								[Math.round(camera.userData.pos.y/100)-1]
+								[Math.round(camera.userData.pos.z/100)]
 							!=
 								0
 						) break;
 					}catch(err){}
 				}
 			}else{
-				for (var i=watcher.pos.x; i>=watcher.pos.x+x; i-=2){
+				for (var i=camera.userData.pos.x; i>=camera.userData.pos.x+x; i-=2){
 					try{
 						if (
 							every
 								[Math.round(i/100)]
-								[Math.round(watcher.pos.y/100)]
-								[Math.round(watcher.pos.z/100)]
+								[Math.round(camera.userData.pos.y/100)]
+								[Math.round(camera.userData.pos.z/100)]
 							!=
 								0
 						) break;
 						if (
 							every
 								[Math.round(i/100)]
-								[Math.round(watcher.pos.y/100)-1]
-								[Math.round(watcher.pos.z/100)]
+								[Math.round(camera.userData.pos.y/100)-1]
+								[Math.round(camera.userData.pos.z/100)]
 							!=
 								0
 						) break;
@@ -1621,20 +1663,20 @@ $("#control").on("touchstart", function(e){
 				}
 			}
 			if (z > 0){
-				for (var j=watcher.pos.z; j<=watcher.pos.z+z; j+=2){
+				for (var j=camera.userData.pos.z; j<=camera.userData.pos.z+z; j+=2){
 					try{
 						if (
 							every
-								[Math.round(watcher.pos.x/100)]
-								[Math.round(watcher.pos.y/100)]
+								[Math.round(camera.userData.pos.x/100)]
+								[Math.round(camera.userData.pos.y/100)]
 								[Math.round(j/100)]
 							!=
 								0
 						) break;
 						if (
 							every
-								[Math.round(watcher.pos.x/100)]
-								[Math.round(watcher.pos.y/100)-1]
+								[Math.round(camera.userData.pos.x/100)]
+								[Math.round(camera.userData.pos.y/100)-1]
 								[Math.round(j/100)]
 							!=
 								0
@@ -1642,20 +1684,20 @@ $("#control").on("touchstart", function(e){
 					}catch(err){}
 				}
 			}else{
-				for (var j=watcher.pos.z; j>=watcher.pos.z+z; j-=2){
+				for (var j=camera.userData.pos.z; j>=camera.userData.pos.z+z; j-=2){
 					try{
 						if (
 							every
-								[Math.round(watcher.pos.x/100)]
-								[Math.round(watcher.pos.y/100)]
+								[Math.round(camera.userData.pos.x/100)]
+								[Math.round(camera.userData.pos.y/100)]
 								[Math.round(j/100)]
 							!=
 								0
 						) break;
 						if (
 							every
-								[Math.round(watcher.pos.x/100)]
-								[Math.round(watcher.pos.y/100)-1]
+								[Math.round(camera.userData.pos.x/100)]
+								[Math.round(camera.userData.pos.y/100)-1]
 								[Math.round(j/100)]
 							!=
 								0
@@ -1663,8 +1705,8 @@ $("#control").on("touchstart", function(e){
 					}catch(err){}
 				}
 			}
-			watcher.pos.x += (i-watcher.pos.x)*(Math.random()*0.2+0.9);
-			watcher.pos.z += (j-watcher.pos.z)*(Math.random()*0.2+0.9);
+			camera.userData.pos.x += (i-camera.userData.pos.x)*(Math.random()*0.2+0.9);
+			camera.userData.pos.z += (j-camera.userData.pos.z)*(Math.random()*0.2+0.9);
 		}
 	}, 100);
 	
@@ -1705,13 +1747,13 @@ $("#jump").on("touchstart", function(){
 	try{
 		if (
 			every
-				[Math.round(watcher.pos.x/100)]
-				[Math.round(watcher.pos.y/100)-2]
-				[Math.round(watcher.pos.z/100)]
+				[Math.round(camera.userData.pos.x/100)]
+				[Math.round(camera.userData.pos.y/100)-2]
+				[Math.round(camera.userData.pos.z/100)]
 			!=
 				0
 		){ //脚下有方块
-			watcher.v.y += 2*(Math.random()*0.2+0.9);
+			camera.userData.v.y += 2*(Math.random()*0.2+0.9);
 		}
 	}catch(err){}
 	
@@ -1747,9 +1789,9 @@ $("canvas:eq(0)").on("touchstart", function (e){
 				if (click[i].faceIndex){
 					if (click[i].object instanceof THREE.Mesh){
 						if (Math.sqrt(
-							Math.pow(click[i].object.position.x - watcher.pos.x, 2)+
-							Math.pow(click[i].object.position.y - watcher.pos.y, 2)+
-							Math.pow(click[i].object.position.z - watcher.pos.z, 2)
+							Math.pow(click[i].object.position.x - camera.userData.pos.x, 2)+
+							Math.pow(click[i].object.position.y - camera.userData.pos.y, 2)+
+							Math.pow(click[i].object.position.z - camera.userData.pos.z, 2)
 						) < 500){ //距离小于500
 							console.log("delete:", click[i].object.position);
 							scene.remove(click[i].object);
@@ -1778,20 +1820,20 @@ $("canvas:eq(0)").on("touchmove", function (e){
 	let [dx, dy] = [x-x0, y-y0];
 	[x0, y0] = [x, y];
 	console.log("move:", dx, dy);
-	watcher.lookAt.left_right += dx/document.getElementsByTagName("canvas")[0].offsetWidth*90;
-	watcher.lookAt.top_bottom -= dy/document.getElementsByTagName("canvas")[0].offsetHeight*90;
+	camera.userData.lookAt.left_right += dx/document.getElementsByTagName("canvas")[0].offsetWidth*90;
+	camera.userData.lookAt.top_bottom -= dy/document.getElementsByTagName("canvas")[0].offsetHeight*90;
 	
-	if (watcher.lookAt.left_right > 360)
-		while (watcher.lookAt.left_right > 360)
-			watcher.lookAt.left_right -= 360;
-	if (watcher.lookAt.left_right < 0)
-		while (watcher.lookAt.left_right < 0)
-			watcher.lookAt.left_right += 360;
+	if (camera.userData.lookAt.left_right > 360)
+		while (camera.userData.lookAt.left_right > 360)
+			camera.userData.lookAt.left_right -= 360;
+	if (camera.userData.lookAt.left_right < 0)
+		while (camera.userData.lookAt.left_right < 0)
+			camera.userData.lookAt.left_right += 360;
 	
-	if (watcher.lookAt.top_bottom > 89.9)
-		watcher.lookAt.top_bottom = 89.9;
-	if (watcher.lookAt.top_bottom < -89.9)
-		watcher.lookAt.top_bottom = -89.9;
+	if (camera.userData.lookAt.top_bottom > 89.9)
+		camera.userData.lookAt.top_bottom = 89.9;
+	if (camera.userData.lookAt.top_bottom < -89.9)
+		camera.userData.lookAt.top_bottom = -89.9;
 	
 	look_refresh(); //刷新
 	
@@ -1817,7 +1859,7 @@ $("canvas:eq(0)").on('touchend', function (e){
 	
 	if (touch_screen.id !== null){ //短按（放置）
 		clearTimeout(touch_screen.id);
-		if (watcher.tools[watcher.choice] == 0) //空气
+		if (camera.userData.tools[camera.userData.choice] == 0) //空气
 			return;
 		touch_screen.id = null;
 		if (Math.sqrt(
@@ -1829,11 +1871,11 @@ $("canvas:eq(0)").on('touchend', function (e){
 				if (click[i].object instanceof THREE.Mesh){
 					if (click[i].faceIndex == 0 | click[i].faceIndex == 1){
 						if (Math.sqrt(
-							Math.pow((click[i].object.position.x+100) - watcher.pos.x, 2)+
-							Math.pow(click[i].object.position.y - watcher.pos.y, 2)+
-							Math.pow(click[i].object.position.z - watcher.pos.z, 2)
+							Math.pow((click[i].object.position.x+100) - camera.userData.pos.x, 2)+
+							Math.pow(click[i].object.position.y - camera.userData.pos.y, 2)+
+							Math.pow(click[i].object.position.z - camera.userData.pos.z, 2)
 						) < 500){ //距离<500
-							let mesh = new THREE.Mesh(block_geometry, blocks[ watcher.tools[watcher.choice]].material);
+							let mesh = new THREE.Mesh(block_geometry, blocks[ camera.userData.tools[camera.userData.choice]].material);
 							mesh.position.x = click[i].object.position.x+100;
 							mesh.position.y = click[i].object.position.y;
 							mesh.position.z = click[i].object.position.z;
@@ -1842,16 +1884,16 @@ $("canvas:eq(0)").on('touchend', function (e){
 							mesh.receiveShadow = true;
 							
 							scene.add(mesh); //网格模型添加到场景中
-							every[ click[i].object.position.x/100+1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = watcher.tools[watcher.choice];
+							every[ click[i].object.position.x/100+1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = camera.userData.tools[camera.userData.choice];
 							break;
 						}
 					}else if (click[i].faceIndex == 2 | click[i].faceIndex == 3){
 						if (Math.sqrt(
-							Math.pow((click[i].object.position.x-100) - watcher.pos.x, 2)+
-							Math.pow(click[i].object.position.y - watcher.pos.y, 2)+
-							Math.pow(click[i].object.position.z - watcher.pos.z, 2)
+							Math.pow((click[i].object.position.x-100) - camera.userData.pos.x, 2)+
+							Math.pow(click[i].object.position.y - camera.userData.pos.y, 2)+
+							Math.pow(click[i].object.position.z - camera.userData.pos.z, 2)
 						) < 500){ //距离<500
-							let mesh = new THREE.Mesh(block_geometry, blocks[ watcher.tools[watcher.choice]].material);
+							let mesh = new THREE.Mesh(block_geometry, blocks[ camera.userData.tools[camera.userData.choice]].material);
 							mesh.position.x = click[i].object.position.x-100;
 							mesh.position.y = click[i].object.position.y;
 							mesh.position.z = click[i].object.position.z;
@@ -1860,16 +1902,16 @@ $("canvas:eq(0)").on('touchend', function (e){
 							mesh.receiveShadow = true;
 							
 							scene.add(mesh); //网格模型添加到场景中
-							every[ click[i].object.position.x/100-1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = watcher.tools[watcher.choice];
+							every[ click[i].object.position.x/100-1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = camera.userData.tools[camera.userData.choice];
 							break;
 						}
 					}else if (click[i].faceIndex == 4 | click[i].faceIndex == 5){
 						if (Math.sqrt(
-								Math.pow(click[i].object.position.x - watcher.pos.x, 2)+
-						 	Math.pow((click[i].object.position.y+100) - watcher.pos.y, 2)+
-							Math.pow(click[i].object.position.z - watcher.pos.z, 2)
+								Math.pow(click[i].object.position.x - camera.userData.pos.x, 2)+
+						 	Math.pow((click[i].object.position.y+100) - camera.userData.pos.y, 2)+
+							Math.pow(click[i].object.position.z - camera.userData.pos.z, 2)
 						) < 500){ //距离<500
-							let mesh = new THREE.Mesh(block_geometry, blocks[ watcher.tools[watcher.choice]].material);
+							let mesh = new THREE.Mesh(block_geometry, blocks[ camera.userData.tools[camera.userData.choice]].material);
 							mesh.position.x = click[i].object.position.x;
 							mesh.position.y = click[i].object.position.y+100;
 							mesh.position.z = click[i].object.position.z;
@@ -1878,16 +1920,16 @@ $("canvas:eq(0)").on('touchend', function (e){
 							mesh.receiveShadow = true;
 							
 							scene.add(mesh); //网格模型添加到场景中
-							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100+1 ][ click[i].object.position.z/100 ] = watcher.tools[watcher.choice];
+							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100+1 ][ click[i].object.position.z/100 ] = camera.userData.tools[camera.userData.choice];
 							break;
 						}
 					}else if (click[i].faceIndex == 6 | click[i].faceIndex == 7){
 							if (Math.sqrt(
-							Math.pow(click[i].object.position.x - watcher.pos.x, 2)+
-							Math.pow((click[i].object.position.y-100) - watcher.pos.y, 2)+
-							Math.pow(click[i].object.position.z - watcher.pos.z, 2)
+							Math.pow(click[i].object.position.x - camera.userData.pos.x, 2)+
+							Math.pow((click[i].object.position.y-100) - camera.userData.pos.y, 2)+
+							Math.pow(click[i].object.position.z - camera.userData.pos.z, 2)
 						) < 500){ //距离<500
-							let mesh = new THREE.Mesh(block_geometry, blocks[ watcher.tools[watcher.choice]].material);
+							let mesh = new THREE.Mesh(block_geometry, blocks[ camera.userData.tools[camera.userData.choice]].material);
 							mesh.position.x = click[i].object.position.x;
 							mesh.position.y = click[i].object.position.y-100;
 							mesh.position.z = click[i].object.position.z;
@@ -1896,16 +1938,16 @@ $("canvas:eq(0)").on('touchend', function (e){
 							mesh.receiveShadow = true;
 							
 							scene.add(mesh); //网格模型添加到场景中
-							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100-1 ][ click[i].object.position.z/100 ] = watcher.tools[watcher.choice];
+							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100-1 ][ click[i].object.position.z/100 ] = camera.userData.tools[camera.userData.choice];
 							break;
 						}
 					}else if (click[i].faceIndex == 8 | click[i].faceIndex == 9){
 						if (Math.sqrt(
-							Math.pow(click[i].object.position.x - watcher.pos.x, 2)+
-							Math.pow(click[i].object.position.y - watcher.pos.y, 2)+
-							Math.pow((click[i].object.position.z+100) - watcher.pos.z, 2)
+							Math.pow(click[i].object.position.x - camera.userData.pos.x, 2)+
+							Math.pow(click[i].object.position.y - camera.userData.pos.y, 2)+
+							Math.pow((click[i].object.position.z+100) - camera.userData.pos.z, 2)
 						) < 500){ //距离<500
-							let mesh = new THREE.Mesh(block_geometry, blocks[ watcher.tools[watcher.choice]].material);
+							let mesh = new THREE.Mesh(block_geometry, blocks[ camera.userData.tools[camera.userData.choice]].material);
 							mesh.position.x = click[i].object.position.x;
 							mesh.position.y = click[i].object.position.y;
 							mesh.position.z = click[i].object.position.z+100;
@@ -1914,16 +1956,16 @@ $("canvas:eq(0)").on('touchend', function (e){
 							mesh.receiveShadow = true;
 							
 							scene.add(mesh); //网格模型添加到场景中
-							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100+1 ] = watcher.tools[watcher.choice];
+							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100+1 ] = camera.userData.tools[camera.userData.choice];
 							break;
 						}
 					}else if (click[i].faceIndex == 10 | click[i].faceIndex == 11){
 						if (Math.sqrt(
-							Math.pow(click[i].object.position.x - watcher.pos.x, 2)+
-							Math.pow(click[i].object.position.y - watcher.pos.y, 2)+
-							Math.pow((click[i].object.position.z-100) - watcher.pos.z, 2)
+							Math.pow(click[i].object.position.x - camera.userData.pos.x, 2)+
+							Math.pow(click[i].object.position.y - camera.userData.pos.y, 2)+
+							Math.pow((click[i].object.position.z-100) - camera.userData.pos.z, 2)
 						) < 500){ //距离<500
-							let mesh = new THREE.Mesh(block_geometry, blocks[ watcher.tools[watcher.choice]].material);
+							let mesh = new THREE.Mesh(block_geometry, blocks[ camera.userData.tools[camera.userData.choice]].material);
 							mesh.position.x = click[i].object.position.x;
 							mesh.position.y = click[i].object.position.y;
 							mesh.position.z = click[i].object.position.z-100;
@@ -1932,7 +1974,7 @@ $("canvas:eq(0)").on('touchend', function (e){
 							mesh.receiveShadow = true;
 							
 							scene.add(mesh); //网格模型添加到场景中
-							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100-1 ] = watcher.tools[watcher.choice];
+							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100-1 ] = camera.userData.tools[camera.userData.choice];
 							break;
 						}
 					}
