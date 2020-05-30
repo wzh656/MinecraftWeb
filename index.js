@@ -17,7 +17,7 @@ function createWindow () {
 	win.setMenu(null);
 
 	// 加载项目的index.html文件.
-	win.loadURL("file://"+__dirname+"/index.html")
+	win.loadURL("file://"+__dirname+"/main.html")
 
 	// 打开开发工具
 	win.webContents.openDevTools()
