@@ -1,9 +1,11 @@
 # 我的世界（仿）
 
-运行：  
-+ [web版](https://wzh656.github.io/MinecraftWeb/main.html)
+# 运行
++ [web版（对网速要求较高，网速慢者无法运行）](https://wzh656.github.io/MinecraftWeb/main.html)
 
-+ [手机版(apk)v0.3.2-alpha（非最新）](https://github.com/wzh656/MinecraftWeb/releases/download/v0.3.2-alpha/Minecraft_v0.3.2-alpha.apk)
++ [手机版(apk)v0.4.0-alpha完整版（较大，20+MB）](https://github.com/wzh656/MinecraftWeb/releases/download/v0.4.0-alpha/Minecraft-full.apk)
+
++ [手机版(apk)v0.4.0-alpha简化版（在线字体、BGM，5+MB）](https://github.com/wzh656/MinecraftWeb/releases/download/v0.4.0-alpha/Minecraft-simplified.apk)
 
 提示：部分功能未完善，存在少量问题未解决
 
@@ -60,8 +62,10 @@
 
 
 ## ㈦关于运行
-1.网页版运行：当前可以直接访问 <https://wzh656.github.io/MinecraftWeb/main.html> 运行，注意，部分~~垃圾~~浏览器可能不支持。还有竖屏时会有一个提示使用横屏或者下载，最好点击关闭，直接竖屏（虽然竖屏的我的世界有点怪），因为不知道横屏为什么会变形，and下载的是v0.3.2版，现在有更新版（至少是v0.3.3，解决了穿透方块的问题）了  
-2.手机apk软件运行（[点击下载v0.3.2-alpha版（非最新）](https://github.com/wzh656/MinecraftWeb/releases/download/v0.3.2-alpha/Minecraft_v0.3.2-alpha.apk)）：直接转横屏运行（不会变形），并且运行之后会在`存储卡/Android/data/com.wzh656.mc`文件夹下创建一个`temp`临时文件夹，卸载后将自动删除。  
+1. 网页版运行：当前可以直接访问 <https://wzh656.github.io/MinecraftWeb/main.html> 运行，注意，部分~~垃圾~~浏览器可能不支持。还有竖屏时会有一个提示使用横屏或者下载，如果浏览器~~不垃圾~~支持横屏，可以将手机横屏使用，并会有提示重新刷新页面，否则将会变形；也可以点击关闭，直接竖屏（虽然竖屏的我的世界有点怪）  
+2. 手机apk软件运行：直接横屏运行
+    + [手机版(apk)v0.4.0-alpha完整版（较大，20+MB）](https://github.com/wzh656/MinecraftWeb/releases/download/v0.4.0-alpha/Minecraft-full.apk)  
+    + [手机版(apk)v0.4.0-alpha简化版（在线字体、BGM，5+MB）](https://github.com/wzh656/MinecraftWeb/releases/download/v0.4.0-alpha/Minecraft-simplified.apk)  
 
 
 ## ㈧关于效果（图片）
