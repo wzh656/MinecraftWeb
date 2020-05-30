@@ -72,19 +72,19 @@
 
 > 0.4.1版
 
-<img alt="效果图片" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/8.jpg" />  
-<img alt="效果图片（火柴盒）" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/9.jpg" />  
+<img alt="效果图片" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/8.png" />  
+<img alt="效果图片（火柴盒）" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/9.png" />  
 
 > 0.4.0版
 
-<img alt="效果图片（W）" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/5.jpg" />  
-<img alt="效果图片（Z）" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/6.jpg" />  
-<img alt="效果图片（H）" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/7.jpg" />  
+<img alt="效果图片（W）" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/5.png" />  
+<img alt="效果图片（Z）" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/6.png" />  
+<img alt="效果图片（H）" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/7.png" />  
 <img alt="效果图片（落日）" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/t.gif" />  
 
 > 0.3.2版
 
 <img alt="效果图片（诡异落日）" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/1.jpg" />  
-<img alt="效果图片" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/2.jpg" />  
-<img alt="效果图片（虚空景观）" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/3.jpg" />  
-<img alt="效果图片" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/4.jpg" />  
+<img alt="效果图片" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/2.png" />  
+<img alt="效果图片（虚空景观）" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/3.png" />  
+<img alt="效果图片" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/4.png" />  
