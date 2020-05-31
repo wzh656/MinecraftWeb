@@ -4,6 +4,10 @@
 		<meta charset="UTF-8" />
 		<meta content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
 		<title>我的世界</title>
+		
+		<!--icon-->
+		<link rel="icon" href="./img/icon.png" type="image/x-icon"/>
+		
 		<style>
 			@font-face{
 				font-family:kt; /*楷体*/
@@ -100,14 +104,14 @@
 			
 			#tools{
 				position: absolute;
-				bottom: 6px;
+				bottom: 12px;
 				left: 50%;
 				transform: translateX(-50%);
-				width: 280px;
+				width: 300px;
 				height: 50px;
 			}
 			#tools > img{
-				width: 18%;
+				width: 16%;
 				height: 100%;
 				display: inline-block;
 				margin: 0 -2px;
@@ -147,7 +151,7 @@
 			推荐使用横屏运行（启用浏览器横屏或<a href="https://github.com/wzh656/MinecraftWeb/releases/download/v0.3.2-alpha/Minecraft_v0.3.2-alpha.apk">下载apk</a>）<br/>
 			<button onclick="this.parentElement.remove();">继续竖屏</button>
 		</h1>
-		<audio id="bgm" <!--autoplay--> perload loop style="display: none;" src="./music/1.m4a"></audio>
+		<audio id="bgm" <!-- autoplay --> perload loop style="display: none;" src="./music/1.m4a" ></audio>
 		<!--<audio id="bgm" autoplay perload loop style="display: none;" src="https://vdse.bdstatic.com/876934f28995e8042230ec598237c67e.mp4?authorization=bce-auth-v1/fb297a5cc0fb434c971b8fa103e8dd7b/2017-05-11T09:02:31Z/-1//ab5b458a478fae53b754e194ab270b96f23aa23ba71c2e63b06fc06d0543040c"></audio>-->
 		<noscript><h1 style="z-index: 3;">你的浏览器不支持JavaScript，无法运行！</h1></noscript>
 <script>
@@ -271,7 +275,7 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 	}, false);
 	
 	//输入锁定改变事件
-	let pointerlockchange = function () {
+	let pointerlockchange = function(){
 		if (
 			document.pointerLockElement === document.body ||
 			document.mozPointerLockElement === document.body ||
@@ -289,7 +293,7 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 	};
 	
 	//输入锁定改变错误
-	let pointerlockerror = function () {
+	let pointerlockerror = function(){
 		console.error("鼠标锁定错误");
 		alert("鼠标锁定错误\n请重试或切换/升级浏览器");
 	};
@@ -424,6 +428,10 @@ function save(){
 	localStorage.setItem("我的世界.存档.方块", JSON.stringify(arr));
 	localStorage.setItem("我的世界.存档.玩家.位置", JSON.stringify(camera.userData.pos));
 	localStorage.setItem("我的世界.存档.玩家.朝向", JSON.stringify(camera.userData.lookAt));
+	localStorage.setItem("我的世界.存档.玩家.物品.工具栏", JSON.stringify({
+		tools: camera.userData.tools,
+		choice: camera.userData.choice
+	}));
 	console.log("备份成功");
 }
 setInterval(save, 60*1000);
@@ -605,8 +613,8 @@ var directionalLight = new THREE.DirectionalLight("#fff", 1);
 directionalLight.position.set(2, 1, 2);
 directionalLight.castShadow = true;
 directionalLight.onlyShadow = true;
-directionalLight.shadow.mapSize.width = Math.pow(2,10);  // default:512
-directionalLight.shadow.mapSize.height = Math.pow(2,10); // default:512
+directionalLight.shadow.mapSize.width = Math.pow(2, 12);  // default:512
+directionalLight.shadow.mapSize.height = Math.pow(2, 12); // default:512
 directionalLight.shadow.camera.near = 0.5;
 directionalLight.shadow.camera.far = 200*100;
 directionalLight.shadow.camera.left = -200*100;
@@ -665,7 +673,7 @@ let WIDTH = window.innerWidth,
 
 var camera = new THREE.PerspectiveCamera(45, WIDTH/HEIGHT, 1, 1000*100);
 //								 view_angle, aspect, near, far(1km)
-camera.position.set(0, 350, 0); //设置相机位置
+camera.position.set(0, 300, 0); //设置相机位置
 camera.lookAt(scene.position); //设置相机方向(指向的场景对象)
 /*setTimeout(function(){
 	console.info(camera);
@@ -707,15 +715,22 @@ window.onresize = function(){
 		Math.abs((window.innerWidth-WIDTH)/WIDTH) > 0.1 |
 		Math.abs((window.innerHeight-HEIGHT)/HEIGHT) > 0.1
 	){
-		if (confirm("屏幕尺寸变化过大，会导致画面扭曲。\n是否立即保存并刷新？")){
-			save();
-			location.reload();
-		}
+		setTimeout(function(){
+			if (
+				Math.abs((window.innerWidth-WIDTH)/WIDTH) > 0.1 |
+				Math.abs((window.innerHeight-HEIGHT)/HEIGHT) > 0.1
+			){
+				if (confirm("屏幕尺寸变化过大，会导致画面扭曲。\n是否立即保存并刷新？")){
+					save();
+					location.reload();
+				}
+			}
+		},1000);
 	}
-	WIDTH = window.innerWidth;
-	HEIGHT = window.innerHeight;
-	camera.aspect = WIDTH/HEIGHT;
-	renderer.setSize(WIDTH, HEIGHT);
+	/*WIDTH = window.innerWidth;
+	HEIGHT = window.innerHeight;*/
+	camera.aspect = window.innerWidth / window.innerHeight;
+	renderer.setSize(window.innerWidth, window.innerHeight);
 };
 
 function sigmod(x){
@@ -827,26 +842,11 @@ camera.userData = {
 		y: 0,
 		z: 0
 	},
-	tools: [1,2,5,6],
-	choice: 2
+	tools: [0,0,0,0],
+	choice: 0
 };
-for (let i in camera.userData.tools){
-	if (camera.userData.tools[i] != 0){
-		$("#tools > img")[i].src = "./img/blocks/"+camera.userData.tools[i]+"/"+blocks[camera.userData.tools[i]].face[0];
-	}
-	$("#tools > img")[i].onclick = ()=>{
-		camera.userData.choice = i;
-		tools_choice_refreash();
-	};
-}
-tools_choice_refreash();
-function tools_choice_refreash(){
-	for (let i in camera.userData.tools){
-		$("#tools > img")[i].style.borderColor = (i == camera.userData.choice)? "#fff": "#aaa";
-		$("#tools > img")[i].style.borderSize = (i == camera.userData.choice)? "6": "3";
-	}
-}
 
+//读取
 if (localStorage.getItem("我的世界.存档.玩家.位置")){
 	camera.userData.pos.x = JSON.parse(localStorage.getItem("我的世界.存档.玩家.位置")).x;
 	camera.userData.pos.y = JSON.parse(localStorage.getItem("我的世界.存档.玩家.位置")).y;
@@ -856,7 +856,42 @@ if (localStorage.getItem("我的世界.存档.玩家.朝向")){
 	camera.userData.lookAt.left_right = JSON.parse(localStorage.getItem("我的世界.存档.玩家.朝向")).left_right;
 	camera.userData.lookAt.top_bottom = JSON.parse(localStorage.getItem("我的世界.存档.玩家.朝向")).top_bottom;
 }
+if (localStorage.getItem("我的世界.存档.玩家.物品.工具栏")){
+	camera.userData.tools = JSON.parse(localStorage.getItem("我的世界.存档.玩家.物品.工具栏")).tools;
+	camera.userData.choice = JSON.parse(localStorage.getItem("我的世界.存档.玩家.物品.工具栏")).choice;
+}
 
+for (let i in camera.userData.tools){
+	/* if (camera.userData.tools[i] != 0){
+		$("#tools > img")[i].src = "./img/blocks/"+camera.userData.tools[i]+"/"+blocks[camera.userData.tools[i]].face[0];
+	} */
+	$("#tools > img")[i].onclick = ()=>{
+		camera.userData.choice = i;
+		tools_choice_refresh();
+	};
+}
+tools_choice_refresh();
+tools_things_refresh();
+function tools_choice_refresh(){
+	for (let i in camera.userData.tools){
+		$("#tools > img")[i].style.borderColor = (i == camera.userData.choice)? "#fff": "#aaa";
+		$("#tools > img")[i].style.borderWidth = (i == camera.userData.choice)? "6px": "3px";
+	}
+}
+function tools_things_refresh(){
+	for (let i in camera.userData.tools)
+		$("#tools > img")[i].src =
+			camera.userData.tools[i] == 0?
+				"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP4//8/AwAI/AL+eMSysAAAAABJRU5ErkJggg=="
+			:
+				"./img/blocks/"+
+				camera.userData.tools[i]+
+				"/"+
+				blocks[ camera.userData.tools[i] ].face[0]
+		;
+}
+
+//gui
 let camera_folder = gui.addFolder("玩家/观察者(camera)");
 camera_folder.open();
 	camera_folder.add(window, "stop").listen();
@@ -882,24 +917,13 @@ camera_folder.open();
 		camera_up_folder.add(camera.userData.up, "z", -1, 1, 0.01);
 	let camera_tools_folder = camera_folder.addFolder("工具栏(tools)");
 	camera_tools_folder.open();
-		camera_tools_folder.add(camera.userData, "choice", 0, 3, 1).listen().name("选择工具").onChange(function(value){
-			for (let i in camera.userData.tools)
-				$("#tools > img")[i].style.borderColor = i==value? "#fff": "#aaa";
-		});
+		camera_tools_folder.add(camera.userData, "choice", 0, 3, 1).listen().name("选择工具").onChange(tools_choice_refresh);
 		let camera_tools_things_folder = camera_tools_folder.addFolder("物品");
 		camera_tools_things_folder.open();
-			camera_tools_things_folder.add(camera.userData.tools, 0, 0, 7, 1).listen().onChange(function(value){
-				$("#tools > img")[0].src = value==0? "": "./img/blocks/"+camera.userData.tools[0]+"/"+blocks[value].face[0];
-			});
-			camera_tools_things_folder.add(camera.userData.tools, 1, 0, 7, 1).listen().onChange(function(value){
-				$("#tools > img")[1].src = value==0? "": "./img/blocks/"+camera.userData.tools[1]+"/"+blocks[value].face[0];
-			});
-			camera_tools_things_folder.add(camera.userData.tools, 2, 0, 7, 1).listen().onChange(function(value){
-				$("#tools > img")[2].src = value==0? "": "./img/blocks/"+camera.userData.tools[2]+"/"+blocks[value].face[0];
-			});
-			camera_tools_things_folder.add(camera.userData.tools, 3, 0, 7, 1).listen().onChange(function(value){
-				$("#tools > img")[3].src = value==0? "": "./img/blocks/"+camera.userData.tools[3]+"/"+blocks[value].face[0];
-			});
+			camera_tools_things_folder.add(camera.userData.tools, 0, 0, 7, 1).listen().onChange(tools_things_refresh);
+			camera_tools_things_folder.add(camera.userData.tools, 1, 0, 7, 1).listen().onChange(tools_things_refresh);
+			camera_tools_things_folder.add(camera.userData.tools, 2, 0, 7, 1).listen().onChange(tools_things_refresh);
+			camera_tools_things_folder.add(camera.userData.tools, 3, 0, 7, 1).listen().onChange(tools_things_refresh);
 
 let T0 = new Date();//上次时间
 function render(){
@@ -1135,12 +1159,40 @@ let keydown = new Set();
 document.addEventListener("keydown", function (e){
 	if (stop)
 		return;
-
+	
+	if (e.keyCode == 27){ //ESC
+		console.log("ESC:", keydown);
+		stop = true;
+		$("canvas:eq(0),#mouse").css("cursor", "default");
+		
+		save();
+		
+		//解除鼠标锁定
+		document.exitPointerLock =
+			document.exitPointerLock ||
+			document.mozExitPointerLock ||
+			document.webkitExitPointerLock
+		;
+		document.exitPointerLock();
+		
+		return;
+	}
+	if (e.keyCode == 121){ //F10
+		console.log("F10:", keydown);
+		if (gui.closed){
+			gui.open();
+		}else{
+			gui.close();
+		}
+		return;
+	}
+	
 	keydown.add(e.keyCode);
 });
 document.addEventListener("keyup", function (e){
 	keydown.delete(e.keyCode);
 });
+let last_jump = Number(new Date());
 setInterval(function(){
 	if (stop)
 		keydown = new Set();
@@ -1178,61 +1230,9 @@ setInterval(function(){
 		console.log("down:", keydown);
 		y += -1*(Math.random()*0.2+0.9);
 	}
-	if (keydown.has(27)){ //ESC
-		console.log("ESC:", keydown);
-		stop = true;
-		$("canvas:eq(0),#mouse").css("cursor", "default");
-		
-		save();
-		
-		//解除鼠标锁定
-		document.exitPointerLock =
-			document.exitPointerLock ||
-			document.mozExitPointerLock ||
-			document.webkitExitPointerLock
-		;
-		document.exitPointerLock();
-		
-		return;
-	}
-	if (keydown.has(121)){ //F10
-		console.log("F10:", keydown);
-		if (gui.closed){
-			gui.open();
-		}else{
-			gui.close();
-		}
-		return;
-	}
 	
-	/* try{
-		if (
-			every
-				[Math.round(camera.userData.pos.x/100)]
-				[Math.round(camera.userData.pos.y/100)]
-				[Math.round(camera.userData.pos.z/100)]
-			!=
-				0
-		){ //头被卡住
-			x = 0;
-			z = 0;
-		}
-	}catch(err){}
-	try{
-		if (
-			every
-				[Math.round(camera.userData.pos.x/100)]
-				[Math.round(camera.userData.pos.y/100)-1]
-				[Math.round(camera.userData.pos.z/100)]
-			!=
-				0
-		){ //脚被卡住
-			x = 0;
-			z = 0;
-		}
-	}catch(err){} */
-	x *= 10;
-	z *= 10;
+	x = x*10 + (x>0? 10: x<0? -10: 0);
+	z = z*10 + (z>0? 10: z<0? -10: 0);
 	try{
 		if (
 			every
@@ -1282,8 +1282,13 @@ setInterval(function(){
 			z = 0;
 		}
 	}catch(err){}
+	
+	x -= (x>0? 10: x<0? -10: 0);
+	z -= (z>0? 10: z<0? -10: 0);
 	
 	camera.userData.pos.x += x*(Math.random()*0.2+0.9);
+	camera.userData.pos.z += z*(Math.random()*0.2+0.9);
+	
 	try{
 		if (
 			every
@@ -1293,12 +1298,13 @@ setInterval(function(){
 			!=
 				0
 		){ //脚下有方块
-			camera.userData.v.y += y*2*(Math.random()*0.2+0.9);
+			// if (Number(new Date())-last_jump >= 1000 & y != 0){
+				camera.userData.v.y += y*2*(Math.random()*0.2+0.9);
+				// last_jump = Number(new Date());
+			// }
 		}
 	}catch(err){}
-	camera.userData.pos.z += z*(Math.random()*0.2+0.9);
-},32.6);
-
+}, 32.6);
 
 /* let choice_object = get_choice_object()?get_choice_object()[1]:undefined;
 
@@ -1408,20 +1414,20 @@ $(document).on('mousewheel DOMMouseScroll',function(event){ //on也可以 bind�
 	if (event.originalEvent.wheelDelta){ //判断浏览器IE,谷歌滚轮事件
 		if (wheel > 0) { //当滑轮向上滚动时
 			up();
-			tools_choice_refreash();
+			tools_choice_refresh();
 		}  
 		if (wheel < 0) { //当滑轮向下滚动时
 			down();
-			tools_choice_refreash();
+			tools_choice_refresh();
 		}  
 	}else if (event.originalEvent.detail){ //Firefox滚轮事件
 		if (detal > 0) { //当滑轮向下滚动时
 			down();
-			tools_choice_refreash();
+			tools_choice_refresh();
 		}
 		if (detal < 0) { //当滑轮向上滚动时
 			up();
-			tools_choice_refreash();
+			tools_choice_refresh();
 		}
 	}  
 });

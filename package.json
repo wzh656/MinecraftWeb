@@ -1,11 +1,11 @@
 {
 	"name": "js-exe",
-	"version": "0.3.1",
-	"description": "我的世界（网页版）",
+	"version": "0.4.1",
+	"description": "我的世界",
 	"main": "index.js",
 	"scripts": {
 		"test": "electron .",
-		"package": "electron-packager . 我的世界（网页版） --platform=win32 --arch=x64 --out=./out --asar --app-version=0.3.1 --overwrite --ignore=.git --electron-version 1.4.13 --registry=https://registry.npm.taobao.org/"
+		"package": "electron-packager . 我的世界 --platform=win32 --arch=x64 --out=./out --asar --icon=./img/icon.ico --app-version=0.4.1 --overwrite --ignore=.git --electron-version 1.4.13 --registry=https://registry.npm.taobao.org/"
 	},
 	"author": "",
 	"license": "ISC",
