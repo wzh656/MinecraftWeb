@@ -7,6 +7,8 @@ const ipcMain = require('electron').ipcMain;
 let win
 
 function createWindow () {
+	const child_process = require("child_process");
+	child_process.exec("创建桌面快捷方式.vbs");
 	// 创建浏览器窗口.
 	win = new BrowserWindow({
 		/* width: 1000, height: 700, */ autoHideMenuBar :true
