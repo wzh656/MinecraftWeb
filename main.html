@@ -54,7 +54,7 @@
 				height: 100%;
 				margin: 0;
 				/*font-size: 8.6vw;*/
-				font-family: qq1;
+				font-family: qq1, serif;
 				/*padding-top: 20%;*/
 				text-align: center;
 				color: #fff;
@@ -65,10 +65,10 @@
 				white-space: pre;
 			}
 			b{
-				font-family: fzqtjt;
+				font-family: fzqtjt, serif;
 			}
 			span{
-				font-family: kt;
+				font-family: kt, serif;
 			}
 			button{
 				width: 80%;
@@ -76,10 +76,10 @@
 				position: relative;
 				top: 26px;
 				font-size: 26px;
-				font-family: hwxk;
+				font-family: hwxk, serif;
 			}
 			*{
-				font-family: qq2;
+				font-family: qq2, serif;
 			}
 			#control{
 				position: absolute;
@@ -345,6 +345,7 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 				document.body.mozRequestPointerLock ||
 				document.body.webkitRequestPointerLock
 			;
+			//解除鼠标锁定
 			document.exitPointerLock =
 				document.exitPointerLock ||
 				document.mozExitPointerLock ||
@@ -382,20 +383,6 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 		console.error("鼠标锁定错误");
 		alert("鼠标锁定错误\n请重试或切换/升级浏览器");
 	};
-	
-	/* document.addEventListener("mousemove", function(e) {
-	  var movementX = e.movementX       ||
-	                  e.mozMovementX    ||
-	                  e.webkitMovementX ||
-	                  0,
-	      movementY = e.movementY       ||
-	                  e.mozMovementY    ||
-	                  e.webkitMovementY ||
-	                  0;
-	
-	  // 打印鼠标移动的增量值。
-	  console.log("movementX=" + movementX, "movementY=" + movementY);
-	}, false); */
 	
 	// Hook pointer lock state change events
 	document.addEventListener("pointerlockchange", pointerlockchange, false);
@@ -521,6 +508,7 @@ function save(){
 }
 setInterval(save, 60*1000);
 gui.add(window, "save").name("保存");
+window.addEventListener("beforeunload", save);
 
 
 /**
@@ -818,52 +806,23 @@ window.onresize = function(){
 	renderer.setSize(window.innerWidth, window.innerHeight);
 };
 
-function sigmod(x){
-	return 1 / ( 1+Math.pow(Math.E, -x) );
+
+/**
+* 背景
+*/
+function dateToNumber(h=0, m=0, s=0){
+	return (s/60+m)/60+h;
 }
-//0~5.25	5.25	7		7~17.35	17.35	19		19~24
-//天黑		开始日出	日出结束	白天	开始日落	日落结束	天黑
+//0~5:45	5.45    6:15	  6:45~16:45	17.15		17:45		19~24
+//天黑		日出(R)	日出(G,B)  白天          日落(G,B)	日落(R)		天黑
 setTimeout(function(){
 	let h = new Date();
-	//h = h.getSeconds()/60*24;
-	h = h.getHours() + h.getMinutes()/60 + h.getSeconds()/3600;
-	if (h > 19 | h < 5.25){ // 天黑
+	//h = (h.getSeconds()+h.getMilliseconds()/1000)/60*24
+	h = h.getHours() + h.getMinutes()/60 + h.getSeconds()/3600-4.6;
+	if (h > dateToNumber(18,15) | h < dateToNumber(5,45)){ // 天黑
 		ambient.color = new THREE.Color("#223");
 		//renderer.setClearColor("#334", 1);
-	}else if (h > 17.35 | h < 7){ // 日出/日落
-		ambient.color = new THREE.Color("#f9a");
-		//renderer.setClearColor("#a34", 1);
-	}else{
-		ambient.color = new THREE.Color("#aac");
-		//renderer.setClearColor("#eef", 1);
-	}
-	renderer.setClearColor(
-		h < 5.25 | h > 19? //天黑
-			"#112"
-		:h < 7? //日出
-			"rgb(" +
-				Math.round(sigmod(-(4.0+5.5)/2*2.5+2.5*h)*240+15) + ","+
-				Math.round(sigmod(-(4.5+6.5)/2*2.5+2.5*h)*240+15) + "," +
-				Math.round(sigmod(-(5.0+7.0)/2*2.5+2.5*h)*225+30) +
-			")"
-		:h > 17.35? //日落
-			"rgb(" +
-				Math.round(sigmod((4.3+6.0+12*2)/2*2.5-2.5*h)*240+15) + ","+
-				Math.round(sigmod((4.8+6.5+12*2)/2*2.5-2.5*h)*240+15) + "," +
-				Math.round(sigmod((5.3+7.0+12*2)/2*2.5-2.5*h)*225+30) +
-			")"
-		: //白天
-			"#eef"
-	, 1);
-}, 0);
-setInterval(function(){
-	let h = new Date();
-	//h = h.getSeconds()/60*24;
-	h = h.getHours() + h.getMinutes()/60 + h.getSeconds()/3600;
-	if (h > 19 | h < 5.25){ // 天黑
-		ambient.color = new THREE.Color("#223");
-		//renderer.setClearColor("#334", 1);
-	}else if (h > 17.35 | h < 7){ // 日出/日落
+	}else if (h > dateToNumber(16,45) | h < dateToNumber(6,45)){ // 日出/日落
 		ambient.color = new THREE.Color("#f9a");
 		//renderer.setClearColor("#a34", 1);
 	}else{ //白天
@@ -871,30 +830,48 @@ setInterval(function(){
 		//renderer.setClearColor("#eef", 1);
 	}
 	renderer.setClearColor(
-		h < 5.25 | h > 19? //天黑
-			"#112"
-		:h < 7? //日出
-			"rgb(" +
-				Math.round(sigmod(-(4.0+6.0)/2*2.5+2.5*h)*240+15) + ","+
-				Math.round(sigmod(-(4.5+6.5)/2*2.5+2.5*h)*240+15) + "," +
-				Math.round(sigmod(-(5.0+7.0)/2*2.5+2.5*h)*225+30) +
-			")"
-		:h > 17.35? //日落
-			"rgb(" +
-				Math.round(sigmod((4.3+6.0+12*2)/2*2.5-2.5*h)*240+15) + ","+
-				Math.round(sigmod((4.8+6.5+12*2)/2*2.5-2.5*h)*240+15) + "," +
-				Math.round(sigmod((5.3+7.0+12*2)/2*2.5-2.5*h)*225+30) +
-			")"
-		: //白天
-			"#eef"
-	, 1);
+		"rgb("+
+			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(5,45) )))+10, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(17,45) ))))+10 ))+","+
+			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+10, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(17,15) ))))+10 ))+","+
+			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+20, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(17,15) ))))+20 ))+
+		")"
+	);
+}, 0);
+setInterval(function(){
+	let h = new Date();
+	// h = (h.getSeconds()+h.getMilliseconds()/1000)/60*24
+	h = h.getHours() + h.getMinutes()/60 + h.getSeconds()/3600-4.6;
+	if (h > dateToNumber(18,15) | h < dateToNumber(5,45)){ // 天黑
+		ambient.color = new THREE.Color("#223");
+		//renderer.setClearColor("#334", 1);
+	}else if (h > dateToNumber(17.15) | h < dateToNumber(6,45)){ // 日出/日落
+		ambient.color = new THREE.Color("#f9a");
+		//renderer.setClearColor("#a34", 1);
+	}else{ //白天
+		ambient.color = new THREE.Color("#aac");
+		//renderer.setClearColor("#eef", 1);
+	}
+	renderer.setClearColor(
+		"rgb("+
+			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(5,45) )))+10, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(17,45) ))))+10 ))+","+
+			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+10, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(17,15) ))))+10 ))+","+
+			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+20, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(17,15) ))))+20 ))+
+		")"
+	);
 	console.log(
 		"time:"+h,
-		(4.3+6+12*2)/2*2.5-2.5*h,
-		(5.3+7+12*2)/2*2.5-2.5*h,
-		"r:"+sigmod((4.3+6+12*2)/2*2.5-2.5*h)*240+15,
-		"g:"+sigmod((5.3+7+12*2)/2*2.5-2.5*h)*240+15,
-		"b:"+sigmod((5.3+7+12*2)/2*2.5-2.5*h)*225+30
+		"\nR:",
+		230/(1+Math.pow(6,-36/30*(h- dateToNumber(5,45) )))+10, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(17,45) ))))+10,
+		"\nG:",
+		230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+10, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(17,15) ))))+10,
+		"\nB:",
+		230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+20, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(17,15) ))))+20,
+		"\nRESULT:",
+		"rgb("+
+			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(5,45) )))+10, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(17,45) ))))+10 ))+","+
+			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+10, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(17,15) ))))+10 ))+","+
+			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+20, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(17,15) ))))+20 ))+
+		")"
 	);
 }, 5*1000); // 5s/次
 
@@ -1246,12 +1223,12 @@ document.addEventListener("keydown", function (e){
 	if (e.keyCode == 69){ //E
 		console.log("E:", keydown);
 		
-		if ($("#set").css("display") != "none"){
+		if ($("#set").css("display") != "none"){ //已显示
 			$("#set").css("display", "none");
-			document.exitPointerLock();
-		}else{
+			stop = false;
+			document.body.requestPointerLock();
+		}else{ //未显示
 			$("#set").css("display", "block");
-			stop = true;
 			stop = "set";
 			document.exitPointerLock();
 		}
@@ -1264,17 +1241,10 @@ document.addEventListener("keydown", function (e){
 	
 	if (e.keyCode == 27){ //ESC
 		console.log("ESC:", keydown);
+		
 		stop = true;
 		$("canvas:eq(0),#mouse").css("cursor", "default");
-		
 		save();
-		
-		//解除鼠标锁定
-		document.exitPointerLock =
-			document.exitPointerLock ||
-			document.mozExitPointerLock ||
-			document.webkitExitPointerLock
-		;
 		document.exitPointerLock();
 		
 		return;
@@ -1335,6 +1305,7 @@ setInterval(function(){
 	
 	x = x*10 + (x>0? 10: x<0? -10: 0);
 	z = z*10 + (z>0? 10: z<0? -10: 0);
+	
 	try{
 		if (
 			every
@@ -1400,10 +1371,10 @@ setInterval(function(){
 			!=
 				0
 		){ //脚下有方块
-			// if (Number(new Date())-last_jump >= 1000 & y != 0){
+			if (Number(new Date())-last_jump >= 1000 & y != 0){
 				camera.userData.v.y += y*2*(Math.random()*0.2+0.9);
-				// last_jump = Number(new Date());
-			// }
+				last_jump = Number(new Date());
+			}
 		}
 	}catch(err){}
 }, 32.6);
@@ -1499,7 +1470,7 @@ document.addEventListener("mousemove", function (e){
 	// [mouse.x0,mouse.y0] = [x, y];
 });
 
-$(document).on('mousewheel DOMMouseScroll',function(event){ //on也可以 bind监听
+$(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind监听
 	//Chorme
 	let wheel = event.originalEvent.wheelDelta;
 	let detal = event.originalEvent.detail;
@@ -1515,19 +1486,23 @@ $(document).on('mousewheel DOMMouseScroll',function(event){ //on也可以 bind�
 	};
 	if (event.originalEvent.wheelDelta){ //判断浏览器IE,谷歌滚轮事件
 		if (wheel > 0) { //当滑轮向上滚动时
+			console.log("上滚轮");
 			up();
 			tools_choice_refresh();
 		}  
 		if (wheel < 0) { //当滑轮向下滚动时
+			console.log("下滚轮");
 			down();
 			tools_choice_refresh();
 		}  
 	}else if (event.originalEvent.detail){ //Firefox滚轮事件
 		if (detal > 0) { //当滑轮向下滚动时
+			console.log("下滚轮");
 			down();
 			tools_choice_refresh();
 		}
 		if (detal < 0) { //当滑轮向上滚动时
+			console.log("上滚轮");
 			up();
 			tools_choice_refresh();
 		}
@@ -1551,12 +1526,30 @@ document.addEventListener("mousedown", function (e){
 						Math.pow(click[i].object.position.y - camera.userData.pos.y, 2)+
 						Math.pow(click[i].object.position.z - camera.userData.pos.z, 2)
 					) < 500){ //距离小于500
-						console.log("delete:", click[i].object.position);
-						scene.remove(click[i].object);
-						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = 0;
-						/* if (
-							every[ click[i].object.position.x/100+1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] 
-						) */
+						let free = -1;
+						if (camera.userData.tools[camera.userData.choice] == 0){
+							free = camera.userData.choice;
+						}else{
+							for (let j in camera.userData.tools){
+								if (camera.userData.tools[j] == 0){
+									free = j;
+									break;
+								}
+							}
+						}
+						
+						if (free == -1){
+							console.info("拿不下！");
+						}else{
+							console.log("delete:", click[i].object.position);
+							scene.remove(click[i].object);
+							camera.userData.tools[free] = every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ]; //放在手中
+							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = 0;
+							tools_things_refresh(); //刷新方块
+							/* if (
+								every[ click[i].object.position.x/100+1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] 
+							) */
+						}
 						break;
 					}
 				}
@@ -1582,6 +1575,8 @@ document.addEventListener("mousedown", function (e){
 						
 						scene.add(mesh); //网格模型添加到场景中
 						every[ click[i].object.position.x/100+1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = camera.userData.tools[camera.userData.choice];
+						camera.userData.tools[camera.userData.choice] = 0; //删除手里的方块
+						tools_things_refresh(); //刷新方块
 						break;
 					}
 				}else if (click[i].faceIndex == 2 | click[i].faceIndex == 3){
@@ -1600,6 +1595,8 @@ document.addEventListener("mousedown", function (e){
 						
 						scene.add(mesh); //网格模型添加到场景中
 						every[ click[i].object.position.x/100-1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = camera.userData.tools[camera.userData.choice];
+						camera.userData.tools[camera.userData.choice] = 0; //删除手里的方块
+						tools_things_refresh(); //刷新方块
 						break;
 					}
 				}else if (click[i].faceIndex == 4 | click[i].faceIndex == 5){
@@ -1618,6 +1615,8 @@ document.addEventListener("mousedown", function (e){
 						
 						scene.add(mesh); //网格模型添加到场景中
 						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100+1 ][ click[i].object.position.z/100 ] = camera.userData.tools[camera.userData.choice];
+						camera.userData.tools[camera.userData.choice] = 0; //删除手里的方块
+						tools_things_refresh(); //刷新方块
 						break;
 					}
 				}else if (click[i].faceIndex == 6 | click[i].faceIndex == 7){
@@ -1636,6 +1635,8 @@ document.addEventListener("mousedown", function (e){
 						
 						scene.add(mesh); //网格模型添加到场景中
 						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100-1 ][ click[i].object.position.z/100 ] = camera.userData.tools[camera.userData.choice];
+						camera.userData.tools[camera.userData.choice] = 0; //删除手里的方块
+						tools_things_refresh(); //刷新方块
 						break;
 					}
 				}else if (click[i].faceIndex == 8 | click[i].faceIndex == 9){
@@ -1654,6 +1655,8 @@ document.addEventListener("mousedown", function (e){
 						
 						scene.add(mesh); //网格模型添加到场景中
 						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100+1 ] = camera.userData.tools[camera.userData.choice];
+						camera.userData.tools[camera.userData.choice] = 0; //删除手里的方块
+						tools_things_refresh(); //刷新方块
 						break;
 					}
 				}else if (click[i].faceIndex == 10 | click[i].faceIndex == 11){
@@ -1672,6 +1675,8 @@ document.addEventListener("mousedown", function (e){
 						
 						scene.add(mesh); //网格模型添加到场景中
 						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100-1 ] = camera.userData.tools[camera.userData.choice];
+						camera.userData.tools[camera.userData.choice] = 0; //删除手里的方块
+						tools_things_refresh(); //刷新方块
 						break;
 					}
 				}
@@ -1726,6 +1731,9 @@ $("#control").on("touchstart", function(e){
 			console.log(Math.atan(dy/dx)*180/Math.PI,r*180/Math.PI);
 			let x = Math.cos( camera.userData.lookAt.left_right/180*Math.PI+r )*l;
 			let z = Math.sin( camera.userData.lookAt.left_right/180*Math.PI+r )*l;
+			
+			x += x>0? 10: x<0? -10: 0;
+			z += z>0? 10: z<0? -10: 0;
 			
 			if (x > 0){
 				for (var i=camera.userData.pos.x; i<=camera.userData.pos.x+x; i+=2){
@@ -1813,6 +1821,10 @@ $("#control").on("touchstart", function(e){
 					}catch(err){}
 				}
 			}
+			
+			i += i>0? 10: i<0? -10: 0;
+			j += j>0? 10: j<0? -10: 0;
+			
 			camera.userData.pos.x += (i-camera.userData.pos.x)*(Math.random()*0.2+0.9);
 			camera.userData.pos.z += (j-camera.userData.pos.z)*(Math.random()*0.2+0.9);
 		}
@@ -1848,7 +1860,6 @@ $("#control").on("touchend", function(e){
 	return false;
 });
 
-
 $("#jump").on("touchstart", function(){
 	console.log("jump");
 	
@@ -1861,7 +1872,10 @@ $("#jump").on("touchstart", function(){
 			!=
 				0
 		){ //脚下有方块
-			camera.userData.v.y += 2*(Math.random()*0.2+0.9);
+			if (Number(new Date())-last_jump >= 1000 & y != 0){
+				camera.userData.v.y += y*2*(Math.random()*0.2+0.9);
+				last_jump = Number(new Date());
+			}
 		}
 	}catch(err){}
 	
@@ -1901,9 +1915,30 @@ $("canvas:eq(0)").on("touchstart", function (e){
 							Math.pow(click[i].object.position.y - camera.userData.pos.y, 2)+
 							Math.pow(click[i].object.position.z - camera.userData.pos.z, 2)
 						) < 500){ //距离小于500
-							console.log("delete:", click[i].object.position);
-							scene.remove(click[i].object);
-							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = 0;
+							let free = -1;
+							if (camera.userData.tools[camera.userData.choice] == 0){
+								free = camera.userData.choice;
+							}else{
+								for (let j in camera.userData.tools){
+									if (camera.userData.tools[j] == 0){
+										free = j;
+										break;
+									}
+								}
+							}
+							
+							if (free == -1){
+								console.info("拿不下！");
+							}else{
+								console.log("delete:", click[i].object.position);
+								scene.remove(click[i].object);
+								camera.userData.tools[free] = every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ]; //放在手中
+								every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = 0;
+								tools_things_refresh(); //刷新方块
+								/* if (
+									every[ click[i].object.position.x/100+1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] 
+								) */
+							}
 							break;
 						}
 					}
@@ -1993,6 +2028,8 @@ $("canvas:eq(0)").on('touchend', function (e){
 							
 							scene.add(mesh); //网格模型添加到场景中
 							every[ click[i].object.position.x/100+1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = camera.userData.tools[camera.userData.choice];
+							camera.userData.tools[camera.userData.choice] = 0; //删除手里的方块
+							tools_things_refresh(); //刷新方块
 							break;
 						}
 					}else if (click[i].faceIndex == 2 | click[i].faceIndex == 3){
@@ -2011,6 +2048,8 @@ $("canvas:eq(0)").on('touchend', function (e){
 							
 							scene.add(mesh); //网格模型添加到场景中
 							every[ click[i].object.position.x/100-1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = camera.userData.tools[camera.userData.choice];
+							camera.userData.tools[camera.userData.choice] = 0; //删除手里的方块
+							tools_things_refresh(); //刷新方块
 							break;
 						}
 					}else if (click[i].faceIndex == 4 | click[i].faceIndex == 5){
@@ -2029,6 +2068,8 @@ $("canvas:eq(0)").on('touchend', function (e){
 							
 							scene.add(mesh); //网格模型添加到场景中
 							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100+1 ][ click[i].object.position.z/100 ] = camera.userData.tools[camera.userData.choice];
+							camera.userData.tools[camera.userData.choice] = 0; //删除手里的方块
+							tools_things_refresh(); //刷新方块
 							break;
 						}
 					}else if (click[i].faceIndex == 6 | click[i].faceIndex == 7){
@@ -2047,6 +2088,8 @@ $("canvas:eq(0)").on('touchend', function (e){
 							
 							scene.add(mesh); //网格模型添加到场景中
 							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100-1 ][ click[i].object.position.z/100 ] = camera.userData.tools[camera.userData.choice];
+							camera.userData.tools[camera.userData.choice] = 0; //删除手里的方块
+							tools_things_refresh(); //刷新方块
 							break;
 						}
 					}else if (click[i].faceIndex == 8 | click[i].faceIndex == 9){
@@ -2065,6 +2108,8 @@ $("canvas:eq(0)").on('touchend', function (e){
 							
 							scene.add(mesh); //网格模型添加到场景中
 							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100+1 ] = camera.userData.tools[camera.userData.choice];
+							camera.userData.tools[camera.userData.choice] = 0; //删除手里的方块
+							tools_things_refresh(); //刷新方块
 							break;
 						}
 					}else if (click[i].faceIndex == 10 | click[i].faceIndex == 11){
@@ -2083,6 +2128,8 @@ $("canvas:eq(0)").on('touchend', function (e){
 							
 							scene.add(mesh); //网格模型添加到场景中
 							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100-1 ] = camera.userData.tools[camera.userData.choice];
+							camera.userData.tools[camera.userData.choice] = 0; //删除手里的方块
+							tools_things_refresh(); //刷新方块
 							break;
 						}
 					}
