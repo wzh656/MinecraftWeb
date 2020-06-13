@@ -70,6 +70,9 @@
 
 ## ㈧关于效果（图片）
 
+> 网页版（竖屏）
+<img alt="效果图片（竖屏我的世界）" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/10.png" />  
+
 > 0.4.1版
 
 <img alt="效果图片" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/8.png" />  

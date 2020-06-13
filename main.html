@@ -127,22 +127,34 @@
 				left: 50%;
 				top: 50%;
 				transform: translate(-50%, -50%);
+				z-index: 1;
 				background-color: #c4c4c4;
 				border: 3px #fff outset;
 				padding: 10px;
 			}
 			#set > div{
 				height: 20%;
-				font-size: 36px;
+				font-size: 3.7vw;
+				margin: 6px;
 			}
 			#set > div > ul{
-				display: inline-block;
+				display: -webkit-flex; 
+				display: -moz-box;
+				display: -mz-flexbox;
+				display: flex; 
+				width: 50%;
+				overflow-x: auto;
+				overflow: none;
+				
 				list-style: none;
 				margin: 0;
+				margin-left: 5.2vw;
+				margin-top: -36px;
 				padding: 0;
 			}
 			#set > div > ul > li{
 				float: left;
+				flex: 0 0 auto;
 			}
 			#set > div > ul > li > *{
 				width: 100%;
@@ -150,20 +162,20 @@
 			}
 			.thing{
 				/* position: absolute; */
-				width: 60px;
-				height: 60px;
+				width: 7vw;
+				height: 7vw;
 				display: inline-block;
 				border: 3px inset #fff;
-				margin: 3px;
+				margin: 0.3vw;
 			}
 			.delete{
 				/* position: absolute; */
-				width: 60px;
-				height: 60px;
+				width: 7vw;
+				height: 7vw;
 				display: inline-block;
 				border: 3px inset #fff;
-				margin: 3px;
-				font-size: 56px;
+				margin: 0.3vw;
+				font-size: 26px;
 			}
 		</style>
 		
@@ -185,13 +197,21 @@
 			<img/>
 			<img/>
 			<img/>
-			<img src="./img/more.png"/>
+			<img src="./img/more.png" onclick="bag();"/>
 		</div>
 		
 		<div id="set" style="display: none;">
 			<div>
 				头：
 				<ul>
+					<li class="thing"></li>
+					<li class="thing"></li>
+					<li class="thing"></li>
+					<li class="thing"></li>
+					<li class="thing"></li>
+					<li class="thing"></li>
+					<li class="thing"></li>
+					<li class="thing"></li>
 					<li class="thing"></li>
 					<li class="delete"><img src="img/delete.png" /></li>
 				</ul>
@@ -224,8 +244,8 @@
 			次进度：<span id="schedule2">0</span>%<br/>
 			<b>生命诚可贵，生命只有一次，请珍爱生命</b>
 		</h1>
-		<h1 id="warning" style="z-index: 1;">
-			推荐使用横屏运行（启用浏览器横屏或<a href="https://github.com/wzh656/MinecraftWeb/releases/download/v0.3.2-alpha/Minecraft_v0.3.2-alpha.apk">下载apk</a>）<br/>
+		<h1 id="warning" style="z-index: 3;">
+			推荐使用横屏运行（启用浏览器横屏或<a href="https://github.com/wzh656/MinecraftWeb/releases/download/v0.4.0-alpha/Minecraft-full.apk">下载apk（完整版）</a>or<a href="https://github.com/wzh656/MinecraftWeb/releases/download/v0.4.0-alpha/Minecraft-simplified.apk">（简化版）</a>）<br/>
 			<button onclick="this.parentElement.remove();">继续竖屏</button>
 		</h1>
 		<audio id="bgm" <!-- autoplay --> perload loop style="display: none;" src="./music/1.m4a" ></audio>
@@ -512,7 +532,8 @@ function save(){
 	console.log("备份成功");
 }
 setInterval(save, 60*1000);
-gui.add(window, "save").name("保存");
+gui.add(window, "save").name("保存(save)");
+gui.add(location, "reload").name("刷新(reload)");
 window.addEventListener("beforeunload", save);
 
 
@@ -691,14 +712,25 @@ var directionalLight = new THREE.DirectionalLight("#fff", 1);
 directionalLight.position.set(2, 1, 2);
 directionalLight.castShadow = true;
 directionalLight.onlyShadow = true;
-directionalLight.shadow.mapSize.width = Math.pow(2, 12);  // default:512
-directionalLight.shadow.mapSize.height = Math.pow(2, 12); // default:512
+directionalLight.shadow.mapSize.width = Math.pow(2, 10);  // default:512
+directionalLight.shadow.mapSize.height = Math.pow(2, 10); // default:512
 directionalLight.shadow.camera.near = 0.5;
 directionalLight.shadow.camera.far = 200*100;
 directionalLight.shadow.camera.left = -200*100;
 directionalLight.shadow.camera.right = 200*100;
 directionalLight.shadow.camera.top = 200*100;
 directionalLight.shadow.camera.bottom = -200*100;
+document.addEventListener("plusready", function(){
+	plus.nativeUI.toast(
+		"<font style=\"font-size:16px\">如果设备<font style=\"font-size:20px;\">性能差</font>，使用光影效果将会导致<font style=\"font-size:20px;\">卡顿</font>。<br/>点此可<a onclick=\"directionalLight.castShadow=false;plus.nativeUI.toast('妈妈再也不用担心手机卡还发烫了（只担心画质丑的一批）');\">关闭光影</a></font>",
+		{
+			type:"richtext",
+			duration:"long",
+			verticalAlign: "top",
+			richTextStyle:{align:"center"}
+		}
+	);
+});
 scene.add(directionalLight);
 // 光照指向平地
 //directionalLight.target = ;
@@ -717,7 +749,7 @@ let scene_light_directionalLight_folder = scene_light_folder.addFolder("平行�
 //scene.add(directionalLight_CameraHelper);
 
 //户外光源
-var hemiLight = new THREE.HemisphereLight('#87ceeb', '#f5deb3', 0.4/*"#aaf", "#888", 1*/);
+var hemiLight = new THREE.HemisphereLight("#87ceeb", "#f5deb3", 0.4/*"#aaf", "#888", 1*/);
 hemiLight.position.set(0,500,0);
 scene.add(hemiLight);
 
@@ -798,9 +830,21 @@ window.onresize = function(){
 				Math.abs((window.innerWidth-WIDTH)/WIDTH) > 0.1 |
 				Math.abs((window.innerHeight-HEIGHT)/HEIGHT) > 0.1
 			){
-				if (confirm("屏幕尺寸变化过大，会导致画面扭曲。\n是否立即保存并刷新？")){
-					save();
-					location.reload();
+				try{
+					plus.nativeUI.toast(
+						"<font style=\"font-size:16px\">屏幕尺寸变化过大，会导致画面扭曲。<br/>点此可<a onclick=\"save();location.reload();location.reload();\">保存并刷新</a></font>",
+						{
+							type:"richtext",
+							duration:"long",
+							verticalAlign: "top",
+							richTextStyle:{align:"center"}
+						}
+					);
+				}catch(err){
+					if (confirm("屏幕尺寸变化过大，会导致画面扭曲。\n是否立即保存并刷新？")){
+						save();
+						location.reload();
+					}
 				}
 			}
 		},1000);
@@ -818,16 +862,16 @@ window.onresize = function(){
 function dateToNumber(h=0, m=0, s=0){
 	return (s/60+m)/60+h;
 }
-//0~5:45	5.45    6:15	  6:45~16:45	17.15		17:45		19~24
-//天黑		日出(R)	日出(G,B)  白天          日落(G,B)	日落(R)		天黑
+//0~5:45	5:45	6:15		6:45~18:25	18:55		19:25		19:25~24
+//天黑		日出(R)	日出(G,B)	白天		日落(G,B)	日落(R)		天黑
 setTimeout(function(){
 	let h = new Date();
 	//h = (h.getSeconds()+h.getMilliseconds()/1000)/60*24
-	h = h.getHours() + h.getMinutes()/60 + h.getSeconds()/3600-4.6;
-	if (h > dateToNumber(18,15) | h < dateToNumber(5,45)){ // 天黑
+	h = h.getHours() + h.getMinutes()/60 + h.getSeconds()/3600;
+	if (h > dateToNumber(19,25) | h < dateToNumber(5,45)){ // 天黑
 		ambient.color = new THREE.Color("#223");
 		//renderer.setClearColor("#334", 1);
-	}else if (h > dateToNumber(16,45) | h < dateToNumber(6,45)){ // 日出/日落
+	}else if (h > dateToNumber(18,25) | h < dateToNumber(6,45)){ // 日出/日落
 		ambient.color = new THREE.Color("#f9a");
 		//renderer.setClearColor("#a34", 1);
 	}else{ //白天
@@ -836,20 +880,20 @@ setTimeout(function(){
 	}
 	renderer.setClearColor(
 		"rgb("+
-			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(5,45) )))+10, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(17,45) ))))+10 ))+","+
-			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+10, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(17,15) ))))+10 ))+","+
-			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+20, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(17,15) ))))+20 ))+
+			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(5,45) )))+10, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(19,25) ))))+10 ))+","+
+			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+10, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(18,55) ))))+10 ))+","+
+			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+20, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(18,55) ))))+20 ))+
 		")"
 	);
 }, 0);
 setInterval(function(){
 	let h = new Date();
 	// h = (h.getSeconds()+h.getMilliseconds()/1000)/60*24
-	h = h.getHours() + h.getMinutes()/60 + h.getSeconds()/3600-4.6;
-	if (h > dateToNumber(18,15) | h < dateToNumber(5,45)){ // 天黑
+	h = h.getHours() + h.getMinutes()/60 + h.getSeconds()/3600;
+	if (h > dateToNumber(19,25) | h < dateToNumber(5,45)){ // 天黑
 		ambient.color = new THREE.Color("#223");
 		//renderer.setClearColor("#334", 1);
-	}else if (h > dateToNumber(17.15) | h < dateToNumber(6,45)){ // 日出/日落
+	}else if (h > dateToNumber(18,25) | h < dateToNumber(6,45)){ // 日出/日落
 		ambient.color = new THREE.Color("#f9a");
 		//renderer.setClearColor("#a34", 1);
 	}else{ //白天
@@ -858,24 +902,24 @@ setInterval(function(){
 	}
 	renderer.setClearColor(
 		"rgb("+
-			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(5,45) )))+10, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(17,45) ))))+10 ))+","+
-			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+10, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(17,15) ))))+10 ))+","+
-			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+20, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(17,15) ))))+20 ))+
+			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(5,45) )))+10, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(19,25) ))))+10 ))+","+
+			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+10, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(18,55) ))))+10 ))+","+
+			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+20, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(18,55) ))))+20 ))+
 		")"
 	);
 	console.log(
 		"time:"+h,
 		"\nR:",
-		230/(1+Math.pow(6,-36/30*(h- dateToNumber(5,45) )))+10, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(17,45) ))))+10,
+		230/(1+Math.pow(6,-36/30*(h- dateToNumber(5,45) )))+10, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(19,25) ))))+10,
 		"\nG:",
-		230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+10, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(17,15) ))))+10,
+		230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+10, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(18,55) ))))+10,
 		"\nB:",
-		230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+20, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(17,15) ))))+20,
+		230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+20, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(18,55) ))))+20,
 		"\nRESULT:",
 		"rgb("+
-			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(5,45) )))+10, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(17,45) ))))+10 ))+","+
-			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+10, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(17,15) ))))+10 ))+","+
-			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+20, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(17,15) ))))+20 ))+
+			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(5,45) )))+10, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(19,25) ))))+10 ))+","+
+			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+10, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(18,55) ))))+10 ))+","+
+			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+20, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(18,55) ))))+20 ))+
 		")"
 	);
 }, 5*1000); // 5s/次
@@ -910,7 +954,8 @@ camera.userData = {
 		z: 0
 	},
 	tools: [0,0,0,0],
-	choice: 0
+	choice: 0,
+	sensitivity: 0.86 //灵敏度
 };
 
 //读取
@@ -925,7 +970,7 @@ if (localStorage.getItem("我的世界.存档.玩家.朝向")){
 }
 if (localStorage.getItem("我的世界.存档.玩家.物品.工具栏")){
 	camera.userData.tools = JSON.parse(localStorage.getItem("我的世界.存档.玩家.物品.工具栏")).tools;
-	camera.userData.choice = JSON.parse(localStorage.getItem("我的世界.存档.玩家.物品.工具栏")).choice;
+	camera.userData.choice = Number(JSON.parse(localStorage.getItem("我的世界.存档.玩家.物品.工具栏")).choice);
 }
 
 for (let i in camera.userData.tools){
@@ -949,7 +994,7 @@ function tools_things_refresh(){
 	for (let i in camera.userData.tools)
 		$("#tools > img")[i].src =
 			camera.userData.tools[i] == 0?
-				"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP4//8/AwAI/AL+eMSysAAAAABJRU5ErkJggg=="
+				"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP4//8/AwAI/AL+eMSysAAAAABJRU5ErkJggg==" //透明图片
 			:
 				"./img/blocks/"+
 				camera.userData.tools[i]+
@@ -962,6 +1007,7 @@ function tools_things_refresh(){
 let camera_folder = gui.addFolder("玩家/观察者(camera)");
 camera_folder.open();
 	camera_folder.add(window, "stop").listen();
+	camera_folder.add(camera.userData, "sensitivity", 1e-1, 1e1).name("灵敏度");
 	let camera_position_folder = camera_folder.addFolder("位置/px");
 	camera_position_folder.open();
 		camera_position_folder.add(camera.userData.pos, "x", -1000, 1000, 0.01).listen();
@@ -979,18 +1025,42 @@ camera_folder.open();
 		camera_look_folder.add(camera.userData.look, "y", 0, 1, 0.01).listen();
 		camera_look_folder.add(camera.userData.look, "z", 0, 1, 0.01).listen();
 	let camera_up_folder = camera_folder.addFolder("天旋地转（小心头晕）");
-		camera_up_folder.add(camera.userData.up, "x", -1, 1, 0.01);
-		camera_up_folder.add(camera.userData.up, "y", -1, 1, 0.01);
-		camera_up_folder.add(camera.userData.up, "z", -1, 1, 0.01);
+		camera_up_folder.add(camera.userData.up, "x", -1, 1, 0.01).onChange(function(){ try{
+			plus.nativeUI.toast(
+				"<font size=\"16\">头晕别怪我</font>",
+				{
+					type: "richtext",
+					verticalAlign: "top",
+					richTextStyle: {align:"center"}
+				}
+			); }catch(err){} });
+		camera_up_folder.add(camera.userData.up, "y", -1, 1, 0.01).onChange(function(){ try{
+			plus.nativeUI.toast(
+				"<font size=\"16\">头晕别怪我</font>",
+				{
+					type: "richtext",
+					verticalAlign: "top",
+					richTextStyle: {align:"center"}
+				}
+			); }catch(err){} });
+		camera_up_folder.add(camera.userData.up, "z", -1, 1, 0.01).onChange(function(){ try{
+			plus.nativeUI.toast(
+				"<font size=\"16\">头晕别怪我</font>",
+				{
+					type: "richtext",
+					verticalAlign: "top",
+					richTextStyle: {align:"center"}
+				}
+			); }catch(err){} });
 	let camera_tools_folder = camera_folder.addFolder("工具栏(tools)");
 	camera_tools_folder.open();
 		camera_tools_folder.add(camera.userData, "choice", 0, 3, 1).listen().name("选择工具").onChange(tools_choice_refresh);
 		let camera_tools_things_folder = camera_tools_folder.addFolder("物品");
 		camera_tools_things_folder.open();
-			camera_tools_things_folder.add(camera.userData.tools, 0, 0, 7, 1).listen().onChange(tools_things_refresh);
-			camera_tools_things_folder.add(camera.userData.tools, 1, 0, 7, 1).listen().onChange(tools_things_refresh);
-			camera_tools_things_folder.add(camera.userData.tools, 2, 0, 7, 1).listen().onChange(tools_things_refresh);
-			camera_tools_things_folder.add(camera.userData.tools, 3, 0, 7, 1).listen().onChange(tools_things_refresh);
+			camera_tools_things_folder.add(camera.userData.tools, 0, 0, 8, 1).listen().onChange(tools_things_refresh);
+			camera_tools_things_folder.add(camera.userData.tools, 1, 0, 8, 1).listen().onChange(tools_things_refresh);
+			camera_tools_things_folder.add(camera.userData.tools, 2, 0, 8, 1).listen().onChange(tools_things_refresh);
+			camera_tools_things_folder.add(camera.userData.tools, 3, 0, 8, 1).listen().onChange(tools_things_refresh);
 
 let T0 = new Date();//上次时间
 function render(){
@@ -1009,6 +1079,19 @@ function render(){
 				0
 		){ //头被卡住
 			console.warn("头被卡住？");
+			try{
+				plus.nativeUI.toast(
+					"<font size=\"16\">想窒息吗？还往头上放方块，看你怎么出来！</font>",
+					{
+						type:"richtext",
+						verticalAlign: "top",
+						richTextStyle:{align:"center"}
+					}
+				);
+			}catch(err){}
+			setTimeout(function(){
+				try{ plus.nativeUI.closeToast(); }catch(err){}
+			},1);
 		}
 		if (
 			every
@@ -1220,24 +1303,30 @@ function render(){
 //setInterval("render()",16.7)
 
 /* let controls = new THREE.OrbitControls(camera,renderer.domElement);//创建控件对象
-controls.addEventListener('change', render);//监听鼠标、键盘事件 */
+controls.addEventListener("change", render);//监听鼠标、键盘事件 */
+
+function bag(){
+	if ($("#set").css("display") != "none"){ //已显示
+		$("#set").css("display", "none");
+		stop = false;
+		document.body.requestPointerLock();
+		console.log("bag:close");
+	}else{ //未显示
+		$("#set").css("display", "block");
+		stop = "set";
+		document.exitPointerLock();
+		console.log("bag:open");
+	}
+	
+	return;
+}
 
 let keydown = new Set();
 document.addEventListener("keydown", function (e){
 	
 	if (e.keyCode == 69){ //E
 		console.log("E:", keydown);
-		
-		if ($("#set").css("display") != "none"){ //已显示
-			$("#set").css("display", "none");
-			stop = false;
-			document.body.requestPointerLock();
-		}else{ //未显示
-			$("#set").css("display", "block");
-			stop = "set";
-			document.exitPointerLock();
-		}
-		
+		bag();
 		return;
 	}
 	
@@ -1271,8 +1360,10 @@ document.addEventListener("keyup", function (e){
 });
 let last_jump = Number(new Date());
 setInterval(function(){
-	if (stop)
+	if (stop){
 		keydown = new Set();
+		return;
+	}
 	
 	let x=0, y=0, z=0;
 	
@@ -1454,8 +1545,8 @@ document.addEventListener("mousemove", function (e){
 		// let [dx, dy] = [x-mouse.x0, y-mouse.y0];
 		// [mouse.x0, mouse.y0] = [x, y];
 		// console.log("move:", dx, dy);
-		camera.userData.lookAt.left_right += dx/document.getElementsByTagName("canvas")[0].offsetWidth*360;
-		camera.userData.lookAt.top_bottom -= dy/document.getElementsByTagName("canvas")[0].offsetHeight*360;
+		camera.userData.lookAt.left_right += dx/document.getElementsByTagName("canvas")[0].offsetWidth*360*camera.userData.sensitivity;
+		camera.userData.lookAt.top_bottom -= dy/document.getElementsByTagName("canvas")[0].offsetHeight*360*camera.userData.sensitivity;
 		
 		if (camera.userData.lookAt.left_right > 360)
 			while (camera.userData.lookAt.left_right > 360)
@@ -1544,7 +1635,7 @@ document.addEventListener("mousedown", function (e){
 						}
 						
 						if (free == -1){
-							console.info("拿不下！");
+							console.info("not free!");
 						}else{
 							console.log("delete:", click[i].object.position);
 							scene.remove(click[i].object);
@@ -1733,9 +1824,10 @@ $("#control").on("touchstart", function(e){
 				Math.pow(dy, 2)
 			);
 			l = l>50? 50: l/3;
-			console.log(Math.atan(dy/dx)*180/Math.PI,r*180/Math.PI);
 			let x = Math.cos( camera.userData.lookAt.left_right/180*Math.PI+r )*l;
 			let z = Math.sin( camera.userData.lookAt.left_right/180*Math.PI+r )*l;
+			
+			console.log(x, z);
 			
 			x += x>0? 10: x<0? -10: 0;
 			z += z>0? 10: z<0? -10: 0;
@@ -1827,11 +1919,14 @@ $("#control").on("touchstart", function(e){
 				}
 			}
 			
-			i += i>0? 10: i<0? -10: 0;
-			j += j>0? 10: j<0? -10: 0;
+			i -= camera.userData.pos.x;
+			j -= camera.userData.pos.z;
 			
-			camera.userData.pos.x += (i-camera.userData.pos.x)*(Math.random()*0.2+0.9);
-			camera.userData.pos.z += (j-camera.userData.pos.z)*(Math.random()*0.2+0.9);
+			i -= i>0? 10: i<0? -10: 0;
+			j -= j>0? 10: j<0? -10: 0;
+			
+			camera.userData.pos.x += i*(Math.random()*0.2+0.9);
+			camera.userData.pos.z += j*(Math.random()*0.2+0.9);
 		}
 	}, 100);
 	
@@ -1860,12 +1955,13 @@ $("#control").on("touchend", function(e){
 	touch_control.x0 = touch_control.y0 = touch_control.x = touch_control.y = null;
 	clearInterval(touch_control.loop);
 	
-	console.log(touch_control)
-	
 	return false;
 });
 
 $("#jump").on("touchstart", function(){
+	if (stop)
+		return;
+	
 	console.log("jump");
 	
 	try{
@@ -1877,8 +1973,8 @@ $("#jump").on("touchstart", function(){
 			!=
 				0
 		){ //脚下有方块
-			if (Number(new Date())-last_jump >= 1000 & y != 0){
-				camera.userData.v.y += y*2*(Math.random()*0.2+0.9);
+			if (Number(new Date())-last_jump >= 1000){
+				camera.userData.v.y += 2*(Math.random()*0.2+0.9);
 				last_jump = Number(new Date());
 			}
 		}
@@ -1897,8 +1993,8 @@ $("canvas:eq(0)").on("touchstart", function (e){
 	if (stop)
 		return;
 	
-	let x = e.originalEvent.targetTouches[0].pageX;
-	let y = e.originalEvent.targetTouches[0].pageY;
+	let x = e.originalEvent.targetTouches[0].pageX*camera.userData.sensitivity;
+	let y = e.originalEvent.targetTouches[0].pageY*camera.userData.sensitivity;
 	console.log("touchstart:", x, y, Number(new Date()));
 	
 	[x0,y0] = [x, y];
@@ -1933,13 +2029,27 @@ $("canvas:eq(0)").on("touchstart", function (e){
 							}
 							
 							if (free == -1){
-								console.info("拿不下！");
+								console.info("not free!");
+								try{
+									plus.nativeUI.toast("<font style=\"font-size:14px\">两只手拿4m³方块已经够多了，反正我是拿不下了</font>",
+										{
+											type:"richtext",
+											verticalAlign: "top",
+											richTextStyle:{
+												align:"center"
+											}
+										}
+									);
+								}catch(err){}
 							}else{
 								console.log("delete:", click[i].object.position);
 								scene.remove(click[i].object);
 								camera.userData.tools[free] = every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ]; //放在手中
 								every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = 0;
 								tools_things_refresh(); //刷新方块
+								try{
+									plus.device.vibrate(100); //挖掘震动
+								}catch(e){}
 								/* if (
 									every[ click[i].object.position.x/100+1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] 
 								) */
@@ -1961,8 +2071,8 @@ $("canvas:eq(0)").on("touchmove", function (e){
 	if (x0 === null | y0 === null)
 		return false;
 	
-	let x = e.originalEvent.targetTouches[0].pageX;
-	let y = e.originalEvent.targetTouches[0].pageY;
+	let x = e.originalEvent.targetTouches[0].pageX*camera.userData.sensitivity;
+	let y = e.originalEvent.targetTouches[0].pageY*camera.userData.sensitivity;
 	console.log("touchmove:", x, y);
 	
 	let [dx, dy] = [x-x0, y-y0];
@@ -1995,20 +2105,18 @@ $("canvas:eq(0)").on("touchmove", function (e){
 	}
 	return false;
 });
-$("canvas:eq(0)").on('touchend', function (e){
+$("canvas:eq(0)").on("touchend", function (e){
 	if (stop)
 		return;
 	
-	let x = e.originalEvent.changedTouches[0].pageX;
-	let y = e.originalEvent.changedTouches[0].pageY;
+	let x = e.originalEvent.changedTouches[0].pageX*camera.userData.sensitivity;
+	let y = e.originalEvent.changedTouches[0].pageY*camera.userData.sensitivity;
 	console.log("touchend:", x, y, Number(new Date()));
 	
 	x0 = null, y0 = null;
 	
 	if (touch_screen.id !== null){ //短按（放置）
 		clearTimeout(touch_screen.id);
-		if (camera.userData.tools[camera.userData.choice] == 0) //空气
-			return;
 		touch_screen.id = null;
 		if (Math.sqrt(
 			Math.pow(touch_screen.pos.x-x, 2)+
@@ -2017,12 +2125,36 @@ $("canvas:eq(0)").on('touchend', function (e){
 			let click = get_choice_object(true, x, y);
 			for (let i in click){
 				if (click[i].object instanceof THREE.Mesh){
+					if (
+						Math.sqrt(
+							Math.pow(click[i].object.position.x - camera.userData.pos.x, 2)+
+							Math.pow(click[i].object.position.y - camera.userData.pos.y, 2)+
+							Math.pow(click[i].object.position.z - camera.userData.pos.z, 2)
+					) < 500){ //距离<500
+						if (
+							every
+								[click[i].object.position.x/100]
+								[click[i].object.position.y/100]
+								[click[i].object.position.z/100]
+							==
+								8
+						){ //命令方块
+							try{
+								eval(prompt("请输入JavaScript代码","console.info(\"输出一条信息，可在VConsole查看\");"))
+							}catch(err){
+								alert("代码运行出错，错误信息（自行翻译）：\n"+err);
+							}
+							return;
+						}
+					}
+					if (camera.userData.tools[camera.userData.choice] == 0) //空气
+						return;
 					if (click[i].faceIndex == 0 | click[i].faceIndex == 1){
 						if (Math.sqrt(
 							Math.pow((click[i].object.position.x+100) - camera.userData.pos.x, 2)+
 							Math.pow(click[i].object.position.y - camera.userData.pos.y, 2)+
 							Math.pow(click[i].object.position.z - camera.userData.pos.z, 2)
-						) < 500){ //距离<500
+						) < 500){ //距离<50
 							let mesh = new THREE.Mesh(block_geometry, blocks[ camera.userData.tools[camera.userData.choice]].material);
 							mesh.position.x = click[i].object.position.x+100;
 							mesh.position.y = click[i].object.position.y;
@@ -2143,7 +2275,7 @@ $("canvas:eq(0)").on('touchend', function (e){
 		}
 	}
 });
-$("canvas:eq(0)").on('touchcancel', function (e){
+$("canvas:eq(0)").on("touchcancel", function (e){
 	if (stop)
 		return;
 	
