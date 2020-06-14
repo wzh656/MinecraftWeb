@@ -70,7 +70,7 @@
 			span{
 				font-family: kt, serif;
 			}
-			button{
+			#warning > button{
 				width: 80%;
 				height: 60px;
 				position: relative;
@@ -120,28 +120,52 @@
 				border-style: groove;
 			}
 			
-			#set{
+			textarea{
+				resize: none;
+			}
+			
+			#bag, #command{
 				width: 66%;
 				height: 66%;
+				
 				position: absolute;
 				left: 50%;
 				top: 50%;
 				transform: translate(-50%, -50%);
+				
+				display: none;
 				z-index: 1;
+				
 				background-color: #c4c4c4;
 				border: 3px #fff outset;
 				padding: 10px;
 			}
-			#set > div{
+			
+			#command > textarea{
+				width: 100%;
+				height: 90%;
+				
+				color: black;
+				font-size: 3vw;
+			}
+			#command > button{
+				width: 48%;
+				height: 9%;
+				margin: 0 0.6%;
+				font-size: 3vw;
+			}
+			
+			#bag > div{
 				height: 20%;
 				font-size: 3.7vw;
 				margin: 6px;
 			}
-			#set > div > ul{
+			#bag > div > ul{
 				display: -webkit-flex; 
 				display: -moz-box;
 				display: -mz-flexbox;
 				display: flex; 
+				
 				width: 50%;
 				overflow-x: auto;
 				overflow: none;
@@ -152,11 +176,11 @@
 				margin-top: -36px;
 				padding: 0;
 			}
-			#set > div > ul > li{
+			#bag > div > ul > li{
 				float: left;
 				flex: 0 0 auto;
 			}
-			#set > div > ul > li > *{
+			#bag > div > ul > li > *{
 				width: 100%;
 				height: 100%;
 			}
@@ -164,6 +188,7 @@
 				/* position: absolute; */
 				width: 7vw;
 				height: 7vw;
+				
 				display: inline-block;
 				border: 3px inset #fff;
 				margin: 0.3vw;
@@ -172,10 +197,11 @@
 				/* position: absolute; */
 				width: 7vw;
 				height: 7vw;
+				
+				font-size: 26px;
 				display: inline-block;
 				border: 3px inset #fff;
 				margin: 0.3vw;
-				font-size: 26px;
 			}
 		</style>
 		
@@ -191,16 +217,56 @@
 		<!--<script src="./node_modules/three/examples/js/controls/PointerLockControls.js"></script>-->
 	</head>
 	
-	<body bgcolor="black">
+	<body bgcolor="black">		
 		<div id="tools">
 			<img/>
 			<img/>
 			<img/>
 			<img/>
-			<img src="./img/more.png" onclick="bag();"/>
+			<img src="./img/more.png" onclick="state('bag');" />
 		</div>
 		
-		<div id="set" style="display: none;">
+		<div id="command">
+			<textarea></textarea>
+			<button onclick="state('command');">关闭</button>
+			<button onclick="try{
+							eval($('#command > textarea').val())
+						}catch(err){
+							$.get('http://fanyi.youdao.com/openapi.do',{
+								keyfrom: 'fadabvaa',
+								key: '522071532',
+								type: 'data',
+								doctype: 'jsonp',
+								version: '1.1',
+								q: err
+							},function(data, state, xhr){
+								console.log(data);
+								try{
+									if (state == 'success' & data.translation[0]){
+										console.error('【命令方块】\n代码运行出错，错误信息：\n'+err+'\n译文：'+data.translation[0]);
+										alert('代码运行出错，错误信息（可在VConsole查看）：\n'+err+'\n译文：'+data.translation[0]);
+									}else{
+										console.error('【命令方块】\n代码运行出错，错误信息（自行翻译）：\n'+err);
+										alert('代码运行出错，错误信息（自行翻译,可在VConsole查看）：\n'+err);
+									}
+								}catch(e){
+									try{
+										if (state == 'success' & data.ReferenceError){
+											console.error('【命令方块】\n代码运行出错，错误信息：\n'+err+'\n译文：'+data.ReferenceError);
+											alert('代码运行出错，错误信息（可在VConsole查看）：\n'+err+'\n译文：'+data.ReferenceError);
+										}else{
+											console.error('【命令方块】\n代码运行出错，错误信息（自行翻译）：\n'+err);
+											alert('代码运行出错，错误信息（自行翻译,可在VConsole查看）：\n'+err);
+										}
+									}catch(e){
+										console.error('【命令方块】\n代码运行出错，错误信息（自行翻译）：\n'+err);
+										alert('代码运行出错，错误信息（自行翻译,可在VConsole查看）：\n'+err);
+									}
+								}
+							},'jsonp');
+						}">运行</button>
+		</div>
+		<div id="bag">
 			<div>
 				头：
 				<ul>
@@ -1305,17 +1371,17 @@ function render(){
 /* let controls = new THREE.OrbitControls(camera,renderer.domElement);//创建控件对象
 controls.addEventListener("change", render);//监听鼠标、键盘事件 */
 
-function bag(){
-	if ($("#set").css("display") != "none"){ //已显示
-		$("#set").css("display", "none");
+function state(id){
+	if ($("#"+id).css("display") != "none"){ //已显示
+		$("#"+id).css("display", "none");
 		stop = false;
 		document.body.requestPointerLock();
-		console.log("bag:close");
+		console.log(id, ":close");
 	}else{ //未显示
-		$("#set").css("display", "block");
-		stop = "set";
+		$("#"+id).css("display", "block");
+		stop = id;
 		document.exitPointerLock();
-		console.log("bag:open");
+		console.log(id, ":open");
 	}
 	
 	return;
@@ -1325,9 +1391,11 @@ let keydown = new Set();
 document.addEventListener("keydown", function (e){
 	
 	if (e.keyCode == 69){ //E
-		console.log("E:", keydown);
-		bag();
-		return;
+		if (stop == "bag" | stop == false){
+			console.log("E:", keydown);
+			state("bag");
+			return;
+		}
 	}
 	
 	if (stop)
@@ -1567,6 +1635,8 @@ document.addEventListener("mousemove", function (e){
 });
 
 $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind监听
+	if (stop)
+		return;
 	//Chorme
 	let wheel = event.originalEvent.wheelDelta;
 	let detal = event.originalEvent.detail;
@@ -1651,10 +1721,30 @@ document.addEventListener("mousedown", function (e){
 				}
 			}
 		}
-	}else if (e.button == 2 & camera.userData.tools[camera.userData.choice] != 0){ //右键（放置）
+	}else if (e.button == 2){ //右键（放置）
 		let click = get_choice_object();
 		for (let i in click){
 			if (click[i].object instanceof THREE.Mesh){
+				if (
+					Math.sqrt(
+						Math.pow(click[i].object.position.x - camera.userData.pos.x, 2)+
+						Math.pow(click[i].object.position.y - camera.userData.pos.y, 2)+
+						Math.pow(click[i].object.position.z - camera.userData.pos.z, 2)
+				) < 500){ //距离<500
+					if (
+						every
+							[click[i].object.position.x/100]
+							[click[i].object.position.y/100]
+							[click[i].object.position.z/100]
+						==
+							8
+					){ //命令方块
+						state("command");
+						return;
+					}
+				}
+				if (camera.userData.tools[camera.userData.choice] == 0) //空气
+					return;
 				if (click[i].faceIndex == 0 | click[i].faceIndex == 1){
 					if (Math.sqrt(
 						Math.pow((click[i].object.position.x+100) - camera.userData.pos.x, 2)+
@@ -1993,8 +2083,8 @@ $("canvas:eq(0)").on("touchstart", function (e){
 	if (stop)
 		return;
 	
-	let x = e.originalEvent.targetTouches[0].pageX*camera.userData.sensitivity;
-	let y = e.originalEvent.targetTouches[0].pageY*camera.userData.sensitivity;
+	let x = e.originalEvent.targetTouches[0].pageX;
+	let y = e.originalEvent.targetTouches[0].pageY
 	console.log("touchstart:", x, y, Number(new Date()));
 	
 	[x0,y0] = [x, y];
@@ -2048,7 +2138,7 @@ $("canvas:eq(0)").on("touchstart", function (e){
 								every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = 0;
 								tools_things_refresh(); //刷新方块
 								try{
-									plus.device.vibrate(100); //挖掘震动
+									plus.device.vibrate(16); //挖掘震动
 								}catch(e){}
 								/* if (
 									every[ click[i].object.position.x/100+1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] 
@@ -2071,15 +2161,15 @@ $("canvas:eq(0)").on("touchmove", function (e){
 	if (x0 === null | y0 === null)
 		return false;
 	
-	let x = e.originalEvent.targetTouches[0].pageX*camera.userData.sensitivity;
-	let y = e.originalEvent.targetTouches[0].pageY*camera.userData.sensitivity;
+	let x = e.originalEvent.targetTouches[0].pageX;
+	let y = e.originalEvent.targetTouches[0].pageY;
 	console.log("touchmove:", x, y);
 	
 	let [dx, dy] = [x-x0, y-y0];
 	[x0, y0] = [x, y];
 	console.log("move:", dx, dy);
-	camera.userData.lookAt.left_right += dx/document.getElementsByTagName("canvas")[0].offsetWidth*90;
-	camera.userData.lookAt.top_bottom -= dy/document.getElementsByTagName("canvas")[0].offsetHeight*90;
+	camera.userData.lookAt.left_right += dx/document.getElementsByTagName("canvas")[0].offsetWidth*90*camera.userData.sensitivity;
+	camera.userData.lookAt.top_bottom -= dy/document.getElementsByTagName("canvas")[0].offsetHeight*90*camera.userData.sensitivity;
 	
 	if (camera.userData.lookAt.left_right > 360)
 		while (camera.userData.lookAt.left_right > 360)
@@ -2109,8 +2199,8 @@ $("canvas:eq(0)").on("touchend", function (e){
 	if (stop)
 		return;
 	
-	let x = e.originalEvent.changedTouches[0].pageX*camera.userData.sensitivity;
-	let y = e.originalEvent.changedTouches[0].pageY*camera.userData.sensitivity;
+	let x = e.originalEvent.changedTouches[0].pageX;
+	let y = e.originalEvent.changedTouches[0].pageY;
 	console.log("touchend:", x, y, Number(new Date()));
 	
 	x0 = null, y0 = null;
@@ -2139,11 +2229,7 @@ $("canvas:eq(0)").on("touchend", function (e){
 							==
 								8
 						){ //命令方块
-							try{
-								eval(prompt("请输入JavaScript代码","console.info(\"输出一条信息，可在VConsole查看\");"))
-							}catch(err){
-								alert("代码运行出错，错误信息（自行翻译）：\n"+err);
-							}
+							state("command");
 							return;
 						}
 					}
