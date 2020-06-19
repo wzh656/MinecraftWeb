@@ -1,8 +1,6 @@
 # 我的世界（仿）
 修改日期:2020.6.19
 
-------------
-
 # 运行
 + [手机版(apk)v0.4.0-alpha完整版（较大，20+MB）](https://github.com/wzh656/MinecraftWeb/releases/download/v0.4.0-alpha/Minecraft-full.apk)
 
@@ -10,6 +8,7 @@
 
 + [web版（对网速要求较高，网速慢者无法运行）](https://wzh656.github.io/MinecraftWeb/main.html)
 
+可在[后面（8.关于运行）](#关于运行)详细查看
 提示：部分功能未完善，存在少量问题未解决
 
 # 说明：
@@ -86,6 +85,7 @@
 ## ㈨关于效果（图片）
 
 > 网页版（竖屏）
+
 <img alt="效果图片（竖屏我的世界）" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/10.png" />  
 
 > 0.4.1版
