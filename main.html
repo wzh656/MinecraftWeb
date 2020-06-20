@@ -80,6 +80,7 @@
 			}
 			*{
 				font-family: qq2, serif;
+				outline: none;
 			}
 			#control{
 				position: absolute;
@@ -138,14 +139,16 @@
 				
 				background-color: #c4c4c4;
 				border: 3px #fff outset;
-				padding: 10px;
+				padding: 1.6vw;
 			}
 			
 			#command > textarea{
 				width: 100%;
-				height: 90%;
+				height: 88.6%;
 				
 				color: black;
+				background-color: #d6d6d6;
+				border: 2px #fff inset;
 				font-size: 3vw;
 			}
 			#command > button{
@@ -229,42 +232,7 @@
 		<div id="command">
 			<textarea></textarea>
 			<button onclick="state('command');">关闭</button>
-			<button onclick="try{
-							eval($('#command > textarea').val())
-						}catch(err){
-							$.get('http://fanyi.youdao.com/openapi.do',{
-								keyfrom: 'fadabvaa',
-								key: '522071532',
-								type: 'data',
-								doctype: 'jsonp',
-								version: '1.1',
-								q: err
-							},function(data, state, xhr){
-								console.log(data);
-								try{
-									if (state == 'success' & data.translation[0]){
-										console.error('【命令方块】\n代码运行出错，错误信息：\n'+err+'\n译文：'+data.translation[0]);
-										alert('代码运行出错，错误信息（可在VConsole查看）：\n'+err+'\n译文：'+data.translation[0]);
-									}else{
-										console.error('【命令方块】\n代码运行出错，错误信息（自行翻译）：\n'+err);
-										alert('代码运行出错，错误信息（自行翻译,可在VConsole查看）：\n'+err);
-									}
-								}catch(e){
-									try{
-										if (state == 'success' & data.ReferenceError){
-											console.error('【命令方块】\n代码运行出错，错误信息：\n'+err+'\n译文：'+data.ReferenceError);
-											alert('代码运行出错，错误信息（可在VConsole查看）：\n'+err+'\n译文：'+data.ReferenceError);
-										}else{
-											console.error('【命令方块】\n代码运行出错，错误信息（自行翻译）：\n'+err);
-											alert('代码运行出错，错误信息（自行翻译,可在VConsole查看）：\n'+err);
-										}
-									}catch(e){
-										console.error('【命令方块】\n代码运行出错，错误信息（自行翻译）：\n'+err);
-										alert('代码运行出错，错误信息（自行翻译,可在VConsole查看）：\n'+err);
-									}
-								}
-							},'jsonp');
-						}">运行</button>
+			<button onclick="run($('#command > textarea').val());">运行</button>
 		</div>
 		<div id="bag">
 			<div>
@@ -318,6 +286,31 @@
 		<!--<audio id="bgm" autoplay perload loop style="display: none;" src="https://vdse.bdstatic.com/876934f28995e8042230ec598237c67e.mp4?authorization=bce-auth-v1/fb297a5cc0fb434c971b8fa103e8dd7b/2017-05-11T09:02:31Z/-1//ab5b458a478fae53b754e194ab270b96f23aa23ba71c2e63b06fc06d0543040c"></audio>-->
 		<noscript><h1 style="z-index: 3;">你的浏览器不支持JavaScript，无法运行！</h1></noscript>
 <script>
+function run(code){
+	try{
+		eval(code);
+	}catch(err){
+		$.get("http://fanyi.youdao.com/translate",{
+			doctype: "json",
+			type: "auto",
+			i: err
+		},function(data, state, xhr){
+			console.log(data);
+			try{
+				if (state == "success" & !!data.translateResult[0][0].tgt){
+					console.error("【命令方块】\n代码运行出错，错误信息：\n"+err+"\n译文（有道翻译提供）："+data.translateResult[0][0].tgt);
+					alert("代码运行出错，错误信息（可在VConsole查看）：\n"+err+"\n译文（有道翻译提供）："+data.translateResult[0][0].tgt);
+				}else{
+					console.error("【命令方块】\n代码运行出错，错误信息（自行翻译）：\n"+err);
+					alert("代码运行出错，错误信息（自行翻译,可在VConsole查看）：\n"+err);
+				}
+			}catch(e){
+				console.error("【命令方块】\n代码运行出错，错误信息（自行翻译）：\n"+err);
+				alert("代码运行出错，错误信息（自行翻译,可在VConsole查看）：\n"+err);
+			}
+		});
+	}
+}
 function playBGM(){
 	let bgm = document.getElementById("bgm");
 	if (bgm.paused){
@@ -615,6 +608,59 @@ let scene_folder = gui.addFolder("场景(scene)");
 		scene_fog_folder.add(scene.fog, "near", 0.001, 10);
 		scene_fog_folder.addColor(scene.fog, "color");
 
+
+/**
+ * 天气(sprite精灵)
+ */
+weather = Math.random()<0.5? 0: Math.abs(1-(Math.log(Math.random()+0.003)+6)/6);
+let sprite_system = [],
+	sprite_lastTime = null,
+	sprite_material = new THREE.SpriteMaterial({
+		color: "#4c51a7", //设置精灵矩形区域颜色
+		//rotation: Math.PI/180*45, //旋转精灵对象45度，弧度值
+		//map: texture, //设置精灵纹理贴图
+	});
+setInterval(function(){
+	if (sprite_lastTime == null)
+		sprite_lastTime = new Date();
+	let t = Math.round((new Date() - sprite_lastTime)/3.6);
+	sprite_lastTime = new Date();
+	
+	if (stop)
+		return;
+	
+	console.log(t)
+	while (t--){
+		if (Math.random() <= weather){
+			//创建精灵模型对象，不需要几何体geometry参数
+			let sprite = new THREE.Sprite(sprite_material);
+			scene.add(sprite);
+			let pX = Math.random()*2000-1000, //[-1000,1000)
+				pY = Math.random()*500+1500, //[1500,2000)
+				pZ = Math.random()*2000-1000; //[-1000,1000)
+			
+			sprite.v = 0;
+			sprite.position.set(pX, pY, pZ); //设置精灵位置
+			//控制精灵大小，比如可视化中精灵大小表征数据大小
+			sprite.scale.set(Math.random()*3+3, Math.random()*26+10, 1); //只需要设置x、y两个分量就可以 x:[3,6) y:[10,36)
+			sprite_system.push(sprite);
+		}
+	}
+}, 1);
+
+let weather_folder = gui.addFolder("天气(weather)");
+	weather_folder.add(window, "weather", 0, 1, 0.001).name("降水系数");
+	weather_folder.add(sprite_system, "length", 0, 300, 1).name("雨滴(sprite)个数").listen();
+	weather_folder.add({
+		clean: function(){
+			for (let i in sprite_system){
+				scene.remove(sprite_system[i]);
+			}
+			sprite_system.splice(0, sprite_system.length);
+		}
+	},"clean").name("清空(clean)");
+
+
 /**
 * 创建网格模型
 */
@@ -641,12 +687,12 @@ for (let i=1; i<blocks.length; i++){
 					return;
 			//单个block加载完毕
 			blocks[i].material = [
-				new THREE.MeshLambertMaterial({ map: blocks[i].texture[0] }),
-				new THREE.MeshLambertMaterial({ map: blocks[i].texture[1] }),
-				new THREE.MeshLambertMaterial({ map: blocks[i].texture[2] }),
-				new THREE.MeshLambertMaterial({ map: blocks[i].texture[3] }),
-				new THREE.MeshLambertMaterial({ map: blocks[i].texture[4] }),
-				new THREE.MeshLambertMaterial({ map: blocks[i].texture[5] })
+				new THREE.MeshLambertMaterial({ map:blocks[i].texture[0], transparent:true }),
+				new THREE.MeshLambertMaterial({ map:blocks[i].texture[1], transparent:true }),
+				new THREE.MeshLambertMaterial({ map:blocks[i].texture[2], transparent:true }),
+				new THREE.MeshLambertMaterial({ map:blocks[i].texture[3], transparent:true }),
+				new THREE.MeshLambertMaterial({ map:blocks[i].texture[4], transparent:true }),
+				new THREE.MeshLambertMaterial({ map:blocks[i].texture[5], transparent:true })
 			]; //材质对象Material
 			delete blocks[i].texture;
 			document.getElementById("schedule2").innerHTML = Math.round(i/6*100*100)/100;
@@ -887,7 +933,7 @@ let renderer_folder = gui.addFolder("渲染器(renderer)");
 	renderer_folder.addColor(renderer.color, "clearColor");
 
 window.onresize = function(){
-	if (
+	/* if (
 		Math.abs((window.innerWidth-WIDTH)/WIDTH) > 0.1 |
 		Math.abs((window.innerHeight-HEIGHT)/HEIGHT) > 0.1
 	){
@@ -914,10 +960,11 @@ window.onresize = function(){
 				}
 			}
 		},1000);
-	}
-	/*WIDTH = window.innerWidth;
-	HEIGHT = window.innerHeight;*/
+	} */
+	WIDTH = window.innerWidth;
+	HEIGHT = window.innerHeight;
 	camera.aspect = window.innerWidth / window.innerHeight;
+	camera.updateProjectionMatrix();
 	renderer.setSize(window.innerWidth, window.innerHeight);
 };
 
@@ -1128,12 +1175,21 @@ camera_folder.open();
 			camera_tools_things_folder.add(camera.userData.tools, 2, 0, 8, 1).listen().onChange(tools_things_refresh);
 			camera_tools_things_folder.add(camera.userData.tools, 3, 0, 8, 1).listen().onChange(tools_things_refresh);
 
+
 let T0 = new Date();//上次时间
 function render(){
 	let t = new Date()-T0;//时间差
 	T0 = new Date();//把本次时间赋值给上次时间
 	requestAnimationFrame(render);
 	renderer.render(scene, camera);//执行渲染操作
+	
+	for (let i=0; i<sprite_system.length; i++){
+		sprite_system[i].v -= 9.8*t/1000*100;
+		sprite_system[i].position.y += sprite_system[i].v*t/1000;
+		if (sprite_system[i].position.y < 0){
+			sprite_system.splice(i,1);
+		}
+	}
 	
 	try{
 		if (
