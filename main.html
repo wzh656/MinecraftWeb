@@ -319,12 +319,12 @@ function playBGM(){
 			bgm.volume = 1;
 			bgm.src = "./music/1.m4a";
 			bgm.play();
-			console.info("bgm begin(1):"+new Date());
+			console.log("bgm begin(1):"+new Date());
 		}else{
 			bgm.volume = 1;
 			bgm.src = "./music/2.m4a";
 			bgm.play();
-			console.info("bgm begin(2):"+new Date());
+			console.log("bgm begin(2):"+new Date());
 		}
 	}else{
 		//console.log("already", bgm.paused);
@@ -488,6 +488,118 @@ gui.close();
 /**
 * 初始化
 */
+function Thing(opinion){
+	if (opinion.id){
+		this.id = Number(opinion.id);
+	}
+	
+	if (opinion.name){
+		this.name = String(opinion.name);
+	}
+	
+	if (opinion.texture){
+		this.texture = [];
+		for (let i=0; i<opinion.texture.length; i++){
+			this.texture[i] = opinion.texture[i];
+		}
+	}
+	this.setTexture = function(texture, index){
+		if (!this.texture){
+			this.texture = [];
+		}
+		if (index){ //有索引
+			this.texture[i] = texture;
+		}else{ //无索引
+			for (let i=0; i<opinion.texture.length; i++){
+				this.texture[i] = opinion.texture[i];
+			}
+		}
+	}
+	this.deleteTexture = function(){
+		delete this.texture;
+	}
+	
+	if (opinion.material){
+		this.material = opinion.material;
+	}
+	this.makeMaterial = function(){
+		this.material = [
+			new THREE.MeshLambertMaterial({ map:this.texture[0], transparent:true }),
+			new THREE.MeshLambertMaterial({ map:this.texture[1], transparent:true }),
+			new THREE.MeshLambertMaterial({ map:this.texture[2], transparent:true }),
+			new THREE.MeshLambertMaterial({ map:this.texture[3], transparent:true }),
+			new THREE.MeshLambertMaterial({ map:this.texture[4], transparent:true }),
+			new THREE.MeshLambertMaterial({ map:this.texture[5], transparent:true })
+		]; //材质对象Material
+	}
+	
+	if (opinion.mesh){
+		this.mesh = opinion.mesh;
+	}
+	this.makeMesh = function(geometry){
+		if (geometry){
+			this.mesh = new THREE.Mesh(geometry, this.material); //网格模型对象Mesh
+		}else{ //使用默认
+			this.mesh = new THREE.Mesh(this.prototype.geometry, this.material); //网格模型对象Mesh
+		}
+		this.mesh.castShadow = true;
+		this.mesh.receiveShadow = true;
+		
+	}
+	this.addMesh = function(pos){
+		this.mesh.position.x = pos.x*100;
+		this.mesh.position.y = pos.y*100;
+		this.mesh.position.z = pos.z*100;
+		
+		scene.add(this.mesh); //网格模型添加到场景中
+		this.map[pos.x][pos.y][pos.z].mesh = this.mesh;
+		this.map[pos.x][pos.y][pos.z].id = this.id;
+		
+	}
+	
+	if (opinion.block){
+		this.block = {};
+		if (opinion.block.face){
+			this.block.face = [];
+			for (let i=0; i<opinion.block.face.length; i++){
+				if (opinion.block.face[i]){
+					this.block.face[i] = opinion.block.face[i];
+				}
+			}
+		}
+	}
+	
+	if (opinion.hold){
+		this.hold = {};
+		if (opinion.hold.tool){
+			this.hold.tool = opinion.hold.tool;
+		}
+		if (opinion.hold.head){
+			this.hold.head = opinion.hold.head;
+		}
+		if (opinion.hold.body){
+			this.hold.body = opinion.hold.body;
+		}
+		if (opinion.hold.leg){
+			this.hold.leg = opinion.hold.leg;
+		}
+		if (opinion.hold.foot){
+			this.hold.foot = opinion.hold.foot;
+		}
+	}
+}
+Thing.prototype.geometry = new THREE.BoxGeometry(100, 100, 100);
+Thing.prototype.map = [];
+for (let x=-10; x<=10; x++){
+	Thing.prototype.map[x] = [];
+	for (let y=0; y<=20; y++){
+		Thing.prototype.map[x][y] = [];
+		for (let z=-10; z<=10; z++){
+			Thing.prototype.map[x][y][z] = {};
+		}
+	}
+}
+
 const blocks = [
 	{
 		name: "空气"
