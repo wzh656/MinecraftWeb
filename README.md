@@ -1,14 +1,14 @@
 # 我的世界（仿）
-修改日期:2020.6.19
+修改日期:2020.6.21
 
 # 运行
-+ [手机版(apk)v0.4.0-alpha完整版（较大，20+MB）](https://github.com/wzh656/MinecraftWeb/releases/download/v0.4.0-alpha/Minecraft-full.apk)
++ [手机版(apk)v0.4.3-alpha完整版（较大，20+MB）](https://github.com/wzh656/MinecraftWeb/releases/download/v0.4.3-alpha/Minecraft-full.apk)
 
-+ [手机版(apk)v0.4.0-alpha简化版（在线字体、BGM，5+MB）](https://github.com/wzh656/MinecraftWeb/releases/download/v0.4.0-alpha/Minecraft-simplified.apk)
++ [手机版(apk)v0.4.3-alpha简化版（在线字体、BGM，5+MB）](https://github.com/wzh656/MinecraftWeb/releases/download/v0.4.3-alpha/Minecraft-simplified.apk)
 
 + [web版（对网速要求较高，网速慢者无法运行）](https://wzh656.github.io/MinecraftWeb/main.html)
 
-可在[后面（8.关于运行）](#关于运行)详细查看
+可在[后面（㈧关于运行）](#关于运行)详细查看
 
 提示：部分功能未完善，存在少量问题未解决
 
@@ -38,10 +38,10 @@
 + 不降水：雨滴增加率=0  
 + 降水：雨滴增加率=随机数∈[0,1)  
 
-### 之后，将每隔1ms(实际要远大于此值)检测一次，根据随机数判断是否增加雨滴。若增加，则在x∈[-1000,1000),y∈[1500,2000),z∈[-1000,1000)中的随机一位置产生雨滴。并且每次刷新帧时都将增加每个雨滴的重力加速度，使之加速下落（目前未考虑空气阻力）。
+### 之后，将每隔1ms(实际要远大于此值)检测一次，根据随机数判断是否增加雨滴。若增加，则在x∈[-1000,1000),y∈[1500,2000),z∈[-1000,1000)中的随机一位置产生 【间隔时间(ms)/3.6】 个 【宽:[3,6)px,高:[10,36)px】 的雨滴。并且每次刷新帧时都将增加每个雨滴的重力加速度，使之加速下落（目前未考虑空气阻力）。
 
 ### 关于雨滴
-雨滴是一种sprite，即只有一个面（永远平行于屏幕）的物体，颜色为`#45c`
+雨滴是一种sprite，即只有一个面（永远平行于屏幕）的物体，颜色为`#4c51a7`
 
 
 ## ㈥注意事项
@@ -106,4 +106,4 @@
 <img alt="效果图片（诡异落日）" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/1.jpg" />  
 <img alt="效果图片" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/2.png" />  
 <img alt="效果图片（虚空景观）" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/3.png" />  
-<img alt="效果图片" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/4.png" />  
+<img alt="效果图片" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/4.png" />
