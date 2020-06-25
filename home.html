@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+		<title>我的世界</title>
+
+		<!--icon-->
+		<link rel="icon" href="./img/icon.png" type="image/x-icon"/>
+		
+		<style>
+		@font-face{
+			font-family:zyyt; /*资源圆体*/
+			src:url("./fonts/zyyt.woff2");
+		}
+		
+		html{
+			-moz-user-select: none;
+			-khtml-user-select: none;
+			user-select: none;
+			
+			color: white;
+			min-height: 100%;
+			background: #1b2036 url("./img/background.jpg") no-repeat fixed center;
+			background-size: cover;
+			max-width: 100%;
+			margin: auto;
+			text-align: center;
+		}
+		body{
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			margin: 0;
+			font-family: zyyt;
+			
+			display: -webkit-flex;
+			display: -moz-box;
+			display: -mz-flexbox;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-around;
+		}
+		h1{
+			text-align: center;
+			font-size: 10vmax;
+			margin: 0;
+		}
+		button{
+			width: 66%;
+			height: 16%;
+			font-size: 6vmax;
+			margin: 0 auto;
+			font-family: zyyt, serif;
+		}
+		</style>
+		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
+		<script>new VConsole();</script>
+	</head>
+	<body>
+		<h1>我的世界</h1>
+		<button onclick="play();">开始游戏</button>
+		
+<script>
+function play(){
+	location.href = 'main.html';
+}
+</script>
+	</body>
+</html>

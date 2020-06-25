@@ -214,6 +214,7 @@
 			window.$ = window.jQuery = require("./js/jquery.min.js");
 		</script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
+		<!-- <script>new VConsole();</script> -->
 		<script src="./js/stats.min.js"></script>
 		<script src="./js/dat.gui.min.js"></script>
 		<script src="./js/three.min.js"></script>
@@ -282,7 +283,7 @@
 			推荐使用横屏运行（启用浏览器横屏或<a href="https://github.com/wzh656/MinecraftWeb/releases/download/v0.4.0-alpha/Minecraft-full.apk">下载apk（完整版）</a>or<a href="https://github.com/wzh656/MinecraftWeb/releases/download/v0.4.0-alpha/Minecraft-simplified.apk">（简化版）</a>）<br/>
 			<button onclick="this.parentElement.remove();">继续竖屏</button>
 		</h1>
-		<audio id="bgm" <!-- autoplay --> perload loop style="display: none;" src="./music/1.m4a" ></audio>
+		<audio id="bgm" perload loop style="display: none;" src="./music/1.m4a" ></audio>
 		<!--<audio id="bgm" autoplay perload loop style="display: none;" src="https://vdse.bdstatic.com/876934f28995e8042230ec598237c67e.mp4?authorization=bce-auth-v1/fb297a5cc0fb434c971b8fa103e8dd7b/2017-05-11T09:02:31Z/-1//ab5b458a478fae53b754e194ab270b96f23aa23ba71c2e63b06fc06d0543040c"></audio>-->
 		<noscript><h1 style="z-index: 3;">你的浏览器不支持JavaScript，无法运行！</h1></noscript>
 <script>
@@ -312,20 +313,33 @@ function run(code){
 	}
 }
 function playBGM(){
-	let bgm = document.getElementById("bgm");
+	let bgm = $("#bgm")[0];
 	if (bgm.paused){
 		let random = Math.random();
 		if (random < 0.5){
 			bgm.volume = 1;
 			bgm.src = "./music/1.m4a";
 			bgm.play();
-			console.log("bgm begin(1):"+new Date());
+			console.info("bgm(BackGround Music)", "begin(1.m4a)", "time:"+new Date());
 		}else{
 			bgm.volume = 1;
 			bgm.src = "./music/2.m4a";
 			bgm.play();
-			console.log("bgm begin(2):"+new Date());
+			console.info("bgm(BackGround Music)", "begin(2.m4a)", "time:"+new Date());
 		}
+		setTimeout(function(){
+		let bgm_folder = gui.addFolder("背景音乐(bgm)")
+			bgm_folder.add(bgm, "volume", 0, 1, 0.01).name("音量(volume)");
+			bgm_folder.add(bgm, "paused").name("是否暂停(paused)").listen();
+			bgm_folder.add({f:()=>{
+				bgm.pause();
+			}}, "f").name("暂停(pause)");
+			bgm_folder.add({f:()=>{
+				bgm.play();
+			}}, "f").name("播放(play)");
+			bgm_folder.add(bgm, "currentTime", 0, bgm.duration, 0.001).name("播放进度(current time)").listen();
+			bgm_folder.add(bgm, "src").name("音乐路径(src)");
+		},1000);
 	}else{
 		//console.log("already", bgm.paused);
 		bgm.play();
@@ -361,7 +375,7 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 		document.getElementById("__vconsole").childNodes[1].style.borderRadius = "66px";
 	};
 	document.body.appendChild(vconsole);*/
-	new VConsole();
+	//new VConsole();
 }else{ //电脑
 	let mouse = document.createElement("div");
 	let parts = [
@@ -572,11 +586,13 @@ function Thing(opinion){
 			if (geometry){
 				this.block.mesh = new THREE.Mesh(geometry, this.block.material); //网格模型对象Mesh
 			}else{ //使用默认
-				this.block.mesh = new THREE.Mesh(this.block.prototype.geometry, this.block.material); //网格模型对象Mesh
+				this.block.mesh = new THREE.Mesh(Thing.prototype.geometry, this.block.material); //网格模型对象Mesh
 			}
 			this.block.mesh.castShadow = true;
 			this.block.mesh.receiveShadow = true;
-			
+		}
+		this.block.deleteMesh = ()=>{
+			delete this.block.mesh;
 		}
 	}
 	
@@ -606,7 +622,10 @@ Thing.prototype.geometry = new THREE.BoxGeometry(100, 100, 100);
 
 function BlockMap(size){
 	//大小
-	this.size = [];
+	this.size = {};
+	this.size.x = size[1].x - size[0].x;
+	this.size.y = size[1].y - size[0].y;
+	this.size.z = size[1].z - size[0].z;
 	this.size[0] = {};
 	this.size[1] = {};
 	this.size[0].x = size[0].x;
@@ -629,23 +648,31 @@ function BlockMap(size){
 	}
 	
 	//添加方块
-	this.addBlock = (thing, pos)=>{
-		thing.mesh.position.x = pos.x*100;
-		thing.mesh.position.y = pos.y*100;
-		thing.mesh.position.z = pos.z*100;
+	this.add = (thing, pos)=>{
+		[pos.x, pos.y, pos.z] = [pos.x, pos.y, pos.z].map(Math.round); //规范化
 		
-		scene.add(thing.mesh); //网格模型添加到场景中
+		//console.log(thing.block.mesh, pos)
+		thing.block.mesh.position.x = pos.x*100;
+		thing.block.mesh.position.y = pos.y*100;
+		thing.block.mesh.position.z = pos.z*100;
+		
+		scene.add(thing.block.mesh); //网格模型添加到场景中
 		this.map[pos.x][pos.y][pos.z] = thing;
 	}
 	//删除方块
-	this.deleteBlock = (pos)=>{
-		scene.remove(this[pos.x][pos.y][pos.z].mesh);
-		this.map[pos.x][pos.y][pos.z] = null;
+	this.delete = (x, y, z)=>{
+		[x, y, z] = [x, y, z].map(Math.round); //规范化
+		
+		scene.remove(this[x][y][z].mesh);
+		this.map[x][y][z] = null;
 	}
 	//编辑方块
-	this.editBlock = (pos)=>{
-		return this.map[pos.x][pos.y][pos.z];
+	this.get = (x, y, z)=>{
+		[x, y, z] = [x, y, z].map(Math.round); //规范化
+		
+		return this.map[x][y][z];
 	}
+	//保存为数组字符串
 	this.save = ()=>{
 		let arr = [];
 		for (let x=this.size[0].x; x<=this.size[1].x; x++){
@@ -658,6 +685,7 @@ function BlockMap(size){
 		return JSON.stringify(arr);
 		//localStorage.setItem("我的世界.存档.方块", JSON.stringify(arr));
 	}
+	//加载保存的数组字符串
 	this.useSave = (arr)=>{
 		//let arr = JSON.parse(localStorage.getItem("我的世界.存档.方块"));
 		let index = 0;
@@ -732,9 +760,9 @@ let map = new BlockMap([
 	{x:-10, y:0, z:-10},
 	{x:10, y:20, z:10}
 ]);
-if (localStorage.getItem("我的世界.存档.方块")){
+/*if (localStorage.getItem("我的世界.存档.方块")){
 	map.useSave( JSON.parse(localStorage.getItem("我的世界.存档.方块")) );
-}/* else{ //初始化地形
+}else{ //初始化地形
 	for (let x=-10; x<=10; x++){
 		for (let y=0; y<=20; y++){
 			for (let z=-10; z<=10; z++){
@@ -754,9 +782,10 @@ if (localStorage.getItem("我的世界.存档.方块")){
 			}
 		}
 	}
-} */
+}*/
 
 function save(){
+	return;
 	localStorage.setItem("我的世界.存档.方块", map.save());
 	localStorage.setItem("我的世界.存档.玩家.位置", JSON.stringify(camera.userData.pos));
 	localStorage.setItem("我的世界.存档.玩家.朝向", JSON.stringify(camera.userData.lookAt));
@@ -779,7 +808,7 @@ let scene = new THREE.Scene();
 scene.fog = new THREE.Fog("#fff", 0.01, 200*100);
 //						 雾气颜色，近处的距离，远处的距离(66m)
 let scene_folder = gui.addFolder("场景(scene)");
-	scene_folder.add(scene.children, "length", 0, 10000);
+	scene_folder.add(scene.children, "length", 0, 10000).name("物体(object)个数").listen();
 	let scene_fog_folder = scene_folder.addFolder("雾(fog)");
 		scene_fog_folder.add(scene.fog, "far", 15*100, 1000*100, 100);
 		scene_fog_folder.add(scene.fog, "near", 0.001, 10);
@@ -790,6 +819,7 @@ let scene_folder = gui.addFolder("场景(scene)");
  * 天气(sprite精灵)
  */
 weather = Math.random()<0.5? 0: Math.abs(1-(Math.log(Math.random()+0.003)+6)/6);
+console.info(`降水概率:${weather}滴/ms`, `=${weather*1000}滴/s`, `降水范围：地图有效区域（<x:${map.size[0].x}~${map.size[1].x}>*<z:${map.size[0].z}~${map.size[1].z}>）`);
 let sprite_system = [],
 	sprite_lastTime = null,
 	sprite_material = new THREE.SpriteMaterial({
@@ -806,17 +836,15 @@ setInterval(function(){
 	if (stop)
 		return;
 	
-	console.log(t)
 	while (t--){
 		if (Math.random() <= weather){
 			//创建精灵模型对象，不需要几何体geometry参数
 			let sprite = new THREE.Sprite(sprite_material);
 			scene.add(sprite);
 			let pX = Math.random()*2000-1000, //[-1000,1000)
-				pY = Math.random()*500+1500, //[1500,2000)
+				pY = Math.random()*500*100+1000*100, //[500m,1000m)
 				pZ = Math.random()*2000-1000; //[-1000,1000)
 			
-			sprite.v = 0;
 			sprite.position.set(pX, pY, pZ); //设置精灵位置
 			//控制精灵大小，比如可视化中精灵大小表征数据大小
 			sprite.scale.set(Math.random()*3+3, Math.random()*26+10, 1); //只需要设置x、y两个分量就可以 x:[3,6) y:[10,36)
@@ -859,71 +887,64 @@ for (let i=1; i<blocks.length; i++){
 			//单个block加载完毕
 			blocks[i].block.makeMaterial();
 			blocks[i].block.deleteTexture();
-			document.getElementById("schedule2").innerHTML = Math.round(i/6*100*100)/100;
+			//blocks[i].block.makeMesh();
+			//blocks[i].block.deleteMaterial();
+			$("#schedule2").text( Math.round(i/blocks.length*100*100)/100 );
 			
 			for (let k=1; k<blocks.length; k++)
 				if (!blocks[k].block.material)
 					return;
 			
 			//所有block加载完毕
-			document.getElementById("schedule_message").innerHTML = "载入方块中……";
-			document.getElementById("schedule1").innerHTML = "50";
-			x = -10;
-			loop = setInterval(function (){
-				for (let y=0; y<=20; y++){
-					for (let z=-10; z<=10; z++){
-						document.getElementById("schedule2").innerHTML = Math.round((x+10)/20*100*100)/100;
-						if (every[x][y][z] != 0){ //非真空
-							/* if (
-								x == -10 | x == 10 |
-								y == 0 | y == 20 |
-								z == -10 | z == 10
-							){ //区块边缘 */
-								let mesh = new THREE.Mesh(block_geometry, blocks[ every[x][y][z] ].material); //网格模型对象Mesh
-								mesh.position.x = x*100;
-								mesh.position.y = y*100;
-								mesh.position.z = z*100;
-								
-								mesh.castShadow = true;
-								mesh.receiveShadow = true;
-								
-								scene.add(mesh); //网格模型添加到场景中
-								meshs[x][y][z] = mesh;
-							/* }else if (
-								every[x+1][y][z] == 0 |
-								every[x-1][y][z] == 0 |
-								every[x][y+1][z] == 0 |
-								every[x][y-1][z] == 0 |
-								every[x][y][z+1] == 0 |
-								every[x][y][z-1] == 0
-							){ //至少一个面露出
-								let mesh = new THREE.Mesh(block_geometry, blocks[ every[x][y][z] ].material); //网格模型对象Mesh
-								mesh.position.x = x*100;
-								mesh.position.y = y*100;
-								mesh.position.z = z*100;
-								
-								mesh.castShadow = true;
-								mesh.receiveShadow = true;
-								
-								scene.add(mesh); //网格模型添加到场景中
-							} */
+			$("#schedule_message").text("载入方块中……");
+			$("#schedule1").text("50");
+			if (localStorage.getItem("我的世界.存档.方块")){
+				map.useSave( JSON.parse(localStorage.getItem("我的世界.存档.方块")) );
+				console.log("achieve loading");
+				$("#schedule1").text("100");
+				//纹理贴图加载成功后，调用渲染函数执行渲染操作
+				render();
+				$("#schedule").remove();
+			}else{ //初始化地形
+				x = map.size[0].x;
+				loop = setInterval(function (){
+					for (let y=map.size[0].y; y<=map.size[1].y; y++){
+						for (let z=map.size[0].z; z<=map.size[1].z; z++){
+							let id = 0;
+							if (y == 0){
+								id = 3;
+							}else if (y == 1){
+								if (x < 0){
+									id = 1;
+								}else if (x > 6){
+									id = 2;
+								}else{
+									id = 4;
+								}
+							}
+							if (id != 0){
+								blocks[id].block.makeMesh();
+								map.add(blocks[id], {x,y,z});
+								blocks[id].block.deleteMesh();
+							}
 						}
 					}
-				}
-				
-				x++;
-				console.log("loading:", x);
-				if (x > 10){
-					console.log("achieve loading");
-					document.getElementById("schedule1").innerHTML = "100";
-					//纹理贴图加载成功后，调用渲染函数执行渲染操作
-					render();
-					document.getElementById("schedule").remove();
-					clearInterval(loop);
-					delete loop;
-					delete x;
-				}
-			},0);
+					
+					$("#schedule2").text( Math.round((x-map.size[0].x)/map.size.x*100*100)/100 );
+					
+					console.log("finish loading:", x);
+					if (++x > map.size[1].x){
+						console.log("achieve loading");
+						$("#schedule1").text("100");
+						//纹理贴图加载成功后，调用渲染函数执行渲染操作
+						render();
+						$("#schedule").remove();
+						clearInterval(loop);
+						delete loop;
+						delete x;
+					}
+				},0);
+			}
 		});
 	}
 }
@@ -1084,7 +1105,7 @@ renderer.color = {
 		return renderer.getClearColor();
 	},
 	set clearColor(value){
-		console.log(value)
+		console.log("set clear color:", value);
 		renderer.setClearColor(
 			"rgb("+
 				Math.round(value.r)+","+
@@ -1185,7 +1206,7 @@ setInterval(function(){
 			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+20, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(18,55) ))))+20 ))+
 		")"
 	);
-	console.log(
+	/*console.log(
 		"time:"+h,
 		"\nR:",
 		230/(1+Math.pow(6,-36/30*(h- dateToNumber(5,45) )))+10, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(19,25) ))))+10,
@@ -1199,7 +1220,7 @@ setInterval(function(){
 			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+10, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(18,55) ))))+10 ))+","+
 			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+20, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(18,55) ))))+20 ))+
 		")"
-	);
+	);*/
 }, 5*1000); // 5s/次
 
 
@@ -1277,7 +1298,7 @@ function tools_things_refresh(){
 				"./img/blocks/"+
 				camera.userData.tools[i]+
 				"/"+
-				blocks[ camera.userData.tools[i] ].face[0]
+				blocks[ camera.userData.tools[i] ].block.face[0]
 		;
 }
 
@@ -1348,24 +1369,25 @@ function render(){
 	requestAnimationFrame(render);
 	renderer.render(scene, camera);//执行渲染操作
 	
+	//降水雨滴
 	for (let i=0; i<sprite_system.length; i++){
-		sprite_system[i].v -= 9.8*t/1000*100;
-		sprite_system[i].position.y += sprite_system[i].v*t/1000;
+		//sprite_system[i].v -= 9.8*t/1000*100;
+		sprite_system[i].position.y -= 10*1000*t/1000; //10m/s //sprite_system[i].v*t/1000;
 		if (sprite_system[i].position.y < 0){
+			scene.remove(sprite_system[i]);
 			sprite_system.splice(i,1);
 		}
 	}
 	
+	let warn = [];
 	try{
-		if (
-			every
-				[Math.round(camera.userData.pos.x/100)]
-				[Math.round(camera.userData.pos.y/100)]
-				[Math.round(camera.userData.pos.z/100)]
+		if (map.get(camera.userData.pos.x/100,
+				camera.userData.pos.y/100,
+				camera.userData.pos.z/100)
 			!=
-				0
+				null
 		){ //头被卡住
-			console.warn("头被卡住？");
+			warn.push("头被卡住？");
 			try{
 				plus.nativeUI.toast(
 					"<font size=\"16\">想窒息吗？还往头上放方块，看你怎么出来！</font>",
@@ -1380,17 +1402,22 @@ function render(){
 				try{ plus.nativeUI.closeToast(); }catch(err){}
 			},1);
 		}
-		if (
-			every
-				[Math.round(camera.userData.pos.x/100)]
-				[Math.round(camera.userData.pos.y/100)-1]
-				[Math.round(camera.userData.pos.z/100)]
+		if (map.get(camera.userData.pos.x/100,
+				camera.userData.pos.y/100-1,
+				camera.userData.pos.z/100)
 			!=
-				0
+				null
 		){ //脚被卡住
-			console.warn("脚被卡住？");
+			warn.push("脚被卡住？");
 		}
 	}catch(err){}
+	if (warn.length){
+		if (warn[0] & warn[1]){
+			console.warn(warn[0], warn[1]);
+		}else{
+			console.warn(warn[0]);
+		}
+	}
 	
 	if (!stop){
 		camera.userData.v.y -= 9.8*t/1000*(Math.random()*0.2+0.9);
@@ -1418,25 +1445,21 @@ function render(){
 		if (camera.userData.v.x > 0){ //向前
 			for (var i=camera.userData.pos.x; i<=camera.userData.pos.x+camera.userData.v.x*t; i+=2){
 				try{
-					if (
-						every
-							[Math.round(i/100)]
-							[Math.round(camera.userData.pos.y/100)]
-							[Math.round(camera.userData.pos.z/100)]
+					if (map.get(i/100,
+							camera.userData.pos.y/100,
+							camera.userData.pos.z/100)
 						!=
-							0
+							null
 					){
 						camera.userData.v.x = 0;
 						console.log("撞到脸，s:"+((camera.userData.pos.x+camera.userData.v.x*t)-i));
 						break;
 					}
-					if (
-						every
-							[Math.round(i/100)]
-							[Math.round(camera.userData.pos.y/100)-1]
-							[Math.round(camera.userData.pos.z/100)]
+					if (map.get(i/100,
+							camera.userData.pos.y/100-1,
+							camera.userData.pos.z/100)
 						!=
-							0
+							null
 					){
 						camera.userData.v.x = 0;
 						console.log("撞到脚，s:"+((camera.userData.pos.x+camera.userData.v.x*t)-i));
@@ -1448,25 +1471,21 @@ function render(){
 		}else if (camera.userData.v.x < 0){ //向后
 			for (var i=camera.userData.pos.x; i>=camera.userData.pos.x+camera.userData.v.x*t; i-=2){
 				try{
-					if (
-						every
-							[Math.round(i/100)]
-							[Math.round(camera.userData.pos.y/100)]
-							[Math.round(camera.userData.pos.z/100)]
+					if (map.get(i/100,
+							camera.userData.pos.y/100,
+							camera.userData.pos.z/100)
 						!=
-							0
+							null
 					){
 						camera.userData.v.x = 0;
 						console.log("撞到后脑，s:"+(i-(camera.userData.pos.x+camera.userData.v.x*t)));
 						break;
 					}
-					if (
-						every
-							[Math.round(i/100)]
-							[Math.round(camera.userData.pos.y/100)-1]
-							[Math.round(camera.userData.pos.z/100)]
+					if (map.get(i/100,
+							camera.userData.pos.y/100-1,
+							camera.userData.pos.z/100)
 						!=
-							0
+							null
 					){
 						camera.userData.v.x = 0;
 						console.log("撞到脚，s:"+(i-(camera.userData.pos.x+camera.userData.v.x*t)));
@@ -1480,13 +1499,11 @@ function render(){
 		if (camera.userData.v.y > 0){ //向上
 			for (var i=camera.userData.pos.y; i<=camera.userData.pos.y+camera.userData.v.y*t; i+=3){
 				try{
-					if (
-						every
-							[Math.round(camera.userData.pos.x/100)]
-							[Math.round(i/100)]
-							[Math.round(camera.userData.pos.z/100)]
+					if (map.get(camera.userData.pos.x/100,
+							i/100,
+							camera.userData.pos.z/100)
 						!=
-							0
+							null
 					){
 						camera.userData.v.y = 0;
 						let s = (camera.userData.pos.y-150+camera.userData.v.y*t)-i;
@@ -1500,13 +1517,11 @@ function render(){
 		}else if (camera.userData.v.y < 0){ //向下
 			for (var i=camera.userData.pos.y-150; i>=camera.userData.pos.y-150+camera.userData.v.y*t; i-=3){
 				try{
-					if (
-						every
-							[Math.round(camera.userData.pos.x/100)]
-							[Math.round(i/100)]
-							[Math.round(camera.userData.pos.z/100)]
+					if (map.get(camera.userData.pos.x/100,
+							i/100,
+							camera.userData.pos.z/100)
 						!=
-							0
+							null
 					){
 						camera.userData.v.y = 0;
 						let s = i-(camera.userData.pos.y-150+camera.userData.v.y*t);
@@ -1522,25 +1537,21 @@ function render(){
 		if (camera.userData.v.z > 0){ //向右
 			for (var i=camera.userData.pos.z; i<=camera.userData.pos.z+camera.userData.v.z*t; i+=2){
 				try{
-					if (
-						every
-							[Math.round(i/100)]
-							[Math.round(camera.userData.pos.y/100)]
-							[Math.round(camera.userData.pos.z/100)]
+					if (map.get(i/100,
+							camera.userData.pos.y/100,
+							camera.userData.pos.z/100)
 						!=
-							0
+							null
 					){
 						camera.userData.v.z = 0;
 						console.log("撞到头，s:"+((camera.userData.pos.z+camera.userData.v.z*t)-i));
 						break;
 					}
-					if (
-						every
-							[Math.round(i/100)]
-							[Math.round(camera.userData.pos.y/100)-1]
-							[Math.round(camera.userData.pos.z/100)]
+					if (map.get(i/100,
+							camera.userData.pos.y/100-1,
+							camera.userData.pos.z/100)
 						!=
-							0
+							null
 					){
 						camera.userData.v.z = 0;
 						console.log("撞到腿，s:"+((camera.userData.pos.z+camera.userData.v.z*t)-i));
@@ -1552,25 +1563,21 @@ function render(){
 		}else if (camera.userData.v.z < 0){ //向左
 			for (var i=camera.userData.pos.z; i>=camera.userData.pos.z+camera.userData.v.z*t; i-=2){
 				try{
-					if (
-						every
-							[Math.round(i/100)]
-							[Math.round(camera.userData.pos.y/100)]
-							[Math.round(camera.userData.pos.z/100)]
+					if (map.get(i/100,
+							camera.userData.pos.y/100,
+							camera.userData.pos.z/100)
 						!=
-							0
+							null
 					){
 						camera.userData.v.z = 0;
 						console.log("撞到头，s:"+(i-(camera.userData.pos.z+camera.userData.v.z*t)));
 						break;
 					}
-					if (
-						every
-							[Math.round(i/100)]
-							[Math.round(camera.userData.pos.y/100)-1]
-							[Math.round(camera.userData.pos.z/100)]
+					if (map.get(i/100,
+							camera.userData.pos.y/100-1,
+							camera.userData.pos.z/100)
 						!=
-							0
+							null
 					){
 						camera.userData.v.z = 0;
 						console.log("撞到腿，s:"+(i-(camera.userData.pos.z+camera.userData.v.z*t)));
@@ -1647,7 +1654,7 @@ document.addEventListener("keydown", function (e){
 document.addEventListener("keyup", function (e){
 	keydown.delete(e.keyCode);
 });
-let last_jump = Number(new Date());
+let last_jump = Number(new Date())-1000;
 setInterval(function(){
 	if (stop){
 		keydown = new Set();
@@ -1693,49 +1700,46 @@ setInterval(function(){
 	
 	try{
 		if (
-			every
-				[Math.round((camera.userData.pos.x+x)/100)]
-				[Math.round(camera.userData.pos.y/100)]
-				[Math.round(camera.userData.pos.z/100)]
+			map.get(
+				Math.round((camera.userData.pos.x+x)/100),
+				Math.round(camera.userData.pos.y/100),
+				Math.round(camera.userData.pos.z/100))
 			!=
-				0
+				null
 		){ //无法向X移动
 			x = 0;
 		}
 	}catch(err){}
 	try{
-		if (
-			every
-				[Math.round((camera.userData.pos.x+x)/100)]
-				[Math.round(camera.userData.pos.y/100)-1]
-				[Math.round(camera.userData.pos.z/100)]
+		if (map.get(
+				Math.round((camera.userData.pos.x+x)/100),
+				Math.round(camera.userData.pos.y/100)-1,
+				Math.round(camera.userData.pos.z/100))
 			!=
-				0
+				null
 		){ //无法向X移动
 			x = 0;
 		}
 	}catch(err){}
 	
 	try{
-		if (
-			every
-				[Math.round(camera.userData.pos.x/100)]
-				[Math.round(camera.userData.pos.y/100)]
-				[Math.round((camera.userData.pos.z+z)/100)]
+		if (map.get(
+				Math.round(camera.userData.pos.x/100),
+				Math.round(camera.userData.pos.y/100),
+				Math.round((camera.userData.pos.z+z)/100))
 			!=
-				0
+				null
 		){ //无法向Z移动
 			z = 0;
 		}
 	}catch(err){}
 	try{
-		if (
-			every
-				[Math.round(camera.userData.pos.x/100)]
-				[Math.round(camera.userData.pos.y/100)-1]
-				[Math.round((camera.userData.pos.z+z)/100)]
+		if (map.get(
+				Math.round(camera.userData.pos.x/100),
+				Math.round(camera.userData.pos.y/100)-1,
+				Math.round((camera.userData.pos.z+z)/100))
 			!=
-				0
+				null
 		){ //无法向Z移动
 			z = 0;
 		}
@@ -1748,13 +1752,12 @@ setInterval(function(){
 	camera.userData.pos.z += z*(Math.random()*0.2+0.9);
 	
 	try{
-		if (
-			every
-				[Math.round(camera.userData.pos.x/100)]
-				[Math.round(camera.userData.pos.y/100)-2]
-				[Math.round(camera.userData.pos.z/100)]
+		if (map.get(
+				Math.round(camera.userData.pos.x/100),
+				Math.round(camera.userData.pos.y/100)-2,
+				Math.round(camera.userData.pos.z/100))
 			!=
-				0
+				null
 		){ //脚下有方块
 			if (Number(new Date())-last_jump >= 1000 & y != 0){
 				camera.userData.v.y += y*2*(Math.random()*0.2+0.9);
@@ -1929,9 +1932,14 @@ document.addEventListener("mousedown", function (e){
 							console.info("not free!");
 						}else{
 							console.log("delete:", click[i].object.position);
-							scene.remove(click[i].object);
+							map.map
+								[click[i].object.position.x/100]
+								[click[i].object.position.y/100]
+								[click[i].object.position.z/100]
+								
+							/*scene.remove(click[i].object);
 							camera.userData.tools[free] = every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ]; //放在手中
-							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = 0;
+							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = 0;*/
 							tools_things_refresh(); //刷新方块
 							/* if (
 								every[ click[i].object.position.x/100+1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] 
