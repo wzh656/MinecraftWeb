@@ -1,5 +1,5 @@
 # 我的世界（仿）
-修改日期:2020.6.21
+修改日期:2020.6.25
 
 # 运行
 + [手机版(apk)v0.4.3-alpha完整版（较大，20+MB）](https://github.com/wzh656/MinecraftWeb/releases/download/v0.4.3-alpha/Minecraft-full.apk)
