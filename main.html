@@ -225,7 +225,7 @@
 			window.$ = window.jQuery = require("./js/jquery.min.js");
 		</script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
-		<!-- <script>new VConsole();</script> -->
+		<script>new VConsole();</script>
 		<script src="./js/stats.min.js"></script>
 		<script src="./js/dat.gui.min.js"></script>
 		<script src="./js/three.min.js"></script>
@@ -1244,6 +1244,25 @@ document.body.appendChild(stats.dom);
 /**
 * 玩家(player)
 */
+function ray(start, end, near, far){
+	if (start.x === undefined) start.x = player.x;
+	if (start.y === undefined) start.y = player.y;
+	if (start.z === undefined) start.z = player.z;
+	if (end.x === undefined) start.x = 0;
+	if (end.y === undefined) start.y = 0;
+	if (end.z === undefined) start.z = 0;
+	
+	let ray = new THREE.Raycaster(
+		new THREE.Vector3(start.x, start.y, start.z),
+		new THREE.Vector3(end.x, end.y, end.z),
+		near,
+		far
+	);
+	ray.camera = camera;
+	let objs = ray.intersectObjects(scene.children);
+	return objs.filter(obj => obj.faceIndex !== null); //过滤
+}
+
 player = {
 	v: {
 		x: 0,
@@ -1264,22 +1283,63 @@ player = {
 	tools: [0,0,0,0],
 	choice: 0,
 	sensitivity: 0.86, //灵敏度
-	move(x, y, z){
+	move(x=player.pos.x, y=player.pos.y, z=player.pos.z){
 		[player.pos.x, player.pos.y, player.pos.z] = [x,y,z];
 	},
-	go(x=0, y=0, z=0, dx=5, dy=5, dz=5/* , bx=0, by=0, bz=0 */){
+	go(x=0, y=0, z=0/*, dx=5, dy=5, dz=5/* , bx=0, by=0, bz=0 */){
 		/* [x, y, z] = [x, y, z].map(function(value){
 			return value*(Math.random()*0.2+0.9);
 		}); */
+		//y *= -1;
+		let rt = [0,0,0];
+		if (y > 0){ //上
+			let objs = ray(
+				{y: player.pos.y+49},
+				{y: 1},
+				0,
+				y
+			);
+			if (objs.length){ //被阻挡
+				let fy = Math.min(...ray(
+					{y: player.pos.y+49},
+					{y: 1}
+				).map((v)=>{return v.point.y}))-50;
+				rt[1] = fy-(player.pos.y+y);
+				player.pos.y = fy;
+				console.log("上 碰撞",y, objs, objs.map((v)=>{return v.point.y}), fy, rt[1]);
+			}else{ //无阻挡
+				player.pos.y += y;
+				console.log("上 无碰撞",y)
+			}
+		}else if (y < 0){ //下
+			let objs = ray(
+				{y: player.pos.y-149},
+				{y: -1},
+				0,
+				-y
+			);
+			if (objs.length){ //被阻挡
+				let fy = Math.max(...ray(
+					{y: player.pos.y-149},
+					{y: -1}
+				).map((v)=>{return v.point.y}))+150;
+				rt[1] = fy-(player.pos.y+y);
+				player.pos.y = fy;
+				console.log("下 碰撞",y, objs, objs.map((v)=>{return v.point.y}), fy, rt[1]);
+			}else{ //无阻挡
+				player.pos.y += y;
+			}
+		}
+		return rt;
 		
-		if (x & z)
+		/*if (x & z)
 			console.log(x,y,z);
 		
 		let rt = [false, false, false];
 		//x
 		if (x > 0){ //向前
 			for (var i=player.pos.x; i<=player.pos.x+x; i+=dx){
-				if (map.get((i+10)/100,
+				if (map.get(i/100,
 						player.pos.y/100,
 						player.pos.z/100)
 					!=
@@ -1412,7 +1472,7 @@ player = {
 			}
 			player.pos.z = k;
 		}
-		return rt;
+		return rt;*/
 	}
 };
 
@@ -1600,7 +1660,7 @@ function render(){
 				player.v.z
 		;
 		
-		let rt = player.go(player.v.x*t, player.v.y*t, player.v.z*t, 2, 3, 2);
+		let rt = player.go(player.v.x*t/1000*100, player.v.y*t/1000*100, player.v.z*t/1000*100, 2, 3, 2);
 		if (rt[0]) player.v.x = 0;
 		if (rt[1]) player.v.y = 0;
 		if (rt[2]) player.v.x = 0;
@@ -2760,7 +2820,7 @@ function get_choice_object(phone, x, y){
 	if(intersects.length){
 		return intersects;
 	}
-	return undefined;
+	return null;
 }
 
 //屏蔽鼠标右键
@@ -2770,9 +2830,9 @@ document.oncontextmenu = function (e){
 	return false;
 };
 //屏蔽选择文字
-document.onselectstart = function (){
+/*document.onselectstart = function (){
 	return false;
-};
+};*/
 </script>
 	</body>
 </html>
