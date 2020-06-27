@@ -1283,25 +1283,25 @@ player = {
 	tools: [0,0,0,0],
 	choice: 0,
 	sensitivity: 0.86, //灵敏度
-	move(x=player.pos.x, y=player.pos.y, z=player.pos.z){
+	move (x=player.pos.x, y=player.pos.y, z=player.pos.z){
 		[player.pos.x, player.pos.y, player.pos.z] = [x,y,z];
 	},
-	go(x=0, y=0, z=0/*, dx=5, dy=5, dz=5/* , bx=0, by=0, bz=0 */){
-		/* [x, y, z] = [x, y, z].map(function(value){
+	go (x=0, y=0, z=0){
+		[x, y, z] = [x, y, z].map(function(value){
 			return value*(Math.random()*0.2+0.9);
-		}); */
-		//y *= -1;
-		let rt = [0,0,0];
+		}); //随机化
+		
+		let rt = [0,0,0]; //返回值
 		if (y > 0){ //上
 			let objs = ray(
-				{y: player.pos.y+49},
+				{y: player.pos.y+50},
 				{y: 1},
 				0,
 				y
 			);
 			if (objs.length){ //被阻挡
 				let fy = Math.min(...ray(
-					{y: player.pos.y+49},
+					{y: player.pos.y+50},
 					{y: 1}
 				).map((v)=>{return v.point.y}))-50;
 				rt[1] = fy-(player.pos.y+y);
@@ -1313,14 +1313,14 @@ player = {
 			}
 		}else if (y < 0){ //下
 			let objs = ray(
-				{y: player.pos.y-149},
+				{y: player.pos.y-150},
 				{y: -1},
 				0,
 				-y
 			);
 			if (objs.length){ //被阻挡
 				let fy = Math.max(...ray(
-					{y: player.pos.y-149},
+					{y: player.pos.y-150},
 					{y: -1}
 				).map((v)=>{return v.point.y}))+150;
 				rt[1] = fy-(player.pos.y+y);
@@ -1328,6 +1328,7 @@ player = {
 				console.log("下 碰撞",y, objs, objs.map((v)=>{return v.point.y}), fy, rt[1]);
 			}else{ //无阻挡
 				player.pos.y += y;
+				console.log("下 无碰撞",y)
 			}
 		}
 		return rt;
@@ -1529,9 +1530,9 @@ camera_folder.open();
 	let camera_position_folder = camera_folder.addFolder("位置/px");
 	camera_position_folder.open();
 		camera_position_folder.add(player.pos, "x", -1000, 1000, 0.01).listen();
-		camera_position_folder.add(player.pos, "y", -1000, 1000, 0.01).listen();
+		camera_position_folder.add(player.pos, "y", -1000, 2000, 0.01).listen();
 		camera_position_folder.add(player.pos, "z", -1000, 1000, 0.01).listen();
-	let camera_v_folder = camera_folder.addFolder("速度/(px/s)");
+	let camera_v_folder = camera_folder.addFolder("速度/(m/s)");
 		camera_v_folder.add(player.v, "x", -10, 10,1e-3).listen();
 		camera_v_folder.add(player.v, "y", -10, 10,1e-3).listen();
 		camera_v_folder.add(player.v, "z", -10, 10,1e-3).listen();
@@ -1591,7 +1592,7 @@ function render(){
 	//降水雨滴
 	for (let i=0; i<sprite_system.length; i++){
 		//sprite_system[i].v -= 9.8*t/1000*100;
-		sprite_system[i].position.y -= 10*1000*t/1000; //10m/s //sprite_system[i].v*t/1000;
+		sprite_system[i].position.y -= 10*1000*t/1000*(Math.random()*0.2+0.9); //10m/s //sprite_system[i].v*t/1000;
 		if (sprite_system[i].position.y < 0){
 			scene.remove(sprite_system[i]);
 			sprite_system.splice(i,1);
@@ -1639,28 +1640,41 @@ function render(){
 	}
 	
 	if (!stop){
-		player.v.y -= 9.8*t/1000*(Math.random()*0.2+0.9);
-		let kf = 16*(Math.random()*0.2+0.9); //空气阻力系数
-		player.v.x -=
-			Math.abs(kf*0.25*player.v.x*t/1000) < Math.abs(player.v.x)?
-				kf*0.25*player.v.x*t/1000
+		let ρ = 1.25, //空气密度/(kg/m³)
+			c = 0.4, //空气阻力系数
+			s = [0.5, 0.2, 0.5], //面积/m²
+			v = [player.v.x, player.v.y, player.v.z], //速度/(m/s)
+			Fw = [], //空气阻力/N
+			m = 50, //质量/m
+			Aw = [] //空气阻力产生的加速度/(m/s²)
+		for (let i=0; i<3; i++){
+			Fw[i] = (1/2) * c * ρ * s[i] * v[i]*v[i]; //F = (1/2)CρSV²
+			Aw[i] = Fw[i] / m; //F=ma => a=F/m
+		}
+		console.info("v:", player.v)
+		player.v.y -= 9.8*t/1000*(Math.random()*0.2+0.9); //重力加速度
+		player.v.x +=
+			Math.abs(Aw[0]*t/1000) < Math.abs(player.v.x)?
+				Aw[0]*t/1000
 			:
 				player.v.x
 		;
-		player.v.y -=
-			Math.abs(kf*0.05*player.v.y*t/1000) < Math.abs(player.v.y)?
-				kf*0.05*player.v.y*t/1000
+		player.v.y +=
+			Math.abs(Aw[1]*t/1000) < Math.abs(player.v.y)?
+				Aw[1]*t/1000
 			:
 				player.v.y
 		;
-		player.v.z -=
-			Math.abs(kf*0.25*player.v.z*t/1000) < Math.abs(player.v.z)?
-				kf*0.25*player.v.z*t/1000
+		player.v.z +=
+			Math.abs(Aw[2]*t/1000) < Math.abs(player.v.z)?
+				Aw[2]*t/1000
 			:
 				player.v.z
 		;
+		console.info("aw:",Aw, "Fw:",Fw, "v:", player.v)
 		
-		let rt = player.go(player.v.x*t/1000*100, player.v.y*t/1000*100, player.v.z*t/1000*100, 2, 3, 2);
+		let rt = player.go(player.v.x*100*t/1000, player.v.y*100*t/1000, player.v.z*100*t/1000);
+		//					m/s*100*ms/1000 => cm/s*s => cm => px
 		if (rt[0]) player.v.x = 0;
 		if (rt[1]) player.v.y = 0;
 		if (rt[2]) player.v.x = 0;
