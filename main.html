@@ -152,6 +152,10 @@
 				border: 3px #fff outset;
 				padding: 1.6vw;
 			}
+			#command{
+				width: 86.66%;
+				height: 86.66%;
+			}
 			
 			#command > textarea{
 				width: 100%;
@@ -242,7 +246,11 @@
 		</div>
 		
 		<div id="command">
-			<textarea></textarea>
+			<textarea>
+deskgood.goY(10000*100);
+deskgood.move(0,10000*100,0);
+deskgood.moveTo(0,10000*100);
+//这是注释，告诉你这三个命令都可以把deskgood送上万米高空"))</textarea>
 			<button onclick="state('command');">关闭</button>
 			<button onclick="run($('#command > textarea').val());">运行</button>
 		</div>
@@ -824,15 +832,18 @@ let map = new BlockMap([
 function save(){
 	return;
 	localStorage.setItem("我的世界.存档.方块", map.save());
-	localStorage.setItem("我的世界.存档.玩家.位置", JSON.stringify(player.pos));
-	localStorage.setItem("我的世界.存档.玩家.朝向", JSON.stringify(player.lookAt));
+	localStorage.setItem("我的世界.存档.玩家.位置", JSON.stringify(deskgood.pos));
+	localStorage.setItem("我的世界.存档.玩家.朝向", JSON.stringify(deskgood.lookAt));
 	localStorage.setItem("我的世界.存档.玩家.物品.工具栏", JSON.stringify({
-		tools: player.tools,
-		choice: player.choice
+		tools: deskgood.tools,
+		choice: deskgood.choice
 	}));
 	console.log("备份成功");
 }
 setInterval(save, 60*1000);
+gui.add({f:function(){
+	run(prompt("请输入命令：","deskgood.goY(3000*100);"))
+}}, "f").name("运行(run)命令");
 gui.add(window, "save").name("保存(save)");
 gui.add(location, "reload").name("刷新(reload)");
 window.addEventListener("beforeunload", save);
@@ -1242,15 +1253,15 @@ document.body.appendChild(stats.dom);
 
 
 /**
-* 玩家(player)
+* 玩家(deskgood)
 */
 function ray(start, end, near, far){
-	if (start.x === undefined) start.x = player.x;
-	if (start.y === undefined) start.y = player.y;
-	if (start.z === undefined) start.z = player.z;
-	if (end.x === undefined) start.x = 0;
-	if (end.y === undefined) start.y = 0;
-	if (end.z === undefined) start.z = 0;
+	if (start.x === undefined) start.x = deskgood.pos.x;
+	if (start.y === undefined) start.y = deskgood.pos.y;
+	if (start.z === undefined) start.z = deskgood.pos.z;
+	if (end.x === undefined) end.x = 0;
+	if (end.y === undefined) end.y = 0;
+	if (end.z === undefined) end.z = 0;
 	
 	let ray = new THREE.Raycaster(
 		new THREE.Vector3(start.x, start.y, start.z),
@@ -1263,7 +1274,7 @@ function ray(start, end, near, far){
 	return objs.filter(obj => obj.faceIndex !== null); //过滤
 }
 
-player = {
+var deskgood = {
 	v: {
 		x: 0,
 		y: 0,
@@ -1272,8 +1283,22 @@ player = {
 	pos: camera.position,
 	up: camera.up,
 	lookAt: {
-		left_right: 0,
-		top_bottom: -30
+		_left_right: 0,
+		_top_bottom: -10,
+		get left_right(){
+			return this._left_right;
+		},
+		set left_right(value){
+			this._left_right = value;
+			deskgood.look_refresh();
+		},
+		get top_bottom(){
+			return this._top_bottom;
+		},
+		set top_bottom(value){
+			this._top_bottom = value;
+			deskgood.look_refresh();
+		}
 	},
 	look: {
 		x: 1,
@@ -1282,53 +1307,133 @@ player = {
 	},
 	tools: [0,0,0,0],
 	choice: 0,
-	sensitivity: 0.86, //灵敏度
-	move (x=player.pos.x, y=player.pos.y, z=player.pos.z){
-		[player.pos.x, player.pos.y, player.pos.z] = [x,y,z];
+	sensitivity: 1, //灵敏度
+	tools_choice_refresh(){
+		for (let i in deskgood.tools){
+			$("#tools > img:eq("+i+")")
+				.css("borderColor", (i==deskgood.choice)?"#fff":"#aaa")
+				.css("borderWidth", (i==deskgood.choice)?"6px":"3px");
+		}
+	},
+	tools_things_refresh(){
+		for (let i in deskgood.tools)
+			$("#tools > img")[i].src =
+				deskgood.tools[i] == 0?
+					"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP4//8/AwAI/AL+eMSysAAAAABJRU5ErkJggg==" //透明图片
+				:
+					"./img/blocks/"+
+					deskgood.tools[i]+
+					"/"+
+					blocks[ deskgood.tools[i] ].block.face[0]
+			;
+	},
+	look_refresh(x,y,z){
+		if (x != undefined | y != undefined | z != undefined){
+			[x,y,z] = [x||deskgood.look.x, y||deskgood.look.y, z||deskgood.look.z];
+			let v = new THREE.Vector3(x,y,z).setLength(1); //单位向量（标准化）
+			camera.lookAt(deskgood.pos.x+v.x, deskgood.pos.y+v.y, deskgood.pos.z+v.z);
+			[deskgood.look.x, deskgood.look.y, deskgood.look.z] = [v.x, v.y, v.z];
+		}else{
+			let x =
+				Math.cos(deskgood.lookAt.left_right/180*Math.PI)*
+				Math.cos(deskgood.lookAt.top_bottom/180*Math.PI)
+			;
+			let z =
+				Math.sin(deskgood.lookAt.left_right/180*Math.PI)*
+				Math.cos(deskgood.lookAt.top_bottom/180*Math.PI)
+			;
+			let y = Math.sin(deskgood.lookAt.top_bottom/180*Math.PI);
+			camera.lookAt(deskgood.pos.x+x, deskgood.pos.y+y, deskgood.pos.z+z);
+			[deskgood.look.x, deskgood.look.y, deskgood.look.z] = [x,y,z];
+		}
+	},
+	move (x=deskgood.pos.x, y=deskgood.pos.y, z=deskgood.pos.z){
+		[x, y, z] = [x, y, z].map(
+			value => value+(200*Math.random()-100)
+		); //随机化
+		
+		[deskgood.pos.x, deskgood.pos.y, deskgood.pos.z] = [x,y,z];
 	},
 	go (x=0, y=0, z=0){
-		[x, y, z] = [x, y, z].map(function(value){
-			return value*(Math.random()*0.2+0.9);
-		}); //随机化
+		[x, y, z] = [x, y, z].map(
+			value => value*(Math.random()*0.2+0.9)
+		); //随机化
 		
 		let rt = [0,0,0]; //返回值
+		//X
+		if (x > 0){
+			let objs = ray(
+				{x: deskgood.pos.x+50},
+				{x: 1},
+				0,
+				x
+			);
+			if (objs.length){ //被阻挡
+				let fx = Math.min(...objs.map(v => v.point.x))-50; //获取碰撞点，计算移动位置
+				rt[1] = fx-(deskgood.pos.x+x);
+				deskgood.pos.x = fx;
+				console.log("x+ 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), fx, rt[1])
+			}else{ //无阻挡
+				deskgood.pos.x += x;
+				console.log("x+ 无碰撞",x)
+			}
+		}else if (x < 0){
+			let objs = ray(
+				{x: deskgood.pos.x-50},
+				{x: -1},
+				0,
+				-x
+			);
+			if (objs.length){ //被阻挡
+				let fx = Math.max(...objs.map(v => v.point.x))+50; //获取碰撞点，计算移动位置
+				rt[1] = fx-(deskgood.pos.x+x);
+				deskgood.pos.x = fx;
+				console.log("x- 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), fx, rt[1])
+			}else{ //无阻挡
+				deskgood.pos.x += x;
+				console.log("x- 无碰撞",x)
+			}
+		}
+		//Y
 		if (y > 0){ //上
 			let objs = ray(
-				{y: player.pos.y+50},
+				{y: deskgood.pos.y+50},
 				{y: 1},
 				0,
 				y
 			);
 			if (objs.length){ //被阻挡
-				let fy = Math.min(...ray(
-					{y: player.pos.y+50},
+				/*let fy = Math.min(...ray(
+					{y: deskgood.pos.y+50},
 					{y: 1}
-				).map((v)=>{return v.point.y}))-50;
-				rt[1] = fy-(player.pos.y+y);
-				player.pos.y = fy;
-				console.log("上 碰撞",y, objs, objs.map((v)=>{return v.point.y}), fy, rt[1]);
+				).map(v => v.point.y))-50;*/
+				let fy = Math.min(...objs.map(v => v.point.y))-50; //获取碰撞点，计算移动位置
+				rt[1] = fy-(deskgood.pos.y+y);
+				deskgood.pos.y = fy;
+				//console.log("y+ 碰撞",y, objs, objs.map(v => v.point.y), fy, rt[1])
 			}else{ //无阻挡
-				player.pos.y += y;
-				console.log("上 无碰撞",y)
+				deskgood.pos.y += y;
+				//console.log("y+ 无碰撞",y)
 			}
 		}else if (y < 0){ //下
 			let objs = ray(
-				{y: player.pos.y-150},
+				{y: deskgood.pos.y-150},
 				{y: -1},
 				0,
 				-y
 			);
 			if (objs.length){ //被阻挡
-				let fy = Math.max(...ray(
-					{y: player.pos.y-150},
+				/*let fy = Math.max(...ray(
+					{y: deskgood.pos.y-150},
 					{y: -1}
-				).map((v)=>{return v.point.y}))+150;
-				rt[1] = fy-(player.pos.y+y);
-				player.pos.y = fy;
-				console.log("下 碰撞",y, objs, objs.map((v)=>{return v.point.y}), fy, rt[1]);
+				).map(v => v.point.y))+150;*/
+				let fy = Math.max(...objs.map(v => v.point.y))+150; //获取碰撞点，计算移动位置
+				rt[1] = fy-(deskgood.pos.y+y);
+				deskgood.pos.y = fy;
+				//console.log("y- 碰撞",y, objs, objs.map(v => v.point.y), fy, rt[1])
 			}else{ //无阻挡
-				player.pos.y += y;
-				console.log("下 无碰撞",y)
+				deskgood.pos.y += y;
+				//console.log("y- 无碰撞",y)
 			}
 		}
 		return rt;
@@ -1339,212 +1444,201 @@ player = {
 		let rt = [false, false, false];
 		//x
 		if (x > 0){ //向前
-			for (var i=player.pos.x; i<=player.pos.x+x; i+=dx){
+			for (var i=deskgood.pos.x; i<=deskgood.pos.x+x; i+=dx){
 				if (map.get(i/100,
-						player.pos.y/100,
-						player.pos.z/100)
+						deskgood.pos.y/100,
+						deskgood.pos.z/100)
 					!=
 						null
 				){
 					rt[0] = true;
-					console.log("撞到脸，s:"+((player.pos.x+x)-i));
+					console.log("撞到脸，s:"+((deskgood.pos.x+x)-i));
 					break;
 				}
 				if (map.get((i+10)/100,
-						player.pos.y/100-1,
-						player.pos.z/100)
+						deskgood.pos.y/100-1,
+						deskgood.pos.z/100)
 					!=
 						null
 				){
 					rt[0] = true;
-					console.log("撞到脚，s:"+((player.pos.x+x)-i));
+					console.log("撞到脚，s:"+((deskgood.pos.x+x)-i));
 					break;
 				}
 			}
-			player.pos.x = i;
+			deskgood.pos.x = i;
 		}else if (x < 0){ //向后
-			for (var i=player.pos.x; i>=player.pos.x+x; i-=dx){
+			for (var i=deskgood.pos.x; i>=deskgood.pos.x+x; i-=dx){
 				if (map.get((i-10)/100,
-						player.pos.y/100,
-						player.pos.z/100)
+						deskgood.pos.y/100,
+						deskgood.pos.z/100)
 					!=
 						null
 				){
 					rt[0] = true;
-					console.log("撞到后脑，s:"+(i-(player.pos.x+x)));
+					console.log("撞到后脑，s:"+(i-(deskgood.pos.x+x)));
 					break;
 				}
 				if (map.get((i-10)/100,
-						player.pos.y/100-1,
-						player.pos.z/100)
+						deskgood.pos.y/100-1,
+						deskgood.pos.z/100)
 					!=
 						null
 				){
 					rt[0] = true;
-					console.log("撞到脚，s:"+(i-(player.pos.x+x)));
+					console.log("撞到脚，s:"+(i-(deskgood.pos.x+x)));
 					break;
 				}
 			}
-			player.pos.x = i;
+			deskgood.pos.x = i;
 		}
 		//y
 		if (y > 0){ //向上
-			for (var j=player.pos.y; j<=player.pos.y+y; j+=dy){
-				if (map.get(player.pos.x/100,
+			for (var j=deskgood.pos.y; j<=deskgood.pos.y+y; j+=dy){
+				if (map.get(deskgood.pos.x/100,
 						j/100,
-						player.pos.z/100)
+						deskgood.pos.z/100)
 					!=
 						null
 				){
 					rt[1] = true;
-					let s = (player.pos.y-150+y)-j;
+					let s = (deskgood.pos.y-150+y)-j;
 					if (s)
 						console.log("撞到天花板，s:", s);
 					break;
 				}
 			}
-			player.pos.y = j;
+			deskgood.pos.y = j;
 		}else if (y < 0){ //向下
-			for (var j=player.pos.y-150; j>=player.pos.y-150+y; j-=dy){
-				if (map.get(player.pos.x/100,
+			for (var j=deskgood.pos.y-150; j>=deskgood.pos.y-150+y; j-=dy){
+				if (map.get(deskgood.pos.x/100,
 						j/100,
-						player.pos.z/100)
+						deskgood.pos.z/100)
 					!=
 						null
 				){
 					rt[1] = true;
-					let s = j-(player.pos.y-150+y);
+					let s = j-(deskgood.pos.y-150+y);
 					if (s)
 						// console.log("撞到地面，s:", s);
 					break;
 				}
 			}
-			player.pos.y = j+150;
+			deskgood.pos.y = j+150;
 		}
 		
 		//z
 		if (z > 0){ //向右
-			for (var k=player.pos.z; k<=player.pos.z+z; k+=dz){
+			for (var k=deskgood.pos.z; k<=deskgood.pos.z+z; k+=dz){
 				if (map.get((k+10)/100,
-						player.pos.y/100,
-						player.pos.z/100)
+						deskgood.pos.y/100,
+						deskgood.pos.z/100)
 					!=
 						null
 				){
 					rt[2] = true;
-					console.log("撞到头，s:"+((player.pos.z+z)-i));
+					console.log("撞到头，s:"+((deskgood.pos.z+z)-i));
 					break;
 				}
 				if (map.get((k+10)/100,
-						player.pos.y/100-1,
-						player.pos.z/100)
+						deskgood.pos.y/100-1,
+						deskgood.pos.z/100)
 					!=
 						null
 				){
 					rt[2] = true;
 					debugger
-					console.log("撞到腿，s:"+((player.pos.z+z)-k));
+					console.log("撞到腿，s:"+((deskgood.pos.z+z)-k));
 					break;
 				}
 			}
-			player.pos.z = k;
+			deskgood.pos.z = k;
 		}else if (z < 0){ //向左
-			for (var k=player.pos.z; k>=player.pos.z+z; k-=dz){
+			for (var k=deskgood.pos.z; k>=deskgood.pos.z+z; k-=dz){
 				if (map.get((k-10)/100,
-						player.pos.y/100,
-						player.pos.z/100)
+						deskgood.pos.y/100,
+						deskgood.pos.z/100)
 					!=
 						null
 				){
 					rt[2] = true;
-					console.log("撞到头，s:"+(k-(player.pos.z+z)));
+					console.log("撞到头，s:"+(k-(deskgood.pos.z+z)));
 					break;
 				}
 				if (map.get((k-10)/100,
-						player.pos.y/100-1,
-						player.pos.z/100)
+						deskgood.pos.y/100-1,
+						deskgood.pos.z/100)
 					!=
 						null
 				){
 					rt[2] = true;
-					console.log("撞到腿，s:"+(k-(player.pos.z+z)));
+					console.log("撞到腿，s:"+(k-(deskgood.pos.z+z)));
 					break;
 				}
 			}
-			player.pos.z = k;
+			deskgood.pos.z = k;
 		}
 		return rt;*/
 	}
-};
+}
+deskgood.moveTo = deskgood.move;
+deskgood.goX = x=>deskgood.go(x);
+deskgood.goY = y=>deskgood.go(0,y);
+deskgood.goZ = z=>deskgood.go(0,0,z);
 
 //读取
 if (localStorage.getItem("我的世界.存档.玩家.位置")){
-	player.pos.x = JSON.parse(localStorage.getItem("我的世界.存档.玩家.位置")).x;
-	player.pos.y = JSON.parse(localStorage.getItem("我的世界.存档.玩家.位置")).y;
-	player.pos.z = JSON.parse(localStorage.getItem("我的世界.存档.玩家.位置")).z;
+	deskgood.pos.x = JSON.parse(localStorage.getItem("我的世界.存档.玩家.位置")).x;
+	deskgood.pos.y = JSON.parse(localStorage.getItem("我的世界.存档.玩家.位置")).y;
+	deskgood.pos.z = JSON.parse(localStorage.getItem("我的世界.存档.玩家.位置")).z;
 }
 if (localStorage.getItem("我的世界.存档.玩家.朝向")){
-	player.lookAt.left_right = JSON.parse(localStorage.getItem("我的世界.存档.玩家.朝向")).left_right;
-	player.lookAt.top_bottom = JSON.parse(localStorage.getItem("我的世界.存档.玩家.朝向")).top_bottom;
+	deskgood.lookAt.left_right = JSON.parse(localStorage.getItem("我的世界.存档.玩家.朝向")).left_right;
+	deskgood.lookAt.top_bottom = JSON.parse(localStorage.getItem("我的世界.存档.玩家.朝向")).top_bottom;
 }
 if (localStorage.getItem("我的世界.存档.玩家.物品.工具栏")){
-	player.tools = JSON.parse(localStorage.getItem("我的世界.存档.玩家.物品.工具栏")).tools;
-	player.choice = Number(JSON.parse(localStorage.getItem("我的世界.存档.玩家.物品.工具栏")).choice);
+	deskgood.tools = JSON.parse(localStorage.getItem("我的世界.存档.玩家.物品.工具栏")).tools;
+	deskgood.choice = Number(JSON.parse(localStorage.getItem("我的世界.存档.玩家.物品.工具栏")).choice);
 }
 
-for (let i in player.tools){
-	/* if (player.tools[i] != 0){
-		$("#tools > img")[i].src = "./img/blocks/"+player.tools[i]+"/"+blocks[player.tools[i]].face[0];
+for (let i in deskgood.tools){
+	/* if (deskgood.tools[i] != 0){
+		$("#tools > img")[i].src = "./img/blocks/"+deskgood.tools[i]+"/"+blocks[deskgood.tools[i]].face[0];
 	} */
 	$("#tools > img")[i].onclick = ()=>{
-		player.choice = i;
-		tools_choice_refresh();
+		deskgood.choice = i;
+		deskgood.tools_choice_refresh();
 	};
 }
-tools_choice_refresh();
-tools_things_refresh();
-function tools_choice_refresh(){
-	for (let i in player.tools){
-		$("#tools > img")[i].style.borderColor = (i == player.choice)? "#fff": "#aaa";
-		$("#tools > img")[i].style.borderWidth = (i == player.choice)? "6px": "3px";
-	}
-}
-function tools_things_refresh(){
-	for (let i in player.tools)
-		$("#tools > img")[i].src =
-			player.tools[i] == 0?
-				"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP4//8/AwAI/AL+eMSysAAAAABJRU5ErkJggg==" //透明图片
-			:
-				"./img/blocks/"+
-				player.tools[i]+
-				"/"+
-				blocks[ player.tools[i] ].block.face[0]
-		;
-}
+
+//初始化
+deskgood.tools_choice_refresh();
+deskgood.tools_things_refresh();
+deskgood.look_refresh();
 
 //gui
 let camera_folder = gui.addFolder("玩家/观察者(camera)");
 camera_folder.open();
 	camera_folder.add(window, "stop").listen();
-	camera_folder.add(player, "sensitivity", 1e-1, 1e1).name("灵敏度");
+	camera_folder.add(deskgood, "sensitivity", 0.1, 10).name("灵敏度");
 	let camera_position_folder = camera_folder.addFolder("位置/px");
 	camera_position_folder.open();
-		camera_position_folder.add(player.pos, "x", -1000, 1000, 0.01).listen();
-		camera_position_folder.add(player.pos, "y", -1000, 2000, 0.01).listen();
-		camera_position_folder.add(player.pos, "z", -1000, 1000, 0.01).listen();
+		camera_position_folder.add(deskgood.pos, "x", -1000, 1000, 0.01).listen();
+		camera_position_folder.add(deskgood.pos, "y", -1000, 2000, 0.01).listen();
+		camera_position_folder.add(deskgood.pos, "z", -1000, 1000, 0.01).listen();
 	let camera_v_folder = camera_folder.addFolder("速度/(m/s)");
-		camera_v_folder.add(player.v, "x", -10, 10,1e-3).listen();
-		camera_v_folder.add(player.v, "y", -10, 10,1e-3).listen();
-		camera_v_folder.add(player.v, "z", -10, 10,1e-3).listen();
+		camera_v_folder.add(deskgood.v, "x", -10, 10,1e-3).listen();
+		camera_v_folder.add(deskgood.v, "y", -10, 10,1e-3).listen();
+		camera_v_folder.add(deskgood.v, "z", -10, 10,1e-3).listen();
 	let camera_lookAt_folder = camera_folder.addFolder("朝向（球坐标系）");
-		camera_lookAt_folder.add(player.lookAt, "left_right", 0, 360).listen().name("左右（水平）");
-		camera_lookAt_folder.add(player.lookAt, "top_bottom", -90, 90).listen().name("上下（竖直）");
+		camera_lookAt_folder.add(deskgood.lookAt, "left_right", 0, 360).listen().name("左右（水平）");
+		camera_lookAt_folder.add(deskgood.lookAt, "top_bottom", -90, 90).listen().name("上下（竖直）");
 	let camera_look_folder = camera_folder.addFolder("朝向（笛卡尔坐标系）");
-		camera_look_folder.add(player.look, "x", 0, 1, 0.01).listen();
-		camera_look_folder.add(player.look, "y", 0, 1, 0.01).listen();
-		camera_look_folder.add(player.look, "z", 0, 1, 0.01).listen();
+		camera_look_folder.add(deskgood.look, "x", -1, 1, 0.01).listen().onChange(x => deskgood.look_refresh(x));
+		camera_look_folder.add(deskgood.look, "y", -1, 1, 0.01).listen().onChange(y => deskgood.look_refresh(undefined, y));
+		camera_look_folder.add(deskgood.look, "z", -1, 1, 0.01).listen().onChange(z => deskgood.look_refresh(undefined, undefined, z));
 	let camera_up_folder = camera_folder.addFolder("天旋地转（小心头晕）");
-		camera_up_folder.add(player.up, "x", -1, 1, 0.01).onChange(function(){ try{
+		camera_up_folder.add(deskgood.up, "x", -1, 1, 0.01).onChange(function(){ try{
 			plus.nativeUI.toast(
 				"<font size=\"16\">头晕别怪我</font>",
 				{
@@ -1553,7 +1647,7 @@ camera_folder.open();
 					richTextStyle: {align:"center"}
 				}
 			); }catch(err){} });
-		camera_up_folder.add(player.up, "y", -1, 1, 0.01).onChange(function(){ try{
+		camera_up_folder.add(deskgood.up, "y", -1, 1, 0.01).onChange(function(){ try{
 			plus.nativeUI.toast(
 				"<font size=\"16\">头晕别怪我</font>",
 				{
@@ -1562,7 +1656,7 @@ camera_folder.open();
 					richTextStyle: {align:"center"}
 				}
 			); }catch(err){} });
-		camera_up_folder.add(player.up, "z", -1, 1, 0.01).onChange(function(){ try{
+		camera_up_folder.add(deskgood.up, "z", -1, 1, 0.01).onChange(function(){ try{
 			plus.nativeUI.toast(
 				"<font size=\"16\">头晕别怪我</font>",
 				{
@@ -1573,13 +1667,13 @@ camera_folder.open();
 			); }catch(err){} });
 	let camera_tools_folder = camera_folder.addFolder("工具栏(tools)");
 	camera_tools_folder.open();
-		camera_tools_folder.add(player, "choice", 0, 3, 1).listen().name("选择工具").onChange(tools_choice_refresh);
+		camera_tools_folder.add(deskgood, "choice", 0, 3, 1).listen().name("选择工具").onChange(deskgood.tools_choice_refresh);
 		let camera_tools_things_folder = camera_tools_folder.addFolder("物品");
 		camera_tools_things_folder.open();
-			camera_tools_things_folder.add(player.tools, 0, 0, 8, 1).listen().onChange(tools_things_refresh);
-			camera_tools_things_folder.add(player.tools, 1, 0, 8, 1).listen().onChange(tools_things_refresh);
-			camera_tools_things_folder.add(player.tools, 2, 0, 8, 1).listen().onChange(tools_things_refresh);
-			camera_tools_things_folder.add(player.tools, 3, 0, 8, 1).listen().onChange(tools_things_refresh);
+			camera_tools_things_folder.add(deskgood.tools, 0, 0, 8, 1).listen().onChange(deskgood.tools_things_refresh);
+			camera_tools_things_folder.add(deskgood.tools, 1, 0, 8, 1).listen().onChange(deskgood.tools_things_refresh);
+			camera_tools_things_folder.add(deskgood.tools, 2, 0, 8, 1).listen().onChange(deskgood.tools_things_refresh);
+			camera_tools_things_folder.add(deskgood.tools, 3, 0, 8, 1).listen().onChange(deskgood.tools_things_refresh);
 
 
 let T0 = new Date();//上次时间
@@ -1601,9 +1695,9 @@ function render(){
 	
 	let warn = [];
 	try{
-		if (map.get(player.pos.x/100,
-				player.pos.y/100,
-				player.pos.z/100)
+		if (map.get(deskgood.pos.x/100,
+				deskgood.pos.y/100,
+				deskgood.pos.z/100)
 			!=
 				null
 		){ //头被卡住
@@ -1622,9 +1716,9 @@ function render(){
 				try{ plus.nativeUI.closeToast(); }catch(err){}
 			},1);
 		}
-		if (map.get(player.pos.x/100,
-				player.pos.y/100-1,
-				player.pos.z/100)
+		if (map.get(deskgood.pos.x/100,
+				deskgood.pos.y/100-1,
+				deskgood.pos.z/100)
 			!=
 				null
 		){ //脚被卡住
@@ -1643,7 +1737,7 @@ function render(){
 		let ρ = 1.25, //空气密度/(kg/m³)
 			c = 0.4, //空气阻力系数
 			s = [0.5, 0.2, 0.5], //面积/m²
-			v = [player.v.x, player.v.y, player.v.z], //速度/(m/s)
+			v = [deskgood.v.x, deskgood.v.y, deskgood.v.z], //速度/(m/s)
 			Fw = [], //空气阻力/N
 			m = 50, //质量/m
 			Aw = [] //空气阻力产生的加速度/(m/s²)
@@ -1651,33 +1745,33 @@ function render(){
 			Fw[i] = (1/2) * c * ρ * s[i] * v[i]*v[i]; //F = (1/2)CρSV²
 			Aw[i] = Fw[i] / m; //F=ma => a=F/m
 		}
-		console.info("v:", player.v)
-		player.v.y -= 9.8*t/1000*(Math.random()*0.2+0.9); //重力加速度
-		player.v.x +=
-			Math.abs(Aw[0]*t/1000) < Math.abs(player.v.x)?
+		console.info("v:", deskgood.v)
+		deskgood.v.y -= 9.8*t/1000*(Math.random()*0.2+0.9); //重力加速度
+		deskgood.v.x +=
+			Math.abs(Aw[0]*t/1000) < Math.abs(deskgood.v.x)?
 				Aw[0]*t/1000
 			:
-				player.v.x
+				deskgood.v.x
 		;
-		player.v.y +=
-			Math.abs(Aw[1]*t/1000) < Math.abs(player.v.y)?
+		deskgood.v.y +=
+			Math.abs(Aw[1]*t/1000) < Math.abs(deskgood.v.y)?
 				Aw[1]*t/1000
 			:
-				player.v.y
+				deskgood.v.y
 		;
-		player.v.z +=
-			Math.abs(Aw[2]*t/1000) < Math.abs(player.v.z)?
+		deskgood.v.z +=
+			Math.abs(Aw[2]*t/1000) < Math.abs(deskgood.v.z)?
 				Aw[2]*t/1000
 			:
-				player.v.z
+				deskgood.v.z
 		;
-		console.info("aw:",Aw, "Fw:",Fw, "v:", player.v)
+		//console.info("aw:",Aw, "Fw:",Fw, "v:", deskgood.v)
 		
-		let rt = player.go(player.v.x*100*t/1000, player.v.y*100*t/1000, player.v.z*100*t/1000);
+		let rt = deskgood.go(deskgood.v.x*100*t/1000, deskgood.v.y*100*t/1000, deskgood.v.z*100*t/1000);
 		//					m/s*100*ms/1000 => cm/s*s => cm => px
-		if (rt[0]) player.v.x = 0;
-		if (rt[1]) player.v.y = 0;
-		if (rt[2]) player.v.x = 0;
+		if (rt[0]) deskgood.v.x = 0;
+		if (rt[1]) deskgood.v.y = 0;
+		if (rt[2]) deskgood.v.x = 0;
 	}
 	
 	
@@ -1759,23 +1853,23 @@ setInterval(function(){
 	
 	if (keydown.has(87) | keydown.has(38)){ //前
 		console.log("front:", keydown);
-		x += Math.cos( (player.lookAt.left_right+0) /180*Math.PI)*(Math.random()*0.2+0.9);
-		z += Math.sin( (player.lookAt.left_right+0) /180*Math.PI)*(Math.random()*0.2+0.9);
+		x += Math.cos( (deskgood.lookAt.left_right+0) /180*Math.PI)*(Math.random()*0.2+0.9);
+		z += Math.sin( (deskgood.lookAt.left_right+0) /180*Math.PI)*(Math.random()*0.2+0.9);
 	}
 	if (keydown.has(83) | keydown.has(40)){ //后
 		console.log("behind:", keydown);
-		x += Math.cos( (player.lookAt.left_right+180) /180*Math.PI)*(Math.random()*0.2+0.9);
-		z += Math.sin( (player.lookAt.left_right+180) /180*Math.PI)*(Math.random()*0.2+0.9);
+		x += Math.cos( (deskgood.lookAt.left_right+180) /180*Math.PI)*(Math.random()*0.2+0.9);
+		z += Math.sin( (deskgood.lookAt.left_right+180) /180*Math.PI)*(Math.random()*0.2+0.9);
 	}
 	if (keydown.has(65) | keydown.has(37)){ //左
 		console.log("left:", keydown);
-		x += Math.cos( (player.lookAt.left_right-90) /180*Math.PI)*(Math.random()*0.2+0.9);
-		z += Math.sin( (player.lookAt.left_right-90) /180*Math.PI)*(Math.random()*0.2+0.9);
+		x += Math.cos( (deskgood.lookAt.left_right-90) /180*Math.PI)*(Math.random()*0.2+0.9);
+		z += Math.sin( (deskgood.lookAt.left_right-90) /180*Math.PI)*(Math.random()*0.2+0.9);
 	}
 	if (keydown.has(68) | keydown.has(39)){ //右
 		console.log("right:", keydown);
-		x += Math.cos( (player.lookAt.left_right+90) /180*Math.PI)*(Math.random()*0.2+0.9);
-		z += Math.sin( (player.lookAt.left_right+90) /180*Math.PI)*(Math.random()*0.2+0.9);
+		x += Math.cos( (deskgood.lookAt.left_right+90) /180*Math.PI)*(Math.random()*0.2+0.9);
+		z += Math.sin( (deskgood.lookAt.left_right+90) /180*Math.PI)*(Math.random()*0.2+0.9);
 	}
 	if (keydown.has(32)){ //上
 		console.log("up:", keydown);
@@ -1791,9 +1885,9 @@ setInterval(function(){
 	
 	try{
 		if (
-			map.get((player.pos.x+x)/100,
-				player.pos.y/100,
-				player.pos.z/100)
+			map.get((deskgood.pos.x+x)/100,
+				deskgood.pos.y/100,
+				deskgood.pos.z/100)
 			!=
 				null
 		){ //无法向X移动
@@ -1801,9 +1895,9 @@ setInterval(function(){
 		}
 	}catch(err){}
 	try{
-		if (map.get((player.pos.x+x)/100,
-				player.pos.y/100-1,
-				player.pos.z/100)
+		if (map.get((deskgood.pos.x+x)/100,
+				deskgood.pos.y/100-1,
+				deskgood.pos.z/100)
 			!=
 				null
 		){ //无法向X移动
@@ -1812,9 +1906,9 @@ setInterval(function(){
 	}catch(err){}
 	
 	try{
-		if (map.get(player.pos.x/100,
-				player.pos.y/100,
-				(player.pos.z+z)/100)
+		if (map.get(deskgood.pos.x/100,
+				deskgood.pos.y/100,
+				(deskgood.pos.z+z)/100)
 			!=
 				null
 		){ //无法向Z移动
@@ -1823,9 +1917,9 @@ setInterval(function(){
 	}catch(err){}
 	try{
 		if (map.get(
-				player.pos.x/100,
-				player.pos.y/100-1,
-				(player.pos.z+z)/100)
+				deskgood.pos.x/100,
+				deskgood.pos.y/100-1,
+				(deskgood.pos.z+z)/100)
 			!=
 				null
 		){ //无法向Z移动
@@ -1836,22 +1930,22 @@ setInterval(function(){
 	x -= (x>0? 10: x<0? -10: 0);
 	z -= (z>0? 10: z<0? -10: 0);
 	
-	player.pos.x += x*(Math.random()*0.2+0.9);
-	player.pos.z += z*(Math.random()*0.2+0.9); */
+	deskgood.pos.x += x*(Math.random()*0.2+0.9);
+	deskgood.pos.z += z*(Math.random()*0.2+0.9); */
 	
 	if (x & z)
-		console.log("go",x,z)
-	player.go(x*10, 0, z*10, 3, 10, 3);
+		console.log("go",x,z);
+	deskgood.go(x*10, 0, z*10, 3, 10, 3);
 	
 	try{
-		if (map.get(player.pos.x/100,
-				player.pos.y/100-1.5,
-				player.pos.z/100)
+		if (map.get(deskgood.pos.x/100,
+				deskgood.pos.y/100-1.5,
+				deskgood.pos.z/100)
 			!=
 				null
 		){ //脚下有方块
 			if (Number(new Date())-last_jump >= 1000 & y != 0){
-				player.v.y += y*2*(Math.random()*0.2+0.9);
+				deskgood.v.y += y*6*(Math.random()*0.2+0.9);
 				last_jump = Number(new Date());
 			}
 		}
@@ -1872,22 +1966,6 @@ choice_folder.open();
 	x0: null,
 	y0: null
 }; */
-function look_refresh(){
-	let x =
-		Math.cos(player.lookAt.left_right/180*Math.PI)*
-		Math.cos(player.lookAt.top_bottom/180*Math.PI)
-	;
-	let z =
-		Math.sin(player.lookAt.left_right/180*Math.PI)*
-		Math.cos(player.lookAt.top_bottom/180*Math.PI)
-	;
-	let y = Math.sin(player.lookAt.top_bottom/180*Math.PI);
-	camera.lookAt(player.pos.x+x, player.pos.y+y, player.pos.z+z);
-	player.look.x = x;
-	player.look.y = y;
-	player.look.z = z;
-}
-look_refresh();
 
 document.addEventListener("mousemove", function (e){
 	if (stop)
@@ -1924,22 +2002,22 @@ document.addEventListener("mousemove", function (e){
 		// let [dx, dy] = [x-mouse.x0, y-mouse.y0];
 		// [mouse.x0, mouse.y0] = [x, y];
 		// console.log("move:", dx, dy);
-		player.lookAt.left_right += dx/document.getElementsByTagName("canvas")[0].offsetWidth*360*player.sensitivity;
-		player.lookAt.top_bottom -= dy/document.getElementsByTagName("canvas")[0].offsetHeight*360*player.sensitivity;
+		deskgood.lookAt.left_right += dx/document.getElementsByTagName("canvas")[0].offsetWidth*360*deskgood.sensitivity;
+		deskgood.lookAt.top_bottom -= dy/document.getElementsByTagName("canvas")[0].offsetHeight*360*deskgood.sensitivity;
 		
-		if (player.lookAt.left_right > 360)
-			while (player.lookAt.left_right > 360)
-				player.lookAt.left_right -= 360;
-		if (player.lookAt.left_right < 0)
-			while (player.lookAt.left_right < 0)
-				player.lookAt.left_right += 360;
+		if (deskgood.lookAt.left_right > 360)
+			while (deskgood.lookAt.left_right > 360)
+				deskgood.lookAt.left_right -= 360;
+		if (deskgood.lookAt.left_right < 0)
+			while (deskgood.lookAt.left_right < 0)
+				deskgood.lookAt.left_right += 360;
 		
-		if (player.lookAt.top_bottom > 89.9)
-			player.lookAt.top_bottom = 89.9;
-		if (player.lookAt.top_bottom < -89.9)
-			player.lookAt.top_bottom = -89.9;
+		if (deskgood.lookAt.top_bottom > 89.9)
+			deskgood.lookAt.top_bottom = 89.9;
+		if (deskgood.lookAt.top_bottom < -89.9)
+			deskgood.lookAt.top_bottom = -89.9;
 		
-		look_refresh(); //刷新
+		//deskgood.look_refresh(); //刷新 //自动
 	// }
 	
 	// [mouse.x0,mouse.y0] = [x, y];
@@ -1952,36 +2030,36 @@ $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind�
 	let wheel = event.originalEvent.wheelDelta;
 	let detal = event.originalEvent.detail;
 	let up = function(){
-		player.choice --;
-		if (player.choice < 0)
-			player.choice = 3;
+		deskgood.choice --;
+		if (deskgood.choice < 0)
+			deskgood.choice = 3;
 	};
 	let down = function(){
-		player.choice ++;
-		if (player.choice > 3)
-			player.choice = 0;
+		deskgood.choice ++;
+		if (deskgood.choice > 3)
+			deskgood.choice = 0;
 	};
 	if (event.originalEvent.wheelDelta){ //判断浏览器IE,谷歌滚轮事件
 		if (wheel > 0) { //当滑轮向上滚动时
 			console.log("上滚轮");
 			up();
-			tools_choice_refresh();
+			deskgood.tools_choice_refresh();
 		}  
 		if (wheel < 0) { //当滑轮向下滚动时
 			console.log("下滚轮");
 			down();
-			tools_choice_refresh();
+			deskgood.tools_choice_refresh();
 		}  
 	}else if (event.originalEvent.detail){ //Firefox滚轮事件
 		if (detal > 0) { //当滑轮向下滚动时
 			console.log("下滚轮");
 			down();
-			tools_choice_refresh();
+			deskgood.tools_choice_refresh();
 		}
 		if (detal < 0) { //当滑轮向上滚动时
 			console.log("上滚轮");
 			up();
-			tools_choice_refresh();
+			deskgood.tools_choice_refresh();
 		}
 	}  
 });
@@ -1999,16 +2077,16 @@ document.addEventListener("mousedown", function (e){
 			if (click[i].faceIndex){
 				if (click[i].object instanceof THREE.Mesh){
 					if (Math.sqrt(
-						Math.pow(click[i].object.position.x - player.pos.x, 2)+
-						Math.pow(click[i].object.position.y - player.pos.y, 2)+
-						Math.pow(click[i].object.position.z - player.pos.z, 2)
+						Math.pow(click[i].object.position.x - deskgood.pos.x, 2)+
+						Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
+						Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
 					) < 500){ //距离小于500
 						let free = -1;
-						if (player.tools[player.choice] == 0){
-							free = player.choice;
+						if (deskgood.tools[deskgood.choice] == 0){
+							free = deskgood.choice;
 						}else{
-							for (let j in player.tools){
-								if (player.tools[j] == 0){
+							for (let j in deskgood.tools){
+								if (deskgood.tools[j] == 0){
 									free = j;
 									break;
 								}
@@ -2019,12 +2097,12 @@ document.addEventListener("mousedown", function (e){
 							console.info("not free!");
 						}else{
 							console.log("delete:", click[i].object.position);
-							player.tools[free] = map.get(
+							deskgood.tools[free] = map.get(
 								click[i].object.position.x/100,
 								click[i].object.position.y/100,
 								click[i].object.position.z/100
 							).id; //放在手中
-							tools_things_refresh(); //刷新方块
+							deskgood.tools_things_refresh(); //刷新方块
 							map.delete(
 								click[i].object.position.x/100,
 								click[i].object.position.y/100,
@@ -2047,9 +2125,9 @@ document.addEventListener("mousedown", function (e){
 			if (click[i].object instanceof THREE.Mesh){
 				if (
 					Math.sqrt(
-						Math.pow(click[i].object.position.x - player.pos.x, 2)+
-						Math.pow(click[i].object.position.y - player.pos.y, 2)+
-						Math.pow(click[i].object.position.z - player.pos.z, 2)
+						Math.pow(click[i].object.position.x - deskgood.pos.x, 2)+
+						Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
+						Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
 				) < 500){ //距离<500
 					if (
 						map.get(click[i].object.position.x/100,
@@ -2066,7 +2144,7 @@ document.addEventListener("mousedown", function (e){
 						return;
 					}
 				}
-				if (player.tools[player.choice] == 0) //空气
+				if (deskgood.tools[deskgood.choice] == 0) //空气
 					return;
 				let x = click[i].object.position.x,
 					y = click[i].object.position.y,
@@ -2100,29 +2178,29 @@ document.addEventListener("mousedown", function (e){
 						return console.error("faceIndex wrong:", click[i].faceIndex);
 				}
 				if (Math.sqrt(
-					Math.pow(x-player.pos.x, 2)+
-					Math.pow(y-player.pos.y, 2)+
-					Math.pow(z-player.pos.z, 2)
+					Math.pow(x-deskgood.pos.x, 2)+
+					Math.pow(y-deskgood.pos.y, 2)+
+					Math.pow(z-deskgood.pos.z, 2)
 				) < 500){ //距离<5m
-					map.add(new Thing(blocks[ player.tools[player.choice] ]).block.makeMesh(), {
+					map.add(new Thing(blocks[ deskgood.tools[deskgood.choice] ]).block.makeMesh(), {
 						x: x/100,
 						y: y/100,
 						z: z/100
 					});
-					player.tools[player.choice] = 0; //删除手里的方块
-					tools_things_refresh(); //刷新方块
+					deskgood.tools[deskgood.choice] = 0; //删除手里的方块
+					deskgood.tools_things_refresh(); //刷新方块
 					break; //跳出 寻找有效放置的 循环
 				}
 				/*if (click[i].faceIndex == 0 | click[i].faceIndex == 1){
 					x += 100;
 					if (Math.sqrt(
-						Math.pow((click[i].object.position.x+100) - player.pos.x, 2)+
-						Math.pow(click[i].object.position.y - player.pos.y, 2)+
-						Math.pow(click[i].object.position.z - player.pos.z, 2)
+						Math.pow((click[i].object.position.x+100) - deskgood.pos.x, 2)+
+						Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
+						Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
 					) < 500){ //距离<500
-						let thing = new Thing(blocks[ player.tools[player.choice] ]);
+						let thing = new Thing(blocks[ deskgood.tools[deskgood.choice] ]);
 						thing.block.makeMesh();
-						let mesh = new THREE.Mesh(block_geometry, blocks[ player.tools[player.choice] ].material);
+						let mesh = new THREE.Mesh(block_geometry, blocks[ deskgood.tools[deskgood.choice] ].material);
 						mesh.position.x = click[i].object.position.x+100;
 						mesh.position.y = click[i].object.position.y;
 						mesh.position.z = click[i].object.position.z;
@@ -2131,19 +2209,19 @@ document.addEventListener("mousedown", function (e){
 						mesh.receiveShadow = true;
 						
 						scene.add(mesh); //网格模型添加到场景中
-						every[ click[i].object.position.x/100+1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = player.tools[player.choice];
-						player.tools[player.choice] = 0; //删除手里的方块
-						tools_things_refresh(); //刷新方块
+						every[ click[i].object.position.x/100+1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = deskgood.tools[deskgood.choice];
+						deskgood.tools[deskgood.choice] = 0; //删除手里的方块
+						deskgood.tools_things_refresh(); //刷新方块
 						break;
 					}
 				}else if (click[i].faceIndex == 2 | click[i].faceIndex == 3){
 					x -= 100;
 					if (Math.sqrt(
-						Math.pow((click[i].object.position.x-100) - player.pos.x, 2)+
-						Math.pow(click[i].object.position.y - player.pos.y, 2)+
-						Math.pow(click[i].object.position.z - player.pos.z, 2)
+						Math.pow((click[i].object.position.x-100) - deskgood.pos.x, 2)+
+						Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
+						Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
 					) < 500){ //距离<500
-						let mesh = new THREE.Mesh(block_geometry, blocks[ player.tools[player.choice]].material);
+						let mesh = new THREE.Mesh(block_geometry, blocks[ deskgood.tools[deskgood.choice]].material);
 						mesh.position.x = click[i].object.position.x-100;
 						mesh.position.y = click[i].object.position.y;
 						mesh.position.z = click[i].object.position.z;
@@ -2152,18 +2230,18 @@ document.addEventListener("mousedown", function (e){
 						mesh.receiveShadow = true;
 						
 						scene.add(mesh); //网格模型添加到场景中
-						every[ click[i].object.position.x/100-1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = player.tools[player.choice];
-						player.tools[player.choice] = 0; //删除手里的方块
-						tools_things_refresh(); //刷新方块
+						every[ click[i].object.position.x/100-1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = deskgood.tools[deskgood.choice];
+						deskgood.tools[deskgood.choice] = 0; //删除手里的方块
+						deskgood.tools_things_refresh(); //刷新方块
 						break;
 					}
 				}else if (click[i].faceIndex == 4 | click[i].faceIndex == 5){
 					if (Math.sqrt(
-						Math.pow(click[i].object.position.x - player.pos.x, 2)+
-					 	Math.pow((click[i].object.position.y+100) - player.pos.y, 2)+
-						Math.pow(click[i].object.position.z - player.pos.z, 2)
+						Math.pow(click[i].object.position.x - deskgood.pos.x, 2)+
+					 	Math.pow((click[i].object.position.y+100) - deskgood.pos.y, 2)+
+						Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
 					) < 500){ //距离<500
-						let mesh = new THREE.Mesh(block_geometry, blocks[ player.tools[player.choice]].material);
+						let mesh = new THREE.Mesh(block_geometry, blocks[ deskgood.tools[deskgood.choice]].material);
 						mesh.position.x = click[i].object.position.x;
 						mesh.position.y = click[i].object.position.y+100;
 						mesh.position.z = click[i].object.position.z;
@@ -2172,18 +2250,18 @@ document.addEventListener("mousedown", function (e){
 						mesh.receiveShadow = true;
 						
 						scene.add(mesh); //网格模型添加到场景中
-						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100+1 ][ click[i].object.position.z/100 ] = player.tools[player.choice];
-						player.tools[player.choice] = 0; //删除手里的方块
-						tools_things_refresh(); //刷新方块
+						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100+1 ][ click[i].object.position.z/100 ] = deskgood.tools[deskgood.choice];
+						deskgood.tools[deskgood.choice] = 0; //删除手里的方块
+						deskgood.tools_things_refresh(); //刷新方块
 						break;
 					}
 				}else if (click[i].faceIndex == 6 | click[i].faceIndex == 7){
 					if (Math.sqrt(
-						Math.pow(click[i].object.position.x - player.pos.x, 2)+
-						Math.pow((click[i].object.position.y-100) - player.pos.y, 2)+
-						Math.pow(click[i].object.position.z - player.pos.z, 2)
+						Math.pow(click[i].object.position.x - deskgood.pos.x, 2)+
+						Math.pow((click[i].object.position.y-100) - deskgood.pos.y, 2)+
+						Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
 					) < 500){ //距离<500
-						let mesh = new THREE.Mesh(block_geometry, blocks[ player.tools[player.choice]].material);
+						let mesh = new THREE.Mesh(block_geometry, blocks[ deskgood.tools[deskgood.choice]].material);
 						mesh.position.x = click[i].object.position.x;
 						mesh.position.y = click[i].object.position.y-100;
 						mesh.position.z = click[i].object.position.z;
@@ -2192,18 +2270,18 @@ document.addEventListener("mousedown", function (e){
 						mesh.receiveShadow = true;
 						
 						scene.add(mesh); //网格模型添加到场景中
-						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100-1 ][ click[i].object.position.z/100 ] = player.tools[player.choice];
-						player.tools[player.choice] = 0; //删除手里的方块
-						tools_things_refresh(); //刷新方块
+						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100-1 ][ click[i].object.position.z/100 ] = deskgood.tools[deskgood.choice];
+						deskgood.tools[deskgood.choice] = 0; //删除手里的方块
+						deskgood.tools_things_refresh(); //刷新方块
 						break;
 					}
 				}else if (click[i].faceIndex == 8 | click[i].faceIndex == 9){
 					if (Math.sqrt(
-						Math.pow(click[i].object.position.x - player.pos.x, 2)+
-						Math.pow(click[i].object.position.y - player.pos.y, 2)+
-						Math.pow((click[i].object.position.z+100) - player.pos.z, 2)
+						Math.pow(click[i].object.position.x - deskgood.pos.x, 2)+
+						Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
+						Math.pow((click[i].object.position.z+100) - deskgood.pos.z, 2)
 					) < 500){ //距离<500
-						let mesh = new THREE.Mesh(block_geometry, blocks[ player.tools[player.choice]].material);
+						let mesh = new THREE.Mesh(block_geometry, blocks[ deskgood.tools[deskgood.choice]].material);
 						mesh.position.x = click[i].object.position.x;
 						mesh.position.y = click[i].object.position.y;
 						mesh.position.z = click[i].object.position.z+100;
@@ -2212,18 +2290,18 @@ document.addEventListener("mousedown", function (e){
 						mesh.receiveShadow = true;
 						
 						scene.add(mesh); //网格模型添加到场景中
-						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100+1 ] = player.tools[player.choice];
-						player.tools[player.choice] = 0; //删除手里的方块
-						tools_things_refresh(); //刷新方块
+						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100+1 ] = deskgood.tools[deskgood.choice];
+						deskgood.tools[deskgood.choice] = 0; //删除手里的方块
+						deskgood.tools_things_refresh(); //刷新方块
 						break;
 					}
 				}else if (click[i].faceIndex == 10 | click[i].faceIndex == 11){
 					if (Math.sqrt(
-						Math.pow(click[i].object.position.x - player.pos.x, 2)+
-						Math.pow(click[i].object.position.y - player.pos.y, 2)+
-						Math.pow((click[i].object.position.z-100) - player.pos.z, 2)
+						Math.pow(click[i].object.position.x - deskgood.pos.x, 2)+
+						Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
+						Math.pow((click[i].object.position.z-100) - deskgood.pos.z, 2)
 					) < 500){ //距离<500
-						let mesh = new THREE.Mesh(block_geometry, blocks[ player.tools[player.choice]].material);
+						let mesh = new THREE.Mesh(block_geometry, blocks[ deskgood.tools[deskgood.choice]].material);
 						mesh.position.x = click[i].object.position.x;
 						mesh.position.y = click[i].object.position.y;
 						mesh.position.z = click[i].object.position.z-100;
@@ -2232,9 +2310,9 @@ document.addEventListener("mousedown", function (e){
 						mesh.receiveShadow = true;
 						
 						scene.add(mesh); //网格模型添加到场景中
-						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100-1 ] = player.tools[player.choice];
-						player.tools[player.choice] = 0; //删除手里的方块
-						tools_things_refresh(); //刷新方块
+						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100-1 ] = deskgood.tools[deskgood.choice];
+						deskgood.tools[deskgood.choice] = 0; //删除手里的方块
+						deskgood.tools_things_refresh(); //刷新方块
 						break;
 					}
 				}*/
@@ -2285,53 +2363,53 @@ $("#control").on("touchstart", function(e){
 				Math.pow(dy, 2)
 			);
 			l = l>50? 50: l/3;
-			let x = Math.cos( player.lookAt.left_right/180*Math.PI+r )*l;
-			let z = Math.sin( player.lookAt.left_right/180*Math.PI+r )*l;
+			let x = Math.cos( deskgood.lookAt.left_right/180*Math.PI+r )*l;
+			let z = Math.sin( deskgood.lookAt.left_right/180*Math.PI+r )*l;
 			
 			console.log("touch control to move:", x, z);
 			
-			// player.go(x, 0, z ,3, 10, 3);
+			deskgood.go(x, 0, z);
 			
-			x += x>0? 10: x<0? -10: 0;
+			/*x += x>0? 10: x<0? -10: 0;
 			z += z>0? 10: z<0? -10: 0;
 			
 			if (x > 0){
-				for (var i=player.pos.x; i<=player.pos.x+x; i+=2){
+				for (var i=deskgood.pos.x; i<=deskgood.pos.x+x; i+=2){
 					try{
 						if (
 							every
 								[Math.round(i/100)]
-								[Math.round(player.pos.y/100)]
-								[Math.round(player.pos.z/100)]
+								[Math.round(deskgood.pos.y/100)]
+								[Math.round(deskgood.pos.z/100)]
 							!=
 								0
 						) break;
 						if (
 							every
 								[Math.round(i/100)]
-								[Math.round(player.pos.y/100)-1]
-								[Math.round(player.pos.z/100)]
+								[Math.round(deskgood.pos.y/100)-1]
+								[Math.round(deskgood.pos.z/100)]
 							!=
 								0
 						) break;
 					}catch(err){}
 				}
 			}else{
-				for (var i=player.pos.x; i>=player.pos.x+x; i-=2){
+				for (var i=deskgood.pos.x; i>=deskgood.pos.x+x; i-=2){
 					try{
 						if (
 							every
 								[Math.round(i/100)]
-								[Math.round(player.pos.y/100)]
-								[Math.round(player.pos.z/100)]
+								[Math.round(deskgood.pos.y/100)]
+								[Math.round(deskgood.pos.z/100)]
 							!=
 								0
 						) break;
 						if (
 							every
 								[Math.round(i/100)]
-								[Math.round(player.pos.y/100)-1]
-								[Math.round(player.pos.z/100)]
+								[Math.round(deskgood.pos.y/100)-1]
+								[Math.round(deskgood.pos.z/100)]
 							!=
 								0
 						) break;
@@ -2339,20 +2417,20 @@ $("#control").on("touchstart", function(e){
 				}
 			}
 			if (z > 0){
-				for (var j=player.pos.z; j<=player.pos.z+z; j+=2){
+				for (var j=deskgood.pos.z; j<=deskgood.pos.z+z; j+=2){
 					try{
 						if (
 							every
-								[Math.round(player.pos.x/100)]
-								[Math.round(player.pos.y/100)]
+								[Math.round(deskgood.pos.x/100)]
+								[Math.round(deskgood.pos.y/100)]
 								[Math.round(j/100)]
 							!=
 								0
 						) break;
 						if (
 							every
-								[Math.round(player.pos.x/100)]
-								[Math.round(player.pos.y/100)-1]
+								[Math.round(deskgood.pos.x/100)]
+								[Math.round(deskgood.pos.y/100)-1]
 								[Math.round(j/100)]
 							!=
 								0
@@ -2360,20 +2438,20 @@ $("#control").on("touchstart", function(e){
 					}catch(err){}
 				}
 			}else{
-				for (var j=player.pos.z; j>=player.pos.z+z; j-=2){
+				for (var j=deskgood.pos.z; j>=deskgood.pos.z+z; j-=2){
 					try{
 						if (
 							every
-								[Math.round(player.pos.x/100)]
-								[Math.round(player.pos.y/100)]
+								[Math.round(deskgood.pos.x/100)]
+								[Math.round(deskgood.pos.y/100)]
 								[Math.round(j/100)]
 							!=
 								0
 						) break;
 						if (
 							every
-								[Math.round(player.pos.x/100)]
-								[Math.round(player.pos.y/100)-1]
+								[Math.round(deskgood.pos.x/100)]
+								[Math.round(deskgood.pos.y/100)-1]
 								[Math.round(j/100)]
 							!=
 								0
@@ -2382,14 +2460,14 @@ $("#control").on("touchstart", function(e){
 				}
 			}
 			
-			i -= player.pos.x;
-			j -= player.pos.z;
+			i -= deskgood.pos.x;
+			j -= deskgood.pos.z;
 			
 			i -= i>0? 10: i<0? -10: 0;
 			j -= j>0? 10: j<0? -10: 0;
 			
-			player.pos.x += i*(Math.random()*0.2+0.9);
-			player.pos.z += j*(Math.random()*0.2+0.9);
+			deskgood.pos.x += i*(Math.random()*0.2+0.9);
+			deskgood.pos.z += j*(Math.random()*0.2+0.9);*/
 		}
 	}, 100);
 	
@@ -2437,14 +2515,14 @@ $("#jump").on("touchstart", function(){
 	
 	try{
 		if (
-			map.get(player.pos.x/100,
-				player.pos.y/100-2,
-				player.pos.z/100)
+			map.get(deskgood.pos.x/100,
+				deskgood.pos.y/100-2,
+				deskgood.pos.z/100)
 			!=
 				null
 		){ //脚下有方块
 			if (Number(new Date())-last_jump >= 1000){
-				player.v.y += 2*(Math.random()*0.2+0.9);
+				deskgood.v.y += 6*(Math.random()*0.2+0.9);
 				last_jump = Number(new Date());
 			}
 		}
@@ -2482,16 +2560,16 @@ $("canvas:eq(0)").on("touchstart", function (e){
 				if (click[i].faceIndex){
 					if (click[i].object instanceof THREE.Mesh){
 						if (Math.sqrt(
-							Math.pow(click[i].object.position.x - player.pos.x, 2)+
-							Math.pow(click[i].object.position.y - player.pos.y, 2)+
-							Math.pow(click[i].object.position.z - player.pos.z, 2)
+							Math.pow(click[i].object.position.x - deskgood.pos.x, 2)+
+							Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
+							Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
 						) < 500){ //距离小于500
 							let free = -1;
-							if (player.tools[player.choice] == 0){
-								free = player.choice;
+							if (deskgood.tools[deskgood.choice] == 0){
+								free = deskgood.choice;
 							}else{
-								for (let j in player.tools){
-									if (player.tools[j] == 0){
+								for (let j in deskgood.tools){
+									if (deskgood.tools[j] == 0){
 										free = j;
 										break;
 									}
@@ -2513,12 +2591,12 @@ $("canvas:eq(0)").on("touchstart", function (e){
 								}catch(err){}
 							}else{
 								console.log("delete:", click[i].object.position);
-								player.tools[free] = map.get(
+								deskgood.tools[free] = map.get(
 									click[i].object.position.x/100,
 									click[i].object.position.y/100,
 									click[i].object.position.z/100
 								).id; //放在手中
-								tools_things_refresh(); //刷新方块
+								deskgood.tools_things_refresh(); //刷新方块
 								map.delete(
 									click[i].object.position.x/100,
 									click[i].object.position.y/100,
@@ -2561,22 +2639,22 @@ $("canvas:eq(0)").on("touchmove", function (e){
 	let [dx, dy] = [x-x0, y-y0];
 	[x0, y0] = [x, y];
 	console.log("move:", dx, dy);
-	player.lookAt.left_right += dx/document.getElementsByTagName("canvas")[0].offsetWidth*90*player.sensitivity;
-	player.lookAt.top_bottom -= dy/document.getElementsByTagName("canvas")[0].offsetHeight*90*player.sensitivity;
+	deskgood.lookAt.left_right += dx/document.getElementsByTagName("canvas")[0].offsetWidth*90*deskgood.sensitivity;
+	deskgood.lookAt.top_bottom -= dy/document.getElementsByTagName("canvas")[0].offsetHeight*90*deskgood.sensitivity;
 	
-	if (player.lookAt.left_right > 360)
-		while (player.lookAt.left_right > 360)
-			player.lookAt.left_right -= 360;
-	if (player.lookAt.left_right < 0)
-		while (player.lookAt.left_right < 0)
-			player.lookAt.left_right += 360;
+	if (deskgood.lookAt.left_right > 360)
+		while (deskgood.lookAt.left_right > 360)
+			deskgood.lookAt.left_right -= 360;
+	if (deskgood.lookAt.left_right < 0)
+		while (deskgood.lookAt.left_right < 0)
+			deskgood.lookAt.left_right += 360;
 	
-	if (player.lookAt.top_bottom > 89.9)
-		player.lookAt.top_bottom = 89.9;
-	if (player.lookAt.top_bottom < -89.9)
-		player.lookAt.top_bottom = -89.9;
+	if (deskgood.lookAt.top_bottom > 89.9)
+		deskgood.lookAt.top_bottom = 89.9;
+	if (deskgood.lookAt.top_bottom < -89.9)
+		deskgood.lookAt.top_bottom = -89.9;
 	
-	look_refresh(); //刷新
+	//deskgood.look_refresh(); //刷新 //自动
 	
 	
 	if (Math.sqrt(
@@ -2610,9 +2688,9 @@ $("canvas:eq(0)").on("touchend", function (e){
 				if (click[i].object instanceof THREE.Mesh){
 					if (
 						Math.sqrt(
-							Math.pow(click[i].object.position.x - player.pos.x, 2)+
-							Math.pow(click[i].object.position.y - player.pos.y, 2)+
-							Math.pow(click[i].object.position.z - player.pos.z, 2)
+							Math.pow(click[i].object.position.x - deskgood.pos.x, 2)+
+							Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
+							Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
 					) < 500){ //距离<500
 						if (
 							map.get(click[i].object.position.x/100,
@@ -2629,7 +2707,7 @@ $("canvas:eq(0)").on("touchend", function (e){
 							return;
 						}
 					}
-					if (player.tools[player.choice] == 0) //空气
+					if (deskgood.tools[deskgood.choice] == 0) //空气
 						return;
 					let x = click[i].object.position.x,
 						y = click[i].object.position.y,
@@ -2663,26 +2741,26 @@ $("canvas:eq(0)").on("touchend", function (e){
 							return console.error("faceIndex wrong:", click[i].faceIndex);
 					}
 					if (Math.sqrt(
-						Math.pow(x-player.pos.x, 2)+
-						Math.pow(y-player.pos.y, 2)+
-						Math.pow(z-player.pos.z, 2)
+						Math.pow(x-deskgood.pos.x, 2)+
+						Math.pow(y-deskgood.pos.y, 2)+
+						Math.pow(z-deskgood.pos.z, 2)
 					) < 500){ //距离<5m
-						map.add(new Thing(blocks[ player.tools[player.choice] ]).block.makeMesh(), {
+						map.add(new Thing(blocks[ deskgood.tools[deskgood.choice] ]).block.makeMesh(), {
 							x: x/100,
 							y: y/100,
 							z: z/100
 						});
-						player.tools[player.choice] = 0; //删除手里的方块
-						tools_things_refresh(); //刷新方块
+						deskgood.tools[deskgood.choice] = 0; //删除手里的方块
+						deskgood.tools_things_refresh(); //刷新方块
 						break; //跳出 寻找有效放置的 循环
 					}
 					/*if (click[i].faceIndex == 0 | click[i].faceIndex == 1){
 						if (Math.sqrt(
-							Math.pow((click[i].object.position.x+100) - player.pos.x, 2)+
-							Math.pow(click[i].object.position.y - player.pos.y, 2)+
-							Math.pow(click[i].object.position.z - player.pos.z, 2)
+							Math.pow((click[i].object.position.x+100) - deskgood.pos.x, 2)+
+							Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
+							Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
 						) < 500){ //距离<50
-							let mesh = new THREE.Mesh(block_geometry, blocks[ player.tools[player.choice]].material);
+							let mesh = new THREE.Mesh(block_geometry, blocks[ deskgood.tools[deskgood.choice]].material);
 							mesh.position.x = click[i].object.position.x+100;
 							mesh.position.y = click[i].object.position.y;
 							mesh.position.z = click[i].object.position.z;
@@ -2691,18 +2769,18 @@ $("canvas:eq(0)").on("touchend", function (e){
 							mesh.receiveShadow = true;
 							
 							scene.add(mesh); //网格模型添加到场景中
-							every[ click[i].object.position.x/100+1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = player.tools[player.choice];
-							player.tools[player.choice] = 0; //删除手里的方块
-							tools_things_refresh(); //刷新方块
+							every[ click[i].object.position.x/100+1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = deskgood.tools[deskgood.choice];
+							deskgood.tools[deskgood.choice] = 0; //删除手里的方块
+							deskgood.tools_things_refresh(); //刷新方块
 							break;
 						}
 					}else if (click[i].faceIndex == 2 | click[i].faceIndex == 3){
 						if (Math.sqrt(
-							Math.pow((click[i].object.position.x-100) - player.pos.x, 2)+
-							Math.pow(click[i].object.position.y - player.pos.y, 2)+
-							Math.pow(click[i].object.position.z - player.pos.z, 2)
+							Math.pow((click[i].object.position.x-100) - deskgood.pos.x, 2)+
+							Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
+							Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
 						) < 500){ //距离<500
-							let mesh = new THREE.Mesh(block_geometry, blocks[ player.tools[player.choice]].material);
+							let mesh = new THREE.Mesh(block_geometry, blocks[ deskgood.tools[deskgood.choice]].material);
 							mesh.position.x = click[i].object.position.x-100;
 							mesh.position.y = click[i].object.position.y;
 							mesh.position.z = click[i].object.position.z;
@@ -2711,18 +2789,18 @@ $("canvas:eq(0)").on("touchend", function (e){
 							mesh.receiveShadow = true;
 							
 							scene.add(mesh); //网格模型添加到场景中
-							every[ click[i].object.position.x/100-1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = player.tools[player.choice];
-							player.tools[player.choice] = 0; //删除手里的方块
-							tools_things_refresh(); //刷新方块
+							every[ click[i].object.position.x/100-1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = deskgood.tools[deskgood.choice];
+							deskgood.tools[deskgood.choice] = 0; //删除手里的方块
+							deskgood.tools_things_refresh(); //刷新方块
 							break;
 						}
 					}else if (click[i].faceIndex == 4 | click[i].faceIndex == 5){
 						if (Math.sqrt(
-								Math.pow(click[i].object.position.x - player.pos.x, 2)+
-						 	Math.pow((click[i].object.position.y+100) - player.pos.y, 2)+
-							Math.pow(click[i].object.position.z - player.pos.z, 2)
+								Math.pow(click[i].object.position.x - deskgood.pos.x, 2)+
+						 	Math.pow((click[i].object.position.y+100) - deskgood.pos.y, 2)+
+							Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
 						) < 500){ //距离<500
-							let mesh = new THREE.Mesh(block_geometry, blocks[ player.tools[player.choice]].material);
+							let mesh = new THREE.Mesh(block_geometry, blocks[ deskgood.tools[deskgood.choice]].material);
 							mesh.position.x = click[i].object.position.x;
 							mesh.position.y = click[i].object.position.y+100;
 							mesh.position.z = click[i].object.position.z;
@@ -2731,18 +2809,18 @@ $("canvas:eq(0)").on("touchend", function (e){
 							mesh.receiveShadow = true;
 							
 							scene.add(mesh); //网格模型添加到场景中
-							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100+1 ][ click[i].object.position.z/100 ] = player.tools[player.choice];
-							player.tools[player.choice] = 0; //删除手里的方块
-							tools_things_refresh(); //刷新方块
+							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100+1 ][ click[i].object.position.z/100 ] = deskgood.tools[deskgood.choice];
+							deskgood.tools[deskgood.choice] = 0; //删除手里的方块
+							deskgood.tools_things_refresh(); //刷新方块
 							break;
 						}
 					}else if (click[i].faceIndex == 6 | click[i].faceIndex == 7){
 							if (Math.sqrt(
-							Math.pow(click[i].object.position.x - player.pos.x, 2)+
-							Math.pow((click[i].object.position.y-100) - player.pos.y, 2)+
-							Math.pow(click[i].object.position.z - player.pos.z, 2)
+							Math.pow(click[i].object.position.x - deskgood.pos.x, 2)+
+							Math.pow((click[i].object.position.y-100) - deskgood.pos.y, 2)+
+							Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
 						) < 500){ //距离<500
-							let mesh = new THREE.Mesh(block_geometry, blocks[ player.tools[player.choice]].material);
+							let mesh = new THREE.Mesh(block_geometry, blocks[ deskgood.tools[deskgood.choice]].material);
 							mesh.position.x = click[i].object.position.x;
 							mesh.position.y = click[i].object.position.y-100;
 							mesh.position.z = click[i].object.position.z;
@@ -2751,18 +2829,18 @@ $("canvas:eq(0)").on("touchend", function (e){
 							mesh.receiveShadow = true;
 							
 							scene.add(mesh); //网格模型添加到场景中
-							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100-1 ][ click[i].object.position.z/100 ] = player.tools[player.choice];
-							player.tools[player.choice] = 0; //删除手里的方块
-							tools_things_refresh(); //刷新方块
+							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100-1 ][ click[i].object.position.z/100 ] = deskgood.tools[deskgood.choice];
+							deskgood.tools[deskgood.choice] = 0; //删除手里的方块
+							deskgood.tools_things_refresh(); //刷新方块
 							break;
 						}
 					}else if (click[i].faceIndex == 8 | click[i].faceIndex == 9){
 						if (Math.sqrt(
-							Math.pow(click[i].object.position.x - player.pos.x, 2)+
-							Math.pow(click[i].object.position.y - player.pos.y, 2)+
-							Math.pow((click[i].object.position.z+100) - player.pos.z, 2)
+							Math.pow(click[i].object.position.x - deskgood.pos.x, 2)+
+							Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
+							Math.pow((click[i].object.position.z+100) - deskgood.pos.z, 2)
 						) < 500){ //距离<500
-							let mesh = new THREE.Mesh(block_geometry, blocks[ player.tools[player.choice]].material);
+							let mesh = new THREE.Mesh(block_geometry, blocks[ deskgood.tools[deskgood.choice]].material);
 							mesh.position.x = click[i].object.position.x;
 							mesh.position.y = click[i].object.position.y;
 							mesh.position.z = click[i].object.position.z+100;
@@ -2771,18 +2849,18 @@ $("canvas:eq(0)").on("touchend", function (e){
 							mesh.receiveShadow = true;
 							
 							scene.add(mesh); //网格模型添加到场景中
-							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100+1 ] = player.tools[player.choice];
-							player.tools[player.choice] = 0; //删除手里的方块
-							tools_things_refresh(); //刷新方块
+							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100+1 ] = deskgood.tools[deskgood.choice];
+							deskgood.tools[deskgood.choice] = 0; //删除手里的方块
+							deskgood.tools_things_refresh(); //刷新方块
 							break;
 						}
 					}else if (click[i].faceIndex == 10 | click[i].faceIndex == 11){
 						if (Math.sqrt(
-							Math.pow(click[i].object.position.x - player.pos.x, 2)+
-							Math.pow(click[i].object.position.y - player.pos.y, 2)+
-							Math.pow((click[i].object.position.z-100) - player.pos.z, 2)
+							Math.pow(click[i].object.position.x - deskgood.pos.x, 2)+
+							Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
+							Math.pow((click[i].object.position.z-100) - deskgood.pos.z, 2)
 						) < 500){ //距离<500
-							let mesh = new THREE.Mesh(block_geometry, blocks[ player.tools[player.choice]].material);
+							let mesh = new THREE.Mesh(block_geometry, blocks[ deskgood.tools[deskgood.choice]].material);
 							mesh.position.x = click[i].object.position.x;
 							mesh.position.y = click[i].object.position.y;
 							mesh.position.z = click[i].object.position.z-100;
@@ -2791,9 +2869,9 @@ $("canvas:eq(0)").on("touchend", function (e){
 							mesh.receiveShadow = true;
 							
 							scene.add(mesh); //网格模型添加到场景中
-							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100-1 ] = player.tools[player.choice];
-							player.tools[player.choice] = 0; //删除手里的方块
-							tools_things_refresh(); //刷新方块
+							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100-1 ] = deskgood.tools[deskgood.choice];
+							deskgood.tools[deskgood.choice] = 0; //删除手里的方块
+							deskgood.tools_things_refresh(); //刷新方块
 							break;
 						}
 					}*/
