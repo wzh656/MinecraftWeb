@@ -39,6 +39,20 @@
 				src:url("./fonts/huawei.ttf");
 			}
 			
+			html:not(textarea){ /* 禁止复制选中 */
+				-webkit-touch-callout: none; /* iOS Safari */
+				-webkit-user-select: none; /* Chrome/Safari/Opera */
+				-khtml-user-select: none; /* Konqueror */
+				-moz-user-select: none; /* Firefox */
+				-ms-user-select: none; /* Internet Explorer/Edge */
+				user-select: none; /* Non-prefixed version, currently not supported by any browser */
+			}
+			
+			::selection {
+			    color: #fff;
+			    background: #f9cc9d;
+			}
+			
 			body{
 				margin: 0;
 				overflow: hidden;
@@ -229,7 +243,7 @@
 			window.$ = window.jQuery = require("./js/jquery.min.js");
 		</script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
-		<script>new VConsole();</script>
+		<!-- <script>new VConsole();</script> -->
 		<script src="./js/stats.min.js"></script>
 		<script src="./js/dat.gui.min.js"></script>
 		<script src="./js/three.min.js"></script>
@@ -471,7 +485,7 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 	
 	//输入锁定改变事件
 	let pointerlockchange = function(){
-		if (stop == "set")
+		if (typeof stop == "string")
 			return;
 		
 		if (
@@ -1262,6 +1276,8 @@ function ray(start, end, near, far){
 	if (end.x === undefined) end.x = 0;
 	if (end.y === undefined) end.y = 0;
 	if (end.z === undefined) end.z = 0;
+	if (!end.y)
+		console.log("ray", start, end,far)
 	
 	let ray = new THREE.Raycaster(
 		new THREE.Vector3(start.x, start.y, start.z),
@@ -1362,38 +1378,73 @@ var deskgood = {
 		let rt = [0,0,0]; //返回值
 		//X
 		if (x > 0){
-			let objs = ray(
-				{x: deskgood.pos.x+50},
-				{x: 1},
-				0,
-				x
-			);
-			if (objs.length){ //被阻挡
-				let fx = Math.min(...objs.map(v => v.point.x))-50; //获取碰撞点，计算移动位置
-				rt[1] = fx-(deskgood.pos.x+x);
-				deskgood.pos.x = fx;
-				console.log("x+ 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), fx, rt[1])
-			}else{ //无阻挡
-				deskgood.pos.x += x;
-				console.log("x+ 无碰撞",x)
-			}
-		}else if (x < 0){
+			//上半身
 			let objs = ray(
 				{x: deskgood.pos.x-50},
-				{x: -1},
+				{x: 1},
 				0,
-				-x
+				x+50
 			);
 			if (objs.length){ //被阻挡
-				let fx = Math.max(...objs.map(v => v.point.x))+50; //获取碰撞点，计算移动位置
-				rt[1] = fx-(deskgood.pos.x+x);
+				let fx = Math.min(...objs.map(v => v.point.x))-10; //获取碰撞点，计算移动位置
+				rt[0] = fx-(deskgood.pos.x+x);
 				deskgood.pos.x = fx;
-				console.log("x- 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), fx, rt[1])
+				console.log("x+ 上 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), fx, rt[0])
 			}else{ //无阻挡
 				deskgood.pos.x += x;
-				console.log("x- 无碰撞",x)
+				// console.log("x+ 上 无碰撞",x)
+			}
+			//下半身
+			objs = ray(
+				{x: deskgood.pos.x-50, y: deskgood.pos.y-100},
+				{x: 1},
+				0,
+				x+50
+			);
+			if (objs.length){ //被阻挡
+				let fx = Math.min(...objs.map(v => v.point.x))-10; //获取碰撞点，计算移动位置
+				rt[0] = fx-(deskgood.pos.x+x);
+				deskgood.pos.x = fx;
+				console.log("x+ 下 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), fx, rt[0])
+			}else{ //无阻挡
+				deskgood.pos.x += x;
+				// console.log("x+ 下 无碰撞",x)
+			}
+		}else if (x < 0){
+			//上半身
+			let objs = ray(
+				{x: deskgood.pos.x+50},
+				{x: -1},
+				0,
+				-x+50
+			);
+			if (objs.length){ //被阻挡
+				let fx = Math.max(...objs.map(v => v.point.x))+10; //获取碰撞点，计算移动位置
+				rt[0] = fx-(deskgood.pos.x+x);
+				deskgood.pos.x = fx;
+				console.log("x- 上 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), fx, rt[0])
+			}else{ //无阻挡
+				deskgood.pos.x += x;
+				// console.log("x- 上 无碰撞",x)
+			}
+			//下半身
+			objs = ray(
+				{x: deskgood.pos.x+50, y: deskgood.pos.y-100},
+				{x: -1},
+				0,
+				-x+50
+			);
+			if (objs.length){ //被阻挡
+				let fx = Math.max(...objs.map(v => v.point.x))+10; //获取碰撞点，计算移动位置
+				rt[0] = fx-(deskgood.pos.x+x);
+				deskgood.pos.x = fx;
+				console.log("x- 下 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), fx, rt[0])
+			}else{ //无阻挡
+				deskgood.pos.x += x;
+				// console.log("x- 下 无碰撞",x)
 			}
 		}
+		
 		//Y
 		if (y > 0){ //上
 			let objs = ray(
@@ -1434,6 +1485,75 @@ var deskgood = {
 			}else{ //无阻挡
 				deskgood.pos.y += y;
 				//console.log("y- 无碰撞",y)
+			}
+		}
+		
+		//z
+		if (z > 0){
+			//上半身
+			let objs = ray(
+				{z: deskgood.pos.z-50},
+				{z: 1},
+				0,
+				z+50
+			);
+			if (objs.length){ //被阻挡
+				let fz = Math.min(...objs.map(v => v.point.z))-10; //获取碰撞点，计算移动位置
+				rt[2] = fz-(deskgood.pos.z+z);
+				deskgood.pos.z = fz;
+				console.log("z+ 上 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), fz, rt[2])
+			}else{ //无阻挡
+				deskgood.pos.z += z;
+				// console.log("z+ 上 无碰撞",z)
+			}
+			//下半身
+			objs = ray(
+				{z: deskgood.pos.z-50, y: deskgood.pos.y-100},
+				{z: 1},
+				0,
+				z+50
+			);
+			if (objs.length){ //被阻挡
+				let fz = Math.min(...objs.map(v => v.point.z))-10; //获取碰撞点，计算移动位置
+				rt[2] = fz-(deskgood.pos.z+z);
+				deskgood.pos.z = fz;
+				console.log("z+ 下 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), fz, rt[2])
+			}else{ //无阻挡
+				deskgood.pos.z += z;
+				// console.log("z+ 下 无碰撞",z)
+			}
+		}else if (z < 0){
+			//上半身
+			let objs = ray(
+				{z: deskgood.pos.z+50},
+				{z: -1},
+				0,
+				-z+50
+			);
+			if (objs.length){ //被阻挡
+				let fz = Math.max(...objs.map(v => v.point.z))+10; //获取碰撞点，计算移动位置
+				rt[2] = fz-(deskgood.pos.z+z);
+				deskgood.pos.z = fz;
+				console.log("z- 上 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), fz, rt[2])
+			}else{ //无阻挡
+				deskgood.pos.z += z;
+				// console.log("z- 上 无碰撞",z)
+			}
+			//下半身
+			objs = ray(
+				{z: deskgood.pos.z+50, y: deskgood.pos.y-100},
+				{z: -1},
+				0,
+				-z+50
+			);
+			if (objs.length){ //被阻挡
+				let fz = Math.max(...objs.map(v => v.point.z))+10; //获取碰撞点，计算移动位置
+				rt[2] = fz-(deskgood.pos.z+z);
+				deskgood.pos.z = fz;
+				console.log("z- 下 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), fz, rt[2])
+			}else{ //无阻挡
+				deskgood.pos.z += z;
+				// console.log("z- 下 无碰撞",z)
 			}
 		}
 		return rt;
@@ -1684,12 +1804,14 @@ function render(){
 	renderer.render(scene, camera);//执行渲染操作
 	
 	//降水雨滴
-	for (let i=0; i<sprite_system.length; i++){
-		//sprite_system[i].v -= 9.8*t/1000*100;
-		sprite_system[i].position.y -= 10*1000*t/1000*(Math.random()*0.2+0.9); //10m/s //sprite_system[i].v*t/1000;
-		if (sprite_system[i].position.y < 0){
-			scene.remove(sprite_system[i]);
-			sprite_system.splice(i,1);
+	if (!stop){
+		for (let i=0; i<sprite_system.length; i++){
+			//sprite_system[i].v -= 9.8*t/1000*100;
+			sprite_system[i].position.y -= 10*1000*t/1000*(Math.random()*0.2+0.9); //10m/s //sprite_system[i].v*t/1000;
+			if (sprite_system[i].position.y < 0){
+				scene.remove(sprite_system[i]);
+				sprite_system.splice(i,1);
+			}
 		}
 	}
 	
@@ -1725,7 +1847,7 @@ function render(){
 			warn.push("脚被卡住？");
 		}
 	}catch(err){}
-	if (warn.length){
+	if (warn.length && !stop){
 		if (warn[0] & warn[1]){
 			console.warn(warn[0], warn[1]);
 		}else{
@@ -1734,8 +1856,8 @@ function render(){
 	}
 	
 	if (!stop){
-		let ρ = 1.25, //空气密度/(kg/m³)
-			c = 0.4, //空气阻力系数
+		let ρ = 1.25*(Math.random()*0.2+0.9), //空气密度/(kg/m³)
+			c = 0.4*(Math.random()*0.2+0.9), //空气阻力系数
 			s = [0.5, 0.2, 0.5], //面积/m²
 			v = [deskgood.v.x, deskgood.v.y, deskgood.v.z], //速度/(m/s)
 			Fw = [], //空气阻力/N
@@ -1745,7 +1867,7 @@ function render(){
 			Fw[i] = (1/2) * c * ρ * s[i] * v[i]*v[i]; //F = (1/2)CρSV²
 			Aw[i] = Fw[i] / m; //F=ma => a=F/m
 		}
-		console.info("v:", deskgood.v)
+		
 		deskgood.v.y -= 9.8*t/1000*(Math.random()*0.2+0.9); //重力加速度
 		deskgood.v.x +=
 			Math.abs(Aw[0]*t/1000) < Math.abs(deskgood.v.x)?
@@ -1784,7 +1906,7 @@ function render(){
 /* let controls = new THREE.OrbitControls(camera,renderer.domElement);//创建控件对象
 controls.addEventListener("change", render);//监听鼠标、键盘事件 */
 
-function state(id){
+function state(id, pointerLock){
 	if ($("#"+id).css("display") != "none"){ //已显示
 		$("#"+id).css("display", "none");
 		stop = false;
@@ -1809,6 +1931,11 @@ document.addEventListener("keydown", function (e){
 			state("bag");
 			return;
 		}
+	}
+	
+	if (e.keyCode == 27 & stop == "command"){
+		state("command");
+		return;
 	}
 	
 	if (stop)
@@ -1939,12 +2066,13 @@ setInterval(function(){
 	
 	try{
 		if (map.get(deskgood.pos.x/100,
-				deskgood.pos.y/100-1.5,
+				deskgood.pos.y/100-1.6,
 				deskgood.pos.z/100)
 			!=
 				null
 		){ //脚下有方块
 			if (Number(new Date())-last_jump >= 1000 & y != 0){
+				console.log("jump");
 				deskgood.v.y += y*6*(Math.random()*0.2+0.9);
 				last_jump = Number(new Date());
 			}
@@ -1989,7 +2117,7 @@ document.addEventListener("mousemove", function (e){
 	;
 	
 	// 打印鼠标移动的增量值。
-	console.log("mousemove:", dx, dy);
+	// console.log("mousemove:", dx, dy);
 	/* let [x, y] = [e.pageX, e.pageY];
 	console.log("mousemove:", x, y); */
 	

@@ -1,17 +1,18 @@
 {
 	"name": "Minecraft",
-	"version": "0.5.0",
+	"version": "1.0.0-alpha",
 	"description": "我的世界",
 	"main": "index.js",
 	"scripts": {
 		"test": "electron .",
-		"package": "electron-packager . 我的世界 --platform=win32 --arch=x64 --out=./out --asar --icon=./img/icon.ico --app-version=0.5.0 --overwrite --ignore=.git --electron-version 1.4.13 --registry=https://registry.npm.taobao.org/"
+		"package": "electron-packager . 我的世界 --platform=win32 --arch=x64 --out=./out --asar --icon=./img/icon.ico --app-version=1.0.0-alpha --overwrite --ignore=.git --ignore=node_modules --electron-version 1.4.13 --registry=https://registry.npm.taobao.org/"
 	},
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
 		"dat.gui": "^0.7.7",
 		"jquery": "^3.5.1",
+		"simplex-noise": "^2.4.0",
 		"stats.js": "^0.17.0",
 		"three": "^0.116.1"
 	}
