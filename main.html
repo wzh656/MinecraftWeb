@@ -39,7 +39,7 @@
 				src:url("./fonts/huawei.ttf");
 			}
 			
-			html:not(textarea){ /* 禁止复制选中 */
+			html:not(textarea, input){ /* 禁止复制选中 */
 				-webkit-touch-callout: none; /* iOS Safari */
 				-webkit-user-select: none; /* Chrome/Safari/Opera */
 				-khtml-user-select: none; /* Konqueror */
@@ -68,7 +68,7 @@
 				width: 100%;
 				height: 100%;
 				margin: 0;
-				/*font-size: 8.6vw;*/
+				font-size: 8.6vmin;
 				font-family: qq1, serif;
 				/*padding-top: 20%;*/
 				text-align: center;
@@ -82,7 +82,7 @@
 			h1:after{
 				content: "Copyright © 2020 by wzh";
 				white-space: pre;
-				font-size: 6px;
+				font-size: 2vmin;
 				
 				position: absolute;
 				bottom: 6vh;
@@ -100,7 +100,7 @@
 				height: 60px;
 				position: relative;
 				top: 26px;
-				font-size: 26px;
+				font-size: 8vmin;
 				font-family: hwxk, serif;
 			}
 			*{
@@ -151,8 +151,8 @@
 			}
 			
 			#bag, #command{
-				width: 66%;
-				height: 66%;
+				width: 80vw;
+				height: 80vh;
 				
 				position: absolute;
 				left: 50%;
@@ -164,12 +164,12 @@
 				
 				background-color: #c4c4c4;
 				border: 3px #fff outset;
-				padding: 1.6vw;
+				padding: 1.6%;
 			}
-			#command{
+			/*#command{
 				width: 86.66%;
 				height: 86.66%;
-			}
+			}*/
 			
 			#command > textarea{
 				width: 100%;
@@ -184,7 +184,7 @@
 				width: 48%;
 				height: 9%;
 				margin: 0 0.6%;
-				font-size: 3vw;
+				font-size: 5vmin;
 			}
 			
 			#bag > div{
@@ -2145,7 +2145,7 @@ document.addEventListener("mousemove", function (e){
 		if (deskgood.lookAt.top_bottom < -89.9)
 			deskgood.lookAt.top_bottom = -89.9;
 		
-		//deskgood.look_refresh(); //刷新 //自动
+		deskgood.look_refresh(); //刷新
 	// }
 	
 	// [mouse.x0,mouse.y0] = [x, y];
@@ -2782,8 +2782,7 @@ $("canvas:eq(0)").on("touchmove", function (e){
 	if (deskgood.lookAt.top_bottom < -89.9)
 		deskgood.lookAt.top_bottom = -89.9;
 	
-	//deskgood.look_refresh(); //刷新 //自动
-	
+	deskgood.look_refresh(); //刷新
 	
 	if (Math.sqrt(
 		Math.pow(touch_screen.pos.x-x, 2)+
