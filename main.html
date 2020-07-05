@@ -39,18 +39,17 @@
 				src:url("./fonts/huawei.ttf");
 			}
 			
-			html:not(textarea, input){ /* 禁止复制选中 */
+			::selection {
+			    color: #fff;
+			    background: #f9cc9d;
+			}
+			:not(textarea):not(input){ /* 禁止复制选中 */
 				-webkit-touch-callout: none; /* iOS Safari */
 				-webkit-user-select: none; /* Chrome/Safari/Opera */
 				-khtml-user-select: none; /* Konqueror */
 				-moz-user-select: none; /* Firefox */
 				-ms-user-select: none; /* Internet Explorer/Edge */
 				user-select: none; /* Non-prefixed version, currently not supported by any browser */
-			}
-			
-			::selection {
-			    color: #fff;
-			    background: #f9cc9d;
 			}
 			
 			body{
@@ -68,7 +67,7 @@
 				width: 100%;
 				height: 100%;
 				margin: 0;
-				font-size: 8.6vmin;
+				/* font-size: 8.6vmin; */
 				font-family: qq1, serif;
 				/*padding-top: 20%;*/
 				text-align: center;
@@ -243,7 +242,7 @@
 			window.$ = window.jQuery = require("./js/jquery.min.js");
 		</script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
-		<!-- <script>new VConsole();</script> -->
+		<script>new VConsole();</script>
 		<script src="./js/stats.min.js"></script>
 		<script src="./js/dat.gui.min.js"></script>
 		<script src="./js/three.min.js"></script>
@@ -324,7 +323,9 @@ function run(code){
 	try{
 		eval(code);
 	}catch(err){
-		$.get("http://fanyi.youdao.com/translate",{
+		console.error("【命令】\n代码运行出错，错误信息（自行翻译）：\n"+err);
+		alert("代码运行出错，错误信息（自行翻译,可在VConsole查看）：\n"+err);
+		/* $.get("http://fanyi.youdao.com/translate",{
 			doctype: "json",
 			type: "auto",
 			i: err
@@ -342,7 +343,7 @@ function run(code){
 				console.error("【命令方块】\n代码运行出错，错误信息（自行翻译）：\n"+err);
 				alert("代码运行出错，错误信息（自行翻译,可在VConsole查看）：\n"+err);
 			}
-		});
+		}); */
 	}
 }
 function playBGM(){
@@ -361,7 +362,7 @@ function playBGM(){
 			console.info("bgm(BackGround Music)", "begin(2.m4a)", "time:"+new Date());
 		}
 		setTimeout(function(){
-		let bgm_folder = gui.addFolder("背景音乐(bgm)")
+			let bgm_folder = gui.addFolder("背景音乐(bgm)")
 			bgm_folder.add(bgm, "volume", 0, 1, 0.01).name("音量(volume)");
 			bgm_folder.add(bgm, "paused").name("是否暂停(paused)").listen();
 			bgm_folder.add({f:()=>{
@@ -493,11 +494,11 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 			document.mozPointerLockElement === document.body ||
 			document.webkitPointerLockElement === document.body
 		){ //已锁定
-			console.log("yes");
+			console.log("pointerLock yes");
 			stop = false;
 			$("#help").css("display", "none");
 		}else{ //未锁定
-			console.log("no");
+			console.log("pointerLock no");
 			stop = true;
 			$("#help").css("display", "inline-block");
 			save();
@@ -1276,8 +1277,8 @@ function ray(start, end, near, far){
 	if (end.x === undefined) end.x = 0;
 	if (end.y === undefined) end.y = 0;
 	if (end.z === undefined) end.z = 0;
-	if (!end.y)
-		console.log("ray", start, end,far)
+	/* if (!end.y)
+		console.log("ray", start, end,far) */
 	
 	let ray = new THREE.Raycaster(
 		new THREE.Vector3(start.x, start.y, start.z),
@@ -1297,6 +1298,7 @@ var deskgood = {
 		z: 0
 	},
 	pos: camera.position,
+	jump_v: 5,
 	up: camera.up,
 	lookAt: {
 		_left_right: 0,
@@ -1702,6 +1704,9 @@ var deskgood = {
 	}
 }
 deskgood.moveTo = deskgood.move;
+deskgood.moveX = x=>deskgood.move(x);
+deskgood.moveY = y=>deskgood.move(0,y);
+deskgood.moveZ = z=>deskgood.move(0,0,z);
 deskgood.goX = x=>deskgood.go(x);
 deskgood.goY = y=>deskgood.go(0,y);
 deskgood.goZ = z=>deskgood.go(0,0,z);
@@ -1741,6 +1746,7 @@ let camera_folder = gui.addFolder("玩家/观察者(camera)");
 camera_folder.open();
 	camera_folder.add(window, "stop").listen();
 	camera_folder.add(deskgood, "sensitivity", 0.1, 10).name("灵敏度");
+	camera_folder.add(deskgood, "jump_v", 1, 10).name("跳跃速度");
 	let camera_position_folder = camera_folder.addFolder("位置/px");
 	camera_position_folder.open();
 		camera_position_folder.add(deskgood.pos, "x", -1000, 1000, 0.01).listen();
@@ -1795,6 +1801,22 @@ camera_folder.open();
 			camera_tools_things_folder.add(deskgood.tools, 2, 0, 8, 1).listen().onChange(deskgood.tools_things_refresh);
 			camera_tools_things_folder.add(deskgood.tools, 3, 0, 8, 1).listen().onChange(deskgood.tools_things_refresh);
 
+
+/* //多线程
+let deskgood_worker = null;
+if(deskgood_worker == null){
+	deskgood_worker = new Worker("./js/deskgood.js");
+}
+deskgood_worker.postMessage([deskgood.pos, deskgood.v]);
+deskgood_worker.onmessage = function(e){
+	// deskgood.go(...e.data);
+	// deskgood.pos.x = e.data[0].x;
+	// deskgood.pos.y = e.data[0].y;
+	// deskgood.pos.z = e.data[0].z;
+	// deskgood.v.x = e.data[1].x;
+	// deskgood.v.y = e.data[1].y;
+	// deskgood.v.z = e.data[1].z;
+}; */
 
 let T0 = new Date();//上次时间
 function render(){
@@ -1922,26 +1944,27 @@ function state(id, pointerLock){
 	return;
 }
 
-let keydown = new Set();
+let keydown = new Set(),
+	double_run = [];
 document.addEventListener("keydown", function (e){
-	
-	if (e.keyCode == 69){ //E
+	if (e.keyCode == 69){ //E 切换背包
 		if (stop == "bag" | stop == false){
 			console.log("E:", keydown);
 			state("bag");
-			return;
+			return false;
 		}
 	}
-	
-	if (e.keyCode == 27 & stop == "command"){
+	if (e.keyCode == 27 & stop == "command"){ //ESC 退出命令方块
 		state("command");
-		return;
+		return false;
 	}
 	
-	if (stop)
-		return;
+	if (stop){
+		double_run = [];
+		return false;
+	}
 	
-	if (e.keyCode == 27){ //ESC
+	if (e.keyCode == 27){ //ESC 暂停游戏
 		console.log("ESC:", keydown);
 		
 		stop = true;
@@ -1949,24 +1972,43 @@ document.addEventListener("keydown", function (e){
 		save();
 		document.exitPointerLock();
 		
-		return;
+		return false;
 	}
-	if (e.keyCode == 121){ //F10
+	if (e.keyCode == 121){ //F10 打开gui
 		console.log("F10:", keydown);
 		if (gui.closed){
 			gui.open();
 		}else{
 			gui.close();
 		}
-		return;
+		return false;
+	}
+	if (e.keyCode == 87 | e.keyCode == 38){
+		if (double_run.length == 0){
+			double_run[0] = +new Date();
+		}else if (double_run.length == 2 && +new Date()-double_run[1] < 500){ //连按
+			double_run = true;
+			console.log("run");
+		}
 	}
 	
 	keydown.add(e.keyCode);
+	
+	return false;
 });
 document.addEventListener("keyup", function (e){
 	keydown.delete(e.keyCode);
+	
+	if (e.keyCode == 87 | e.keyCode == 38){
+		if (double_run.length == 1 && +new Date()-double_run[0] < 500){
+			double_run[1] = +new Date();
+		}else{
+			double_run = [];
+		}
+	}
+	return false;
 });
-let last_jump = Number(new Date())-1000;
+let last_jump = +new Date()-1000;
 setInterval(function(){
 	if (stop){
 		keydown = new Set();
@@ -1978,25 +2020,30 @@ setInterval(function(){
 	if (keydown.size)
 		console.log("keydown:", keydown);
 	
+	if ((keydown.has(87) | keydown.has(38)) & keydown.has(17)){ //control 按下
+		double_run = true;
+		console.log("run");
+	}
+	
 	if (keydown.has(87) | keydown.has(38)){ //前
 		console.log("front:", keydown);
-		x += Math.cos( (deskgood.lookAt.left_right+0) /180*Math.PI)*(Math.random()*0.2+0.9);
-		z += Math.sin( (deskgood.lookAt.left_right+0) /180*Math.PI)*(Math.random()*0.2+0.9);
+		x += Math.cos( (deskgood.lookAt.left_right+0) /180*Math.PI) *(double_run==true?3:1) *(Math.random()*0.2+0.9);
+		z += Math.sin( (deskgood.lookAt.left_right+0) /180*Math.PI) *(double_run==true?3:1) *(Math.random()*0.2+0.9);
 	}
 	if (keydown.has(83) | keydown.has(40)){ //后
 		console.log("behind:", keydown);
-		x += Math.cos( (deskgood.lookAt.left_right+180) /180*Math.PI)*(Math.random()*0.2+0.9);
-		z += Math.sin( (deskgood.lookAt.left_right+180) /180*Math.PI)*(Math.random()*0.2+0.9);
+		x += Math.cos( (deskgood.lookAt.left_right+180) /180*Math.PI) *(Math.random()*0.2+0.9);
+		z += Math.sin( (deskgood.lookAt.left_right+180) /180*Math.PI) *(Math.random()*0.2+0.9);
 	}
 	if (keydown.has(65) | keydown.has(37)){ //左
 		console.log("left:", keydown);
-		x += Math.cos( (deskgood.lookAt.left_right-90) /180*Math.PI)*(Math.random()*0.2+0.9);
-		z += Math.sin( (deskgood.lookAt.left_right-90) /180*Math.PI)*(Math.random()*0.2+0.9);
+		x += Math.cos( (deskgood.lookAt.left_right-90) /180*Math.PI) *(Math.random()*0.2+0.9);
+		z += Math.sin( (deskgood.lookAt.left_right-90) /180*Math.PI) *(Math.random()*0.2+0.9);
 	}
 	if (keydown.has(68) | keydown.has(39)){ //右
 		console.log("right:", keydown);
-		x += Math.cos( (deskgood.lookAt.left_right+90) /180*Math.PI)*(Math.random()*0.2+0.9);
-		z += Math.sin( (deskgood.lookAt.left_right+90) /180*Math.PI)*(Math.random()*0.2+0.9);
+		x += Math.cos( (deskgood.lookAt.left_right+90) /180*Math.PI) *(Math.random()*0.2+0.9);
+		z += Math.sin( (deskgood.lookAt.left_right+90) /180*Math.PI) *(Math.random()*0.2+0.9);
 	}
 	if (keydown.has(32)){ //上
 		console.log("up:", keydown);
@@ -2062,7 +2109,7 @@ setInterval(function(){
 	
 	if (x & z)
 		console.log("go",x,z);
-	deskgood.go(x*10, 0, z*10, 3, 10, 3);
+	deskgood.go(x*10/3, 0, z*10/3); // 10cm/33.3ms = 3m/s
 	
 	try{
 		if (map.get(deskgood.pos.x/100,
@@ -2071,14 +2118,14 @@ setInterval(function(){
 			!=
 				null
 		){ //脚下有方块
-			if (Number(new Date())-last_jump >= 1000 & y != 0){
+			if (+new Date()-last_jump >= 1000 & y != 0){
 				console.log("jump");
-				deskgood.v.y += y*6*(Math.random()*0.2+0.9);
-				last_jump = Number(new Date());
+				deskgood.v.y += y * deskgood.jump_v*(Math.random()*0.2+0.9);
+				last_jump = +new Date();
 			}
 		}
 	}catch(err){}
-}, 32.6);
+}, 33.3);
 
 /* let choice_object = get_choice_object()?get_choice_object()[1]:undefined;
 
@@ -2650,7 +2697,7 @@ $("#jump").on("touchstart", function(){
 				null
 		){ //脚下有方块
 			if (Number(new Date())-last_jump >= 1000){
-				deskgood.v.y += 6*(Math.random()*0.2+0.9);
+				deskgood.v.y += deskgood.jump_v*(Math.random()*0.2+0.9);
 				last_jump = Number(new Date());
 			}
 		}
