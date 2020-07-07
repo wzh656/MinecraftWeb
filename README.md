@@ -1,5 +1,5 @@
 # 我的世界（仿）
-修改日期:2020.7.5
+修改日期:2020.7.7
 
 # 运行
 + [手机版(apk)v0.5.0-alpha完整版（较大，20+MB）](https://github.com/wzh656/MinecraftWeb/releases/download/v0.5.0-alpha/Minecraft-full.apk)
@@ -74,8 +74,8 @@
 
 
 ## ㈦关于工具
-> ⑴*state.js*库：左上角(left-top corner)默认蓝色(normal blue)，可以使用该工具查看当前渲染状态，该工具有3种状态（点击切换(click to change)）
-
+> ⑴*state.js*库：左上角(left-top corner)默认蓝色(normal blue)
+可以使用该工具查看当前渲染状态，该工具有3种状态（点击切换(click to change)）
 + fps:蓝色（默认），查看当前每秒可渲染的帧数，越大越流畅（一般最佳：60fps（电脑就这样，手机（特烂）只有10+fps））  
 + ms:绿色(green)，查看渲染每帧需要的时间(ms)，越小越流畅（一般最佳：16ms/帧）  
 + MB:红色(red)，查看当前使用的内存(MB兆字节)  
@@ -111,6 +111,9 @@
 > 网页版（竖屏）
 
 <img alt="效果图片（竖屏我的世界）" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/10.png" />  
+<img alt="效果图片（好雨知时节）" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/11.png" />  
+<img alt="效果图片（命令方块）" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/12.png" />  
+<img alt="效果图片（工具栏&bgm）" style="width:100%;height:auto;" src="https://wzh656.github.io/MinecraftWeb/img/effect/13.png" />  
 
 > 0.4.1版
 

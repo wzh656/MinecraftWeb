@@ -697,19 +697,65 @@ function BlockMap(size){
 		thing.block.mesh.position.x = pos.x*100;
 		thing.block.mesh.position.y = pos.y*100;
 		thing.block.mesh.position.z = pos.z*100;
+		thing.block.visible = false; //默认不绘制
 		
-		scene.add(thing.block.mesh); //网格模型添加到场景中
-		thing.block.mesh = thing.block.mesh;
+		/*scene.add(thing.block.mesh); //网格模型添加到场景中
+		thing.block.mesh = thing.block.mesh;*/
 		this.map[pos.x][pos.y][pos.z] = thing;
-	}
+	};
+	//更新方块
+	this.update = (x, y, z)=>{
+		[x, y, z] = [x, y, z].map(Math.round); //规范化
+		
+		if (!this.get(x,y,z)) // 没有方块/不在范围
+			return;
+		
+		if (this.get(x,y,z).block.visible){ //可见
+			if (
+				!this.get(x+1, y, z) &&
+				!this.get(x-1, y, z) &&
+				!this.get(x, y+1, z) &&
+				!this.get(x, y-1, z) &&
+				!this.get(x, y, z+1) &&
+				!this.get(x, y, z-1)
+			){ //四周有方块 不渲染
+				scene.remove(this.get(x,y,z).block.mesh);
+				this.map[x][y][z].block.visible = false;
+			}
+		}else{ //不可见
+			if (
+				this.get(x+1, y, z) ||
+				this.get(x-1, y, z) ||
+				this.get(x, y+1, z) ||
+				this.get(x, y-1, z) ||
+				this.get(x, y, z+1) ||
+				this.get(x, y, z-1)
+			){ //四周无方块 渲染
+				scene.add(this.get(x,y,z).block.mesh); //网格模型添加到场景中
+				this.map[x][y][z].block.visible = true;
+			}
+		}
+	};
+	this.updateRound = (x,y,z)=>{ //更新方块及周围
+		this.update(x, y, z);
+		this.update(x+1, y, z);
+		this.update(x-1, y, z);
+		this.update(x, y+1, z);
+		this.update(x, y-1, z);
+		this.update(x, y, z+1);
+		this.update(x, y, z-1);
+	};
 	//删除方块
 	this.delete = (x, y, z)=>{
 		[x, y, z] = [x, y, z].map(Math.round); //规范化
 		
+		if (!this.get(x,y,z)) // 没有方块/不在范围
+			return;
+		
 		scene.remove(this.map[x][y][z].block.mesh);
 		this.map[x][y][z] = null;
-	}
-	//编辑方块
+	};
+	//获取方块（不可编辑）
 	this.get = (x, y, z)=>{
 		[x, y, z] = [x, y, z].map(Math.round); //规范化
 		
@@ -722,7 +768,7 @@ function BlockMap(size){
 		}else{
 			return null; //真空
 		}
-	}
+	};
 	//保存为数组字符串
 	this.save = ()=>{
 		let arr = [];
@@ -735,7 +781,7 @@ function BlockMap(size){
 		}
 		return JSON.stringify(arr);
 		//localStorage.setItem("我的世界.存档.方块", JSON.stringify(arr));
-	}
+	};
 	//加载保存的数组字符串
 	this.useSave = (arr)=>{
 		//let arr = JSON.parse(localStorage.getItem("我的世界.存档.方块"));
@@ -747,14 +793,14 @@ function BlockMap(size){
 				}
 			}
 		}
-	}
+	};
 }
 
 const face_url = [
 	["side.png", "side.png", "up.png", "down.png", "side.png", "side.png"],
 	["face.png", "face.png", "face.png", "face.png", "face.png", "face.png"]
 ];
-const blocks = [];
+const blocks = []; //模板
 blocks.push(new Thing({
 	id: 0,
 	name: "空气"
@@ -919,14 +965,12 @@ setInterval(function(){
 let weather_folder = gui.addFolder("天气(weather)");
 	weather_folder.add(window, "weather", 0, 1/300*1000, 1e-3).name("降水系数").onChange((value)=>{weather = Math.pow(value*300/1000,3)/300*1000});
 	weather_folder.add(sprite_system, "length", 0, 1000, 1).name("雨滴(sprite)个数").listen();
-	weather_folder.add({
-		clean: function(){
-			for (let i in sprite_system){
-				scene.remove(sprite_system[i]);
-			}
-			sprite_system.splice(0, sprite_system.length);
+	weather_folder.add({clean: function(){
+		for (let i in sprite_system){
+			scene.remove(sprite_system[i]);
 		}
-	},"clean").name("清空(clean)");
+		sprite_system.splice(0, sprite_system.length);
+	}},"clean").name("清空(clean)");
 
 
 /**
@@ -989,6 +1033,7 @@ for (let i=1; i<blocks.length; i++){
 							}
 							if (id != 0)
 								map.add(new Thing(blocks[id]).block.makeMesh(), {x:load.x, y, z}); //以模板建立
+								map.update(load.x ,y ,z); //刷新是否添加方块
 								// blocks[id].block.deleteMesh();
 						}
 					}
@@ -1298,6 +1343,14 @@ var deskgood = {
 		z: 0
 	},
 	pos: camera.position,
+	/*size: {
+		"x+": 50,
+		"x-": 50,
+		"y+": 50,
+		"y-": 150,
+		"z+": 50,
+		"z-": 50
+	},*/
 	jump_v: 5,
 	up: camera.up,
 	lookAt: {
@@ -2109,7 +2162,7 @@ setInterval(function(){
 	
 	if (x & z)
 		console.log("go",x,z);
-	deskgood.go(x*10/3, 0, z*10/3); // 10cm/33.3ms = 3m/s
+	deskgood.go(x*10/6, 0, z*10/6); // 10cm/33.3ms = 3m/s
 	
 	try{
 		if (map.get(deskgood.pos.x/100,
@@ -2125,7 +2178,7 @@ setInterval(function(){
 			}
 		}
 	}catch(err){}
-}, 33.3);
+}, 16.667);
 
 /* let choice_object = get_choice_object()?get_choice_object()[1]:undefined;
 
@@ -2251,12 +2304,15 @@ document.addEventListener("mousedown", function (e){
 		for (let i in click){
 			if (click[i].faceIndex){
 				if (click[i].object instanceof THREE.Mesh){
+					let x = click[i].object.position.x,
+						y = click[i].object.position.y,
+						z = click[i].object.position.z;
 					if (Math.sqrt(
-						Math.pow(click[i].object.position.x - deskgood.pos.x, 2)+
-						Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
-						Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
+						Math.pow(x - deskgood.pos.x, 2)+
+						Math.pow(y - deskgood.pos.y, 2)+
+						Math.pow(z - deskgood.pos.z, 2)
 					) < 500){ //距离小于500
-						let free = -1;
+						/*let free = -1;
 						if (deskgood.tools[deskgood.choice] == 0){
 							free = deskgood.choice;
 						}else{
@@ -2266,23 +2322,16 @@ document.addEventListener("mousedown", function (e){
 									break;
 								}
 							}
-						}
-						
+						}*/
+						let free = deskgood.tools[deskgood.choice]==0? deskgood.choice: deskgood.tools.indexOf(0);
 						if (free == -1){
 							console.info("not free!");
 						}else{
 							console.log("delete:", click[i].object.position);
-							deskgood.tools[free] = map.get(
-								click[i].object.position.x/100,
-								click[i].object.position.y/100,
-								click[i].object.position.z/100
-							).id; //放在手中
+							deskgood.tools[free] = map.get(x/100, y/100, z/100).id; //放在手中
 							deskgood.tools_things_refresh(); //刷新方块
-							map.delete(
-								click[i].object.position.x/100,
-								click[i].object.position.y/100,
-								click[i].object.position.z/100
-							);
+							map.delete(x/100, y/100, z/100); //删除方块
+							map.updateRound(x/100, y/100, z/100); //刷新方块及周围
 							/*scene.remove(click[i].object);
 							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = 0;*/
 							/* if (
@@ -2298,22 +2347,17 @@ document.addEventListener("mousedown", function (e){
 		let click = get_choice_object();
 		for (let i in click){
 			if (click[i].object instanceof THREE.Mesh){
+				let x = click[i].object.position.x,
+					y = click[i].object.position.y,
+					z = click[i].object.position.z;
 				if (
 					Math.sqrt(
-						Math.pow(click[i].object.position.x - deskgood.pos.x, 2)+
-						Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
-						Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
+						Math.pow(x - deskgood.pos.x, 2)+
+						Math.pow(y - deskgood.pos.y, 2)+
+						Math.pow(z - deskgood.pos.z, 2)
 				) < 500){ //距离<500
-					if (
-						map.get(click[i].object.position.x/100,
-							click[i].object.position.y/100,
-							click[i].object.position.z/100)
-						&&
-						map.get(click[i].object.position.x/100,
-							click[i].object.position.y/100,
-							click[i].object.position.z/100).id
-						==
-							8
+					if (map.get(x/100, y/100, z/100) &&
+						map.get(x/100, y/100, z/100).id == 8
 					){ //命令方块
 						state("command");
 						return;
@@ -2321,9 +2365,6 @@ document.addEventListener("mousedown", function (e){
 				}
 				if (deskgood.tools[deskgood.choice] == 0) //空气
 					return;
-				let x = click[i].object.position.x,
-					y = click[i].object.position.y,
-					z = click[i].object.position.z;
 				switch (click[i].faceIndex){
 					case 0:
 					case 1:
@@ -2362,6 +2403,7 @@ document.addEventListener("mousedown", function (e){
 						y: y/100,
 						z: z/100
 					});
+					map.updateRound(x/100, y/100, z/100); //刷新方块及周围
 					deskgood.tools[deskgood.choice] = 0; //删除手里的方块
 					deskgood.tools_things_refresh(); //刷新方块
 					break; //跳出 寻找有效放置的 循环
@@ -2506,6 +2548,7 @@ let touch_control = {
 	y0: null,
 	x: null,
 	y: null,
+	t0: null,
 	loop: null
 };
 $("#control").on("touchstart", function(e){
@@ -2516,7 +2559,7 @@ $("#control").on("touchstart", function(e){
 		y = e.originalEvent.targetTouches[0].clientY;
 	console.log("touchstart(control):", x, y);
 	
-	[touch_control.x0, touch_control.y0] = [x, y];
+	[touch_control.x0, touch_control.y0, touch_control.t0] = [x, y, +new Date()];
 	
 	touch_control.loop = setInterval(function(){
 		if (touch_control.x0 !== null &
@@ -2524,6 +2567,8 @@ $("#control").on("touchstart", function(e){
 			touch_control.x !== null &
 			touch_control.y !== null
 		){
+			let t = +new Date()-touch_control.t0;
+			touch_control.t0 = +new Date();
 			let dx = touch_control.x-touch_control.x0,
 				dy = touch_control.y-touch_control.y0;
 			let r = (
@@ -2537,7 +2582,7 @@ $("#control").on("touchstart", function(e){
 				Math.pow(dx, 2)+
 				Math.pow(dy, 2)
 			);
-			l = l>50? 50: l/3;
+			l = l>100? 0.26*t: l*t/866;
 			let x = Math.cos( deskgood.lookAt.left_right/180*Math.PI+r )*l;
 			let z = Math.sin( deskgood.lookAt.left_right/180*Math.PI+r )*l;
 			
@@ -2644,7 +2689,7 @@ $("#control").on("touchstart", function(e){
 			deskgood.pos.x += i*(Math.random()*0.2+0.9);
 			deskgood.pos.z += j*(Math.random()*0.2+0.9);*/
 		}
-	}, 100);
+	}, 16.667);
 	
 	return false;
 });
@@ -2666,7 +2711,7 @@ $("#control").on("touchend", function(e){
 	console.log("touchend(control):", x, y);
 	
 	clearInterval(touch_control.loop);
-	touch_control.x0 = touch_control.y0 = touch_control.x = touch_control.y = touch_control.loop = null;
+	touch_control.x0 = touch_control.y0 = touch_control.x = touch_control.y = touch_control.t0 = touch_control.loop = null;
 	
 	return false;
 });
@@ -2676,7 +2721,7 @@ $("#control").on("touchcancel", function(e){
 	console.log("touchcancel(control):", x, y);
 	
 	clearInterval(touch_control.loop);
-	touch_control.x0 = touch_control.y0 = touch_control.x = touch_control.y = touch_control.loop = null;
+	touch_control.x0 = touch_control.y0 = touch_control.x = touch_control.y = touch_control.t0 = touch_control.loop = null;
 	
 	return false;
 });
@@ -2734,12 +2779,15 @@ $("canvas:eq(0)").on("touchstart", function (e){
 			for (let i in click){
 				if (click[i].faceIndex){
 					if (click[i].object instanceof THREE.Mesh){
+						let x = click[i].object.position.x,
+							y = click[i].object.position.y,
+							z = click[i].object.position.z;
 						if (Math.sqrt(
-							Math.pow(click[i].object.position.x - deskgood.pos.x, 2)+
-							Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
-							Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
+							Math.pow(x - deskgood.pos.x, 2)+
+							Math.pow(y - deskgood.pos.y, 2)+
+							Math.pow(z - deskgood.pos.z, 2)
 						) < 500){ //距离小于500
-							let free = -1;
+							/*let free = -1;
 							if (deskgood.tools[deskgood.choice] == 0){
 								free = deskgood.choice;
 							}else{
@@ -2749,8 +2797,8 @@ $("canvas:eq(0)").on("touchstart", function (e){
 										break;
 									}
 								}
-							}
-							
+							}*/
+							let free = deskgood.tools[deskgood.choice]==0? deskgood.choice: deskgood.tools.indexOf(0);
 							if (free == -1){
 								console.info("not free!");
 								try{
@@ -2766,17 +2814,10 @@ $("canvas:eq(0)").on("touchstart", function (e){
 								}catch(err){}
 							}else{
 								console.log("delete:", click[i].object.position);
-								deskgood.tools[free] = map.get(
-									click[i].object.position.x/100,
-									click[i].object.position.y/100,
-									click[i].object.position.z/100
-								).id; //放在手中
+								deskgood.tools[free] = map.get(x/100, y/100, z/100).id; //放在手中
 								deskgood.tools_things_refresh(); //刷新方块
-								map.delete(
-									click[i].object.position.x/100,
-									click[i].object.position.y/100,
-									click[i].object.position.z/100
-								);
+								map.delete(x/100, y/100, z/100); //删除方块
+								map.updateRound(x/100, y/100, z/100); //更新方块
 								//scene.remove(click[i].object);
 								//every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = 0;
 								try{
@@ -2924,6 +2965,7 @@ $("canvas:eq(0)").on("touchend", function (e){
 							y: y/100,
 							z: z/100
 						});
+						map.updateRound(x/100, y/100, z/100); //更新方块及周围方块
 						deskgood.tools[deskgood.choice] = 0; //删除手里的方块
 						deskgood.tools_things_refresh(); //刷新方块
 						break; //跳出 寻找有效放置的 循环
