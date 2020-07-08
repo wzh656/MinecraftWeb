@@ -242,7 +242,7 @@
 			window.$ = window.jQuery = require("./js/jquery.min.js");
 		</script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
-		<!-- <script>new VConsole();</script> -->
+		<script>new VConsole();</script>
 		<script src="./js/stats.min.js"></script>
 		<script src="./js/dat.gui.min.js"></script>
 		<script src="./js/three.min.js"></script>
@@ -593,8 +593,11 @@ function Thing(opinion){
 		}
 		this.block.deleteTexture = (index)=>{
 			if (index != undefined){ //有索引
+				this.block.texture[index].dispose(); //清除内存
 				delete this.block.texture[index];
 			}else{ //无索引
+				for (let i of this.block.texture)
+					i.dispose(); //清除内存
 				delete this.block.texture;
 			}
 			return this;
@@ -605,16 +608,17 @@ function Thing(opinion){
 		}
 		this.block.makeMaterial = ()=>{
 			this.block.material = [
-				new THREE.MeshLambertMaterial({ map:this.block.texture[0], transparent:true }),
-				new THREE.MeshLambertMaterial({ map:this.block.texture[1], transparent:true }),
-				new THREE.MeshLambertMaterial({ map:this.block.texture[2], transparent:true }),
-				new THREE.MeshLambertMaterial({ map:this.block.texture[3], transparent:true }),
-				new THREE.MeshLambertMaterial({ map:this.block.texture[4], transparent:true }),
-				new THREE.MeshLambertMaterial({ map:this.block.texture[5], transparent:true })
+				new THREE.MeshLambertMaterial({ map:this.block.texture[0], transparent:true/*, visible:false*/ }),
+				new THREE.MeshLambertMaterial({ map:this.block.texture[1], transparent:true/*, visible:false*/ }),
+				new THREE.MeshLambertMaterial({ map:this.block.texture[2], transparent:true/*, visible:false*/ }),
+				new THREE.MeshLambertMaterial({ map:this.block.texture[3], transparent:true/*, visible:false*/ }),
+				new THREE.MeshLambertMaterial({ map:this.block.texture[4], transparent:true/*, visible:false*/ }),
+				new THREE.MeshLambertMaterial({ map:this.block.texture[5], transparent:true/*, visible:false*/ })
 			]; //材质对象 MeshLambertMaterial
 			return this;
 		}
 		this.block.deleteMaterial = ()=>{
+			this.block.material.dispose(); //清除内存
 			delete this.block.material;
 			return this;
 		}
@@ -633,6 +637,8 @@ function Thing(opinion){
 			return this;
 		}
 		this.block.deleteMesh = (index)=>{
+			this.block.mesh.material.dispose();
+			this.block.mesh.geometry.dispose(); //清除内存
 			delete this.block.mesh;
 			return this;
 		}
@@ -697,10 +703,10 @@ function BlockMap(size){
 		thing.block.mesh.position.x = pos.x*100;
 		thing.block.mesh.position.y = pos.y*100;
 		thing.block.mesh.position.z = pos.z*100;
-		thing.block.visible = false; //默认不绘制
+		//thing.block.visible = false; //默认不绘制
 		
-		/*scene.add(thing.block.mesh); //网格模型添加到场景中
-		thing.block.mesh = thing.block.mesh;*/
+		scene.add(thing.block.mesh); //网格模型添加到场景中
+		//thing.block.mesh = thing.block.mesh;
 		this.map[pos.x][pos.y][pos.z] = thing;
 	};
 	//更新方块
@@ -710,7 +716,15 @@ function BlockMap(size){
 		if (!this.get(x,y,z)) // 没有方块/不在范围
 			return;
 		
-		if (this.get(x,y,z).block.visible){ //可见
+		this.map[x][y][z].block.material[0].visible = this.get(x+1, y, z)==null;
+		this.map[x][y][z].block.material[1].visible = this.get(x-1, y, z)==null;
+		this.map[x][y][z].block.material[2].visible = this.get(x, y+1, z)==null;
+		this.map[x][y][z].block.material[3].visible = this.get(x, y-1, z)==null;
+		this.map[x][y][z].block.material[4].visible = this.get(x, y, z+1)==null;
+		this.map[x][y][z].block.material[5].visible = this.get(x, y, z-1)==null;
+		//console.log(this.map[x][y][z].block.material.map(v => v.visible))
+		
+		/*if (this.get(x,y,z).block.visible){ //可见
 			if (
 				this.get(x+1, y, z) &&
 				this.get(x-1, y, z) &&
@@ -734,7 +748,7 @@ function BlockMap(size){
 				scene.add(this.get(x,y,z).block.mesh); //网格模型添加到场景中
 				return this.map[x][y][z].block.visible = true;
 			}
-		}
+		}*/
 	};
 	this.updateRound = (x,y,z)=>{ //更新方块及周围
 		this.update(x, y, z);
@@ -954,6 +968,23 @@ setInterval(function(){
 	if (stop)
 		return;
 	
+	//雨滴降落
+	for (let i=0; i<sprite_system.length; i++){
+		//sprite_system[i].v -= 9.8*t/1000*100;
+		sprite_system[i].position.y -= 10*1000*t/1000*(Math.random()*0.2+0.9); //10m/s //sprite_system[i].v*t/1000;
+		if (/*!map.get(
+				sprite_system[i].position.x/100,
+				sprite_system[i].position.y/100,
+				sprite_system[i].position.z/100
+			)||*/
+			sprite_system[i].position.y < 0
+		){ // 有方块/超出界限
+			sprite_system[i].material.dispose(); //清除内存
+			scene.remove(sprite_system[i]);
+			sprite_system.splice(i,1);
+		}
+	}
+	
 	while (t--){
 		if (Math.random() <= weather){
 			//创建精灵模型对象，不需要几何体geometry参数
@@ -969,7 +1000,7 @@ setInterval(function(){
 			sprite_system.push(sprite);
 		}
 	}
-}, 1);
+}, 0);
 
 let weather_folder = gui.addFolder("天气(weather)");
 	weather_folder.add(window, "weather", 0, 1/300*1000, 1e-3).name("降水系数").onChange((value)=>{weather = Math.pow(value*300/1000,3)/300*1000});
@@ -1001,12 +1032,12 @@ for (let i=1; i<blocks.length; i++){
 					return;
 			
 			//单个block加载完毕
-			blocks[i].block.makeMaterial().block.deleteTexture();
+			//blocks[i].block.makeMaterial().block.deleteTexture();
 			//blocks[i].block.makeMesh().deleteMaterial();
 			$("#schedule2").text( Math.round(i/blocks.length*100*100)/100 );
 			
 			for (let k=1; k<blocks.length; k++)
-				if (!blocks[k].block.material)
+				if (!blocks[k].block.texture/*material*/)
 					return;
 			
 			//所有block加载完毕
@@ -1039,11 +1070,11 @@ for (let i=1; i<blocks.length; i++){
 								}else{
 									id = 4;
 								}
-							}else if (y < 10){
+							}else if (y < 6){
 								id = 6;
 							}
 							if (id != 0)
-								map.add(new Thing(blocks[id]).block.makeMesh(), {x:load.x, y, z}); //以模板建立
+								map.add(new Thing(blocks[id]).block.makeMaterial().block.deleteTexture().block.makeMesh(), {x:load.x, y, z}); //以模板建立
 								//map.update(load.x ,y ,z); //刷新是否添加方块
 								// blocks[id].block.deleteMesh();
 						}
@@ -1201,7 +1232,7 @@ let WIDTH = window.innerWidth,
 
 var camera = new THREE.PerspectiveCamera(45, WIDTH/HEIGHT, 1, 1000*100);
 //								 view_angle, aspect, near, far(1km)
-camera.position.set(0, 300, 0); //设置相机位置
+camera.position.set(0, 2000, 0); //设置相机位置
 camera.lookAt(scene.position); //设置相机方向(指向的场景对象)
 /*setTimeout(function(){
 	console.info(camera);
@@ -1450,7 +1481,7 @@ var deskgood = {
 				{x: deskgood.pos.x-50},
 				{x: 1},
 				0,
-				x+50
+				x+60
 			);
 			if (objs.length){ //被阻挡
 				let fx = Math.min(...objs.map(v => v.point.x))-10; //获取碰撞点，计算移动位置
@@ -1466,7 +1497,7 @@ var deskgood = {
 				{x: deskgood.pos.x-50, y: deskgood.pos.y-100},
 				{x: 1},
 				0,
-				x+50
+				x+60
 			);
 			if (objs.length){ //被阻挡
 				let fx = Math.min(...objs.map(v => v.point.x))-10; //获取碰撞点，计算移动位置
@@ -1483,7 +1514,7 @@ var deskgood = {
 				{x: deskgood.pos.x+50},
 				{x: -1},
 				0,
-				-x+50
+				-x+60
 			);
 			if (objs.length){ //被阻挡
 				let fx = Math.max(...objs.map(v => v.point.x))+10; //获取碰撞点，计算移动位置
@@ -1499,7 +1530,7 @@ var deskgood = {
 				{x: deskgood.pos.x+50, y: deskgood.pos.y-100},
 				{x: -1},
 				0,
-				-x+50
+				-x+60
 			);
 			if (objs.length){ //被阻挡
 				let fx = Math.max(...objs.map(v => v.point.x))+10; //获取碰撞点，计算移动位置
@@ -1562,7 +1593,7 @@ var deskgood = {
 				{z: deskgood.pos.z-50},
 				{z: 1},
 				0,
-				z+50
+				z+60
 			);
 			if (objs.length){ //被阻挡
 				let fz = Math.min(...objs.map(v => v.point.z))-10; //获取碰撞点，计算移动位置
@@ -1578,7 +1609,7 @@ var deskgood = {
 				{z: deskgood.pos.z-50, y: deskgood.pos.y-100},
 				{z: 1},
 				0,
-				z+50
+				z+60
 			);
 			if (objs.length){ //被阻挡
 				let fz = Math.min(...objs.map(v => v.point.z))-10; //获取碰撞点，计算移动位置
@@ -1595,7 +1626,7 @@ var deskgood = {
 				{z: deskgood.pos.z+50},
 				{z: -1},
 				0,
-				-z+50
+				-z+60
 			);
 			if (objs.length){ //被阻挡
 				let fz = Math.max(...objs.map(v => v.point.z))+10; //获取碰撞点，计算移动位置
@@ -1611,7 +1642,7 @@ var deskgood = {
 				{z: deskgood.pos.z+50, y: deskgood.pos.y-100},
 				{z: -1},
 				0,
-				-z+50
+				-z+60
 			);
 			if (objs.length){ //被阻挡
 				let fz = Math.max(...objs.map(v => v.point.z))+10; //获取碰撞点，计算移动位置
@@ -1892,18 +1923,6 @@ function render(){
 	requestAnimationFrame(render);
 	renderer.render(scene, camera);//执行渲染操作
 	
-	//降水雨滴
-	if (!stop){
-		for (let i=0; i<sprite_system.length; i++){
-			//sprite_system[i].v -= 9.8*t/1000*100;
-			sprite_system[i].position.y -= 10*1000*t/1000*(Math.random()*0.2+0.9); //10m/s //sprite_system[i].v*t/1000;
-			if (sprite_system[i].position.y < 0){
-				scene.remove(sprite_system[i]);
-				sprite_system.splice(i,1);
-			}
-		}
-	}
-	
 	let warn = [];
 	try{
 		if (map.get(deskgood.pos.x/100,
@@ -1913,15 +1932,6 @@ function render(){
 				null
 		){ //头被卡住
 			warn.push("头被卡住？");
-			while (map.get(deskgood.pos.x/100,
-					deskgood.pos.y/100,
-					deskgood.pos.z/100)
-				!=
-					null
-			){
-				deskgood.pos.y += 25;
-			}
-			deskgood.pos.y += 75;
 			try{
 				plus.nativeUI.toast(
 					"<font size=\"16\">想窒息吗？还往头上放方块，看你怎么出来！</font>",
@@ -1943,18 +1953,18 @@ function render(){
 				null
 		){ //脚被卡住
 			warn.push("脚被卡住？");
-			while (map.get(deskgood.pos.x/100,
-					deskgood.pos.y/100,
-					deskgood.pos.z/100)
-				!=
-					null
-			){
-				deskgood.pos.y += 25;
-			}
-			deskgood.pos.y += 75;
 		}
 	}catch(err){}
 	if (warn.length && !stop){
+		if (!map.get(deskgood.pos.x/100,
+			deskgood.pos.y/100,
+			deskgood.pos.z/100
+		) &&
+		!map.get(deskgood.pos.x/100,
+			deskgood.pos.y/100+1,
+			deskgood.pos.z/100
+		)) deskgood.v.y += deskgood.jump_v/3; //自动跳跃
+		
 		if (warn[0] & warn[1]){
 			console.warn(warn[0], warn[1]);
 		}else{
@@ -2442,7 +2452,7 @@ document.addEventListener("mousedown", function (e){
 					Math.pow(y-deskgood.pos.y, 2)+
 					Math.pow(z-deskgood.pos.z, 2)
 				) < 500){ //距离<5m
-					map.add(new Thing(blocks[ deskgood.tools[deskgood.choice] ]).block.makeMesh(), {
+					map.add(new Thing(blocks[ deskgood.tools[deskgood.choice] ]).block.makeMaterial().block.deleteTexture().block.makeMesh(), {
 						x: x/100,
 						y: y/100,
 						z: z/100
@@ -2775,7 +2785,7 @@ $("#jump").on("touchstart", function(){
 	if (stop)
 		return;
 	
-	console.log("jump");
+	console.log("try jump");
 	
 	try{
 		if (
@@ -2931,7 +2941,7 @@ $("canvas:eq(0)").on("touchend", function (e){
 	
 	let x = e.originalEvent.changedTouches[0].pageX;
 	let y = e.originalEvent.changedTouches[0].pageY;
-	console.log("touchend:", x, y, Number(new Date()));
+	//console.log("touchend:", x, y, Number(new Date()));
 	
 	x0 = null, y0 = null;
 	
@@ -3004,7 +3014,7 @@ $("canvas:eq(0)").on("touchend", function (e){
 						Math.pow(y-deskgood.pos.y, 2)+
 						Math.pow(z-deskgood.pos.z, 2)
 					) < 500){ //距离<5m
-						map.add(new Thing(blocks[ deskgood.tools[deskgood.choice] ]).block.makeMesh(), {
+						map.add(new Thing(blocks[ deskgood.tools[deskgood.choice] ]).block.makeMaterial().block.deleteTexture().block.makeMesh(), {
 							x: x/100,
 							y: y/100,
 							z: z/100
