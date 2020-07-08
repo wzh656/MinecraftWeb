@@ -1,7 +1,9 @@
 # 我的世界（仿）
-修改日期:2020.7.7
+修改日期:2020.7.8
 
 # 运行
++ [手机版(apk)v1.0.0.1-alpha临时完整版（较大，20+MB）（与之前不兼容，无存档，需先卸载重装）](https://github.com/wzh656/MinecraftWeb/releases/download/v1.0.0.1-alpha/Minecraft-full.apk)
+
 + [手机版(apk)v0.5.0-alpha完整版（较大，20+MB）](https://github.com/wzh656/MinecraftWeb/releases/download/v0.5.0-alpha/Minecraft-full.apk)
 
 + [手机版(apk)v0.5.0-alpha简化版（在线字体、BGM，5+MB）](https://github.com/wzh656/MinecraftWeb/releases/download/v0.5.0-alpha//Minecraft-simplified.apk)
@@ -74,7 +76,8 @@
 
 
 ## ㈦关于工具
-> ⑴*state.js*库：左上角(left-top corner)默认蓝色(normal blue)  
+> ⑴*state.js*库：左上角(left-top corner)默认蓝色(normal blue)
+
 可以使用该工具查看当前渲染状态，该工具有3种状态（点击切换(click to change)）
 + fps:蓝色（默认），查看当前每秒可渲染的帧数，越大越流畅（一般最佳：60fps（电脑就这样，手机（特烂）只有10+fps））  
 + ms:绿色(green)，查看渲染每帧需要的时间(ms)，越小越流畅（一般最佳：16ms/帧）  
