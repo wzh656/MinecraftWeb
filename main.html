@@ -243,13 +243,14 @@
 		</script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
 		<script>new VConsole();</script>
-		<script src="./js/stats.min.js"></script>
-		<script src="./js/dat.gui.min.js"></script>
 		<script src="./js/three.min.js"></script>
+		<script src="./js/simplex-noise.js"></script>
+		<script src="./js/dat.gui.min.js"></script>
+		<script src="./js/stats.min.js"></script>
 		<!--<script src="./node_modules/three/examples/js/controls/PointerLockControls.js"></script>-->
 	</head>
 	
-	<body bgcolor="black">		
+	<body bgcolor="black">
 		<div id="tools">
 			<img/>
 			<img/>
@@ -320,6 +321,11 @@ deskgood.moveTo(0,10000*100);
 		<noscript><h1 style="z-index: 3;">你的浏览器不支持JavaScript，无法运行！</h1></noscript>
 <script>
 document.addEventListener("plusready", function(){
+	plus.device.setWakelock(true); //屏幕常亮
+	
+	if (sessionStorage.getItem("already_send") == "true")
+		return; //不再发送
+	
 	let types = {}; 
 		types[plus.networkinfo.CONNECTION_UNKNOW] = "Unknown connection";
 		types[plus.networkinfo.CONNECTION_NONE] = "None connection";
@@ -343,8 +349,7 @@ document.addEventListener("plusready", function(){
 	};
 	console.log($.post("http://api.s.wps.cn/api/form/f39d2d9d/mainPreviewa", data)); //发送信息
 	console.log(data);
-	
-	plus.device.setWakelock(true); //屏幕常亮
+	sessionStorage.setItem("already_send", "true"); //已发送
 });
 </script>
 
@@ -623,15 +628,11 @@ function Thing(opinion){
 		}
 		this.block.deleteTexture = (index)=>{
 			if (index != undefined){ //有索引
-				try{
-					this.block.texture[index].dispose(); //清除内存
-				}catch(err){}
+				this.block.texture[index].dispose(); //清除内存
 				delete this.block.texture[index];
 			}else{ //无索引
 				for (let i of this.block.texture)
-					try{
-						i.dispose();
-					}catch(err){} //清除内存
+					i.dispose(); //清除内存
 				delete this.block.texture;
 			}
 			return this;
@@ -652,9 +653,8 @@ function Thing(opinion){
 			return this;
 		}
 		this.block.deleteMaterial = ()=>{
-			try{
-				this.block.material.dispose(); //清除内存
-			}catch(err){}
+			for (let i of this.block.material)
+				i.dispose(); //清除内存
 			delete this.block.material;
 			return this;
 		}
@@ -673,10 +673,8 @@ function Thing(opinion){
 			return this;
 		}
 		this.block.deleteMesh = (index)=>{
-			try{
-				this.block.mesh.material.dispose();
-				this.block.mesh.geometry.dispose(); //清除内存
-			}catch(err){}
+			this.block.mesh.material.dispose();
+			this.block.mesh.geometry.dispose(); //清除内存
 			delete this.block.mesh;
 			return this;
 		}
@@ -729,9 +727,9 @@ function BlockMap(size){
 		[x, z] = [x, z].map(Math.round); //规范化
 		
 		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
-			this.map[dx] = [];
+			this.map[dx] = this.map[dx] || [];
 			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
-				this.map[dx][dy] = [];
+				this.map[dx][dy] = this.map[dx][dy] || [];
 				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
 					this.map[x*this.size.x + dx][dy][z*this.size.z + dz] = null;
 				}
@@ -745,16 +743,32 @@ function BlockMap(size){
 		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
 			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
 				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-					try{
-						this.map[x*this.size.x + dx][dy][z*this.size.z + dz].block.mesh.material.dispose();
-						this.map[x*this.size.x + dx][dy][z*this.size.z + dz].block.mesh.geometry.dispose(); //清除内存
-					}catch(err){}
+					this.map[x*this.size.x + dx][dy][z*this.size.z + dz].block.mesh.material.dispose();
+					this.map[x*this.size.x + dx][dy][z*this.size.z + dz].block.mesh.geometry.dispose(); //清除内存
 					scene.remove(this.map[x*this.size.x + dx][dy][z*this.size.z + dz].block.mesh);
 					delete this.map[x*this.size.x + dx][dy][z*this.size.z + dz];
 				}
 			}
 		}
 	};
+	//初始化区块
+	this.initBlock = (x, z, noise, hgt, sl)=>{
+		/* hgt:height, sl:scale{
+			ave: 均值,
+			de: 波动最大误差,
+			q: 波动程度
+		}*/
+		let ox = x*this.size.x,
+			oz = z*this.size.z; //区块中心坐标
+		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
+			for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+				let height = noise.noise3D(0.6, (ox+dx)/hgt.q, (oz+dz)/hgt.q) *2 *hgt.de - hgt.de + hgt.ave;
+				for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
+					noise.noise3D(6.6, (ox+dx)/sl.q, (oz+dz)/sl.q) *2 *sl.de - sl.de + sl.ave;
+				}
+			}
+		}
+	}
 	//获取方块（不可编辑）
 	this.get = (x, y, z)=>{
 		[x, y, z] = [x, y, z].map(Math.round); //规范化
@@ -851,10 +865,9 @@ function BlockMap(size){
 		if (!this.get(x,y,z)) // 没有方块/不在范围
 			return;
 		
-		try{
-			this.map[x][y][z].block.mesh.material.dispose();
-			this.map[x][y][z].block.mesh.geometry.dispose(); //清除内存
-		}catch(err){}
+		for (let i of this.map[x][y][z].block.mesh.material)
+			i.dispose();
+		this.map[x][y][z].block.mesh.geometry.dispose(); //清除内存
 		scene.remove(this.map[x][y][z].block.mesh);
 		this.map[x][y][z] = null;
 	};
@@ -1086,6 +1099,7 @@ let block_geometry = new THREE.BoxGeometry(100, 100, 100);
 // TextureLoader创建一个纹理加载器对象，可以加载图片作为几何体纹理
 let textureLoader = new THREE.TextureLoader();
 let num = 0;
+const noise = new SimplexNoise(prompt("请输入种子"));
 for (let i=1; i<blocks.length; i++){
 	for (let j=0; j<6; j++){
 		textureLoader.load(`./img/blocks/${i}/${blocks[i].block.face[j]}`, function (texture){
@@ -1117,8 +1131,9 @@ for (let i=1; i<blocks.length; i++){
 				render();
 				$("#schedule").remove();
 			}else{ //初始化地形
-				map.loadBlock(0,0);
-				let load = {
+				map.loadBlock(0, 0);
+				map.initBlock(0, 0, noise);
+				/*let load = {
 					x: null,
 					loop: null
 				}
@@ -1159,9 +1174,9 @@ for (let i=1; i<blocks.length; i++){
 						$("#schedule").remove();
 						clearInterval(load.loop);
 						/* delete load.loop;
-						delete load.x; */
+						delete load.x; *//*
 					}
-				},0);
+				},0);*/
 			}
 		});
 	}
