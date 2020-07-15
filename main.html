@@ -763,7 +763,7 @@ function BlockMap(size){
 				x:pos.x,
 				y:pos.y,
 				z:pos.z,
-			},
+			}
 		); //以模板建立
 	};
 	
@@ -827,8 +827,9 @@ function BlockMap(size){
 		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
 			for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
 				let height = noise.noise3D(0.6, (ox+dx)/h.q, (oz+dz)/h.q) *h.de + h.ave;
-				for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
-					let earth = height * (noise.noise3D(6.6, (ox+dx)/s.q, (oz+dz)/s.q) *s.de + s.ave);
+				let grass = false;
+				for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
+					let earth = height - height * (noise.noise3D(6.6, (ox+dx)/s.q, (oz+dz)/s.q) *s.de + s.ave);
 					if (dy > height){
 						this.addID(0, {
 							x: ox+dx,
@@ -836,13 +837,22 @@ function BlockMap(size){
 							z: oz+dz
 						}, template); //空气
 					}else if (dy > earth){
-						this.addID(1, {
-							x: ox+dx,
-							y: dy,
-							z: oz+dz
-						}, template); //草方块
+						if (grass){
+							this.addID(2, {
+								x: ox+dx,
+								y: dy,
+								z: oz+dz
+							}, template); //泥土
+						}else{
+							this.addID(1, {
+								x: ox+dx,
+								y: dy,
+								z: oz+dz
+							}, template); //草方块
+							grass = true;
+						}
 					}else{
-						this.addID(3, {
+						this.addID(4, {
 							x: ox+dx,
 							y: dy,
 							z: oz+dz
@@ -951,48 +961,55 @@ template.push(new Thing({
 }));
 template.push(new Thing({
 	id: 2,
-	name: "木板",
+	name: "泥土",
 	block: {
 		face: face_url[1]
 	}
 }));
 template.push(new Thing({
 	id: 3,
-	name: "石头",
+	name: "木板",
 	block: {
 		face: face_url[1]
 	}
 }));
 template.push(new Thing({
 	id: 4,
-	name: "原石",
+	name: "石头",
 	block: {
 		face: face_url[1]
 	}
 }));
 template.push(new Thing({
 	id: 5,
-	name: "沙子",
+	name: "原石",
 	block: {
 		face: face_url[1]
 	}
 }));
 template.push(new Thing({
 	id: 6,
-	name: "砖",
+	name: "沙子",
 	block: {
 		face: face_url[1]
 	}
 }));
 template.push(new Thing({
 	id: 7,
+	name: "砖",
+	block: {
+		face: face_url[1]
+	}
+}));
+template.push(new Thing({
+	id: 8,
 	name: "仙人掌",
 	block: {
 		face: face_url[0]
 	}
 }));
 template.push(new Thing({
-	id: 8,
+	id: 9,
 	name: "命令方块",
 	block: {
 		face: face_url[0]
@@ -2128,10 +2145,10 @@ deskgood_folder.open();
 		deskgood_tools_folder.add(deskgood, "choice", 0, 3, 1).listen().name("选择工具").onChange(deskgood.tools_choice_refresh);
 		let deskgood_tools_things_folder = deskgood_tools_folder.addFolder("物品");
 		deskgood_tools_things_folder.open();
-			deskgood_tools_things_folder.add(deskgood.tools, 0, 0, 8, 1).listen().onChange(deskgood.tools_things_refresh);
-			deskgood_tools_things_folder.add(deskgood.tools, 1, 0, 8, 1).listen().onChange(deskgood.tools_things_refresh);
-			deskgood_tools_things_folder.add(deskgood.tools, 2, 0, 8, 1).listen().onChange(deskgood.tools_things_refresh);
-			deskgood_tools_things_folder.add(deskgood.tools, 3, 0, 8, 1).listen().onChange(deskgood.tools_things_refresh);
+			deskgood_tools_things_folder.add(deskgood.tools, 0, 0, 9, 1).listen().onChange(deskgood.tools_things_refresh);
+			deskgood_tools_things_folder.add(deskgood.tools, 1, 0, 9, 1).listen().onChange(deskgood.tools_things_refresh);
+			deskgood_tools_things_folder.add(deskgood.tools, 2, 0, 9, 1).listen().onChange(deskgood.tools_things_refresh);
+			deskgood_tools_things_folder.add(deskgood.tools, 3, 0, 9, 1).listen().onChange(deskgood.tools_things_refresh);
 
 
 /* //多线程
