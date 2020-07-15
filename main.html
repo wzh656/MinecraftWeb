@@ -721,91 +721,20 @@ function BlockMap(size){
 	
 	//所有方块
 	this.map = [];
+	//活动区块
+	this.activeBlock = [];
 	
-	//加载区块
-	this.loadBlock = (x, z)=>{
-		[x, z] = [x, z].map(Math.round); //规范化
-		
-		let ox = x*this.size.x,
-			oz = z*this.size.z; //区块中心坐标
-		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
-			this.map[dx] = this.map[dx] || [];
-			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
-				this.map[dx][dy] = this.map[dx][dy] || [];
-				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-					this.map[ox+dx][dy][oz+dz] = null;
-				}
-			}
-		}
-	};
-	//卸载载区块
-	this.unloadBlock = (x, z)=>{
-		[x, z] = [x, z].map(Math.round); //规范化
-		
-		let ox = x*this.size.x,
-			oz = z*this.size.z; //区块中心坐标
-		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
-			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
-				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-					this.map[ox+dx][dy][oz+dz].block.mesh.material.dispose();
-					this.map[ox+dx][dy][oz+dz].block.mesh.geometry.dispose(); //清除内存
-					scene.remove(this.map[ox+dx][dy][oz+dz].block.mesh);
-					delete this.map[ox+dx][dy][oz+dz];
-				}
-			}
-		}
-	};
-	//初始化区块
-	this.initBlock = (x, z, noise, h, s)=>{
-		/* h:height, s:scale{
-			ave: 均值,
-			de: 最大波动程度,
-			q: 波动程度
-		}*/
-		let ox = x*this.size.x,
-			oz = z*this.size.z; //区块中心坐标
-		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
-			for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-				let height = noise.noise3D(0.6, (ox+dx)/h.q, (oz+dz)/h.q) *2 *h.de - h.de + h.ave;
-				for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
-					let stones = noise.noise3D(6.6, (ox+dx)/s.q, (oz+dz)/s.q) *2 *s.de - s.de + s.ave;
-					if (dy > height){
-						this.addID(0, {
-							x: ox+dx,
-							y: dy,
-							z: oz+dz
-						}, template); //空气
-					}else if (dy > stones){
-						this.addID(1, {
-							x: ox+dx,
-							y: dy,
-							z: oz+dz
-						}, template); //草方块
-					}else{
-						this.addID(4, {
-							x: ox+dx,
-							y: dy,
-							z: oz+dz
-						}, template); //岩石
-					}
-				}
-			}
-		}
-	}
 	//获取方块（不可编辑）
 	this.get = (x, y, z)=>{
 		[x, y, z] = [x, y, z].map(Math.round); //规范化
 		
-		if (
-			this.size[0].x <= x & x <= this.size[1].x &
-			this.size[0].y <= y & y <= this.size[1].y &
-			this.size[0].z <= z & z <= this.size[1].z
-		){ //在范围内
+		try{
 			return this.map[x][y][z];
-		}else{
-			return null; //真空
+		}catch(err){ //超过范围
+			return null;
 		}
 	};
+	
 	//添加方块
 	this.add = (thing, pos)=>{
 		[pos.x, pos.y, pos.z] = [pos.x, pos.y, pos.z].map(Math.round); //规范化
@@ -820,6 +749,7 @@ function BlockMap(size){
 		//thing.block.mesh = thing.block.mesh;
 		this.map[pos.x][pos.y][pos.z] = thing;
 	};
+	
 	//根据 模板和ID 添加方块
 	this.addID = (id, pos, template)=>{
 		if (!id)
@@ -835,7 +765,94 @@ function BlockMap(size){
 				z:pos.z,
 			},
 		); //以模板建立
-	}
+	};
+	
+	//初始化区块
+	this.initBlock = (x, z)=>{
+		[x, z] = [x, z].map(Math.round); //规范化
+		
+		let have = false;
+		for (let i of this.activeBlock)
+			if (i[0] == x && i[1] == z)
+				have = true;
+		if (!have)
+			this.activeBlock.push([x,z]);
+		
+		let ox = x*this.size.x,
+			oz = z*this.size.z; //区块中心坐标
+		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
+			this.map[ox+dx] = this.map[ox+dx] || [];
+			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
+				this.map[ox+dx][dy] = this.map[ox+dx][dy] || [];
+				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+					this.map[ox+dx][dy][oz+dz] = null;
+				}
+			}
+		}
+	};
+	
+	//卸载区块
+	this.unloadBlock = (x, z)=>{
+		[x, z] = [x, z].map(Math.round); //规范化
+		for (let i in this.activeBlock)
+			if (this.activeBlock[i][0] == x && this.activeBlock[i][1] == z)
+				delete this.activeBlock[i];
+		
+		let ox = x*this.size.x,
+			oz = z*this.size.z; //区块中心坐标
+		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
+			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
+				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+					try{
+						for (let i of this.map[ox+dx][dy][oz+dz].block.mesh.material)
+							i.dispose();
+						this.map[ox+dx][dy][oz+dz].block.mesh.geometry.dispose(); //清除内存
+						scene.remove(this.map[ox+dx][dy][oz+dz].block.mesh);
+					}catch(err){}
+					delete this.map[ox+dx][dy][oz+dz];
+				}
+			}
+		}
+	};
+	
+	//加载区块
+	this.loadBlock = (x, z, noise, h, s)=>{
+		/* h:height, s:scale{
+			ave: 均值,
+			de: 最大波动程度,
+			q: 波动程度
+		}*/
+		let ox = x*this.size.x,
+			oz = z*this.size.z; //区块中心坐标
+		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
+			for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+				let height = noise.noise3D(0.6, (ox+dx)/h.q, (oz+dz)/h.q) *h.de + h.ave;
+				for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
+					let earth = height * (noise.noise3D(6.6, (ox+dx)/s.q, (oz+dz)/s.q) *s.de + s.ave);
+					if (dy > height){
+						this.addID(0, {
+							x: ox+dx,
+							y: dy,
+							z: oz+dz
+						}, template); //空气
+					}else if (dy > earth){
+						this.addID(1, {
+							x: ox+dx,
+							y: dy,
+							z: oz+dz
+						}, template); //草方块
+					}else{
+						this.addID(3, {
+							x: ox+dx,
+							y: dy,
+							z: oz+dz
+						}, template); //石头
+					}
+				}
+			}
+		}
+	};
+	
 	//更新方块
 	this.update = (x, y, z)=>{
 		[x, y, z] = [x, y, z].map(Math.round); //规范化
@@ -849,34 +866,8 @@ function BlockMap(size){
 		this.map[x][y][z].block.material[3].visible = this.get(x, y-1, z)==null;
 		this.map[x][y][z].block.material[4].visible = this.get(x, y, z+1)==null;
 		this.map[x][y][z].block.material[5].visible = this.get(x, y, z-1)==null;
-		//console.log(this.map[x][y][z].block.material.map(v => v.visible))
-		
-		/*if (this.get(x,y,z).block.visible){ //可见
-			if (
-				this.get(x+1, y, z) &&
-				this.get(x-1, y, z) &&
-				this.get(x, y+1, z) &&
-				this.get(x, y-1, z) &&
-				this.get(x, y, z+1) &&
-				this.get(x, y, z-1)
-			){ //四周有方块 不渲染
-				scene.remove(this.get(x,y,z).block.mesh);
-				return this.map[x][y][z].block.visible = false;
-			}
-		}else{ //不可见
-			if (
-				!this.get(x+1, y, z) ||
-				!this.get(x-1, y, z) ||
-				!this.get(x, y+1, z) ||
-				!this.get(x, y-1, z) ||
-				!this.get(x, y, z+1) ||
-				!this.get(x, y, z-1)
-			){ //四周无方块 渲染
-				scene.add(this.get(x,y,z).block.mesh); //网格模型添加到场景中
-				return this.map[x][y][z].block.visible = true;
-			}
-		}*/
 	};
+	
 	//更新方块及周围
 	this.updateRound = (x,y,z)=>{
 		this.update(x, y, z);
@@ -887,9 +878,9 @@ function BlockMap(size){
 		this.update(x, y, z+1);
 		this.update(x, y, z-1);
 	};
+	
 	//更新区块内所有方块
 	this.updateBlock = (x,z)=>{
-	
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
@@ -901,6 +892,7 @@ function BlockMap(size){
 			}
 		}
 	};
+	
 	//删除方块
 	this.delete = (x, y, z)=>{
 		[x, y, z] = [x, y, z].map(Math.round); //规范化
@@ -1011,29 +1003,6 @@ let map = new BlockMap([
 	{x: -8, y: 0, z: -8},
 	{x: 8, y: 32, z: 8}
 ]);
-/*if (localStorage.getItem("我的世界.存档.方块")){
-	map.useSave( JSON.parse(localStorage.getItem("我的世界.存档.方块")) );
-}else{ //初始化地形
-	for (let x=-10; x<=10; x++){
-		for (let y=0; y<=20; y++){
-			for (let z=-10; z<=10; z++){
-				if (y == 0){
-					map.addBlock(thing[3], {x,y,z});
-				}else if (y == 1){
-					if (x < 0){
-						map.addBlock(thing[1], {x,y,z});
-					}else if (x > 6){
-						map.addBlock(thing[2], {x,y,z});
-					}else{
-						map.addBlock(thing[4], {x,y,z});
-					}
-				}//else{
-					//map.addBlock(0);
-				//}
-			}
-		}
-	}
-}*/
 
 function save(){
 	return;
@@ -1072,7 +1041,7 @@ let scene_folder = gui.addFolder("场景(scene)");
 /**
  * 天气(sprite精灵)
  */
-weather = Math.random()<0.5? 0: Math.random()*Math.random()*Math.random()/300*1000;//Math.abs(1-(Math.log(Math.random()+0.003)+6)/6);
+weather = Math.random()<0.25? 0: Math.random()*Math.random()*Math.random()/300*1000;//Math.abs(1-(Math.log(Math.random()+0.003)+6)/6);
 console.info(`降水概率:${weather}滴/s/m²`, `降水范围：地图有效区域（<x:${map.size[0].x}~${map.size[1].x}>*<z:${map.size[0].z}~${map.size[1].z}>）`);
 let sprite_system = [],
 	sprite_lastTime = null,
@@ -1168,21 +1137,73 @@ block_load.id = setInterval(function(){
 		delete block_load;
 		$("#schedule_message").text("载入方块中……");
 		
-		map.loadBlock(0, 0); //初始化区块
-		map.initBlock(0, 0, noise, {
+		map.initBlock(0, 0); //初始化区块
+		map.loadBlock(0, 0, noise, {
 			ave: 10,
 			de: 5,
 			q: 66
 		}, {
-			ave: 7.6,
-			de: 1.6,
+			ave: 0.266,
+			de: 0.16,
 			q: 66
 		}); //用噪声填充区块
 		map.updateBlock(0, 0); //更新区块
 		
+		/* map.initBlock(0, 1); //初始化区块
+		map.loadBlock(0, 1, noise, {
+			ave: 10,
+			de: 5,
+			q: 66
+		}, {
+			ave: 0.266,
+			de: 0.16,
+			q: 66
+		}); //用噪声填充区块
+		map.updateBlock(0, 1); //更新区块
+		
+		map.initBlock(0, -1); //初始化区块
+		map.loadBlock(0, -1, noise, {
+			ave: 10,
+			de: 5,
+			q: 66
+		}, {
+			ave: 0.266,
+			de: 0.16,
+			q: 66
+		}); //用噪声填充区块
+		map.updateBlock(0, -1); //更新区块
+		
+		map.initBlock(1, 0); //初始化区块
+		map.loadBlock(1, 0, noise, {
+			ave: 10,
+			de: 5,
+			q: 66
+		}, {
+			ave: 0.266,
+			de: 0.16,
+			q: 66
+		}); //用噪声填充区块
+		map.updateBlock(1, 0); //更新区块
+		
+		map.initBlock(-1, 0); //初始化区块
+		map.loadBlock(-1, 0, noise, {
+			ave: 10,
+			de: 5,
+			q: 66
+		}, {
+			ave: 0.266,
+			de: 0.16,
+			q: 66
+		}); //用噪声填充区块
+		map.updateBlock(-1, 0); //更新区块 */
+		
+		
+		
 		$("#schedule1").text("100");
-		render(); //纹理贴图加载成功后，调用渲染函数执行渲染操作
-		$("#schedule").remove();
+		setTimeout(function(){
+			render(); //纹理贴图加载成功后，调用渲染函数执行渲染操作
+			$("#schedule").remove();
+		});
 	}
 },0);
 
@@ -1838,6 +1859,35 @@ var deskgood = {
 				// console.log("z- 下 无碰撞",z)
 			}
 		}
+		
+		let block = [
+			Math.round(deskgood.pos.x/100/map.size.x),
+			Math.round(deskgood.pos.z/100/map.size.z)
+		];
+		let have = false;
+		for (let i of map.activeBlock)
+			if (i[0] == block[0] && i[1] == block[1])
+				have = true;
+		if (!have){
+			map.initBlock(...block);
+			map.loadBlock(...block, noise, {
+				ave: 10,
+				de: 5,
+				q: 66
+			}, {
+				ave: 0.266,
+				de: 0.16,
+				q: 66
+			}); //用噪声填充区块
+			map.updateBlock(...block); //更新区块
+			for (let i of map.activeBlock)
+				if (
+					(i[0] != 0 || i[1] != 0)&&
+					(i[0] != block[0] || i[1] != block[1])
+				)
+					map.unloadBlock(...i); //卸载区块
+		}
+		
 		return rt;
 		
 		/*if (x & z)
