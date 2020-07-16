@@ -704,7 +704,7 @@ function Thing(opinion){
 Thing.prototype.geometry = new THREE.BoxGeometry(100, 100, 100);
 
 
-function BlockMap(size){
+function BlockMap(size, seed){
 	//一区块大小
 	this.size = {};
 	this.size.x = Math.round(size[1].x - size[0].x);
@@ -723,6 +723,28 @@ function BlockMap(size){
 	this.map = [];
 	//活动区块
 	this.activeBlock = [];
+	//种子设置
+	if (seed){
+		/* h:height, s:scale{
+			ave: 均值,
+			de: 最大波动程度,
+			q: 波动程度
+		}*/
+		this.seed = {
+			seed: seed.seed,
+			h: {
+				ave: seed.height.ave,
+				de: seed.height.de,
+				q: seed.height.q
+			},
+			s: {
+				ave: seed.scale.ave,
+				de: seed.scale.de,
+				q: seed.scale.q
+			}
+		};
+		this.seed.noise = new SimplexNoise(this.seed.seed);
+	}
 	
 	//获取方块（不可编辑）
 	this.get = (x, y, z)=>{
@@ -771,11 +793,9 @@ function BlockMap(size){
 	this.initBlock = (x, z)=>{
 		[x, z] = [x, z].map(Math.round); //规范化
 		
-		let have = false;
-		for (let i of this.activeBlock)
-			if (i[0] == x && i[1] == z)
-				have = true;
-		if (!have)
+		if (this.activeBlock.every(function(value, index, arr){
+			return value[0] != x || value[1] != z;
+		})) //每个都不一样（不存在）
 			this.activeBlock.push([x,z]);
 		
 		let ox = x*this.size.x,
@@ -796,7 +816,7 @@ function BlockMap(size){
 		[x, z] = [x, z].map(Math.round); //规范化
 		for (let i in this.activeBlock)
 			if (this.activeBlock[i][0] == x && this.activeBlock[i][1] == z)
-				delete this.activeBlock[i];
+				this.activeBlock.splice(i,1); //从i开始删除一个元素
 		
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
@@ -816,20 +836,24 @@ function BlockMap(size){
 	};
 	
 	//加载区块
-	this.loadBlock = (x, z, noise, h, s)=>{
-		/* h:height, s:scale{
-			ave: 均值,
-			de: 最大波动程度,
-			q: 波动程度
-		}*/
+	this.loadBlock = (x, z, callback)=>{
 		let ox = x*this.size.x,
-			oz = z*this.size.z; //区块中心坐标
-		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
+			oz = z*this.size.z, //区块中心坐标
+			t = this.seed; //临时变量
+		let dx=this.size[0].x;
+		
+		let id = setInterval(()=>{
+			if (dx > this.size[1].x){
+				clearInterval(id);
+				callback();
+				return;
+			}
+			
 			for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-				let height = noise.noise3D(0.6, (ox+dx)/h.q, (oz+dz)/h.q) *h.de + h.ave;
+				let height = t.noise.noise3D(0.6, (ox+dx)/t.h.q, (oz+dz)/t.h.q) *t.h.de + t.h.ave;
 				let grass = false;
 				for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
-					let earth = height - height * (noise.noise3D(6.6, (ox+dx)/s.q, (oz+dz)/s.q) *s.de + s.ave);
+					let earth = height - height * (t.noise.noise3D(6.6, (ox+dx)/t.s.q, (oz+dz)/t.s.q) *t.s.de + t.s.ave);
 					if (dy > height){
 						this.addID(0, {
 							x: ox+dx,
@@ -860,7 +884,12 @@ function BlockMap(size){
 					}
 				}
 			}
-		}
+			
+			dx++;
+		},0);
+		/* for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
+			
+		} */
 	};
 	
 	//更新方块
@@ -1019,7 +1048,20 @@ template.push(new Thing({
 let map = new BlockMap([
 	{x: -8, y: 0, z: -8},
 	{x: 8, y: 32, z: 8}
-]);
+],{
+	seed: prompt("请输入种子\n（取消或输入为空则随机生成）") || undefined,
+	height: {
+		ave: 10,
+		de: 5,
+		q: 66
+	},
+	scale: {
+		ave: 0.266,
+		de: 0.16,
+		q: 66
+	}
+});
+document.title = "我的世界:"+(map.seed.seed? map.seed.seed: "随机世界");
 
 function save(){
 	return;
@@ -1129,12 +1171,7 @@ let weather_folder = gui.addFolder("天气(weather)");
 // let num = 0;
 let block_load = {
 	i: 1,
-	id: null,
-	seed: prompt("请输入种子\n（取消或输入为空则随机生成）") || undefined
-}
-const noise = new SimplexNoise(block_load.seed);
-if (block_load.seed){
-	document.title = `我的世界（种子：${block_load.seed}）`;
+	id: null
 }
 // for (let i=1; i<template.length; i++){
 block_load.id = setInterval(function(){
@@ -1155,72 +1192,14 @@ block_load.id = setInterval(function(){
 		$("#schedule_message").text("载入方块中……");
 		
 		map.initBlock(0, 0); //初始化区块
-		map.loadBlock(0, 0, noise, {
-			ave: 10,
-			de: 5,
-			q: 66
-		}, {
-			ave: 0.266,
-			de: 0.16,
-			q: 66
+		map.loadBlock(0, 0, function(){
+			map.updateBlock(0, 0); //更新区块
+			$("#schedule1").text("100");
+			setTimeout(function(){
+				render(); //纹理贴图加载成功后，调用渲染函数执行渲染操作
+				$("#schedule").remove();
+			});
 		}); //用噪声填充区块
-		map.updateBlock(0, 0); //更新区块
-		
-		/* map.initBlock(0, 1); //初始化区块
-		map.loadBlock(0, 1, noise, {
-			ave: 10,
-			de: 5,
-			q: 66
-		}, {
-			ave: 0.266,
-			de: 0.16,
-			q: 66
-		}); //用噪声填充区块
-		map.updateBlock(0, 1); //更新区块
-		
-		map.initBlock(0, -1); //初始化区块
-		map.loadBlock(0, -1, noise, {
-			ave: 10,
-			de: 5,
-			q: 66
-		}, {
-			ave: 0.266,
-			de: 0.16,
-			q: 66
-		}); //用噪声填充区块
-		map.updateBlock(0, -1); //更新区块
-		
-		map.initBlock(1, 0); //初始化区块
-		map.loadBlock(1, 0, noise, {
-			ave: 10,
-			de: 5,
-			q: 66
-		}, {
-			ave: 0.266,
-			de: 0.16,
-			q: 66
-		}); //用噪声填充区块
-		map.updateBlock(1, 0); //更新区块
-		
-		map.initBlock(-1, 0); //初始化区块
-		map.loadBlock(-1, 0, noise, {
-			ave: 10,
-			de: 5,
-			q: 66
-		}, {
-			ave: 0.266,
-			de: 0.16,
-			q: 66
-		}); //用噪声填充区块
-		map.updateBlock(-1, 0); //更新区块 */
-		
-		
-		
-		$("#schedule1").text("100");
-		setTimeout(function(){
-			render(); //纹理贴图加载成功后，调用渲染函数执行渲染操作
-			$("#schedule").remove();
-		});
 	}
 },0);
 
@@ -1257,15 +1236,7 @@ for (let i=1; i<template.length; i++){
 				$("#schedule").remove();
 			}else{ //初始化地形
 				map.loadBlock(0, 0);
-				map.initBlock(0, 0, noise, {
-					ave: 10,
-					de: 5,
-					q: 6
-				}, {
-					ave: 2.6,
-					de: 1.2,
-					q: 6
-				});
+				map.initBlock(0, 0);
 				
 				$("#schedule1").text("100");
 				//纹理贴图加载成功后，调用渲染函数执行渲染操作
@@ -1877,33 +1848,77 @@ var deskgood = {
 			}
 		}
 		
-		let block = [
+		let block0 = [
 			Math.round(deskgood.pos.x/100/map.size.x),
 			Math.round(deskgood.pos.z/100/map.size.z)
+		],
+		block1 = [
+			Math.round((deskgood.pos.x+300)/100/map.size.x),
+			Math.round(deskgood.pos.z/100/map.size.z)
+		],
+		block2 = [
+			Math.round((deskgood.pos.x-300)/100/map.size.x),
+			Math.round(deskgood.pos.z/100/map.size.z)
+		],
+		block3 = [
+			Math.round(deskgood.pos.x/100/map.size.x),
+			Math.round((deskgood.pos.z+300)/100/map.size.z)
+		],
+		block4 = [
+			Math.round(deskgood.pos.x/100/map.size.x),
+			Math.round((deskgood.pos.z-300)/100/map.size.z)
 		];
-		let have = false;
-		for (let i of map.activeBlock)
-			if (i[0] == block[0] && i[1] == block[1])
-				have = true;
-		if (!have){
-			map.initBlock(...block);
-			map.loadBlock(...block, noise, {
-				ave: 10,
-				de: 5,
-				q: 66
-			}, {
-				ave: 0.266,
-				de: 0.16,
-				q: 66
+		if (map.activeBlock.every(function(value, index, arr){
+			return value[0] != block0[0] || value[1] != block0[1];
+		})){ //每个都不一样（不存在）
+			map.initBlock(...block0);
+			map.loadBlock(...block0, function(){
+				map.updateBlock(...block0); //更新区块
 			}); //用噪声填充区块
-			map.updateBlock(...block); //更新区块
-			for (let i of map.activeBlock)
-				if (
-					(i[0] != 0 || i[1] != 0)&&
-					(i[0] != block[0] || i[1] != block[1])
-				)
-					map.unloadBlock(...i); //卸载区块
+		//////////////////////////////////////////////////////block1
+		}else if (map.activeBlock.every(function(value, index, arr){
+			return value[0] != block1[0] || value[1] != block1[1];
+		})){
+			map.initBlock(...block1);
+			map.loadBlock(...block1, function(){
+				map.updateBlock(...block1); //更新区块
+			}); //用噪声填充区块
+		//////////////////////////////////////////////////////block2
+		}else if (map.activeBlock.every(function(value, index, arr){
+			return value[0] != block2[0] || value[1] != block2[1];
+		})){
+			map.initBlock(...block2);
+			map.loadBlock(...block2, function(){
+				map.updateBlock(...block2); //更新区块
+			}); //用噪声填充区块
+		//////////////////////////////////////////////////////block3
+		}else if (map.activeBlock.every(function(value, index, arr){
+			return value[0] != block3[0] || value[1] != block3[1];
+		})){
+			map.initBlock(...block3);
+			map.loadBlock(...block3, function(){
+				map.updateBlock(...block3); //更新区块
+			}); //用噪声填充区块
+		//////////////////////////////////////////////////////block4
+		}else if (map.activeBlock.every(function(value, index, arr){
+			return value[0] != block4[0] || value[1] != block4[1];
+		})){
+			map.initBlock(...block4);
+			map.loadBlock(...block4, function(){
+				map.updateBlock(...block4); //更新区块
+			}); //用噪声填充区块
 		}
+		
+		for (let i of map.activeBlock)
+			if (
+				(i[0] != 0 || i[1] != 0)&&
+				(i[0] != block0[0] || i[1] != block0[1])&&
+				(i[0] != block1[0] || i[1] != block1[1])&&
+				(i[0] != block2[0] || i[1] != block2[1])&&
+				(i[0] != block3[0] || i[1] != block3[1])&&
+				(i[0] != block4[0] || i[1] != block4[1])
+			)
+				map.unloadBlock(...i); //卸载区块
 		
 		return rt;
 		
