@@ -1,8 +1,10 @@
 # 我的世界（仿）
-修改日期:2020.7.8
+修改日期:2020.7.17(v1.0.0.3-alpha)
 
 # 运行
-+ [手机版(apk)v1.0.0.1-alpha临时完整版（较大，20+MB）（与之前不兼容，无存档，需先卸载重装）](https://github.com/wzh656/MinecraftWeb/releases/download/v1.0.0.1-alpha/Minecraft-full.apk)
++ [手机版(apk)v1.0.0.3-alpha临时完整版（较大，30+MB）（与之前不兼容，无存档，需先卸载重装）](https://github.com/wzh656/MinecraftWeb/releases/download/v1.0.0.3-alpha/full.apk)
+
++ [手机版(apk)v1.0.0.3-alpha临时简化版（在线字体、BGM，6+MB）（与之前不兼容，无存档，需先卸载重装）](https://github.com/wzh656/MinecraftWeb/releases/download/v1.0.0.3-alpha/full.apk)
 
 + [手机版(apk)v0.5.0-alpha完整版（较大，20+MB）](https://github.com/wzh656/MinecraftWeb/releases/download/v0.5.0-alpha/Minecraft-full.apk)
 
@@ -32,7 +34,9 @@
 
 ## ㈢关于地图
 1. 《我的世界》地图由种子(seed)经过柏林噪声(perlin noise)产生  
-2. 《我的世界（仿）》地图为平坦模式，地面（20×20×2），可用（可放置方块）空间（20×20×20）  
+2. 《我的世界（仿）》地图使用柏林噪声函数生成  
+    + 每个区块17*17*32  
+    + 海拔平均：10，最高：15  
 
 
 ## ㈣关于方块
@@ -105,9 +109,10 @@
 ## ㈧关于运行
 1. 网页版运行：当前可以直接访问 <https://wzh656.github.io/MinecraftWeb/home.html> 运行，注意，部分~~垃圾~~浏览器可能不支持。还有竖屏时会有一个提示使用横屏或者下载，如果浏览器~~不垃圾~~支持横屏，可以将手机横屏使用，并会有提示重新刷新页面，否则将会变形；也可以点击关闭，直接竖屏（虽然竖屏的我的世界有点怪）  
 2. 手机apk软件运行：直接横屏运行
+    + [手机版(apk)v1.0.0.3-alpha临时完整版（较大，30+MB）（与之前不兼容，无存档，需先卸载重装）](https://github.com/wzh656/MinecraftWeb/releases/download/v1.0.0.3-alpha/full.apk)
+    + [手机版(apk)v1.0.0.3-alpha临时简化版（在线字体、BGM，6+MB）（与之前不兼容，无存档，需先卸载重装）](https://github.com/wzh656/MinecraftWeb/releases/download/v1.0.0.3-alpha/full.apk)
     + [手机版(apk)v0.5.0-alpha完整版（较大，20+MB）](https://github.com/wzh656/MinecraftWeb/releases/download/v0.5.0-alpha/Minecraft-full.apk)  
     + [手机版(apk)v0.5.0-alpha简化版（在线字体、BGM，5+MB）](https://github.com/wzh656/MinecraftWeb/releases/download/v0.5.0-alpha/Minecraft-simplified.apk)  
-
 
 ## ㈨关于效果（图片）
 
