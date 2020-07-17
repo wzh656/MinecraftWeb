@@ -307,9 +307,9 @@ deskgood.moveTo(0,10000*100);
 			</div>
 		</div>
 		<h1 id="schedule" style="z-index: 2;">
-			<span id="schedule_message">贴图加载中……</span><br/>
-			主进度：<span id="schedule1">0</span>%<br/>
-			次进度：<span id="schedule2">0</span>%<br/>
+			<header>贴图加载中……</header>
+			进度：<progress></progress>
+			<span>0</span>%<br/>
 			<b>生命诚可贵，生命只有一次，请珍爱生命</b>
 		</h1>
 		<h1 id="warning" style="z-index: 3;">
@@ -746,6 +746,8 @@ function BlockMap(size, seed){
 		this.seed.noise = new SimplexNoise(this.seed.seed);
 	}
 	
+	
+	
 	//获取方块（不可编辑）
 	this.get = (x, y, z)=>{
 		[x, y, z] = [x, y, z].map(Math.round); //规范化
@@ -771,11 +773,11 @@ function BlockMap(size, seed){
 		//thing.block.mesh = thing.block.mesh;
 		this.map[pos.x][pos.y][pos.z] = thing;
 	};
-	
 	//根据 模板和ID 添加方块
 	this.addID = (id, pos, template)=>{
 		if (!id)
 			return; //ID为0（空气）
+		//try{
 		this.add(
 			new Thing(template[id])
 				.block.makeMaterial()
@@ -787,7 +789,23 @@ function BlockMap(size, seed){
 				z:pos.z,
 			}
 		); //以模板建立
+		//}catch(err){console.info(template[id], template[id].block.texture, id, err)}
 	};
+	
+	//删除方块
+	this.delete = (x, y, z)=>{
+		[x, y, z] = [x, y, z].map(Math.round); //规范化
+		
+		if (!this.get(x,y,z)) // 没有方块/不在范围
+			return;
+		
+		for (let i of this.map[x][y][z].block.mesh.material)
+			i.dispose();
+		this.map[x][y][z].block.mesh.geometry.dispose(); //清除内存
+		scene.remove(this.map[x][y][z].block.mesh);
+		this.map[x][y][z] = null;
+	};
+	
 	
 	//初始化区块
 	this.initBlock = (x, z)=>{
@@ -811,40 +829,58 @@ function BlockMap(size, seed){
 		}
 	};
 	
-	//卸载区块
-	this.unloadBlock = (x, z)=>{
+	//加载区块（同步）
+	this.loadBlock = (x, z)=>{
 		[x, z] = [x, z].map(Math.round); //规范化
-		for (let i in this.activeBlock)
-			if (this.activeBlock[i][0] == x && this.activeBlock[i][1] == z)
-				this.activeBlock.splice(i,1); //从i开始删除一个元素
-		
-		let ox = x*this.size.x,
-			oz = z*this.size.z; //区块中心坐标
-		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
-			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
-				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-					try{
-						for (let i of this.map[ox+dx][dy][oz+dz].block.mesh.material)
-							i.dispose();
-						this.map[ox+dx][dy][oz+dz].block.mesh.geometry.dispose(); //清除内存
-						scene.remove(this.map[ox+dx][dy][oz+dz].block.mesh);
-					}catch(err){}
-					delete this.map[ox+dx][dy][oz+dz];
-				}
-			}
-		}
-	};
-	
-	//加载区块
-	this.loadBlock = (x, z, callback)=>{
 		let ox = x*this.size.x,
 			oz = z*this.size.z, //区块中心坐标
 			t = this.seed; //临时变量
-		let dx=this.size[0].x;
 		
-		let id = setInterval(()=>{
+		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
+			for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+				let height = t.noise.noise3D(0.6, (ox+dx)/t.h.q, (oz+dz)/t.h.q) *t.h.de + t.h.ave;
+				let grass = false;
+				for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
+					let earth = height - height * (t.noise.noise3D(6.6, (ox+dx)/t.s.q, (oz+dz)/t.s.q) *t.s.de + t.s.ave);
+					if (dy > height){
+						// 空气/真空 (null)：不用加载
+					}else if (dy > earth){
+						if (grass){
+							this.addID(2, {
+								x: ox+dx,
+								y: dy,
+								z: oz+dz
+							}, template); //泥土
+						}else{
+							this.addID(1, {
+								x: ox+dx,
+								y: dy,
+								z: oz+dz
+							}, template); //草方块
+							grass = true;
+						}
+					}else{
+						this.addID(4, {
+							x: ox+dx,
+							y: dy,
+							z: oz+dz
+						}, template); //石头
+					}
+				}
+			}
+		}
+	}
+	//加载区块（异步）
+	this.loadBlockAsync = (x, z, callback)=>{
+		[x, z] = [x, z].map(Math.round); //规范化
+		let ox = x*this.size.x,
+			oz = z*this.size.z, //区块中心坐标
+			t = this.seed; //临时变量
+		
+		let dx = this.size[0].x;
+		let loadBlock_id = setInterval(()=>{
 			if (dx > this.size[1].x){
-				clearInterval(id);
+				clearInterval(loadBlock_id);
 				callback();
 				return;
 			}
@@ -855,11 +891,7 @@ function BlockMap(size, seed){
 				for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
 					let earth = height - height * (t.noise.noise3D(6.6, (ox+dx)/t.s.q, (oz+dz)/t.s.q) *t.s.de + t.s.ave);
 					if (dy > height){
-						this.addID(0, {
-							x: ox+dx,
-							y: dy,
-							z: oz+dz
-						}, template); //空气
+						// 空气/真空 (null)：不用加载
 					}else if (dy > earth){
 						if (grass){
 							this.addID(2, {
@@ -887,10 +919,69 @@ function BlockMap(size, seed){
 			
 			dx++;
 		},0);
+	};
+	
+	//卸载区块（同步）
+	this.unloadBlock = (x, z, callback)=>{
+		[x, z] = [x, z].map(Math.round); //规范化
+		let ox = x*this.size.x,
+			oz = z*this.size.z; //区块中心坐标
+		
+		for (let i in this.activeBlock)
+			if (this.activeBlock[i][0] == x && this.activeBlock[i][1] == z)
+				this.activeBlock.splice(i,1); //从i开始删除一个元素
+		
+		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
+			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
+				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+					if (this.map[ox+dx][dy][oz+dz] != null){
+						for (let i of this.map[ox+dx][dy][oz+dz].block.mesh.material)
+							i.dispose();
+						this.map[ox+dx][dy][oz+dz].block.mesh.geometry.dispose(); //清除内存
+						scene.remove(this.map[ox+dx][dy][oz+dz].block.mesh);
+					}
+					delete this.map[ox+dx][dy][oz+dz];
+				}
+			}
+		}
 		/* for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
 			
 		} */
 	};
+	//卸载区块（异步）
+	this.unloadBlockAsync = (x, z, callback)=>{
+		[x, z] = [x, z].map(Math.round); //规范化
+		let ox = x*this.size.x,
+			oz = z*this.size.z; //区块中心坐标
+		
+		for (let i in this.activeBlock)
+			if (this.activeBlock[i][0] == x && this.activeBlock[i][1] == z)
+				this.activeBlock.splice(i,1); //从i开始删除一个元素
+		
+		let dx = this.size[0].x;
+		let unloadBlock_id = setInterval(()=>{
+			if (dx > this.size[1].x){
+				clearInterval(unloadBlock_id);
+				callback();
+				return;
+			}
+			
+			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
+				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+					if (this.map[ox+dx][dy][oz+dz] != null){ //非空气
+						for (let i of this.map[ox+dx][dy][oz+dz].block.mesh.material)
+							i.dispose();
+						this.map[ox+dx][dy][oz+dz].block.mesh.geometry.dispose(); //清除内存
+						scene.remove(this.map[ox+dx][dy][oz+dz].block.mesh);
+					}
+					delete this.map[ox+dx][dy][oz+dz];
+				}
+			}
+			
+			dx++;
+		},0);
+	};
+	
 	
 	//更新方块
 	this.update = (x, y, z)=>{
@@ -932,19 +1023,6 @@ function BlockMap(size, seed){
 		}
 	};
 	
-	//删除方块
-	this.delete = (x, y, z)=>{
-		[x, y, z] = [x, y, z].map(Math.round); //规范化
-		
-		if (!this.get(x,y,z)) // 没有方块/不在范围
-			return;
-		
-		for (let i of this.map[x][y][z].block.mesh.material)
-			i.dispose();
-		this.map[x][y][z].block.mesh.geometry.dispose(); //清除内存
-		scene.remove(this.map[x][y][z].block.mesh);
-		this.map[x][y][z] = null;
-	};
 	/* //保存为数组字符串
 	this.save = ()=>{
 		let arr = [];
@@ -1174,31 +1252,34 @@ let block_load = {
 	id: null
 }
 // for (let i=1; i<template.length; i++){
+$("#schedule progress")[0].max = template.length;
 block_load.id = setInterval(function(){
 	for (let j=0; j<6; j++){
 		template[block_load.i].block.setTexture(
 			new THREE.TextureLoader()
 				.load(`./img/blocks/${block_load.i}/${template[block_load.i].block.face[j]}`), j);
-		$("#schedule2").text( Math.round( (j+1)/6*100 *100)/100 );
+		//$("#schedule2").text( Math.round( (j+1)/6*100 *100)/100 );
 	}
 	
 	//单个block加载完毕
-	$("#schedule1").text( Math.round( block_load.i++/(template.length-1)*100 *100)/100 );
-	$("#schedule2").text(0);
+	$("#schedule span").text( Math.round( block_load.i++/(template.length-1)*100 *100)/100 );
+	$("#schedule progress")[0].value = block_load.i;
+	//$("#schedule2").text(0);
 	
 	if (block_load.i >= template.length){ //所有block加载完毕
 		clearInterval(block_load.id);
 		delete block_load;
-		$("#schedule_message").text("载入方块中……");
+		$("#schedule header").text("载入方块中……");
 		
 		map.initBlock(0, 0); //初始化区块
-		map.loadBlock(0, 0, function(){
+		map.loadBlockAsync(0, 0, function(){
 			map.updateBlock(0, 0); //更新区块
-			$("#schedule1").text("100");
+			$("#schedule span").text("100");
+			$("#schedule progress")[0].value = template.length;
 			setTimeout(function(){
 				render(); //纹理贴图加载成功后，调用渲染函数执行渲染操作
 				$("#schedule").remove();
-			});
+			},0);
 		}); //用噪声填充区块
 	}
 },0);
@@ -1305,36 +1386,6 @@ scene.add(floor_mesh); */
 // 参数设置坐标轴大小:1000
 var axesHelper = new THREE.AxesHelper(1666);
 scene.add(axesHelper);
-/*let line = [];
-let line_geometry = [];
-let line_material = [];
-
-line_geometry[0] = new THREE.Geometry();
-line_geometry[0].vertices.push(new THREE.Vector3( -1000, 0, 0) );
-line_geometry[0].vertices.push(new THREE.Vector3( 1000, 0, 0) );
-line_material[0] = new THREE.LineBasicMaterial({
-	color: 0xffffff
-});
-line[0] = new THREE.Line(line_geometry[0], line_material[0]);
-scene.add(line[0]);
-
-line_geometry[1] = new THREE.Geometry();
-line_geometry[1].vertices.push(new THREE.Vector3( 0, 1000, 0) );
-line_geometry[1].vertices.push(new THREE.Vector3( 0, -1000, 0) );
-line_material[1] = new THREE.LineBasicMaterial({
-	color: 0xffffff
-});
-line[1] = new THREE.Line(line_geometry[1], line_material[1]);
-scene.add(line[1]);
-
-line_geometry[2] = new THREE.Geometry();
-line_geometry[2].vertices.push(new THREE.Vector3( 0, 0, 1000) );
-line_geometry[2].vertices.push(new THREE.Vector3( 0, 0, -1000) );
-line_material[2] = new THREE.LineBasicMaterial({
-	color: 0xffffff
-});
-line[2] = new THREE.Line(line_geometry[2], line_material[2]);
-scene.add(line[2]);*/
 
 
 /**
@@ -1360,9 +1411,20 @@ directionalLight.shadow.camera.left = -200*100;
 directionalLight.shadow.camera.right = 200*100;
 directionalLight.shadow.camera.top = 200*100;
 directionalLight.shadow.camera.bottom = -200*100;
-document.addEventListener("plusready", function(){
+message(`
+<font style="font-size:16px">
+	如果设备
+		<font style="font-size:20px;">性能差</font>
+		，使用光影效果将会导致
+		<font style=\"font-size:20px;\">卡顿</font>。<br/>
+		点此可
+		<a onclick="directionalLight.castShadow=false;message('妈妈再也不用担心手机卡还发烫了（只担心画质丑的一批）','short',3000);" style="color:blue; text-decoration:underline;">
+			关闭光影
+		</a>
+	</font>`,"long", 5000);
+/* document.addEventListener("plusready", function(){
 	plus.nativeUI.toast(
-		"<font style=\"font-size:16px\">如果设备<font style=\"font-size:20px;\">性能差</font>，使用光影效果将会导致<font style=\"font-size:20px;\">卡顿</font>。<br/>点此可<a onclick=\"directionalLight.castShadow=false;plus.nativeUI.toast('妈妈再也不用担心手机卡还发烫了（只担心画质丑的一批）');\">关闭光影</a></font>",
+		
 		{
 			type:"richtext",
 			duration:"long",
@@ -1370,7 +1432,7 @@ document.addEventListener("plusready", function(){
 			richTextStyle:{align:"center"}
 		}
 	);
-});
+}); */
 scene.add(directionalLight);
 // 光照指向平地
 //directionalLight.target = ;
@@ -1423,7 +1485,7 @@ let WIDTH = window.innerWidth,
 
 var camera = new THREE.PerspectiveCamera(45, WIDTH/HEIGHT, 1, 1000*100);
 //								 view_angle, aspect, near, far(1km)
-camera.position.set(0, 2000, 0); //设置相机位置
+camera.position.set(0, 20*100, 0); //设置相机位置
 camera.lookAt(scene.position); //设置相机方向(指向的场景对象)
 /*setTimeout(function(){
 	console.info(camera);
@@ -1848,64 +1910,114 @@ var deskgood = {
 			}
 		}
 		
-		let block0 = [
+		let block = [];
+		block.push([
 			Math.round(deskgood.pos.x/100/map.size.x),
 			Math.round(deskgood.pos.z/100/map.size.z)
-		],
-		block1 = [
+		]);
+		block.push([
 			Math.round((deskgood.pos.x+300)/100/map.size.x),
 			Math.round(deskgood.pos.z/100/map.size.z)
-		],
-		block2 = [
+		]);
+		block.push([
 			Math.round((deskgood.pos.x-300)/100/map.size.x),
 			Math.round(deskgood.pos.z/100/map.size.z)
-		],
-		block3 = [
+		]);
+		block.push([
 			Math.round(deskgood.pos.x/100/map.size.x),
 			Math.round((deskgood.pos.z+300)/100/map.size.z)
-		],
-		block4 = [
+		]);
+		block.push([
 			Math.round(deskgood.pos.x/100/map.size.x),
 			Math.round((deskgood.pos.z-300)/100/map.size.z)
-		];
+		]);
+		block.push([
+			Math.round((deskgood.pos.x+300)/100/map.size.x),
+			Math.round((deskgood.pos.z+300)/100/map.size.z)
+		]);
+		block.push([
+			Math.round((deskgood.pos.x+300)/100/map.size.x),
+			Math.round((deskgood.pos.z-300)/100/map.size.z)
+		]);
+		block.push([
+			Math.round((deskgood.pos.x-300)/100/map.size.x),
+			Math.round((deskgood.pos.z+300)/100/map.size.z)
+		]);
+		block.push([
+			Math.round((deskgood.pos.x-300)/100/map.size.x),
+			Math.round((deskgood.pos.z-300)/100/map.size.z)
+		]);
+		//////////////////////////////////////////////////////block[0]
 		if (map.activeBlock.every(function(value, index, arr){
-			return value[0] != block0[0] || value[1] != block0[1];
+			return value[0] != block[0][0] || value[1] != block[0][1];
 		})){ //每个都不一样（不存在）
-			map.initBlock(...block0);
-			map.loadBlock(...block0, function(){
-				map.updateBlock(...block0); //更新区块
+			map.initBlock(...block[0]);
+			map.loadBlockAsync(...block[0], function(){
+				map.updateBlock(...block[0]); //更新区块
 			}); //用噪声填充区块
-		//////////////////////////////////////////////////////block1
+		//////////////////////////////////////////////////////block[1]
 		}else if (map.activeBlock.every(function(value, index, arr){
-			return value[0] != block1[0] || value[1] != block1[1];
+			return value[0] != block[1][0] || value[1] != block[1][1];
 		})){
-			map.initBlock(...block1);
-			map.loadBlock(...block1, function(){
-				map.updateBlock(...block1); //更新区块
+			map.initBlock(...block[1]);
+			map.loadBlockAsync(...block[1], function(){
+				map.updateBlock(...block[1]); //更新区块
 			}); //用噪声填充区块
-		//////////////////////////////////////////////////////block2
+		//////////////////////////////////////////////////////block[2]
 		}else if (map.activeBlock.every(function(value, index, arr){
-			return value[0] != block2[0] || value[1] != block2[1];
+			return value[0] != block[2][0] || value[1] != block[2][1];
 		})){
-			map.initBlock(...block2);
-			map.loadBlock(...block2, function(){
-				map.updateBlock(...block2); //更新区块
+			map.initBlock(...block[2]);
+			map.loadBlockAsync(...block[2], function(){
+				map.updateBlock(...block[2]); //更新区块
 			}); //用噪声填充区块
-		//////////////////////////////////////////////////////block3
+		//////////////////////////////////////////////////////block[3]
 		}else if (map.activeBlock.every(function(value, index, arr){
-			return value[0] != block3[0] || value[1] != block3[1];
+			return value[0] != block[3][0] || value[1] != block[3][1];
 		})){
-			map.initBlock(...block3);
-			map.loadBlock(...block3, function(){
-				map.updateBlock(...block3); //更新区块
+			map.initBlock(...block[3]);
+			map.loadBlockAsync(...block[3], function(){
+				map.updateBlock(...block[3]); //更新区块
 			}); //用噪声填充区块
-		//////////////////////////////////////////////////////block4
+		//////////////////////////////////////////////////////block[4]
 		}else if (map.activeBlock.every(function(value, index, arr){
-			return value[0] != block4[0] || value[1] != block4[1];
+			return value[0] != block[4][0] || value[1] != block[4][1];
 		})){
-			map.initBlock(...block4);
-			map.loadBlock(...block4, function(){
-				map.updateBlock(...block4); //更新区块
+			map.initBlock(...block[4]);
+			map.loadBlockAsync(...block[4], function(){
+				map.updateBlock(...block[4]); //更新区块
+			}); //用噪声填充区块
+		//////////////////////////////////////////////////////block[5]
+		}else if (map.activeBlock.every(function(value, index, arr){
+			return value[0] != block[5][0] || value[1] != block[5][1];
+		})){
+			map.initBlock(...block[5]);
+			map.loadBlockAsync(...block[5], function(){
+				map.updateBlock(...block[5]); //更新区块
+			}); //用噪声填充区块
+		//////////////////////////////////////////////////////block[6]
+		}else if (map.activeBlock.every(function(value, index, arr){
+			return value[0] != block[6][0] || value[1] != block[6][1];
+		})){
+			map.initBlock(...block[6]);
+			map.loadBlockAsync(...block[6], function(){
+				map.updateBlock(...block[6]); //更新区块
+			}); //用噪声填充区块
+		//////////////////////////////////////////////////////block[7]
+		}else if (map.activeBlock.every(function(value, index, arr){
+			return value[0] != block[7][0] || value[1] != block[7][1];
+		})){
+			map.initBlock(...block[7]);
+			map.loadBlockAsync(...block[7], function(){
+				map.updateBlock(...block[7]); //更新区块
+			}); //用噪声填充区块
+		//////////////////////////////////////////////////////block[8]
+		}else if (map.activeBlock.every(function(value, index, arr){
+			return value[0] != block[8][0] || value[1] != block[8][1];
+		})){
+			map.initBlock(...block[8]);
+			map.loadBlockAsync(...block[8], function(){
+				map.updateBlock(...block[8]); //更新区块
 			}); //用噪声填充区块
 		}
 		
@@ -1916,9 +2028,14 @@ var deskgood = {
 				(i[0] != block1[0] || i[1] != block1[1])&&
 				(i[0] != block2[0] || i[1] != block2[1])&&
 				(i[0] != block3[0] || i[1] != block3[1])&&
-				(i[0] != block4[0] || i[1] != block4[1])
-			)
-				map.unloadBlock(...i); //卸载区块
+				(i[0] != block4[0] || i[1] != block4[1])&&
+				(i[0] != block5[0] || i[1] != block5[1])&&
+				(i[0] != block6[0] || i[1] != block6[1])&&
+				(i[0] != block7[0] || i[1] != block7[1])&&
+				(i[0] != block8[0] || i[1] != block8[1])
+			){
+				map.unloadBlockAsync(...i,function(){}); //卸载区块
+			}
 		
 		return rt;
 		
@@ -2066,7 +2183,18 @@ var deskgood = {
 	}
 }
 deskgood.moveTo = deskgood.move;
-deskgood.moveX = x=>deskgood.move(x);
+deskgood.moveX = (x)=>{
+	try{
+		if (typeof map
+			[Math.floor(deskgood.pos.x/100)]
+			[Math.floor(deskgood.pos.y/100)]
+			[Math.floor(deskgood.pos.z/100)] != "undefined"){
+			deskgood.move(x);
+		}else{
+			throw;
+		}
+	}catch(err){/* 未加载区块，禁止进入 */}
+};
 deskgood.moveY = y=>deskgood.move(0,y);
 deskgood.moveZ = z=>deskgood.move(0,0,z);
 deskgood.goX = x=>deskgood.go(x);
@@ -2128,33 +2256,39 @@ deskgood_folder.open();
 		deskgood_look_folder.add(deskgood.look, "y", -1, 1, 0.01).listen().onChange(y => deskgood.look_refresh(undefined, y));
 		deskgood_look_folder.add(deskgood.look, "z", -1, 1, 0.01).listen().onChange(z => deskgood.look_refresh(undefined, undefined, z));
 	let deskgood_up_folder = deskgood_folder.addFolder("天旋地转（小心头晕）");
-		deskgood_up_folder.add(deskgood.up, "x", -1, 1, 0.01).onChange(function(){ try{
-			plus.nativeUI.toast(
+		deskgood_up_folder.add(deskgood.up, "x", -1, 1, 0.01).onChange(function(){
+			message("<font size=\"16\">头晕别怪我</font>", "short", 3000);
+			/* plus.nativeUI.toast(
 				"<font size=\"16\">头晕别怪我</font>",
 				{
 					type: "richtext",
 					verticalAlign: "top",
 					richTextStyle: {align:"center"}
 				}
-			); }catch(err){} });
-		deskgood_up_folder.add(deskgood.up, "y", -1, 1, 0.01).onChange(function(){ try{
-			plus.nativeUI.toast(
-				"<font size=\"16\">头晕别怪我</font>",
-				{
-					type: "richtext",
-					verticalAlign: "top",
-					richTextStyle: {align:"center"}
-				}
-			); }catch(err){} });
-		deskgood_up_folder.add(deskgood.up, "z", -1, 1, 0.01).onChange(function(){ try{
-			plus.nativeUI.toast(
-				"<font size=\"16\">头晕别怪我</font>",
-				{
-					type: "richtext",
-					verticalAlign: "top",
-					richTextStyle: {align:"center"}
-				}
-			); }catch(err){} });
+			); }catch(err){} */
+		});
+		deskgood_up_folder.add(deskgood.up, "y", -1, 1, 0.01).onChange(function(){
+			message("<font size=\"16\">头晕别怪我</font>", "short", 3000);
+				/* plus.nativeUI.toast(
+					"<font size=\"16\">头晕别怪我</font>",
+					{
+						type: "richtext",
+						verticalAlign: "top",
+						richTextStyle: {align:"center"}
+					}
+				); }catch(err){} */
+			});
+		deskgood_up_folder.add(deskgood.up, "z", -1, 1, 0.01).onChange(function(){
+			message("<font size=\"16\">头晕别怪我</font>", "short", 3000);
+				/* plus.nativeUI.toast(
+					"<font size=\"16\">头晕别怪我</font>",
+					{
+						type: "richtext",
+						verticalAlign: "top",
+						richTextStyle: {align:"center"}
+					}
+				); }catch(err){} */
+			});
 	let deskgood_tools_folder = deskgood_folder.addFolder("工具栏(tools)");
 	deskgood_tools_folder.open();
 		deskgood_tools_folder.add(deskgood, "choice", 0, 3, 1).listen().name("选择工具").onChange(deskgood.tools_choice_refresh);
@@ -2198,7 +2332,8 @@ function render(){
 				null
 		){ //头被卡住
 			warn.push("头被卡住？");
-			try{
+			message("<font size=\"16\">想窒息吗？还往头上放方块，看你怎么出来！</font>", "short", 0);
+			/* try{
 				plus.nativeUI.toast(
 					"<font size=\"16\">想窒息吗？还往头上放方块，看你怎么出来！</font>",
 					{
@@ -2207,7 +2342,7 @@ function render(){
 						richTextStyle:{align:"center"}
 					}
 				);
-			}catch(err){}
+			}catch(err){} */
 			setTimeout(function(){
 				try{ plus.nativeUI.closeToast(); }catch(err){}
 			},1);
@@ -2480,9 +2615,11 @@ setInterval(function(){
 	deskgood.pos.x += x*(Math.random()*0.2+0.9);
 	deskgood.pos.z += z*(Math.random()*0.2+0.9); */
 	
-	if (x & z)
+	if (x && z)
 		console.log("go",x,z);
-	deskgood.go(x*t*0.1, 0, z*t*0.1); // 1m/s = 100px/s = 0.1px/ms
+	
+	if (x || y || z)
+		deskgood.go(x*t*0.1, 0, z*t*0.1); // 1m/s = 100px/s = 0.1px/ms
 	
 	try{
 		if (map.get(deskgood.pos.x/100,
@@ -2646,6 +2783,7 @@ document.addEventListener("mousedown", function (e){
 						let free = deskgood.tools[deskgood.choice]==0? deskgood.choice: deskgood.tools.indexOf(0);
 						if (free == -1){
 							console.info("not free!");
+							message("<font style=\"font-size:14px\">两只手拿4m³方块已经够多了，反正我是拿不下了</font>", "short", 3000);
 						}else{
 							console.log("delete:", click[i].object.position);
 							deskgood.tools[free] = map.get(x/100, y/100, z/100).id; //放在手中
@@ -2677,7 +2815,7 @@ document.addEventListener("mousedown", function (e){
 						Math.pow(z - deskgood.pos.z, 2)
 				) < 500){ //距离<500
 					if (map.get(x/100, y/100, z/100) &&
-						map.get(x/100, y/100, z/100).id == 8
+						map.get(x/100, y/100, z/100).id == 9
 					){ //命令方块
 						state("command");
 						return;
@@ -3126,7 +3264,8 @@ $("canvas:eq(0)").on("touchstart", function (e){
 							let free = deskgood.tools[deskgood.choice]==0? deskgood.choice: deskgood.tools.indexOf(0);
 							if (free == -1){
 								console.info("not free!");
-								try{
+								message("<font style=\"font-size:14px\">两只手拿4m³方块已经够多了，反正我是拿不下了</font>", "short", 3000);
+								/* try{
 									plus.nativeUI.toast("<font style=\"font-size:14px\">两只手拿4m³方块已经够多了，反正我是拿不下了</font>",
 										{
 											type:"richtext",
@@ -3136,7 +3275,7 @@ $("canvas:eq(0)").on("touchstart", function (e){
 											}
 										}
 									);
-								}catch(err){}
+								}catch(err){} */
 							}else{
 								console.log("delete:", click[i].object.position);
 								deskgood.tools[free] = map.get(x/100, y/100, z/100).id; //放在手中
@@ -3241,7 +3380,7 @@ $("canvas:eq(0)").on("touchend", function (e){
 								click[i].object.position.y/100,
 								click[i].object.position.z/100).id
 							==
-								8
+								9
 						){ //命令方块
 							state("command");
 							return;
@@ -3488,6 +3627,41 @@ setInterval(function(){
 		`);
 	}
 },1000);
+
+function GetQueryString(name){
+	var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+	var r = window.location.search.substr(1).match(reg);
+	if(r!=null)return  unescape(r[2]); return null;
+}
+
+function message(text, time1="long", time2=5000){
+	if (typeof plus == "undefined"){
+		let msg = $(`<dialog>${text}</dialog>`);
+		;
+		$(document.body).append(
+			msg.attr("open", "true")
+				.css("position","absolute")
+				.css("top","16vmin")
+				.hide()
+		);
+		msg.fadeIn("slow");
+		setTimeout(()=>{
+			msg.fadeOut("slow");
+		},time2);
+	}else{
+		plus.nativeUI.toast(
+			text,
+			{
+				type: "richtext",
+				duration: time1,
+				verticalAlign: "top",
+				richTextStyle: {
+					align:"center",
+				}
+			}
+		);
+	}
+}
 </script>
 	</body>
 </html>
