@@ -2186,7 +2186,7 @@ deskgood.moveTo = deskgood.move;
 deskgood.moveX = (x)=>{
 	try{
 		if (typeof map
-			[Math.floor(deskgood.pos.x/100)]
+			[Math.floor(x/100)]
 			[Math.floor(deskgood.pos.y/100)]
 			[Math.floor(deskgood.pos.z/100)] != "undefined"){
 			deskgood.move(x);
@@ -2195,8 +2195,30 @@ deskgood.moveX = (x)=>{
 		}
 	}catch(err){/* 未加载区块，禁止进入 */}
 };
-deskgood.moveY = y=>deskgood.move(0,y);
-deskgood.moveZ = z=>deskgood.move(0,0,z);
+deskgood.moveY = (y)=>{
+	try{
+		if (typeof map
+			[Math.floor(deskgood.pos.x/100)]
+			[Math.floor(y/100)]
+			[Math.floor(deskgood.pos.z/100)] != "undefined"){
+			deskgood.move(deskgood.pos.x, y);
+		}else{
+			throw;
+		}
+	}catch(err){/* 未加载区块，禁止进入 */}
+};
+deskgood.moveZ = (z)=>{
+	try{
+		if (typeof map
+			[Math.floor(deskgood.pos.x/100)]
+			[Math.floor(deskgood.pos.y/100)]
+			[Math.floor(z/100)] != "undefined"){
+			deskgood.move(deskgood.pos.x, deskgood.pos.y, z);
+		}else{
+			throw;
+		}
+	}catch(err){/* 未加载区块，禁止进入 */}
+};
 deskgood.goX = x=>deskgood.go(x);
 deskgood.goY = y=>deskgood.go(0,y);
 deskgood.goZ = z=>deskgood.go(0,0,z);
