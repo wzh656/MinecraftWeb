@@ -71,8 +71,17 @@
 				font-family: qq1, serif;
 				/*padding-top: 20%;*/
 				text-align: center;
+				
 				color: #fff;
 				background-color: #000;
+				background-image: radial-gradient(#666, #232, #011);
+				animation-name: backgroundColor;
+				animation-duration: 1s;
+				animation-iteration-count: infinite;
+				
+				text-shadow: 0px 0px 3px red,
+					0px 0px 6px blue,
+					0px 0px 9px yellow;
 			}
 			h1:before{
 				content: "\a\a";
@@ -86,7 +95,12 @@
 				position: absolute;
 				bottom: 6vh;
 				left: 50%;
-				transform: translateX(-50%)
+				transform: translateX(-50%);
+				
+				text-shadow: 0.5px 0px 0px #aaa, /*右*/
+					-0.5px 0px 0px #ddd, /*左*/
+					0px 0.5px 0px #ddd, /*上*/
+					0px -0.5px 0px #aaa; /*下*/
 			}
 			b{
 				font-family: fzqtjt, serif;
@@ -94,6 +108,36 @@
 			span{
 				font-family: kt, serif;
 			}
+			
+			@keyframes backgroundColor{
+				0%{
+					background-image: radial-gradient(#333, #112, #011);
+				}
+				25%{
+					background-image: radial-gradient(#555, #223, #122);
+				}
+				50%{
+					background-image: radial-gradient(#666, #334, #233);
+				}
+				75%{
+					background-image: radial-gradient(#888, #445, #344);
+				}
+				100%{
+					background-image: radial-gradient(#999, #556, #455);
+				}
+			}
+			progress{
+				background-color: red;
+			}
+			progress::-webkit-progress-bar{
+				background-color: gray;
+				background-image: linear-gradient(45deg, black, gray, #aaa);
+			}
+			progress::-webkit-progress-value{
+				background-color: green;
+				background-image: linear-gradient(135deg, red, orange, yellow, green, blue, indigo, purple);
+			}
+			
 			#warning > button{
 				width: 80%;
 				height: 60px;
@@ -106,6 +150,12 @@
 				font-family: qq2, serif;
 				outline: none;
 			}
+			
+			dialog{
+				max-width: 50vw;
+				border-radius: 1.6vw;
+			}
+			
 			#control{
 				position: absolute;
 				bottom: 16%;
@@ -242,6 +292,7 @@
 			window.$ = window.jQuery = require("./js/jquery.min.js");
 		</script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
+		<script>new VConsole();</script>
 		<script src="./js/three.min.js"></script>
 		<script src="./js/simplex-noise.js"></script>
 		<script src="./js/dat.gui.min.js"></script>
@@ -317,7 +368,7 @@ deskgood.moveTo(0,10000*100);
 		</h1>
 		<audio id="bgm" perload loop style="display: none;" src="./music/1.m4a" ></audio>
 		<!--<audio id="bgm" autoplay perload loop style="display: none;" src="https://vdse.bdstatic.com/876934f28995e8042230ec598237c67e.mp4?authorization=bce-auth-v1/fb297a5cc0fb434c971b8fa103e8dd7b/2017-05-11T09:02:31Z/-1//ab5b458a478fae53b754e194ab270b96f23aa23ba71c2e63b06fc06d0543040c"></audio>-->
-		<noscript><h1 style="z-index: 3;">你的浏览器不支持JavaScript，无法运行！</h1></noscript>
+		<noscript><h1 style="z-index: 5;">你的浏览器不支持JavaScript，无法运行！</h1></noscript>
 <script>
 document.addEventListener("plusready", function(){
 	plus.device.setWakelock(true); //屏幕常亮
@@ -443,7 +494,7 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 		document.getElementById("__vconsole").childNodes[1].style.borderRadius = "66px";
 	};
 	document.body.appendChild(vconsole);*/
-	//new VConsole();
+	new VConsole();
 }else{ //电脑
 	let mouse = document.createElement("div");
 	let parts = [
@@ -780,7 +831,6 @@ function BlockMap(size, seed){
 	this.addID = (id, pos, template)=>{
 		if (!id)
 			return; //ID为0（空气）
-		//try{
 		this.add(
 			new Thing(template[id])
 				.block.makeMaterial()
@@ -792,7 +842,6 @@ function BlockMap(size, seed){
 				z:pos.z,
 			}
 		); //以模板建立
-		//}catch(err){console.info(template[id], template[id].block.texture, id, err)}
 	};
 	
 	//删除方块
@@ -1534,17 +1583,16 @@ directionalLight.shadow.camera.left = -200*100;
 directionalLight.shadow.camera.right = 200*100;
 directionalLight.shadow.camera.top = 200*100;
 directionalLight.shadow.camera.bottom = -200*100;
-message(`
-<font style="font-size:16px">
-	如果设备
-		<font style="font-size:20px;">性能差</font>
-		，使用光影效果将会导致
-		<font style=\"font-size:20px;\">卡顿</font>。<br/>
-		点此可
-		<a onclick="directionalLight.castShadow=false;message('妈妈再也不用担心手机卡还发烫了（只担心画质丑的一批）','short',3000);" style="color:blue; text-decoration:underline;">
-			关闭光影
-		</a>
-	</font>`,"long", 5000);
+message(
+`<font style="font-size:16px">`+
+	`如果设备`+
+		`<b>性能差</b>`+
+		`，使用光影效果将会导致`+
+		`<b>卡顿</b>。`+
+		`<button onclick="directionalLight.castShadow=false;message('妈妈再也不用担心手机卡还发烫了（只担心画质丑的一批）',3);" style="width:66%; height:6.6vh; font-size:3.6vmin;">`+
+			`点此可关闭光影`+
+		`</button>`+
+	`</font>`, 5);
 /* document.addEventListener("plusready", function(){
 	plus.nativeUI.toast(
 		
@@ -2372,7 +2420,7 @@ deskgood_folder.open();
 		deskgood_look_folder.add(deskgood.look, "z", -1, 1, 0.01).listen().onChange(z => deskgood.look_refresh(undefined, undefined, z));
 	let deskgood_up_folder = deskgood_folder.addFolder("天旋地转（小心头晕）");
 		deskgood_up_folder.add(deskgood.up, "x", -1, 1, 0.01).onChange(function(){
-			message("<font size=\"16\">头晕别怪我</font>", "short", 3000);
+			message("<font style='font-size: 16px;'>头晕别怪我</font>", 3);
 			/* plus.nativeUI.toast(
 				"<font size=\"16\">头晕别怪我</font>",
 				{
@@ -2383,7 +2431,7 @@ deskgood_folder.open();
 			); }catch(err){} */
 		});
 		deskgood_up_folder.add(deskgood.up, "y", -1, 1, 0.01).onChange(function(){
-			message("<font size=\"16\">头晕别怪我</font>", "short", 3000);
+			message("<font style='font-size: 16px;'>头晕别怪我</font>", 3);
 				/* plus.nativeUI.toast(
 					"<font size=\"16\">头晕别怪我</font>",
 					{
@@ -2394,7 +2442,7 @@ deskgood_folder.open();
 				); }catch(err){} */
 			});
 		deskgood_up_folder.add(deskgood.up, "z", -1, 1, 0.01).onChange(function(){
-			message("<font size=\"16\">头晕别怪我</font>", "short", 3000);
+			message("<font style='font-size: 16px;'>头晕别怪我</font>", 3);
 				/* plus.nativeUI.toast(
 					"<font size=\"16\">头晕别怪我</font>",
 					{
@@ -2447,7 +2495,7 @@ function render(){
 				null
 		){ //头被卡住
 			warn.push("头被卡住？");
-			message("<font size=\"16\">想窒息吗？还往头上放方块，看你怎么出来！</font>", "short", 0);
+			message("<font style='font-size: 16px;'>想窒息吗？还往头上放方块，看你怎么出来！</font>", 1);
 			/* try{
 				plus.nativeUI.toast(
 					"<font size=\"16\">想窒息吗？还往头上放方块，看你怎么出来！</font>",
@@ -2458,9 +2506,9 @@ function render(){
 					}
 				);
 			}catch(err){} */
-			setTimeout(function(){
+			/*setTimeout(function(){
 				try{ plus.nativeUI.closeToast(); }catch(err){}
-			},1);
+			},1);*/
 		}
 		if (map.get(deskgood.pos.x/100,
 				deskgood.pos.y/100-1,
@@ -2898,7 +2946,7 @@ document.addEventListener("mousedown", function (e){
 						let free = deskgood.tools[deskgood.choice]==0? deskgood.choice: deskgood.tools.indexOf(0);
 						if (free == -1){
 							console.info("not free!");
-							message("<font style=\"font-size:14px\">两只手拿4m³方块已经够多了，反正我是拿不下了</font>", "short", 3000);
+							message("<font style='font-size:14px;'>两只手拿4m³方块已经够多了，反正我是拿不下了</font>", 3);
 						}else{
 							console.log("delete:", click[i].object.position);
 							deskgood.tools[free] = map.get(x/100, y/100, z/100).id; //放在手中
@@ -3379,7 +3427,7 @@ $("canvas:eq(0)").on("touchstart", function (e){
 							let free = deskgood.tools[deskgood.choice]==0? deskgood.choice: deskgood.tools.indexOf(0);
 							if (free == -1){
 								console.info("not free!");
-								message("<font style=\"font-size:14px\">两只手拿4m³方块已经够多了，反正我是拿不下了</font>", "short", 3000);
+								message("<font style='font-size:14px;'>两只手拿4m³方块已经够多了，反正我是拿不下了</font>", 3);
 								/* try{
 									plus.nativeUI.toast("<font style=\"font-size:14px\">两只手拿4m³方块已经够多了，反正我是拿不下了</font>",
 										{
@@ -3749,33 +3797,49 @@ function GetQueryString(name){
 	if(r!=null)return  unescape(r[2]); return null;
 }
 
-function message(text, time1="long", time2=5000){
-	if (typeof plus == "undefined"){
+function message(text, time=5){
+	/*if (navigator.userAgent.toLowerCase().indexOf("html5plus") != -1){
+		if (typeof plus != "undefined"){
+			plus.nativeUI.toast(
+				text,
+				{
+					type: "richtext",
+					duration: time1,
+					verticalAlign: "top",
+					richTextStyle: {
+						align:"center",
+					}
+				}
+			);
+		}else{
+			document.addEventListener("plusready", function(){
+				plus.nativeUI.toast(
+					text,
+					{
+						type: "richtext",
+						duration: time1,
+						verticalAlign: "top",
+						richTextStyle: {
+							align:"center",
+						}
+					}
+				);
+			});
+		}
+	}else{*/
 		let msg = $(`<dialog>${text}</dialog>`);
-		;
 		$(document.body).append(
 			msg.attr("open", "true")
 				.css("position","absolute")
 				.css("top","16vmin")
+				.css("z-index",4)
 				.hide()
 		);
 		msg.fadeIn("slow");
 		setTimeout(()=>{
 			msg.fadeOut("slow");
-		},time2);
-	}else{
-		plus.nativeUI.toast(
-			text,
-			{
-				type: "richtext",
-				duration: time1,
-				verticalAlign: "top",
-				richTextStyle: {
-					align:"center",
-				}
-			}
-		);
-	}
+		}, time*1000);
+	//}
 }
 </script>
 	</body>
