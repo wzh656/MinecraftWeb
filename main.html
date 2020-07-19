@@ -75,13 +75,15 @@
 				color: #fff;
 				background-color: #000;
 				background-image: radial-gradient(#666, #232, #011);
+				
+				text-shadow: 0 0 3px red,
+					0 0 6px blue,
+					0 0 9px yellow;
+			}
+			#schedule{
 				animation-name: backgroundColor;
 				animation-duration: 1s;
 				animation-iteration-count: infinite;
-				
-				text-shadow: 0px 0px 3px red,
-					0px 0px 6px blue,
-					0px 0px 9px yellow;
 			}
 			h1:before{
 				content: "\a\a";
@@ -152,8 +154,13 @@
 			}
 			
 			dialog{
+				position: absolute;
+				top: 16vmin;
+				
 				max-width: 50vw;
 				border-radius: 1.6vw;
+				
+				z-index: 4;
 			}
 			
 			#control{
@@ -292,11 +299,12 @@
 			window.$ = window.jQuery = require("./js/jquery.min.js");
 		</script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
-		<script>new VConsole();</script>
+		<script>//new VConsole();</script>
 		<script src="./js/three.min.js"></script>
 		<script src="./js/simplex-noise.js"></script>
 		<script src="./js/dat.gui.min.js"></script>
 		<script src="./js/stats.min.js"></script>
+		<script src="./js/sql.js"></script>
 		<!--<script src="./node_modules/three/examples/js/controls/PointerLockControls.js"></script>-->
 	</head>
 	
@@ -771,7 +779,9 @@ function BlockMap(size, seed){
 	
 	//所有方块
 	this.map = [];
-	//活动区块
+	//已初始化的区块
+	this.initedBlock = [];
+	//活动区块（加载完毕）
 	this.activeBlock = [];
 	//种子设置
 	if (seed){
@@ -862,9 +872,14 @@ function BlockMap(size, seed){
 	//初始化区块
 	this.initBlock = (x, z)=>{
 		[x, z] = [x, z].map(Math.round); //规范化
-		
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
+		
+		if (this.initedBlock.every(function(value, index, arr){
+			return value[0] != x || value[1] != z;
+		})) //每个都不一样（不存在）
+			this.initedBlock.push([x,z]);
+		
 		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
 			this.map[ox+dx] = this.map[ox+dx] || [];
 			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
@@ -940,8 +955,7 @@ function BlockMap(size, seed){
 					})) //每个都不一样（不存在）
 						this.activeBlock.push([x,z]);
 					
-					if (callback)
-						callback();
+					callback();
 					return;
 				}
 				
@@ -1036,6 +1050,9 @@ function BlockMap(size, seed){
 		for (let i in this.activeBlock)
 			if (this.activeBlock[i][0] == x && this.activeBlock[i][1] == z)
 				this.activeBlock.splice(i,1); //从i开始删除一个元素
+		for (let i in this.initedBlock)
+			if (this.initedBlock[i][0] == x && this.initedBlock[i][1] == z)
+				this.initedBlock.splice(i,1); //从i开始删除一个元素
 		
 		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
 			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
@@ -1060,14 +1077,16 @@ function BlockMap(size, seed){
 		for (let i in this.activeBlock)
 			if (this.activeBlock[i][0] == x && this.activeBlock[i][1] == z)
 				this.activeBlock.splice(i,1); //从i开始删除一个元素
+		for (let i in this.initedBlock)
+			if (this.initedBlock[i][0] == x && this.initedBlock[i][1] == z)
+				this.initedBlock.splice(i,1); //从i开始删除一个元素
 		
 		if (callback){ //有回调（必须setInterval）
 			let dx = this.size[0].x;
 			let unloadBlock_id = setInterval(()=>{
 				if (dx > this.size[1].x){
 					clearInterval(unloadBlock_id);
-					if (callback)
-						callback();
+					callback();
 					return;
 				}
 				
@@ -1137,6 +1156,7 @@ function BlockMap(size, seed){
 	
 	//更新区块内所有方块（同步）
 	this.updateBlock = (x, z)=>{
+		console.info("updateBlock", x, z)
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
@@ -1150,6 +1170,7 @@ function BlockMap(size, seed){
 	};
 	//更新区块内所有方块（异步）
 	this.updateBlockAsync = (x, z, callback)=>{
+		console.info("updateBlock", x, z)
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
@@ -1583,16 +1604,18 @@ directionalLight.shadow.camera.left = -200*100;
 directionalLight.shadow.camera.right = 200*100;
 directionalLight.shadow.camera.top = 200*100;
 directionalLight.shadow.camera.bottom = -200*100;
-message(
-`<font style="font-size:16px">`+
-	`如果设备`+
-		`<b>性能差</b>`+
-		`，使用光影效果将会导致`+
-		`<b>卡顿</b>。`+
-		`<button onclick="directionalLight.castShadow=false;message('妈妈再也不用担心手机卡还发烫了（只担心画质丑的一批）',3);" style="width:66%; height:6.6vh; font-size:3.6vmin;">`+
-			`点此可关闭光影`+
-		`</button>`+
-	`</font>`, 5);
+setTimeout(function(){
+	message(
+	`<font style="font-size:16px">`+
+		`如果设备`+
+			`<b>性能差</b>`+
+			`，使用光影效果将会导致`+
+			`<b>卡顿</b>。`+
+			`<button onclick="directionalLight.castShadow=false;message('妈妈再也不用担心手机卡还发烫了（只担心画质丑的一批）',3);">`+
+				`点此可关闭光影`+
+			`</button>`+
+		`</font>`, 5);
+},1000);
 /* document.addEventListener("plusready", function(){
 	plus.nativeUI.toast(
 		
@@ -1902,7 +1925,7 @@ var deskgood = {
 				map.activeBlock.some((item, index, value)=>{
 					return item[0] == Math.round(x/100/map.size.x) &&
 						item[1] == Math.round(z/100/map.size.z);
-				}) //含有
+				}) //含有（在已加载的区块）
 			){
 				[deskgood.pos.x, deskgood.pos.y, deskgood.pos.z] = [x,y,z];
 			}else{
@@ -2129,15 +2152,15 @@ var deskgood = {
 			Math.round((deskgood.pos.z-300)/100/map.size.z)
 		]);
 		//////////////////////////////////////////////////////block[0]
-		if (map.activeBlock.every(function(value, index, arr){
+		if (map.initedBlock.every(function(value, index, arr){
 			return value[0] != block[0][0] || value[1] != block[0][1];
-		})){ //每个都不一样（不存在）
+		})){ //每个都不一样（不存在 & 不在加载中）
 			map.initBlock(...block[0]);
 			map.loadBlockAsync(...block[0], function(){
 				map.updateBlockAsync(...block[0]); //更新区块
 			}); //用噪声填充区块
 		//////////////////////////////////////////////////////block[1]
-		}else if (map.activeBlock.every(function(value, index, arr){
+		}else if (map.initedBlock.every(function(value, index, arr){
 			return value[0] != block[1][0] || value[1] != block[1][1];
 		})){
 			map.initBlock(...block[1]);
@@ -2145,7 +2168,7 @@ var deskgood = {
 				map.updateBlockAsync(...block[1]); //更新区块
 			}); //用噪声填充区块
 		//////////////////////////////////////////////////////block[2]
-		}else if (map.activeBlock.every(function(value, index, arr){
+		}else if (map.initedBlock.every(function(value, index, arr){
 			return value[0] != block[2][0] || value[1] != block[2][1];
 		})){
 			map.initBlock(...block[2]);
@@ -2153,7 +2176,7 @@ var deskgood = {
 				map.updateBlockAsync(...block[2]); //更新区块
 			}); //用噪声填充区块
 		//////////////////////////////////////////////////////block[3]
-		}else if (map.activeBlock.every(function(value, index, arr){
+		}else if (map.initedBlock.every(function(value, index, arr){
 			return value[0] != block[3][0] || value[1] != block[3][1];
 		})){
 			map.initBlock(...block[3]);
@@ -2161,7 +2184,7 @@ var deskgood = {
 				map.updateBlockAsync(...block[3]); //更新区块
 			}); //用噪声填充区块
 		//////////////////////////////////////////////////////block[4]
-		}else if (map.activeBlock.every(function(value, index, arr){
+		}else if (map.initedBlock.every(function(value, index, arr){
 			return value[0] != block[4][0] || value[1] != block[4][1];
 		})){
 			map.initBlock(...block[4]);
@@ -2169,7 +2192,7 @@ var deskgood = {
 				map.updateBlockAsync(...block[4]); //更新区块
 			}); //用噪声填充区块
 		//////////////////////////////////////////////////////block[5]
-		}else if (map.activeBlock.every(function(value, index, arr){
+		}else if (map.initedBlock.every(function(value, index, arr){
 			return value[0] != block[5][0] || value[1] != block[5][1];
 		})){
 			map.initBlock(...block[5]);
@@ -2177,7 +2200,7 @@ var deskgood = {
 				map.updateBlockAsync(...block[5]); //更新区块
 			}); //用噪声填充区块
 		//////////////////////////////////////////////////////block[6]
-		}else if (map.activeBlock.every(function(value, index, arr){
+		}else if (map.initedBlock.every(function(value, index, arr){
 			return value[0] != block[6][0] || value[1] != block[6][1];
 		})){
 			map.initBlock(...block[6]);
@@ -2185,7 +2208,7 @@ var deskgood = {
 				map.updateBlockAsync(...block[6]); //更新区块
 			}); //用噪声填充区块
 		//////////////////////////////////////////////////////block[7]
-		}else if (map.activeBlock.every(function(value, index, arr){
+		}else if (map.initedBlock.every(function(value, index, arr){
 			return value[0] != block[7][0] || value[1] != block[7][1];
 		})){
 			map.initBlock(...block[7]);
@@ -2193,7 +2216,7 @@ var deskgood = {
 				map.updateBlockAsync(...block[7]); //更新区块
 			}); //用噪声填充区块
 		//////////////////////////////////////////////////////block[8]
-		}else if (map.activeBlock.every(function(value, index, arr){
+		}else if (map.initedBlock.every(function(value, index, arr){
 			return value[0] != block[8][0] || value[1] != block[8][1];
 		})){
 			map.initBlock(...block[8]);
@@ -2207,7 +2230,7 @@ var deskgood = {
 				(i[0] != 0 || i[1] != 0)&&
 				block.every((value, index, arr)=>{
 					return i[0] != value[0] || i[1] != value[1];
-				}) //不与block任何相等
+				}) //不与任何block相等
 			)
 				map.unloadBlockAsync(...i); //卸载区块
 		
@@ -2322,7 +2345,6 @@ var deskgood = {
 						null
 				){
 					rt[2] = true;
-					debugger
 					console.log("撞到腿，s:"+((deskgood.pos.z+z)-k));
 					break;
 				}
@@ -3829,11 +3851,7 @@ function message(text, time=5){
 	}else{*/
 		let msg = $(`<dialog>${text}</dialog>`);
 		$(document.body).append(
-			msg.attr("open", "true")
-				.css("position","absolute")
-				.css("top","16vmin")
-				.css("z-index",4)
-				.hide()
+			msg.attr("open", "true").hide()
 		);
 		msg.fadeIn("slow");
 		setTimeout(()=>{
