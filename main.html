@@ -765,9 +765,9 @@ Thing.prototype.geometry = new THREE.BoxGeometry(100, 100, 100);
 function BlockMap(size, seed, perloadLength){
 	//一区块大小
 	this.size = {};
-	this.size.x = Math.round(size[1].x - size[0].x);
-	this.size.y = Math.round(size[1].y - size[0].y);
-	this.size.z = Math.round(size[1].z - size[0].z);
+	this.size.x = Math.round(size[1].x - size[0].x)+1;
+	this.size.y = Math.round(size[1].y - size[0].y)+1;
+	this.size.z = Math.round(size[1].z - size[0].z)+1;
 	this.size[0] = {};
 	this.size[1] = {};
 	this.size[0].x = Math.round(size[0].x); //-8
