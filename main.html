@@ -299,7 +299,7 @@
 			window.$ = window.jQuery = require("./js/jquery.min.js");
 		</script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
-		<script>new VConsole();</script>
+		<script>//new VConsole();</script>
 		<script src="./js/three.min.js"></script>
 		<script src="./js/simplex-noise.js"></script>
 		<script src="./js/dat.gui.min.js"></script>
@@ -1059,6 +1059,9 @@ function BlockMap(size, seed, perloadLength){
 		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
 			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
 				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+					if (ox+dx == 24){
+						//
+					};
 					if (this.map[ox+dx][dy][oz+dz] != null){
 						for (let i of this.map[ox+dx][dy][oz+dz].block.mesh.material)
 							i.dispose();
@@ -1158,7 +1161,6 @@ function BlockMap(size, seed, perloadLength){
 	
 	//更新区块内所有方块（同步）
 	this.updateBlock = (x, z)=>{
-		console.info("updateBlock", x, z)
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
@@ -1172,7 +1174,6 @@ function BlockMap(size, seed, perloadLength){
 	};
 	//更新区块内所有方块（异步）
 	this.updateBlockAsync = (x, z, callback)=>{
-		console.info("updateBlock", x, z)
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
@@ -1248,7 +1249,7 @@ function BlockMap(size, seed, perloadLength){
 					return i[0] != value[0] || i[1] != value[1];
 				}) //不与任何block相等
 			)
-				this.unloadBlockAsync(...i); //卸载区块
+				this.unloadBlock(...i); //卸载区块
 	};
 	
 	/* //保存为数组字符串
@@ -1408,14 +1409,14 @@ let scene_folder = gui.addFolder("场景(scene)");
 /**
  * 天气(sprite精灵)
  */
-weather = Math.random()<0.25? 0: Math.random()*Math.random()*Math.random()/300*1000;//Math.abs(1-(Math.log(Math.random()+0.003)+6)/6);
+weather = Math.random()<0.75? 0: Math.random()*Math.random()*Math.random()/300*1000;//Math.abs(1-(Math.log(Math.random()+0.003)+6)/6);
 console.info(`降水概率:${weather}滴/s/m²`, `降水范围：地图有效区域（<x:${map.size[0].x}~${map.size[1].x}>*<z:${map.size[0].z}~${map.size[1].z}>）`);
 let sprite_system = [],
 	sprite_lastTime = null,
 	sprite_material = new THREE.SpriteMaterial({
-		color: "#4c51a7", //设置精灵矩形区域颜色
-		//rotation: Math.PI/180*45, //旋转精灵对象45度，弧度值
-		//map: texture, //设置精灵纹理贴图
+		// color: "#4c51a7", //设置精灵矩形区域颜色
+		// rotation: Math.PI/180*45, //旋转精灵对象45度，弧度值
+		map: new THREE.TextureLoader().load("img/rain.png"), //设置精灵纹理贴图
 	});
 setInterval(function(){
 	if (sprite_lastTime == null)
@@ -1428,15 +1429,14 @@ setInterval(function(){
 	
 	//雨滴降落
 	for (let i=0; i<sprite_system.length; i++){
-		//sprite_system[i].v -= 9.8*t/1000*100;
 		sprite_system[i].position.y -= 10*1000*t/1000*(Math.random()*0.2+0.9); //10m/s //sprite_system[i].v*t/1000;
-		if (/*!map.get(
+		if (map.get(
 				sprite_system[i].position.x/100,
 				sprite_system[i].position.y/100,
 				sprite_system[i].position.z/100
-			)||*/
-			sprite_system[i].position.y < 0
-		){ // 有方块/超出界限
+			) //有方块
+			||sprite_system[i].position.y < 0
+		){
 			sprite_system[i].material.dispose(); //清除内存
 			scene.remove(sprite_system[i]);
 			sprite_system.splice(i,1);
@@ -1454,11 +1454,12 @@ setInterval(function(){
 			
 			sprite.position.set(pX, pY, pZ); //设置精灵位置
 			//控制精灵大小，比如可视化中精灵大小表征数据大小
-			sprite.scale.set(Math.random()*3+3, Math.random()*26+10, 1); //只需要设置x、y两个分量就可以 x:[3,6) y:[10,36)
+			sprite.scale.set(Math.random()*4+6, Math.random()*8+12, 1); //只需要设置x、y两个分量就可以 x:[6,10) y:[12,20)
 			sprite_system.push(sprite);
 		}
 	}
 }, 0);
+
 
 let weather_folder = gui.addFolder("天气(weather)");
 	weather_folder.add(window, "weather", 0, 1/300*1000, 1e-3).name("降水系数").onChange((value)=>{weather = Math.pow(value*300/1000,3)/300*1000});
@@ -2747,21 +2748,24 @@ setInterval(function(){
 	}catch(err){}
 }, 16.667);
 
-/* let choice_object = get_choice_object()?get_choice_object()[1]:undefined;
 
-let choice_folder = gui.addFolder("选择物体");
-choice_folder.open();
-	choice_position_folder = choice_folder.addFolder("位置");
-	choice_position_folder.open();
-		choice_position_folder.add(choice_object?choice_object.object.position:{x:0,y:0,z:0}, "x", -1000, 1000, 100).listen();
-		choice_position_folder.add(choice_object?choice_object.object.position:{x:0,y:0,z:0}, "y", -1000, 1000, 100).listen();
-		choice_position_folder.add(choice_object?choice_object.object.position:{x:0,y:0,z:0}, "z", -1000, 1000, 100).listen();
-	choice_folder.add(choice_object.faceIndex?choice_object:{faceIndex:-1}, "faceIndex", 0, 12).listen(); */
-/* let mouse = {
-	x0: null,
-	y0: null
-}; */
+let mouse_choice = {
+	x: -1,
+	y: -1,
+	z: -1,
+	faceIndex: -1,
+	id: -1
+};
+let deskgood_choice_folder = deskgood_folder.addFolder("选择物体");
+	deskgood_choice_folder.add(mouse_choice, "x", -1000, 1000, 100).listen();
+	deskgood_choice_folder.add(mouse_choice, "y", -1000, 1000, 100).listen();
+	deskgood_choice_folder.add(mouse_choice, "z", -1000, 1000, 100).listen();
+	deskgood_choice_folder.add(mouse_choice, "faceIndex", 0, 12, 1).listen();
+	deskgood_choice_folder.add(mouse_choice, "id", 0, 9, 1).listen();
 
+document.addEventListener("click", function (e){
+	console.log( ray({},deskgood.look)[0] );
+});
 document.addEventListener("mousemove", function (e){
 	if (stop)
 		return;
@@ -2783,39 +2787,43 @@ document.addEventListener("mousemove", function (e){
 		0
 	;
 	
-	// 打印鼠标移动的增量值。
-	// console.log("mousemove:", dx, dy);
-	/* let [x, y] = [e.pageX, e.pageY];
-	console.log("mousemove:", x, y); */
+	deskgood.lookAt.left_right += dx/document.getElementsByTagName("canvas")[0].offsetWidth*360*deskgood.sensitivity;
+	deskgood.lookAt.top_bottom -= dy/document.getElementsByTagName("canvas")[0].offsetHeight*360*deskgood.sensitivity;
 	
-	// choice_object = get_choice_object()?get_choice_object()[1]:undefined;
+	if (deskgood.lookAt.left_right > 360)
+		while (deskgood.lookAt.left_right > 360)
+			deskgood.lookAt.left_right -= 360;
+	if (deskgood.lookAt.left_right < 0)
+		while (deskgood.lookAt.left_right < 0)
+			deskgood.lookAt.left_right += 360;
 	
-	/* if (
-		Math.sqrt(Math.pow(dx,2)+Math.pow(dy.y0,2)) <= 100 & //
-		mouse.x0 !== null & mouse.y0 !== null
-	){ */
-		// let [dx, dy] = [x-mouse.x0, y-mouse.y0];
-		// [mouse.x0, mouse.y0] = [x, y];
-		// console.log("move:", dx, dy);
-		deskgood.lookAt.left_right += dx/document.getElementsByTagName("canvas")[0].offsetWidth*360*deskgood.sensitivity;
-		deskgood.lookAt.top_bottom -= dy/document.getElementsByTagName("canvas")[0].offsetHeight*360*deskgood.sensitivity;
-		
-		if (deskgood.lookAt.left_right > 360)
-			while (deskgood.lookAt.left_right > 360)
-				deskgood.lookAt.left_right -= 360;
-		if (deskgood.lookAt.left_right < 0)
-			while (deskgood.lookAt.left_right < 0)
-				deskgood.lookAt.left_right += 360;
-		
-		if (deskgood.lookAt.top_bottom > 89.9)
-			deskgood.lookAt.top_bottom = 89.9;
-		if (deskgood.lookAt.top_bottom < -89.9)
-			deskgood.lookAt.top_bottom = -89.9;
-		
-		deskgood.look_refresh(); //刷新
-	// }
+	if (deskgood.lookAt.top_bottom > 89.9)
+		deskgood.lookAt.top_bottom = 89.9;
+	if (deskgood.lookAt.top_bottom < -89.9)
+		deskgood.lookAt.top_bottom = -89.9;
 	
-	// [mouse.x0,mouse.y0] = [x, y];
+	deskgood.look_refresh(); //刷新
+	
+	try{
+		let get = ray({},deskgood.look)[0];
+		mouse_choice.x = get.object.position.x;
+		mouse_choice.y = get.object.position.y;
+		mouse_choice.z = get.object.position.z;
+		mouse_choice.faceIndex = get.faceIndex;
+		mouse_choice.id = map.get(
+			get.object.position.x/100,
+			get.object.position.y/100,
+			get.object.position.z/100
+		).id;
+	}catch(err){
+		mouse_choice = {
+			x: -1,
+			y: -1,
+			z: -1,
+			faceIndex: -1,
+			id: -1
+		};
+	}
 });
 
 $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind监听
@@ -3712,8 +3720,8 @@ function get_choice_object(phone, x, y){
 
 //屏蔽鼠标右键
 document.oncontextmenu = function (e){
-	//var e = e || window.event;
-	//e.returnValue = false;
+	var e = e || window.event;
+	e.returnValue = false;
 	return false;
 };
 //屏蔽选择文字
