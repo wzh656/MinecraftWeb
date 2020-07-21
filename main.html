@@ -76,9 +76,18 @@
 				background-color: #000;
 				background-image: radial-gradient(#666, #232, #011);
 				
-				text-shadow: 0 0 3px red,
-					0 0 6px blue,
-					0 0 9px yellow;
+				text-shadow:
+					0 0 10px rgba(255,0,0, .4),
+					0 0 20px rgba(0,0,255, .5),
+					0 0 30px rgba(255,255,0, .7),
+					
+					0 0 10px rgba(255,0,0, .4),
+					0 0 20px rgba(0,0,255, .5),
+					0 0 30px rgba(255,255,0, .7),
+					
+					0 0 10px rgba(255,0,0, .4),
+					0 0 20px rgba(0,0,255, .5),
+					0 0 30px rgba(255,255,0, .7);
 			}
 			#schedule{
 				animation-name: backgroundColor;
@@ -304,7 +313,7 @@
 		<script src="./js/simplex-noise.js"></script>
 		<script src="./js/dat.gui.min.js"></script>
 		<script src="./js/stats.min.js"></script>
-		<script src="./js/sql.js"></script>
+		<script src="./js/SQL.js"></script>
 		<!--<script src="./node_modules/three/examples/js/controls/PointerLockControls.js"></script>-->
 	</head>
 	
@@ -811,17 +820,17 @@ function BlockMap(size, seed, perloadLength){
 	
 	
 	//获取方块（不可编辑）
-	this.get = (x, y, z)=>{
+	this.get = (x, y, z)=>{  // 没有方块:null,不在范围:undefined,加载中:false
 		[x, y, z] = [x, y, z].map(Math.round); //规范化
 		
 		try{
 			if (this.map[x][y][z] == undefined){
-				return null;
+				return undefined;
 			}else{
 				return this.map[x][y][z];
 			}
 		}catch(err){ //超过范围
-			return null;
+			return undefined;
 		}
 	};
 	
@@ -841,8 +850,12 @@ function BlockMap(size, seed, perloadLength){
 	};
 	//根据 模板和ID 添加方块
 	this.addID = (id, pos, template)=>{
-		if (!id)
-			return; //ID为0（空气）
+		if (id == 0){
+			[pos.x, pos.y, pos.z] = [pos.x, pos.y, pos.z].map(Math.round); //规范化
+			this.map[pos.x][pos.y][pos.z] = null; //空气
+			return;
+		}
+		
 		this.add(
 			new Thing(template[id])
 				.block.makeMaterial()
@@ -860,7 +873,7 @@ function BlockMap(size, seed, perloadLength){
 	this.delete = (x, y, z)=>{
 		[x, y, z] = [x, y, z].map(Math.round); //规范化
 		
-		if (!this.get(x,y,z)) // 没有方块/不在范围
+		if (!this.get(x,y,z)) // 没有方块(null)/不在范围(undefined)/加载中(false)
 			return;
 		
 		for (let i of this.map[x][y][z].block.mesh.material)
@@ -868,6 +881,93 @@ function BlockMap(size, seed, perloadLength){
 		this.map[x][y][z].block.mesh.geometry.dispose(); //清除内存
 		scene.remove(this.map[x][y][z].block.mesh);
 		this.map[x][y][z] = null;
+	};
+	
+	
+	//更新方块
+	this.update = (x, y, z)=>{
+		[x, y, z] = [x, y, z].map(Math.round); //规范化
+		
+		if (!this.get(x,y,z)) // 没有方块(null)/不在范围(undefined)/加载中(false)
+			return;
+		
+		this.map[x][y][z].block.material[0].visible = !this.get(x+1, y, z);
+		this.map[x][y][z].block.material[1].visible = !this.get(x-1, y, z);
+		this.map[x][y][z].block.material[2].visible = !this.get(x, y+1, z);
+		this.map[x][y][z].block.material[3].visible = !this.get(x, y-1, z);
+		this.map[x][y][z].block.material[4].visible = !this.get(x, y, z+1);
+		this.map[x][y][z].block.material[5].visible = !this.get(x, y, z-1);
+	};
+	
+	//更新方块及周围
+	this.updateRound = (x,y,z)=>{
+		this.update(x, y, z);
+		this.update(x+1, y, z);
+		this.update(x-1, y, z);
+		this.update(x, y+1, z);
+		this.update(x, y-1, z);
+		this.update(x, y, z+1);
+		this.update(x, y, z-1);
+	};
+	
+	//更新区块内所有方块（同步）
+	this.updateBlock = (x, z)=>{
+		let ox = x*this.size.x,
+			oz = z*this.size.z; //区块中心坐标
+		
+		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
+			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
+				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+					this.update(ox+dx, dy, oz+dz);
+				}
+			}
+		}
+	};
+	//更新区块内所有方块（异步）
+	this.updateBlockAsync = (x, z, callback)=>{
+		let ox = x*this.size.x,
+			oz = z*this.size.z; //区块中心坐标
+		
+		if (callback){ //有回调（必须setInterval）
+			let dx = this.size[0].x;
+			let updateBlock_id = setInterval(()=>{
+				if (dx > this.size[1].x){
+					clearInterval(updateBlock_id);
+					callback();
+					return;
+				}
+				
+				//正常代码
+				for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
+					for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+						this.update(ox+dx, dy, oz+dz);
+					}
+				}
+				
+				dx++;
+			},0);
+		}else{ //无回调（不分顺序）
+			for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
+				setTimeout(()=>{
+					
+					//正常代码
+					for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
+						for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+							this.update(ox+dx, dy, oz+dz);
+						}
+					}
+					
+				},0);
+			}
+		}
+		
+		/* for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
+			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
+				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+					this.update(ox+dx, dy, oz+dz);
+				}
+			}
+		} */
 	};
 	
 	
@@ -887,7 +987,7 @@ function BlockMap(size, seed, perloadLength){
 			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
 				this.map[ox+dx][dy] = this.map[ox+dx][dy] || [];
 				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-					this.map[ox+dx][dy][oz+dz] = null;
+					this.map[ox+dx][dy][oz+dz] = false/* null */;
 				}
 			}
 		}
@@ -912,7 +1012,11 @@ function BlockMap(size, seed, perloadLength){
 				for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
 					let earth = height - height * (t.noise.noise3D(6.6, (ox+dx)/t.s.q, (oz+dz)/t.s.q) *t.s.de + t.s.ave);
 					if (dy > height){
-						// 空气/真空 (null)：不用加载
+						this.addID(0, {
+							x: ox+dx,
+							y: dy,
+							z: oz+dz
+						}); // 空气/真空 (null)
 					}else if (dy > earth){
 						if (grass){
 							this.addID(2, {
@@ -968,7 +1072,11 @@ function BlockMap(size, seed, perloadLength){
 					for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
 						let earth = height - height * (t.noise.noise3D(6.6, (ox+dx)/t.s.q, (oz+dz)/t.s.q) *t.s.de + t.s.ave);
 						if (dy > height){
-							// 空气/真空 (null)：不用加载
+							this.addID(0, {
+								x: ox+dx,
+								y: dy,
+								z: oz+dz
+							}); // 空气/真空 (null)：不用加载
 						}else if (dy > earth){
 							if (grass){
 								this.addID(2, {
@@ -1012,7 +1120,11 @@ function BlockMap(size, seed, perloadLength){
 						for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
 							let earth = height - height * (t.noise.noise3D(6.6, (ox+dx)/t.s.q, (oz+dz)/t.s.q) *t.s.de + t.s.ave);
 							if (dy > height){
-								// 空气/真空 (null)：不用加载
+								this.addID(0, {
+									x: ox+dx,
+									y: dy,
+									z: oz+dz
+								}); // 空气/真空 (null)：不用加载
 							}else if (dy > earth){
 								if (grass){
 									this.addID(2, {
@@ -1132,93 +1244,6 @@ function BlockMap(size, seed, perloadLength){
 		}
 	};
 	
-	
-	//更新方块
-	this.update = (x, y, z)=>{
-		[x, y, z] = [x, y, z].map(Math.round); //规范化
-		
-		if (!this.get(x,y,z)) // 没有方块/不在范围
-			return;
-		
-		this.map[x][y][z].block.material[0].visible = this.get(x+1, y, z)==null;
-		this.map[x][y][z].block.material[1].visible = this.get(x-1, y, z)==null;
-		this.map[x][y][z].block.material[2].visible = this.get(x, y+1, z)==null;
-		this.map[x][y][z].block.material[3].visible = this.get(x, y-1, z)==null;
-		this.map[x][y][z].block.material[4].visible = this.get(x, y, z+1)==null;
-		this.map[x][y][z].block.material[5].visible = this.get(x, y, z-1)==null;
-	};
-	
-	//更新方块及周围
-	this.updateRound = (x,y,z)=>{
-		this.update(x, y, z);
-		this.update(x+1, y, z);
-		this.update(x-1, y, z);
-		this.update(x, y+1, z);
-		this.update(x, y-1, z);
-		this.update(x, y, z+1);
-		this.update(x, y, z-1);
-	};
-	
-	//更新区块内所有方块（同步）
-	this.updateBlock = (x, z)=>{
-		let ox = x*this.size.x,
-			oz = z*this.size.z; //区块中心坐标
-		
-		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
-			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
-				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-					this.update(ox+dx, dy, oz+dz);
-				}
-			}
-		}
-	};
-	//更新区块内所有方块（异步）
-	this.updateBlockAsync = (x, z, callback)=>{
-		let ox = x*this.size.x,
-			oz = z*this.size.z; //区块中心坐标
-		
-		if (callback){ //有回调（必须setInterval）
-			let dx = this.size[0].x;
-			let updateBlock_id = setInterval(()=>{
-				if (dx > this.size[1].x){
-					clearInterval(updateBlock_id);
-					callback();
-					return;
-				}
-				
-				//正常代码
-				for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
-					for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-						this.update(ox+dx, dy, oz+dz);
-					}
-				}
-				
-				dx++;
-			},0);
-		}else{ //无回调（不分顺序）
-			for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
-				setTimeout(()=>{
-					
-					//正常代码
-					for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
-						for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-							this.update(ox+dx, dy, oz+dz);
-						}
-					}
-					
-				},0);
-			}
-		}
-		
-		/* for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
-			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
-				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-					this.update(ox+dx, dy, oz+dz);
-				}
-			}
-		} */
-	};
-	
 	//预加载区块
 	this.perloadBlock = (length = this.perloadLength)=>{
 		let block = [];
@@ -1249,7 +1274,7 @@ function BlockMap(size, seed, perloadLength){
 					return i[0] != value[0] || i[1] != value[1];
 				}) //不与任何block相等
 			)
-				this.unloadBlock(...i); //卸载区块
+				this.unloadBlockAsync(...i); //卸载区块
 	};
 	
 	/* //保存为数组字符串
@@ -1370,6 +1395,7 @@ let map = new BlockMap([
 },300);
 document.title = "我的世界:"+(map.seed.seed? map.seed.seed: "随机世界");
 
+var sql = new SQL("Minecraft", "1.0", "Minecraft", 10*1024*1024);
 function save(){
 	return;
 	localStorage.setItem("我的世界.存档.方块", map.save());
@@ -1394,7 +1420,7 @@ window.addEventListener("beforeunload", save);
 * 创建场景对象Scene
 */
 let scene = new THREE.Scene();
-scene.fog = new THREE.Fog("#fff", 0.01, 200*100);
+scene.fog = new THREE.Fog("#fff", 0.01, 300*100);
 //						 雾气颜色，近处的距离，远处的距离(66m)
 let scene_folder = gui.addFolder("场景(scene)");
 	scene_folder.add(scene.children, "length", 0, 10000).name("物体(object)个数").listen();
@@ -1403,7 +1429,7 @@ let scene_folder = gui.addFolder("场景(scene)");
 		scene_fog_folder.add(scene.fog, "near", 0.001, 10);
 		scene_fog_folder.addColor(scene.fog, "color");
 	let scene_block_folder = scene_folder.addFolder("区块(block)");
-		scene_block_folder.add(map, "perloadLength", 1, 1000, 1).name("预加载范围/px(cm)");
+		scene_block_folder.add(map, "perloadLength", 1, 1000, 1).name("预加载范围/px");
 
 
 /**
@@ -1960,10 +1986,12 @@ var deskgood = {
 					[Math.round(z/100)]
 				!== undefined
 				&&*/
-				map.activeBlock.some((item, index, value)=>{
+				map.initedBlock.some((item, index, value)=>{
 					return item[0] == Math.round(x/100/map.size.x) &&
 						item[1] == Math.round(z/100/map.size.z);
-				}) //含有（在已加载的区块）
+				}) //含有（已加载和加载中的区块）
+				&&
+				map.get(x/100, y/100, z/100) !== false
 			){
 				let t = deskgood.pos.x == x && deskgood.pos.z == z; //未改变区块
 				[deskgood.pos.x, deskgood.pos.y, deskgood.pos.z] = [x,y,z];
