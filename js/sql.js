@@ -25,7 +25,7 @@ function SQL(dbName, version, decision, size){
 		}, errCallback, successCallback);
 	};
 	//删除表
-	this.createTable = function(tName, errCallback = this.errCallback, successCallback = this.successCallback){
+	this.deleteTable = function(tName, errCallback = this.errCallback, successCallback = this.successCallback){
 		this.db.transaction(function (tx){
 			tx.executeSql(`DROP TABLE ${tName}`);
 		}, errCallback, successCallback);

@@ -1397,6 +1397,7 @@ document.title = "我的世界:"+(map.seed.seed? map.seed.seed: "随机世界");
 
 var sql = new SQL("Minecraft", "1.0", "Minecraft", 10*1024*1024);
 function save(){
+	sql.createTable("files");
 	return;
 	localStorage.setItem("我的世界.存档.方块", map.save());
 	localStorage.setItem("我的世界.存档.玩家.位置", JSON.stringify(deskgood.pos));
