@@ -1395,28 +1395,6 @@ let map = new BlockMap([
 },300);
 document.title = "我的世界:"+(map.seed.seed? map.seed.seed: "随机世界");
 
-var sql = new SQL("Minecraft", "1.0", "Minecraft", 10*1024*1024);
-function save(){
-	sql.createTable("files");
-	return;
-	localStorage.setItem("我的世界.存档.方块", map.save());
-	localStorage.setItem("我的世界.存档.玩家.位置", JSON.stringify(deskgood.pos));
-	localStorage.setItem("我的世界.存档.玩家.朝向", JSON.stringify(deskgood.lookAt));
-	localStorage.setItem("我的世界.存档.玩家.物品.工具栏", JSON.stringify({
-		tools: deskgood.tools,
-		choice: deskgood.choice
-	}));
-	console.log("备份成功");
-}
-setInterval(save, 60*1000);
-gui.add({f:function(){
-	run(prompt("请输入命令：","deskgood.goY(3000*100);"))
-}}, "f").name("运行(run)命令");
-gui.add(window, "save").name("保存(save)");
-gui.add(location, "reload").name("刷新(reload)");
-window.addEventListener("beforeunload", save);
-
-
 /**
 * 创建场景对象Scene
 */
@@ -2336,7 +2314,74 @@ deskgood.goX = x=>deskgood.go(x);
 deskgood.goY = y=>deskgood.go(0,y);
 deskgood.goZ = z=>deskgood.go(0,0,z);
 
-//读取
+
+// SQL
+const sql = new SQL("Minecraft", "1.0", "我的世界游戏存档", 10*1024*1024);
+sql.setErrCallback(function(err){
+	console.error("SQL运行出错：", err);
+});
+sql.createTable("file", [
+	"type UNSIGNED TINYINT",
+	"x INT",
+	"y INT",
+	"z INT",
+	"id UNSIGNED TINYINT",
+	"attr TEXT"
+]);
+function save(){
+	sql.deleteData("file", "type=1", undefined, function(){
+		sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
+			1,
+			Math.round(deskgood.pos.x),
+			Math.round(deskgood.pos.y),
+			Math.round(deskgood.pos.z),
+			deskgood.sensitivity,
+			`"${deskgood.lookAt.left_right} ${deskgood.lookAt.top_bottom}"`
+		])
+	});
+	sql.deleteData("file", "type=2", undefined, function(){
+		sql.insertData("file", ["type", "x", "y", "z"], [
+			2,
+			Math.round(deskgood.v.x),
+			Math.round(deskgood.v.y),
+			Math.round(deskgood.v.z)
+		])
+	});
+	sql.deleteData("file", "type=3", undefined, function(){
+		for (let i of deskgood.tools){
+			sql.insertData("file", ["type", "x", "id", "attr"], [
+				3,
+				0, //物品栏
+				i,
+				`""`
+			])
+		}
+		sql.insertData("file", ["type", "x", "id"], [
+			3,
+			1, //选择物品
+			deskgood.choice
+		]);
+	});
+	
+	// return;
+	/* localStorage.setItem("我的世界.存档.方块", map.save());
+	localStorage.setItem("我的世界.存档.玩家.位置", JSON.stringify(deskgood.pos));
+	localStorage.setItem("我的世界.存档.玩家.朝向", JSON.stringify(deskgood.lookAt));
+	localStorage.setItem("我的世界.存档.玩家.物品.工具栏", JSON.stringify({
+		tools: deskgood.tools,
+		choice: deskgood.choice
+	}));
+	console.log("备份成功"); */
+}
+setInterval(save, 10*1000); // 10s
+gui.add({f:function(){
+	run(prompt("请输入命令：","deskgood.goY(3000*100);"))
+}}, "f").name("运行(run)命令");
+gui.add(window, "save").name("保存(save)");
+gui.add(location, "reload").name("刷新(reload)");
+window.addEventListener("beforeunload", save);
+
+/* //读取
 if (localStorage.getItem("我的世界.存档.玩家.位置")){
 	deskgood.pos.x = JSON.parse(localStorage.getItem("我的世界.存档.玩家.位置")).x;
 	deskgood.pos.y = JSON.parse(localStorage.getItem("我的世界.存档.玩家.位置")).y;
@@ -2349,7 +2394,7 @@ if (localStorage.getItem("我的世界.存档.玩家.朝向")){
 if (localStorage.getItem("我的世界.存档.玩家.物品.工具栏")){
 	deskgood.tools = JSON.parse(localStorage.getItem("我的世界.存档.玩家.物品.工具栏")).tools;
 	deskgood.choice = Number(JSON.parse(localStorage.getItem("我的世界.存档.玩家.物品.工具栏")).choice);
-}
+} */
 
 for (let i in deskgood.tools){
 	/* if (deskgood.tools[i] != 0){
@@ -2937,6 +2982,18 @@ document.addEventListener("mousedown", function (e){
 							deskgood.tools_things_refresh(); //刷新方块
 							map.delete(x/100, y/100, z/100); //删除方块
 							map.updateRound(x/100, y/100, z/100); //刷新方块及周围
+							//SQL
+							[x, y, z] = [x, y, z].map(v => Math.round(v/100));
+							sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
+								sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
+									0,
+									x,
+									y,
+									z,
+									0,
+									`""`
+								])
+							});
 							/*scene.remove(click[i].object);
 							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = 0;*/
 							/* if (
@@ -3008,6 +3065,18 @@ document.addEventListener("mousedown", function (e){
 						y: y/100,
 						z: z/100
 					}, template);
+					//SQL
+					[x, y, z] = [x, y, z].map(v => Math.round(v/100));
+					sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
+						sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
+							0,
+							x,
+							y,
+							z,
+							deskgood.tools[deskgood.choice],
+							`""`
+						])
+					});
 					/* map.add(new Thing(template[ deskgood.tools[deskgood.choice] ]).block.makeMaterial().block.deleteTexture().block.makeMesh(), {
 						x: x/100,
 						y: y/100,
@@ -3429,6 +3498,18 @@ $("canvas:eq(0)").on("touchstart", function (e){
 								deskgood.tools_things_refresh(); //刷新方块
 								map.delete(x/100, y/100, z/100); //删除方块
 								map.updateRound(x/100, y/100, z/100); //更新方块
+								//SQL
+								[x, y, z] = [x, y, z].map(v => Math.round(v/100));
+								sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
+									sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
+										0,
+										x,
+										y,
+										z,
+										0,
+										`""`
+									])
+								});
 								//scene.remove(click[i].object);
 								//every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = 0;
 								try{
@@ -3576,6 +3657,18 @@ $("canvas:eq(0)").on("touchend", function (e){
 							y: y/100,
 							z: z/100
 						}, template);
+						//SQL
+						[x, y, z] = [x, y, z].map(v => Math.round(v/100));
+						sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
+							sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
+								0,
+								x,
+								y,
+								z,
+								deskgood.tools[deskgood.choice],
+								`""`
+							])
+						});
 						/* map.add(new Thing(template[ deskgood.tools[deskgood.choice] ]).block.makeMaterial().block.deleteTexture().block.makeMesh(), {
 							x: x/100,
 							y: y/100,
