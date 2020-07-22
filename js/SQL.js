@@ -1,7 +1,7 @@
 function SQL(dbName, version, decision, size){
 	//打开数据库
 	this.db = openDatabase(dbName, version, decision, size);
-
+	
 	//设置错误回调
 	this.setErrCallback = function(callback){
 		this.errCallback = callback;
@@ -10,14 +10,22 @@ function SQL(dbName, version, decision, size){
 	this.setSuccessCallback = function(callback){
 		this.successCallback = callback;
 	};
-
-	//删除数据库
+	
+	/* //删除数据库
 	this.deleteDatabase = function(dbName, errCallback = this.errCallback, successCallback = this.successCallback){
 		this.db.transaction(function (tx){
 			tx.executeSql(`DROP DATABASE ${dbName}`);
 		}, errCallback, successCallback);
+	}; */
+												/* 表 */
+	//读取所有表
+	this.selectTable = function(readCallback, errCallback = this.errCallback, successCallback = this.successCallback){
+		this.db.transaction(function (tx){
+			tx.executeSql(`SHOW TABLES`,[],function(tx, data){
+				readCallback(data.rows);
+			});
+		}, errCallback, successCallback);
 	};
-
 	//创建表
 	this.createTable = function(tName, value, errCallback = this.errCallback, successCallback = this.successCallback){
 		this.db.transaction(function (tx){
@@ -30,11 +38,12 @@ function SQL(dbName, version, decision, size){
 			tx.executeSql(`DROP TABLE ${tName}`);
 		}, errCallback, successCallback);
 	};
-
+												/* 数据 */
 	//插入数据
 	this.insertData = function(tName, dataName, data, errCallback = this.errCallback, successCallback = this.successCallback){
 		this.db.transaction(function (tx){
 			tx.executeSql(`INSERT INTO ${tName} (${ dataName.join(",") }) VALUES (${ data.join(",") })`);
+			console.log(`INSERT INTO ${tName} (${ dataName.join(",") }) VALUES (${ data.join(",") })`)
 		}, errCallback, successCallback);
 	};
 	//读取数据
@@ -55,7 +64,7 @@ function SQL(dbName, version, decision, size){
 		}, errCallback, successCallback);
 	};
 	//更新数据
-	this.deleteData = function(tName, set, where, errCallback = this.errCallback, successCallback = this.successCallback){
+	this.updateData = function(tName, set, where, errCallback = this.errCallback, successCallback = this.successCallback){
 		this.db.transaction(function (tx){
 			set = set.map(function(value){
 				return value.join("=");
