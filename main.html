@@ -139,6 +139,7 @@
 			}
 			progress{
 				background-color: red;
+				width: 63vw;
 			}
 			progress::-webkit-progress-bar{
 				background-color: gray;
@@ -146,7 +147,16 @@
 			}
 			progress::-webkit-progress-value{
 				background-color: green;
-				background-image: linear-gradient(135deg, red, orange, yellow, green, blue, indigo, purple);
+				background-image: repeating-linear-gradient(
+					135deg,
+					red 0vw,
+					orange 9vw,
+					yellow 18vw,
+					green 27vw,
+					blue 36vw,
+					indigo 45vw,
+					purple 54vw
+				);
 			}
 			
 			#warning > button{
@@ -307,8 +317,10 @@
 		if (typeof(require) != "undefined")
 			window.$ = window.jQuery = require("./js/jquery.min.js");
 		</script>
+		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
-		<script>//new VConsole();</script>
+		<script>eruda.init();</script>
+		<script>new VConsole();</script>
 		<script src="./js/three.min.js"></script>
 		<script src="./js/simplex-noise.js"></script>
 		<script src="./js/dat.gui.min.js"></script>
@@ -633,6 +645,16 @@ let gui = new dat.GUI({
 	closeOnTop: true // 关闭按钮是否在顶部
 });
 gui.close();
+gui.add({f:function(){
+	run(prompt("请输入命令：","deskgood.goY(3000*100);"))
+}}, "f").name("运行(run)命令");
+gui.add(window, "save").name("保存(save)");
+gui.add(location, "reload").name("刷新(reload)");
+window.addEventListener("beforeunload", function(event){
+	event.preventDefault();
+	event.returnValue = "未保存！";
+	return "未保存！";
+});
 
 
 /**
@@ -925,6 +947,7 @@ function BlockMap(size, seed, perloadLength){
 	};
 	//更新区块内所有方块（异步）
 	this.updateBlockAsync = (x, z, callback)=>{
+		//console.log("updateBlock:",x,z,+new Date);
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
@@ -1050,109 +1073,121 @@ function BlockMap(size, seed, perloadLength){
 			oz = z*this.size.z, //区块中心坐标
 			t = this.seed; //临时变量
 		
-		if (callback){ //有回调（必须setInterval）
-			let dx = this.size[0].x;
-			let loadBlock_id = setInterval(()=>{
-				if (dx > this.size[1].x){
-					clearInterval(loadBlock_id);
-					
+		sql.selectData("file", ["x", "y", "z", "id", "attr"],
+			`type=0 AND`+
+			` (x BETWEEN ${ ox+this.size[0].x } AND ${ ox+this.size[1].x }) AND`+
+			` (z BETWEEN ${ oz+this.size[0].z } AND ${ oz+this.size[1].z })`,
+			(edit) => {
+				
+				console.log(edit);
+				debugger;
+				
+				if (callback){ //有回调（必须setInterval）
+					let dx = this.size[0].x;
+					let loadBlock_id = setInterval(()=>{
+						if (dx > this.size[1].x){
+							clearInterval(loadBlock_id);
+							
+							if (this.activeBlock.every(function(value, index, arr){
+								return value[0] != x || value[1] != z;
+							})) //每个都不一样（不存在）
+								this.activeBlock.push([x,z]);
+							
+							callback();
+							return;
+						}
+						
+						//正常代码
+						for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+							let height = t.noise.noise3D(0.6, (ox+dx)/t.h.q, (oz+dz)/t.h.q) *t.h.de + t.h.ave;
+							let grass = false;
+							for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
+								let earth = height - height * (t.noise.noise3D(6.6, (ox+dx)/t.s.q, (oz+dz)/t.s.q) *t.s.de + t.s.ave);
+								if (dy > height){
+									this.addID(0, {
+										x: ox+dx,
+										y: dy,
+										z: oz+dz
+									}); // 空气/真空 (null)：不用加载
+								}else if (dy > earth){
+									if (grass){
+										this.addID(2, {
+											x: ox+dx,
+											y: dy,
+											z: oz+dz
+										}, template); //泥土
+									}else{
+										this.addID(1, {
+											x: ox+dx,
+											y: dy,
+											z: oz+dz
+										}, template); //草方块
+										grass = true;
+									}
+								}else{
+									this.addID(4, {
+										x: ox+dx,
+										y: dy,
+										z: oz+dz
+									}, template); //石头
+								}
+							}
+						}
+						
+						dx++;
+					},0);
+				}else{ //无回调（不分顺序）
 					if (this.activeBlock.every(function(value, index, arr){
 						return value[0] != x || value[1] != z;
 					})) //每个都不一样（不存在）
 						this.activeBlock.push([x,z]);
 					
-					callback();
-					return;
-				}
-				
-				//正常代码
-				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-					let height = t.noise.noise3D(0.6, (ox+dx)/t.h.q, (oz+dz)/t.h.q) *t.h.de + t.h.ave;
-					let grass = false;
-					for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
-						let earth = height - height * (t.noise.noise3D(6.6, (ox+dx)/t.s.q, (oz+dz)/t.s.q) *t.s.de + t.s.ave);
-						if (dy > height){
-							this.addID(0, {
-								x: ox+dx,
-								y: dy,
-								z: oz+dz
-							}); // 空气/真空 (null)：不用加载
-						}else if (dy > earth){
-							if (grass){
-								this.addID(2, {
-									x: ox+dx,
-									y: dy,
-									z: oz+dz
-								}, template); //泥土
-							}else{
-								this.addID(1, {
-									x: ox+dx,
-									y: dy,
-									z: oz+dz
-								}, template); //草方块
-								grass = true;
-							}
-						}else{
-							this.addID(4, {
-								x: ox+dx,
-								y: dy,
-								z: oz+dz
-							}, template); //石头
-						}
-					}
-				}
-				
-				dx++;
-			},0);
-		}else{ //无回调（不分顺序）
-			if (this.activeBlock.every(function(value, index, arr){
-				return value[0] != x || value[1] != z;
-			})) //每个都不一样（不存在）
-				this.activeBlock.push([x,z]);
-			
-			for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
-				setTimeout(()=>{
-					
-					//正常代码
-					for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-						let height = t.noise.noise3D(0.6, (ox+dx)/t.h.q, (oz+dz)/t.h.q) *t.h.de + t.h.ave;
-						let grass = false;
-						for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
-							let earth = height - height * (t.noise.noise3D(6.6, (ox+dx)/t.s.q, (oz+dz)/t.s.q) *t.s.de + t.s.ave);
-							if (dy > height){
-								this.addID(0, {
-									x: ox+dx,
-									y: dy,
-									z: oz+dz
-								}); // 空气/真空 (null)：不用加载
-							}else if (dy > earth){
-								if (grass){
-									this.addID(2, {
-										x: ox+dx,
-										y: dy,
-										z: oz+dz
-									}, template); //泥土
-								}else{
-									this.addID(1, {
-										x: ox+dx,
-										y: dy,
-										z: oz+dz
-									}, template); //草方块
-									grass = true;
+					for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
+						setTimeout(()=>{
+							
+							//正常代码
+							for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+								let height = t.noise.noise3D(0.6, (ox+dx)/t.h.q, (oz+dz)/t.h.q) *t.h.de + t.h.ave;
+								let grass = false;
+								for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
+									let earth = height - height * (t.noise.noise3D(6.6, (ox+dx)/t.s.q, (oz+dz)/t.s.q) *t.s.de + t.s.ave);
+									if (dy > height){
+										this.addID(0, {
+											x: ox+dx,
+											y: dy,
+											z: oz+dz
+										}); // 空气/真空 (null)：不用加载
+									}else if (dy > earth){
+										if (grass){
+											this.addID(2, {
+												x: ox+dx,
+												y: dy,
+												z: oz+dz
+											}, template); //泥土
+										}else{
+											this.addID(1, {
+												x: ox+dx,
+												y: dy,
+												z: oz+dz
+											}, template); //草方块
+											grass = true;
+										}
+									}else{
+										this.addID(4, {
+											x: ox+dx,
+											y: dy,
+											z: oz+dz
+										}, template); //石头
+									}
 								}
-							}else{
-								this.addID(4, {
-									x: ox+dx,
-									y: dy,
-									z: oz+dz
-								}, template); //石头
 							}
-						}
+							
+						},0);
 					}
-					
-				},0);
+				}
+				
 			}
-		}
+		)
 	};
 	
 	//卸载区块（同步）
@@ -1510,6 +1545,7 @@ block_load.id = setInterval(function(){
 		map.initBlock(0, 0); //初始化区块
 		map.loadBlockAsync(0, 0, function(){
 			map.updateBlockAsync(0, 0); //更新区块
+			map.perloadBlock();
 			$("#schedule span").text("100");
 			$("#schedule progress")[0].value = template.length;
 			setTimeout(function(){
@@ -2318,7 +2354,8 @@ deskgood.goZ = z=>deskgood.go(0,0,z);
 // SQL
 const sql = new SQL("Minecraft", "1.0", "我的世界游戏存档", 10*1024*1024);
 sql.setErrCallback(function(err){
-	console.error("SQL运行出错：", err);
+	console.error("SQL运行出错：", err, err.message);
+	alert("存档 读取/写入 错误");
 });
 sql.createTable("file", [
 	"type UNSIGNED TINYINT",
@@ -2328,6 +2365,39 @@ sql.createTable("file", [
 	"id UNSIGNED TINYINT",
 	"attr TEXT"
 ]);
+sql.selectData("file", ["x", "y", "z", "id", "attr"], "type=1", function(result){
+	if (result.length){
+		deskgood.pos.x = result[0].x;
+		deskgood.pos.y = result[0].y;
+		deskgood.pos.z = result[0].z;
+		deskgood.sensitivity = result[0].id;
+		[deskgood.lookAt.left_right, deskgood.lookAt.top_bottom] = result[0].attr.split(" ").map(Number);
+		deskgood.look_refresh();
+		//setTimeout(map.perloadBlock, 1000); //需在初始化后
+	}
+});
+sql.selectData("file", ["x", "y", "z"], "type=2", function(result){
+	if (result.length){
+		deskgood.v.x = result[0].x;
+		deskgood.v.y = result[0].y;
+		deskgood.v.z = result[0].z;
+	}
+});
+sql.selectData("file", ["id", "attr"], "type=3 AND x=0", function(result){ //物品栏
+	if (result.length){
+		for (let i in deskgood.tools){
+			deskgood.tools[i] = result[i].id;
+			//...
+		}
+		deskgood.tools_things_refresh();
+	}
+});
+sql.selectData("file", ["id"], "type=3 AND x=1", function(result){ //选择物品
+	if (result.length){
+		deskgood.choice = result[0].id;
+		deskgood.tools_choice_refresh();
+	}
+});
 function save(){
 	sql.deleteData("file", "type=1", undefined, function(){
 		sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
@@ -2337,7 +2407,7 @@ function save(){
 			Math.round(deskgood.pos.z),
 			deskgood.sensitivity,
 			`"${deskgood.lookAt.left_right} ${deskgood.lookAt.top_bottom}"`
-		])
+		]);
 	});
 	sql.deleteData("file", "type=2", undefined, function(){
 		sql.insertData("file", ["type", "x", "y", "z"], [
@@ -2345,7 +2415,7 @@ function save(){
 			Math.round(deskgood.v.x),
 			Math.round(deskgood.v.y),
 			Math.round(deskgood.v.z)
-		])
+		]);
 	});
 	sql.deleteData("file", "type=3", undefined, function(){
 		for (let i of deskgood.tools){
@@ -2353,8 +2423,8 @@ function save(){
 				3,
 				0, //物品栏
 				i,
-				`""`
-			])
+				`""` //...
+			]);
 		}
 		sql.insertData("file", ["type", "x", "id"], [
 			3,
@@ -2363,6 +2433,7 @@ function save(){
 		]);
 	});
 	
+	console.log("存档+1中……");
 	// return;
 	/* localStorage.setItem("我的世界.存档.方块", map.save());
 	localStorage.setItem("我的世界.存档.玩家.位置", JSON.stringify(deskgood.pos));
@@ -2374,12 +2445,6 @@ function save(){
 	console.log("备份成功"); */
 }
 setInterval(save, 10*1000); // 10s
-gui.add({f:function(){
-	run(prompt("请输入命令：","deskgood.goY(3000*100);"))
-}}, "f").name("运行(run)命令");
-gui.add(window, "save").name("保存(save)");
-gui.add(location, "reload").name("刷新(reload)");
-window.addEventListener("beforeunload", save);
 
 /* //读取
 if (localStorage.getItem("我的世界.存档.玩家.位置")){
@@ -2837,9 +2902,9 @@ let deskgood_choice_folder = deskgood_folder.addFolder("选择物体");
 	deskgood_choice_folder.add(mouse_choice, "faceIndex", 0, 12, 1).listen();
 	deskgood_choice_folder.add(mouse_choice, "id", 0, 9, 1).listen();
 
-document.addEventListener("click", function (e){
+/*document.addEventListener("click", function (e){
 	console.log( ray({},deskgood.look)[0] );
-});
+});*/
 document.addEventListener("mousemove", function (e){
 	if (stop)
 		return;
@@ -2907,12 +2972,12 @@ $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind�
 	let wheel = event.originalEvent.wheelDelta;
 	let detal = event.originalEvent.detail;
 	let up = function(){
-		deskgood.choice --;
+		deskgood.choice--;
 		if (deskgood.choice < 0)
 			deskgood.choice = 3;
 	};
 	let down = function(){
-		deskgood.choice ++;
+		deskgood.choice++;
 		if (deskgood.choice > 3)
 			deskgood.choice = 0;
 	};
@@ -3065,7 +3130,14 @@ document.addEventListener("mousedown", function (e){
 						y: y/100,
 						z: z/100
 					}, template);
+					/* map.add(new Thing(template[ deskgood.tools[deskgood.choice] ]).block.makeMaterial().block.deleteTexture().block.makeMesh(), {
+						x: x/100,
+						y: y/100,
+						z: z/100
+					}); */
+					map.updateRound(x/100, y/100, z/100); //刷新方块及周围
 					//SQL
+					let thing_id = deskgood.tools[deskgood.choice];
 					[x, y, z] = [x, y, z].map(v => Math.round(v/100));
 					sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
 						sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
@@ -3073,16 +3145,10 @@ document.addEventListener("mousedown", function (e){
 							x,
 							y,
 							z,
-							deskgood.tools[deskgood.choice],
+							thing_id,
 							`""`
 						])
 					});
-					/* map.add(new Thing(template[ deskgood.tools[deskgood.choice] ]).block.makeMaterial().block.deleteTexture().block.makeMesh(), {
-						x: x/100,
-						y: y/100,
-						z: z/100
-					}); */
-					map.updateRound(x/100, y/100, z/100); //刷新方块及周围
 					deskgood.tools[deskgood.choice] = 0; //删除手里的方块
 					deskgood.tools_things_refresh(); //刷新方块
 					break; //跳出 寻找有效放置的 循环
@@ -3657,6 +3723,13 @@ $("canvas:eq(0)").on("touchend", function (e){
 							y: y/100,
 							z: z/100
 						}, template);
+						/* map.add(new Thing(template[ deskgood.tools[deskgood.choice] ]).block.makeMaterial().block.deleteTexture().block.makeMesh(), {
+							x: x/100,
+							y: y/100,
+							z: z/100
+						}); */
+						map.updateRound(x/100, y/100, z/100); //更新方块及周围方块
+						let thing_id = deskgood.tools[deskgood.choice];
 						//SQL
 						[x, y, z] = [x, y, z].map(v => Math.round(v/100));
 						sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
@@ -3665,16 +3738,10 @@ $("canvas:eq(0)").on("touchend", function (e){
 								x,
 								y,
 								z,
-								deskgood.tools[deskgood.choice],
+								thing_id,
 								`""`
 							])
 						});
-						/* map.add(new Thing(template[ deskgood.tools[deskgood.choice] ]).block.makeMaterial().block.deleteTexture().block.makeMesh(), {
-							x: x/100,
-							y: y/100,
-							z: z/100
-						}); */
-						map.updateRound(x/100, y/100, z/100); //更新方块及周围方块
 						deskgood.tools[deskgood.choice] = 0; //删除手里的方块
 						deskgood.tools_things_refresh(); //刷新方块
 						break; //跳出 寻找有效放置的 循环
