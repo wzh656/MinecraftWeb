@@ -18,14 +18,14 @@ function SQL(dbName, version, decision, size){
 		}, errCallback, successCallback);
 	}; */
 												/* 表 */
-	//读取所有表
+	/* //读取所有表
 	this.selectTable = function(readCallback, errCallback = this.errCallback, successCallback = this.successCallback){
 		this.db.transaction(function (tx){
 			tx.executeSql(`SHOW TABLES`,[],function(tx, data){
 				readCallback(data.rows);
 			});
 		}, errCallback, successCallback);
-	};
+	}; */
 	//创建表
 	this.createTable = function(tName, value, errCallback = this.errCallback, successCallback = this.successCallback){
 		this.db.transaction(function (tx){
@@ -43,13 +43,16 @@ function SQL(dbName, version, decision, size){
 	this.insertData = function(tName, dataName, data, errCallback = this.errCallback, successCallback = this.successCallback){
 		this.db.transaction(function (tx){
 			tx.executeSql(`INSERT INTO ${tName} (${ dataName.join(",") }) VALUES (${ data.join(",") })`);
-			console.log(`INSERT INTO ${tName} (${ dataName.join(",") }) VALUES (${ data.join(",") })`)
+			//console.log(`INSERT INTO ${tName} (${ dataName.join(",") }) VALUES (${ data.join(",") })`);
 		}, errCallback, successCallback);
 	};
 	//读取数据
-	this.selectData = function(tName, dataName=["*"], readCallback, errCallback = this.errCallback, successCallback = this.successCallback){
+	this.selectData = function(tName, dataName=["*"], where, readCallback, errCallback = this.errCallback, successCallback = this.successCallback){
 		this.db.transaction(function (tx){
-			tx.executeSql(`SELECT ${ dataName.join(",") } FROM ${tName}`,[],function(tx, data){
+			var sql = `SELECT ${ dataName.join(",") } FROM ${tName}`;
+			if (where)
+				sql += ` WHERE ${where}`;
+			tx.executeSql(sql,[],function(tx, data){
 				readCallback(data.rows);
 			});
 		}, errCallback, successCallback);
