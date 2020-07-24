@@ -319,8 +319,8 @@
 		</script>
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
-		<script>eruda.init();</script>
-		<script>new VConsole();</script>
+		<script>//eruda.init();</script>
+		<script>//new VConsole();</script>
 		<script src="./js/three.min.js"></script>
 		<script src="./js/simplex-noise.js"></script>
 		<script src="./js/dat.gui.min.js"></script>
@@ -1033,6 +1033,21 @@ function BlockMap(size, seed, perloadLength){
 				let height = t.noise.noise3D(0.6, (ox+dx)/t.h.q, (oz+dz)/t.h.q) *t.h.de + t.h.ave;
 				let grass = false;
 				for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
+					
+					if (new Array(...edit).some((value, index, arr) => { //被编辑
+						let ret = value.x == ox+dx &&
+							value.y == dy &&
+							value.z == oz+dz;
+						if (ret){
+							this.addID(value.id, {
+								x: ox+dx,
+								y: dy,
+								z: oz+dz
+							}, template);
+						}
+						return ret;
+					})) continue;
+					
 					let earth = height - height * (t.noise.noise3D(6.6, (ox+dx)/t.s.q, (oz+dz)/t.s.q) *t.s.de + t.s.ave);
 					if (dy > height){
 						this.addID(0, {
@@ -1073,14 +1088,13 @@ function BlockMap(size, seed, perloadLength){
 			oz = z*this.size.z, //区块中心坐标
 			t = this.seed; //临时变量
 		
-		sql.selectData("file", ["x", "y", "z", "id", "attr"],
+		sql.selectData(map.seed.seed || "file", ["x", "y", "z", "id", "attr"],
 			`type=0 AND`+
 			` (x BETWEEN ${ ox+this.size[0].x } AND ${ ox+this.size[1].x }) AND`+
 			` (z BETWEEN ${ oz+this.size[0].z } AND ${ oz+this.size[1].z })`,
 			(edit) => {
 				
 				console.log(edit);
-				debugger;
 				
 				if (callback){ //有回调（必须setInterval）
 					let dx = this.size[0].x;
@@ -1102,34 +1116,40 @@ function BlockMap(size, seed, perloadLength){
 							let height = t.noise.noise3D(0.6, (ox+dx)/t.h.q, (oz+dz)/t.h.q) *t.h.de + t.h.ave;
 							let grass = false;
 							for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
+								
 								let earth = height - height * (t.noise.noise3D(6.6, (ox+dx)/t.s.q, (oz+dz)/t.s.q) *t.s.de + t.s.ave);
+								let id = 0;
 								if (dy > height){
-									this.addID(0, {
-										x: ox+dx,
-										y: dy,
-										z: oz+dz
-									}); // 空气/真空 (null)：不用加载
+									id = 0; // 空气/真空 (null)：不用加载
 								}else if (dy > earth){
 									if (grass){
-										this.addID(2, {
-											x: ox+dx,
-											y: dy,
-											z: oz+dz
-										}, template); //泥土
+										id = 2; //泥土
 									}else{
-										this.addID(1, {
-											x: ox+dx,
-											y: dy,
-											z: oz+dz
-										}, template); //草方块
+										id = 1; //草方块
 										grass = true;
 									}
 								}else{
-									this.addID(4, {
+									id = 4; //石头
+								}
+								
+								if (!new Array(...edit).some((value, index, arr) => {
+									let ret = value.x == ox+dx &&
+										value.y == dy &&
+										value.z == oz+dz;
+									if (ret){ //被编辑
+										this.addID(value.id, {
+											x: ox+dx,
+											y: dy,
+											z: oz+dz
+										}, template);
+									}
+									return ret;
+								})){ //未编辑
+									this.addID(id, {
 										x: ox+dx,
 										y: dy,
 										z: oz+dz
-									}, template); //石头
+									}, template);
 								}
 							}
 						}
@@ -1150,6 +1170,21 @@ function BlockMap(size, seed, perloadLength){
 								let height = t.noise.noise3D(0.6, (ox+dx)/t.h.q, (oz+dz)/t.h.q) *t.h.de + t.h.ave;
 								let grass = false;
 								for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
+									
+									if (new Array(...edit).some((value, index, arr) => { //被编辑
+										let ret = value.x == ox+dx &&
+											value.y == dy &&
+											value.z == oz+dz;
+										if (ret){
+											this.addID(value.id, {
+												x: ox+dx,
+												y: dy,
+												z: oz+dz
+											}, template);
+										}
+										return ret;
+									})) continue;
+									
 									let earth = height - height * (t.noise.noise3D(6.6, (ox+dx)/t.s.q, (oz+dz)/t.s.q) *t.s.de + t.s.ave);
 									if (dy > height){
 										this.addID(0, {
@@ -1416,7 +1451,7 @@ let map = new BlockMap([
 	{x: -8, y: 0, z: -8},
 	{x: 8, y: 32, z: 8}
 ],{
-	seed: prompt("请输入种子\n（取消或输入为空则随机生成）") || undefined,
+	seed: prompt("请输入种子\n（取消或输入为空则随机生成）") || "随机世界_"+Math.random().toString(36).substr(2),
 	height: {
 		ave: 10,
 		de: 5,
@@ -1438,6 +1473,7 @@ scene.fog = new THREE.Fog("#fff", 0.01, 300*100);
 //						 雾气颜色，近处的距离，远处的距离(66m)
 let scene_folder = gui.addFolder("场景(scene)");
 	scene_folder.add(scene.children, "length", 0, 10000).name("物体(object)个数").listen();
+	scene_folder.add(map.seed, "seed").name("地图种子");
 	let scene_fog_folder = scene_folder.addFolder("雾(fog)");
 		scene_fog_folder.add(scene.fog, "far", 15*100, 1000*100, 100);
 		scene_fog_folder.add(scene.fog, "near", 0.001, 10);
@@ -2357,7 +2393,7 @@ sql.setErrCallback(function(err){
 	console.error("SQL运行出错：", err, err.message);
 	alert("存档 读取/写入 错误");
 });
-sql.createTable("file", [
+sql.createTable(map.seed.seed || "file", [
 	"type UNSIGNED TINYINT",
 	"x INT",
 	"y INT",
@@ -2365,7 +2401,7 @@ sql.createTable("file", [
 	"id UNSIGNED TINYINT",
 	"attr TEXT"
 ]);
-sql.selectData("file", ["x", "y", "z", "id", "attr"], "type=1", function(result){
+sql.selectData(map.seed.seed || "file", ["x", "y", "z", "id", "attr"], "type=1", function(result){
 	if (result.length){
 		deskgood.pos.x = result[0].x;
 		deskgood.pos.y = result[0].y;
@@ -2376,14 +2412,14 @@ sql.selectData("file", ["x", "y", "z", "id", "attr"], "type=1", function(result)
 		//setTimeout(map.perloadBlock, 1000); //需在初始化后
 	}
 });
-sql.selectData("file", ["x", "y", "z"], "type=2", function(result){
+sql.selectData(map.seed.seed || "file", ["x", "y", "z"], "type=2", function(result){
 	if (result.length){
 		deskgood.v.x = result[0].x;
 		deskgood.v.y = result[0].y;
 		deskgood.v.z = result[0].z;
 	}
 });
-sql.selectData("file", ["id", "attr"], "type=3 AND x=0", function(result){ //物品栏
+sql.selectData(map.seed.seed || "file", ["id", "attr"], "type=3 AND x=0", function(result){ //物品栏
 	if (result.length){
 		for (let i in deskgood.tools){
 			deskgood.tools[i] = result[i].id;
@@ -2392,15 +2428,15 @@ sql.selectData("file", ["id", "attr"], "type=3 AND x=0", function(result){ //物
 		deskgood.tools_things_refresh();
 	}
 });
-sql.selectData("file", ["id"], "type=3 AND x=1", function(result){ //选择物品
+sql.selectData(map.seed.seed || "file", ["id"], "type=3 AND x=1", function(result){ //选择物品
 	if (result.length){
 		deskgood.choice = result[0].id;
 		deskgood.tools_choice_refresh();
 	}
 });
 function save(){
-	sql.deleteData("file", "type=1", undefined, function(){
-		sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
+	sql.deleteData(map.seed.seed || "file", "type=1", undefined, function(){
+		sql.insertData(map.seed.seed || "file", ["type", "x", "y", "z", "id", "attr"], [
 			1,
 			Math.round(deskgood.pos.x),
 			Math.round(deskgood.pos.y),
@@ -2409,24 +2445,24 @@ function save(){
 			`"${deskgood.lookAt.left_right} ${deskgood.lookAt.top_bottom}"`
 		]);
 	});
-	sql.deleteData("file", "type=2", undefined, function(){
-		sql.insertData("file", ["type", "x", "y", "z"], [
+	sql.deleteData(map.seed.seed || "file", "type=2", undefined, function(){
+		sql.insertData(map.seed.seed || "file", ["type", "x", "y", "z"], [
 			2,
 			Math.round(deskgood.v.x),
 			Math.round(deskgood.v.y),
 			Math.round(deskgood.v.z)
 		]);
 	});
-	sql.deleteData("file", "type=3", undefined, function(){
+	sql.deleteData(map.seed.seed || "file", "type=3", undefined, function(){
 		for (let i of deskgood.tools){
-			sql.insertData("file", ["type", "x", "id", "attr"], [
+			sql.insertData(map.seed.seed || "file", ["type", "x", "id", "attr"], [
 				3,
 				0, //物品栏
 				i,
 				`""` //...
 			]);
 		}
-		sql.insertData("file", ["type", "x", "id"], [
+		sql.insertData(map.seed.seed || "file", ["type", "x", "id"], [
 			3,
 			1, //选择物品
 			deskgood.choice
@@ -3049,8 +3085,8 @@ document.addEventListener("mousedown", function (e){
 							map.updateRound(x/100, y/100, z/100); //刷新方块及周围
 							//SQL
 							[x, y, z] = [x, y, z].map(v => Math.round(v/100));
-							sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
-								sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
+							sql.deleteData(map.seed.seed || "file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
+								sql.insertData(map.seed.seed || "file", ["type", "x", "y", "z", "id", "attr"], [
 									0,
 									x,
 									y,
@@ -3139,8 +3175,8 @@ document.addEventListener("mousedown", function (e){
 					//SQL
 					let thing_id = deskgood.tools[deskgood.choice];
 					[x, y, z] = [x, y, z].map(v => Math.round(v/100));
-					sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
-						sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
+					sql.deleteData(map.seed.seed || "file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
+						sql.insertData(map.seed.seed || "file", ["type", "x", "y", "z", "id", "attr"], [
 							0,
 							x,
 							y,
@@ -3566,8 +3602,8 @@ $("canvas:eq(0)").on("touchstart", function (e){
 								map.updateRound(x/100, y/100, z/100); //更新方块
 								//SQL
 								[x, y, z] = [x, y, z].map(v => Math.round(v/100));
-								sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
-									sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
+								sql.deleteData(map.seed.seed || "file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
+									sql.insertData(map.seed.seed || "file", ["type", "x", "y", "z", "id", "attr"], [
 										0,
 										x,
 										y,
@@ -3732,8 +3768,8 @@ $("canvas:eq(0)").on("touchend", function (e){
 						let thing_id = deskgood.tools[deskgood.choice];
 						//SQL
 						[x, y, z] = [x, y, z].map(v => Math.round(v/100));
-						sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
-							sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
+						sql.deleteData(map.seed.seed || "file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
+							sql.insertData(map.seed.seed || "file", ["type", "x", "y", "z", "id", "attr"], [
 								0,
 								x,
 								y,
