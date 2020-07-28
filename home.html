@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 	<head>
 		<meta charset="UTF-8" />
 		<meta content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
@@ -19,20 +19,27 @@
 			-khtml-user-select: none;
 			user-select: none;
 			
-			color: white;
+			font-family: zyyt, serif;
+			text-align: center;
+			
 			min-height: 100%;
 			background: #1b2036 url("./img/background.jpg") no-repeat fixed center;
 			background-size: cover;
 			max-width: 100%;
 			margin: auto;
-			text-align: center;
 		}
 		body{
 			position: absolute;
 			width: 100%;
 			height: 100%;
 			margin: 0;
-			font-family: zyyt;
+			overflow: hidden;
+		}
+		.init{
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			margin: 0;
 			
 			display: -webkit-flex;
 			display: -moz-box;
@@ -41,30 +48,141 @@
 			flex-direction: column;
 			justify-content: space-around;
 		}
-		h1{
-			text-align: center;
-			font-size: 10vmax;
+		.init > h1{
+			color: white;
+			font-size: 16vmin;
 			margin: 0;
 		}
-		button{
+		.init > button{
 			width: 66%;
 			height: 16%;
-			font-size: 6vmax;
+			font-size: 10vmin;
 			margin: 0 auto;
 			font-family: zyyt, serif;
 		}
+		.new_world{
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			top: 100%;
+			left: 0;
+			margin: 0;
+			background-color: white;
+			opacity: 0;
+		}
+		.new_world > h2{
+			font-size: 6vmin;
+		}
+		.new_world span{
+			font-size: 3vmin;
+		}
+		.new_world input{
+			width: 66%;
+			font-size: 3vmin;
+		}
+		.new_world > button{
+			width: 46%;
+			height: 6.8%;
+			margin: 3px;
+			font-size: 3vmin;
+		}
+		.more{
+			margin: 3px;
+		}
+		.more[open]{
+			border: 1px solid black;
+			border-radius: 3px;
+		}
+		.more > summary{
+			font-size: 3vmin;
+			text-align: left;
+			margin-left: 1%;
+			outline: none;
+		}
+		dialog{
+			border-radius: 6px;
+			
+			top: 50%;
+			transform: translateY(-50%);
+		}
 		</style>
+		<script src="./js/jquery.min.js"></script>
+		<script>
+		if (typeof(require) != "undefined")
+			window.$ = window.jQuery = require("./js/jquery.min.js");
+		</script>
+		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
-		<script>new VConsole();</script>
+		<script>//eruda.init();</script>
+		<script>//new VConsole();</script>
 	</head>
 	<body>
-		<h1>我的世界</h1>
-		<button onclick="play();">开始游戏</button>
+		<div class="init">
+			<h1>我的世界</h1>
+			<button>新的世界</button>
+			<button>帮助</button>
+		</div>
+		<div class="new_world">
+			<h2>新的世界</h2>
+			<label for="seed"><span>种子(seed)：</span></label><input name="seed" id="seed" placeholder="不输入则随机生成" />
+			<br/>
+			<details class="more">
+				<summary>高级设置</summary>
+				<span>暂无</span>
+			</details>
+			<button>取消</button>
+			<button>开始游戏</button>
+		</div>
 		
 <script>
-function play(){
-	location.href = 'main.html';
+if (localStorage.getItem("我的世界_seed") !== null){
+	location.href = "main.html";
 }
+$(".init > button:eq(0)").click(function(){
+	$(".init").animate({
+		left: "-100%",
+		opacity: 0
+	},1000);
+	$(".new_world").animate({
+		top: "0%",
+		opacity: 1
+	},1000);
+});
+$(".init > button:eq(1)").click(function(){
+	// window.open("https://wzh656.github.io/MinecraftWeb/", "newwin", "height=366, width=666, toolbar=no, menubar=no, location=no");
+	location.href = "https://wzh656.github.io/MinecraftWeb/";
+	let msg = $("<dialog>加载中……</dialog>");
+	$(document.body).append(
+		msg.attr("open", "true").hide()
+	);
+	msg.fadeIn("fast");
+});
+$(".new_world > button:eq(0)").click(function(){
+	$(".init").animate({
+		left: "0%",
+		opacity: 1
+	},1000);
+	$(".new_world").animate({
+		top: "100%",
+		opacity: 0
+	},1000);
+});
+$(".new_world > button:eq(1)").click(function(){
+	let seed;
+	if ($("[name='seed']").val() === ""){ //随机种子
+		seed = Math.random().toString(36).substring(2);
+	}else{
+		seed = $("[name='seed']").val();
+	}
+	localStorage.setItem("我的世界_seed", seed);
+	
+	location.href = "main.html";
+	let msg = $("<dialog>加载中……</dialog>");
+	$(document.body).append(
+		msg.attr("open", "true").hide()
+	);
+	msg.fadeIn("fast");
+});
 </script>
 	</body>
 </html>
