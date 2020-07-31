@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- Copyright © 2020 by wzh -->
 <html lang="zh">
 	<head>
 		<meta charset="UTF-8" />
@@ -35,6 +36,13 @@
 			margin: 0;
 			overflow: hidden;
 		}
+		p{
+			font-size: 2vmax;
+			margin: 0;
+		}
+		button,label,summary{
+			cursor: pointer;
+		}
 		.init{
 			position: absolute;
 			width: 100%;
@@ -50,13 +58,13 @@
 		}
 		.init > h1{
 			color: white;
-			font-size: 16vmin;
+			font-size: 10vmax;
 			margin: 0;
 		}
 		.init > button{
 			width: 66%;
-			height: 16%;
-			font-size: 10vmin;
+			/* height: 16%; */
+			font-size: 6vmax;
 			margin: 0 auto;
 			font-family: zyyt, serif;
 		}
@@ -71,20 +79,20 @@
 			opacity: 0;
 		}
 		.new_world > h2{
-			font-size: 6vmin;
+			font-size: 6vmax;
 		}
 		.new_world span{
-			font-size: 3vmin;
+			font-size: 3vmax;
 		}
 		.new_world input{
 			width: 66%;
-			font-size: 3vmin;
+			font-size: 3vmax;
 		}
 		.new_world > button{
 			width: 46%;
-			height: 6.8%;
+			/*height: 6.8%;*/
 			margin: 3px;
-			font-size: 3vmin;
+			font-size: 3vmax;
 		}
 		.more{
 			margin: 3px;
@@ -94,7 +102,7 @@
 			border-radius: 3px;
 		}
 		.more > summary{
-			font-size: 3vmin;
+			font-size: 3vmax;
 			text-align: left;
 			margin-left: 1%;
 			outline: none;
@@ -113,41 +121,54 @@
 		</script>
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
-		<script>//eruda.init();</script>
-		<script>//new VConsole();</script>
+		<script>eruda.init();</script>
+		<script>new VConsole();</script>
 	</head>
 	<body>
 		<div class="init">
 			<h1>我的世界</h1>
-			<button>新的世界</button>
-			<button>帮助</button>
+			<button>新的世界<p>NEW WORLD</p></button>
+			<button>帮助<p>ABOUT</p></button>
 		</div>
 		<div class="new_world">
-			<h2>新的世界</h2>
+			<h2>新的世界<p>NEW WORLD</p></h2>
 			<label for="seed"><span>种子(seed)：</span></label><input name="seed" id="seed" placeholder="不输入则随机生成" />
 			<br/>
 			<details class="more">
 				<summary>高级设置</summary>
 				<span>暂无</span>
 			</details>
-			<button>取消</button>
-			<button>开始游戏</button>
+			<button>取消<p>CANCEL</p></button>
+			<button>开始游戏<p>OK</p></button>
 		</div>
 		
 <script>
 if (localStorage.getItem("我的世界_seed") !== null){
 	location.href = "main.html";
+	let msg = $("<dialog>加载中……</dialog>");
+	$(document.body).append(
+		msg.attr("open", "true").hide()
+	);
+	msg.fadeIn("fast");
 }
+//新的世界
 $(".init > button:eq(0)").click(function(){
-	$(".init").animate({
-		left: "-100%",
-		opacity: 0
-	},1000);
-	$(".new_world").animate({
-		top: "0%",
-		opacity: 1
-	},1000);
+	$(".init")
+		.css("left", "0%")
+		.css("opacity", "1")
+		.animate({
+			left: (Math.round(Math.random())?"-":"") + "100%", //正负100%
+			opacity: 0
+		},1000);
+	$(".new_world")
+		.css("top", (Math.round(Math.random())?"-":"") + "100%") //正负100%
+		.css("opacity", "0")
+		.animate({
+			top: "0%",
+			opacity: 1
+		},1000);
 });
+//关于/帮助
 $(".init > button:eq(1)").click(function(){
 	// window.open("https://wzh656.github.io/MinecraftWeb/", "newwin", "height=366, width=666, toolbar=no, menubar=no, location=no");
 	location.href = "https://wzh656.github.io/MinecraftWeb/";
@@ -157,16 +178,24 @@ $(".init > button:eq(1)").click(function(){
 	);
 	msg.fadeIn("fast");
 });
+//取消
 $(".new_world > button:eq(0)").click(function(){
-	$(".init").animate({
-		left: "0%",
-		opacity: 1
-	},1000);
-	$(".new_world").animate({
-		top: "100%",
-		opacity: 0
-	},1000);
+	$(".init")
+		.css("left", (Math.round(Math.random())?"-":"") + "100%") //正负100%
+		.css("opacity", "0")
+		.animate({
+			left: "0%",
+			opacity: 1
+		},1000);
+	$(".new_world")
+		.css("top", "0%")
+		.css("opacity", "1")
+		.animate({
+			top: (Math.round(Math.random())?"-":"") + "100%", //正负100%
+			opacity: 0
+		},1000);
 });
+//开始游戏
 $(".new_world > button:eq(1)").click(function(){
 	let seed;
 	if ($("[name='seed']").val() === ""){ //随机种子
@@ -182,6 +211,35 @@ $(".new_world > button:eq(1)").click(function(){
 		msg.attr("open", "true").hide()
 	);
 	msg.fadeIn("fast");
+});
+//双击
+$("h1").on("dblclick",function(){
+	for (let i=0; i<36*Math.random()+36; i++){
+		$(".init").animate({
+			left: (Math.random()*6-3)+"%",
+			top: (Math.random()*6-3)+"%",
+			opacity: 1
+		},10);
+	}
+	$(".init").animate({
+		left: "0%",
+		top: "0%",
+		opacity: 1
+	},10);
+});
+$("h2").on("dblclick",function(){
+	for (let i=0; i<36*Math.random()+36; i++){
+		$(".new_world").animate({
+			left: (Math.random()*6-3)+"%",
+			top: (Math.random()*6-3)+"%",
+			opacity: 1
+		},10);
+	}
+	$(".new_world").animate({
+		left: "0%",
+		top: "0%",
+		opacity: 1
+	},10);
 });
 </script>
 	</body>
