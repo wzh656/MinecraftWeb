@@ -325,8 +325,8 @@
 		</script>
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
-		<script>//eruda.init();</script>
-		<script>//new VConsole();</script>
+		<script>eruda.init();</script>
+		<script>new VConsole();</script>
 		<script src="./js/three.min.js"></script>
 		<script src="./js/simplex-noise.js"></script>
 		<script src="./js/dat.gui.min.js"></script>
@@ -798,7 +798,13 @@ function Thing(opinion){
 //Thing.prototype.idLength = 0;
 Thing.prototype.geometry = new THREE.BoxGeometry(100, 100, 100);
 
-
+SimplexNoise.prototype.more3D = function(xin, yin, zin, more){
+	let sum = 0;
+	for (let i=1; i<more; i*=2){
+		sum += this.noise3D(xin*i, yin*i, zin*i)/i;
+	}
+	return sum;
+};
 function BlockMap(size, seed, perloadLength){
 	//一区块大小
 	this.size = {};
@@ -832,17 +838,29 @@ function BlockMap(size, seed, perloadLength){
 		this.seed = {
 			seed: seed.seed,
 			h: {
+				max: seed.height.max,
+				min: seed.height.min,
 				ave: seed.height.ave,
-				de: seed.height.de,
+				/*de: seed.height.de,*/
 				q: seed.height.q
 			},
 			s: {
-				ave: seed.scale.ave,
-				de: seed.scale.de,
+				max: seed.scale.max,
+				min: seed.scale.min,
+				/*ave: seed.scale.ave,
+				de: seed.scale.de,*/
 				q: seed.scale.q
 			}
 		};
 		this.seed.noise = new SimplexNoise(this.seed.seed);
+		/* this.seed.h.k = (this.seed.h.max - this.seed.h.min)/2;
+		this.seed.h.b = (this.seed.h.max + this.seed.h.min)/2;
+		this.seed.s.k = (this.seed.s.max - this.seed.s.min)/2;
+		this.seed.s.b = (this.seed.s.max + this.seed.s.min)/2; */
+		this.seed.h.k = this.seed.h.max - this.seed.h.min;
+		this.seed.h.b = (this.seed.h.max + this.seed.h.min)/2;
+		this.seed.s.k = this.seed.s.max - this.seed.s.min;
+		this.seed.s.b = (this.seed.s.max + this.seed.s.min)/2;
 	}
 	
 	
@@ -1040,11 +1058,26 @@ function BlockMap(size, seed, perloadLength){
 				let grass = false;
 				for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
 					
-					if (new Array(...edit).some((value, index, arr) => { //被编辑
+					let earth = height - height * (t.noise.noise3D(6.6, (ox+dx)/t.s.q, (oz+dz)/t.s.q) *t.s.de + t.s.ave);
+					let id = 0;
+					if (dy > height){
+						id = 0; // 空气/真空 (null)：不用加载
+					}else if (dy > earth){
+						if (grass){
+							id = 3; //泥土
+						}else{
+							id = 2; //草方块
+							grass = true;
+						}
+					}else{
+						id = 5; //石头
+					}
+					
+					if (!new Array(...edit).some((value, index, arr) => {
 						let ret = value.x == ox+dx &&
 							value.y == dy &&
 							value.z == oz+dz;
-						if (ret){
+						if (ret){ //被编辑
 							this.addID(value.id, {
 								x: ox+dx,
 								y: dy,
@@ -1052,37 +1085,14 @@ function BlockMap(size, seed, perloadLength){
 							}, template);
 						}
 						return ret;
-					})) continue;
-					
-					let earth = height - height * (t.noise.noise3D(6.6, (ox+dx)/t.s.q, (oz+dz)/t.s.q) *t.s.de + t.s.ave);
-					if (dy > height){
-						this.addID(0, {
+					})){ //未编辑
+						this.addID(id, {
 							x: ox+dx,
 							y: dy,
 							z: oz+dz
-						}); // 空气/真空 (null)
-					}else if (dy > earth){
-						if (grass){
-							this.addID(2, {
-								x: ox+dx,
-								y: dy,
-								z: oz+dz
-							}, template); //泥土
-						}else{
-							this.addID(1, {
-								x: ox+dx,
-								y: dy,
-								z: oz+dz
-							}, template); //草方块
-							grass = true;
-						}
-					}else{
-						this.addID(4, {
-							x: ox+dx,
-							y: dy,
-							z: oz+dz
-						}, template); //石头
+						}, template);
 					}
+					
 				}
 			}
 		}
@@ -1119,23 +1129,32 @@ function BlockMap(size, seed, perloadLength){
 						
 						//正常代码
 						for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-							let height = t.noise.noise3D(0.6, (ox+dx)/t.h.q, (oz+dz)/t.h.q) *t.h.de + t.h.ave;
+							let noise = Math.abs(t.noise.more3D(0.6, (ox+dx)/t.h.q/2, (oz+dz)/t.h.q/2, 5));
+							let height = noise*noise*noise*(noise*(noise*6-15)+10) //*t.h.k +t.h.b;
+							height = Math.pow(10, height);
+							// debugger
+							// let a = 1/(1+Math.pow(Math.E, 3)), // 1/(1+e^3)
+							// 	b = 1/(1+Math.pow(Math.E, -3)), // 1/(1+e^(-3))
+							// 	noise = (1+Math.pow(Math.E, -3*noise)-a)/(b-a); // (1+e^(-3x)-a)/(b-a)
+							// let height = (t.h.max -t.h.min)/(t.h.ave -1) *Math.pow(t.h.ave, noise) *(t.h.min *t.h.ave -t.h.max)/(t.h.ave -1);
+							// let height = Math.pow(1000, 0.5+0.5*noise, 3), 10);
+							// let height = t.noise.noise3D(0.6, (ox+dx)/t.h.q, (oz+dz)/t.h.q) *t.h.de + t.h.ave;
 							let grass = false;
 							for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
 								
-								let earth = height - height * (t.noise.noise3D(6.6, (ox+dx)/t.s.q, (oz+dz)/t.s.q) *t.s.de + t.s.ave);
+								let earth = height - height * (t.noise.noise3D(6.6, (ox+dx)/t.s.q, (oz+dz)/t.s.q) *t.s.k + t.s.b);
 								let id = 0;
 								if (dy > height){
 									id = 0; // 空气/真空 (null)：不用加载
 								}else if (dy > earth){
 									if (grass){
-										id = 2; //泥土
+										id = 3; //泥土
 									}else{
-										id = 1; //草方块
+										id = 2; //草方块
 										grass = true;
 									}
 								}else{
-									id = 4; //石头
+									id = 5; //石头
 								}
 								
 								if (!new Array(...edit).some((value, index, arr) => {
@@ -1157,6 +1176,7 @@ function BlockMap(size, seed, perloadLength){
 										z: oz+dz
 									}, template);
 								}
+								
 							}
 						}
 						
@@ -1177,11 +1197,26 @@ function BlockMap(size, seed, perloadLength){
 								let grass = false;
 								for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
 									
-									if (new Array(...edit).some((value, index, arr) => { //被编辑
+									let earth = height - height * (t.noise.noise3D(6.6, (ox+dx)/t.s.q, (oz+dz)/t.s.q) *t.s.de + t.s.ave);
+									let id = 0;
+									if (dy > height){
+										id = 0; // 空气/真空 (null)：不用加载
+									}else if (dy > earth){
+										if (grass){
+											id = 3; //泥土
+										}else{
+											id = 2; //草方块
+											grass = true;
+										}
+									}else{
+										id = 5; //石头
+									}
+									
+									if (!new Array(...edit).some((value, index, arr) => {
 										let ret = value.x == ox+dx &&
 											value.y == dy &&
 											value.z == oz+dz;
-										if (ret){
+										if (ret){ //被编辑
 											this.addID(value.id, {
 												x: ox+dx,
 												y: dy,
@@ -1189,37 +1224,14 @@ function BlockMap(size, seed, perloadLength){
 											}, template);
 										}
 										return ret;
-									})) continue;
-									
-									let earth = height - height * (t.noise.noise3D(6.6, (ox+dx)/t.s.q, (oz+dz)/t.s.q) *t.s.de + t.s.ave);
-									if (dy > height){
-										this.addID(0, {
+									})){ //未编辑
+										this.addID(id, {
 											x: ox+dx,
 											y: dy,
 											z: oz+dz
-										}); // 空气/真空 (null)：不用加载
-									}else if (dy > earth){
-										if (grass){
-											this.addID(2, {
-												x: ox+dx,
-												y: dy,
-												z: oz+dz
-											}, template); //泥土
-										}else{
-											this.addID(1, {
-												x: ox+dx,
-												y: dy,
-												z: oz+dz
-											}, template); //草方块
-											grass = true;
-										}
-									}else{
-										this.addID(4, {
-											x: ox+dx,
-											y: dy,
-											z: oz+dz
-										}, template); //石头
+										}, template);
 									}
+									
 								}
 							}
 							
@@ -1391,35 +1403,35 @@ template.push(new Thing({
 }));
 template.push(new Thing({
 	id: 1,
-	name: "草方块",
+	name: "命令方块",
 	block: {
 		face: face_url[0]
 	}
 }));
 template.push(new Thing({
 	id: 2,
+	name: "草方块",
+	block: {
+		face: face_url[0]
+	}
+}));
+template.push(new Thing({
+	id: 3,
 	name: "泥土",
 	block: {
 		face: face_url[1]
 	}
 }));
 template.push(new Thing({
-	id: 3,
-	name: "木板",
-	block: {
-		face: face_url[1]
-	}
-}));
-template.push(new Thing({
 	id: 4,
-	name: "石头",
+	name: "原石",
 	block: {
 		face: face_url[1]
 	}
 }));
 template.push(new Thing({
 	id: 5,
-	name: "原石",
+	name: "石头",
 	block: {
 		face: face_url[1]
 	}
@@ -1433,23 +1445,30 @@ template.push(new Thing({
 }));
 template.push(new Thing({
 	id: 7,
-	name: "砖",
-	block: {
-		face: face_url[1]
-	}
-}));
-template.push(new Thing({
-	id: 8,
 	name: "仙人掌",
 	block: {
 		face: face_url[0]
 	}
 }));
 template.push(new Thing({
-	id: 9,
-	name: "命令方块",
+	id: 8,
+	name: "橡木",
 	block: {
-		face: face_url[0]
+		face: ["side.png", "side.png", "up_down.png", "up_down.png", "side.png", "side.png"],
+	}
+}));
+template.push(new Thing({
+	id: 9,
+	name: "木板",
+	block: {
+		face: face_url[1]
+	}
+}));
+template.push(new Thing({
+	id: 10,
+	name: "砖",
+	block: {
+		face: face_url[1]
 	}
 }));
 
@@ -1463,17 +1482,18 @@ let map = new BlockMap([
 ],{
 	seed: localStorage.getItem("我的世界_seed"),
 	height: {
+		max: 32,
+		min: 3,
 		ave: 10,
-		de: 5,
 		q: 66
 	},
 	scale: {
-		ave: 0.266,
-		de: 0.16,
+		max: 0.4,
+		min: 0.1,
 		q: 66
 	}
 },300);
-document.title = "我的世界:"+map.seed.seed;
+document.title = "我的世界:"+map.seed.seed||"读取数据失败";
 
 /**
 * 创建场景对象Scene
@@ -1756,7 +1776,7 @@ scene.add(directionalLight);
 // 光照指向平地
 //directionalLight.target = ;
 let scene_light_directionalLight_folder = scene_light_folder.addFolder("平行光(directionalLight)");
-	scene_light_directionalLight_folder.add(directionalLight, "castShadow").name("阴影");
+	scene_light_directionalLight_folder.add(directionalLight, "castShadow").name("阴影").listen();
 	let scene_light_directionalLight_mapSize_folder = scene_light_directionalLight_folder.addFolder("阴影贴图大小(mapSize)");
 		scene_light_directionalLight_mapSize_folder.add(directionalLight.shadow.mapSize, "width", Math.pow(2,9), Math.pow(2,12), Math.pow(2,9));
 		scene_light_directionalLight_mapSize_folder.add(directionalLight.shadow.mapSize, "height", Math.pow(2,9), Math.pow(2,12), Math.pow(2,9));
@@ -1996,6 +2016,24 @@ var deskgood = {
 	tools: [0,0,0,0],
 	choice: 0,
 	sensitivity: 1, //灵敏度
+	die(reason){
+		sql.deleteTable("file", undefined, function(){
+			localStorage.removeItem("我的世界_seed");
+			
+			alert(
+				"游戏结束！\n"+
+				"角色deskgood死亡\n"+
+				"死因："+(reason || "无从考证")+"\n"+
+				"注：生命诚可贵，生命只有一次，请珍爱生命，deskgood无法重生，游戏即将关闭"
+			);
+			
+			window.open("home.html", "_self").close();
+			
+			try{
+				plus.runtime.quit();
+			}catch(e){}
+		});
+	},
 	tools_choice_refresh(){
 		for (let i in deskgood.tools){
 			$("#tools > img:eq("+i+")")
@@ -2526,6 +2564,9 @@ deskgood.look_refresh();
 let deskgood_folder = gui.addFolder("玩家/观察者(deskgood)");
 deskgood_folder.open();
 	deskgood_folder.add(window, "stop").listen();
+	deskgood_folder.add({
+		f(){deskgood.die("使用命令自杀")}
+	}, "f").name("Game Over（自杀 deskgood.die()）");
 	deskgood_folder.add(deskgood, "sensitivity", 0.1, 10).name("灵敏度");
 	deskgood_folder.add(deskgood, "jump_v", 1, 10).name("跳跃速度");
 	let deskgood_position_folder = deskgood_folder.addFolder("位置/px");
@@ -3130,7 +3171,7 @@ document.addEventListener("mousedown", function (e){
 						Math.pow(z - deskgood.pos.z, 2)
 				) < 500){ //距离<500
 					if (map.get(x/100, y/100, z/100) &&
-						map.get(x/100, y/100, z/100).id == 9
+						map.get(x/100, y/100, z/100).id == 1
 					){ //命令方块
 						state("command");
 						return;
@@ -3720,7 +3761,7 @@ $("canvas:eq(0)").on("touchend", function (e){
 								click[i].object.position.y/100,
 								click[i].object.position.z/100).id
 							==
-								9
+								1
 						){ //命令方块
 							state("command");
 							return;
