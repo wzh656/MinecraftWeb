@@ -325,8 +325,8 @@
 		</script>
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
-		<script>eruda.init();</script>
-		<script>new VConsole();</script>
+		<script>//eruda.init();</script>
+		<script>//new VConsole();</script>
 		<script src="./js/three.min.js"></script>
 		<script src="./js/simplex-noise.js"></script>
 		<script src="./js/dat.gui.min.js"></script>
@@ -1131,7 +1131,7 @@ function BlockMap(size, seed, perloadLength){
 						for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
 							let noise = Math.abs(t.noise.more3D(0.6, (ox+dx)/t.h.q/2, (oz+dz)/t.h.q/2, 5));
 							let height = noise*noise*noise*(noise*(noise*6-15)+10) //*t.h.k +t.h.b;
-							height = Math.pow(10, height);
+							height = Math.pow(t.h.k, height) + t.h.b;
 							// debugger
 							// let a = 1/(1+Math.pow(Math.E, 3)), // 1/(1+e^3)
 							// 	b = 1/(1+Math.pow(Math.E, -3)), // 1/(1+e^(-3))
@@ -1584,6 +1584,7 @@ let weather_folder = gui.addFolder("天气(weather)");
 // let block_geometry = new THREE.BoxGeometry(100, 100, 100);
 // TextureLoader创建一个纹理加载器对象，可以加载图片作为几何体纹理
 // let num = 0;
+let perload_condition = 0;
 let block_load = {
 	i: 1,
 	id: null
@@ -1611,7 +1612,10 @@ block_load.id = setInterval(function(){
 		map.initBlock(0, 0); //初始化区块
 		map.loadBlockAsync(0, 0, function(){
 			map.updateBlockAsync(0, 0); //更新区块
-			map.perloadBlock();
+			if (++perload_condition >= 2){
+				map.perloadBlock();
+			}
+			console.log(perload_condition)
 			$("#schedule span").text("100");
 			$("#schedule progress")[0].value = template.length;
 			setTimeout(function(){
@@ -2457,7 +2461,10 @@ sql.selectData("file", ["x", "y", "z", "id", "attr"], "type=1", function(result)
 		deskgood.sensitivity = result[0].id;
 		[deskgood.lookAt.left_right, deskgood.lookAt.top_bottom] = result[0].attr.split(" ").map(Number);
 		deskgood.look_refresh();
-		//setTimeout(map.perloadBlock, 1000); //需在初始化后
+		if (++perload_condition >= 2){
+			map.perloadBlock();
+		}
+		console.log(perload_condition)
 	}
 });
 sql.selectData("file", ["x", "y", "z"], "type=2", function(result){
@@ -2572,7 +2579,7 @@ deskgood_folder.open();
 	let deskgood_position_folder = deskgood_folder.addFolder("位置/px");
 	deskgood_position_folder.open();
 		deskgood_position_folder.add(deskgood.pos, "x", -1000, 1000, 0.01).listen();
-		deskgood_position_folder.add(deskgood.pos, "y", -1000, 2000, 0.01).listen();
+		deskgood_position_folder.add(deskgood.pos, "y", -1000, 3200, 0.01).listen();
 		deskgood_position_folder.add(deskgood.pos, "z", -1000, 1000, 0.01).listen();
 	let deskgood_v_folder = deskgood_folder.addFolder("速度/(m/s)");
 		deskgood_v_folder.add(deskgood.v, "x", -10, 10, 1e-3).listen();
@@ -2976,6 +2983,7 @@ setInterval(function(){
 
 
 let mouse_choice = {
+	view: false,
 	x: -1,
 	y: -1,
 	z: -1,
@@ -2983,6 +2991,7 @@ let mouse_choice = {
 	id: -1
 };
 let deskgood_choice_folder = deskgood_folder.addFolder("选择物体");
+	deskgood_choice_folder.add(mouse_choice, "view").name("显示");
 	deskgood_choice_folder.add(mouse_choice, "x", -1000, 1000, 100).listen();
 	deskgood_choice_folder.add(mouse_choice, "y", -1000, 1000, 100).listen();
 	deskgood_choice_folder.add(mouse_choice, "z", -1000, 1000, 100).listen();
@@ -3041,8 +3050,34 @@ document.addEventListener("mousemove", function (e){
 			get.object.position.y/100,
 			get.object.position.z/100
 		).id;
+		
+		for (let i of scene.children)
+			if (i.userData.view == true)
+				scene.remove(i); //删除
+		
+		if (mouse_choice.view){
+			let geometry = new THREE.BoxGeometry(100, 100, 100);
+			let material1 = new THREE.MeshBasicMaterial({
+				color: "blue",
+				transparent: true,
+				opacity: 0.3
+			});
+			let material2 = new THREE.MeshBasicMaterial({
+				color: "red",
+				wireframe: true //只显示框架
+			});
+			let mesh1 = new THREE.Mesh(geometry, material1);
+			let mesh2 = new THREE.Mesh(geometry, material2);
+			mesh1.position.x = mesh2.position.x = get.object.position.x;
+			mesh1.position.y = mesh2.position.y = get.object.position.y;
+			mesh1.position.z = mesh2.position.z = get.object.position.z;
+			mesh1.userData.view = mesh2.userData.view = true; //识别
+			scene.add(mesh1);
+			scene.add(mesh2);
+		}
 	}catch(err){
 		mouse_choice = {
+			view: mouse_choice.view,
 			x: -1,
 			y: -1,
 			z: -1,
