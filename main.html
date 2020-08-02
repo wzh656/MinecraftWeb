@@ -1478,14 +1478,14 @@ if (localStorage.getItem("我的世界_seed") === null){
 }
 let map = new BlockMap([
 	{x: -8, y: 0, z: -8},
-	{x: 8, y: 32, z: 8}
+	{x: 8, y: 64, z: 8}
 ],{
 	seed: localStorage.getItem("我的世界_seed"),
 	height: {
-		max: 32,
-		min: 3,
+		max: 64,
+		min: 1,
 		ave: 10,
-		q: 66
+		q: 166
 	},
 	scale: {
 		max: 0.4,
@@ -2984,6 +2984,7 @@ setInterval(function(){
 
 let mouse_choice = {
 	view: false,
+	obj: [],
 	x: -1,
 	y: -1,
 	z: -1,
@@ -2991,7 +2992,7 @@ let mouse_choice = {
 	id: -1
 };
 let deskgood_choice_folder = deskgood_folder.addFolder("选择物体");
-	deskgood_choice_folder.add(mouse_choice, "view").name("显示");
+	deskgood_choice_folder.add(mouse_choice, "view").name("选择模式");
 	deskgood_choice_folder.add(mouse_choice, "x", -1000, 1000, 100).listen();
 	deskgood_choice_folder.add(mouse_choice, "y", -1000, 1000, 100).listen();
 	deskgood_choice_folder.add(mouse_choice, "z", -1000, 1000, 100).listen();
@@ -3039,6 +3040,13 @@ document.addEventListener("mousemove", function (e){
 	
 	deskgood.look_refresh(); //刷新
 	
+	for (let i in mouse_choice.obj){
+		mouse_choice.obj[i].material.dispose();
+		mouse_choice.obj[i].geometry.dispose(); //清除内存
+		scene.remove(mouse_choice.obj[i]); //删除
+		// mouse_choice.obj.splice(i,1); //已经删除！
+	}
+	
 	try{
 		let get = ray({},deskgood.look)[0];
 		mouse_choice.x = get.object.position.x;
@@ -3051,12 +3059,8 @@ document.addEventListener("mousemove", function (e){
 			get.object.position.z/100
 		).id;
 		
-		for (let i of scene.children)
-			if (i.userData.view == true)
-				scene.remove(i); //删除
-		
 		if (mouse_choice.view){
-			let geometry = new THREE.BoxGeometry(100, 100, 100);
+			let geometry1 = new THREE.BoxGeometry(100, 100, 100);
 			let material1 = new THREE.MeshBasicMaterial({
 				color: "blue",
 				transparent: true,
@@ -3066,18 +3070,34 @@ document.addEventListener("mousemove", function (e){
 				color: "red",
 				wireframe: true //只显示框架
 			});
-			let mesh1 = new THREE.Mesh(geometry, material1);
-			let mesh2 = new THREE.Mesh(geometry, material2);
+			let mesh1 = new THREE.Mesh(geometry1, material1);
+			let mesh2 = new THREE.Mesh(geometry1, material2);
 			mesh1.position.x = mesh2.position.x = get.object.position.x;
 			mesh1.position.y = mesh2.position.y = get.object.position.y;
 			mesh1.position.z = mesh2.position.z = get.object.position.z;
-			mesh1.userData.view = mesh2.userData.view = true; //识别
 			scene.add(mesh1);
 			scene.add(mesh2);
+			
+			/* let geometry2 = new THREE.BoxGeometry(map.size.x*100, map.size.y*100, map.size.z*100);
+			let mesh3 = new THREE.Mesh(geometry2, new THREE.MeshBasicMaterial({
+				color: "blue",
+				transparent: true,
+				opacity: 0.1
+			}));
+			mesh3.position.x = Math.round(get.object.position.x/100/map.size.x)*100;
+			mesh3.position.y = map.size.y*100/2;
+			mesh3.position.z = Math.round(get.object.position.z/100/map.size.z)*100;
+			scene.add(mesh3);
+			console.log(mesh3)
+			mouse_choice.obj.push(mesh1);
+			mouse_choice.obj.push(mesh2);
+			mouse_choice.obj.push(mesh3); */
 		}
 	}catch(err){
+		// console.error(err)
 		mouse_choice = {
 			view: mouse_choice.view,
+			obj: [],
 			x: -1,
 			y: -1,
 			z: -1,
