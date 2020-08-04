@@ -79,6 +79,7 @@
 			background-color: white;
 			opacity: 0;
 			text-align: center;
+			overflow-y: auto;
 		}
 		.new_world h2{
 			font-size: 10vmin;
@@ -104,6 +105,7 @@
 		.more[open]{
 			border: 1px solid black;
 			border-radius: 3px;
+			/* clear:both; */
 		}
 		.more > summary{
 			font-size: 6vmin;
@@ -115,8 +117,19 @@
 			font-size: 5vmin;
 			margin: 0;
 		}
+		.more h4{
+			font-size: 3vmin;
+			margin: 0;
+		}
 		.more input{
-			width: 16%;
+			width: 16vw;
+		}
+		
+		.more > div{
+			float: left;
+		}
+		.more div{
+			margin-left: 6vw;
 		}
 		
 		dialog{
@@ -152,14 +165,27 @@
 					<h3>高度(height)</h3>
 					最小/m：1<input type="range" min="1" max="64" step="1" value="1" name="min" onchange="$(this).next().html(this.value+'m')" />64 <span>1m</span><br/>
 					最大/m：1<input type="range" min="1" max="64" step="1" value="64" name="max" onchange="$(this).next().html(this.value+'m')" />64 <span>64m</span><br/>
-					平滑程度：1<input type="range" min="1" max="1000" step="1" value="166" name="max" onchange="$(this).next().html(this.value)" />1000 <span>166</span>
+					平滑程度：1<input type="range" min="1" max="1000" step="1" value="166" name="q" onchange="$(this).next().html(this.value)" />1000 <span>166</span>
 					<div class="error">
-						<h3>误差(error)</h3>
-						最小/m：-5<input type="range" min="-5" max="5" value="-1" name="min" onchange="$(this).next().html(this.value+'m')" />5 <span>-1m</span><br/>
-						最大/m：-5<input type="range" min="-5" max="5" value="1" name="max" onchange="$(this).next().html(this.value+'m')" />5 <span>1m</span><br/>
-						平滑程度：1<input type="range" min="1" max="1000" value="166" name="max" onchange="$(this).next().html(this.value)" />1000 <span>166</span>
+						<h4>误差(error)</h4>
+						最小/m：-5<input type="range" min="-5" max="5" step="0.1" value="-1" name="min" onchange="$(this).next().html(this.value+'m')" />5 <span>-1m</span><br/>
+						最大/m：-5<input type="range" min="-5" max="5" step="0.1" value="1" name="max" onchange="$(this).next().html(this.value+'m')" />5 <span>1m</span><br/>
+						平滑程度：1<input type="range" min="1" max="1000" value="166" name="q" onchange="$(this).next().html(this.value)" />1000 <span>166</span>
 					</div>
 				</div>
+				<div class="scale">
+					<h3>泥土与石头之比(scale)</h3>
+					最小：0.01<input type="range" min="0.01" max="0.99" value="0.1" step="0.01" name="min" onchange="$(this).next().html(this.value)" />0.99 <span>0.1</span><br/>
+					最大：0.01<input type="range" min="0.01" max="0.99" value="0.4" step="0.01" name="max" onchange="$(this).next().html(this.value)" />0.99 <span>0.4</span><br/>
+					平滑程度：1<input type="range" min="1" max="1000" step="1" value="166" name="q" onchange="$(this).next().html(this.value)" />1000 <span>166</span>
+					<div class="error">
+						<h4>误差(error)</h4>
+						最小：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="-0.1" name="min" onchange="$(this).next().html(this.value)" />0.5 <span>-0.1m</span><br/>
+						最大：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="0.1" name="max" onchange="$(this).next().html(this.value)" />0.5 <span>0.1m</span><br/>
+						平滑程度：1<input type="range" min="1" max="1000" value="166" name="q" onchange="$(this).next().html(this.value)" />1000 <span>166</span>
+					</div>
+				</div>
+				<br style="clear:both;" />
 			</details>
 			<button>取消<p>CANCEL</p></button>
 			<button>开始游戏<p>OK</p></button>
@@ -220,13 +246,35 @@ $(".new_world > button:eq(0)").click(function(){
 });
 //开始游戏
 $(".new_world > button:eq(1)").click(function(){
-	let seed;
+	let seed,
+		height={
+			min: Number( $(".more > .height > [name='min']").val() ),
+			max: Number( $(".more > .height > [name='max']").val() ),
+			q: Number( $(".more > .height > [name='q']").val() ),
+			error:{
+				min: Number( $(".more > .height > .error > [name='min']").val() ),
+				max: Number( $(".more > .height > .error > [name='max']").val() ),
+				q: Number( $(".more > .height > .error > [name='q']").val() )
+			}
+		},
+		scale={
+			min: Number( $(".more > .scale > [name='min']").val() ),
+			max: Number( $(".more > .scale > [name='max']").val() ),
+			q: Number( $(".more > .scale > [name='q']").val() ),
+			error:{
+				min: Number( $(".more > .scale > .error > [name='min']").val() ),
+				max: Number( $(".more > .scale > .error > [name='max']").val() ),
+				q: Number( $(".more > .scale > .error > [name='q']").val() )
+			}
+		};
 	if ($("[name='seed']").val() === ""){ //随机种子
 		seed = Math.random().toString(36).substring(2);
 	}else{
 		seed = $("[name='seed']").val();
 	}
 	localStorage.setItem("我的世界_seed", seed);
+	localStorage.setItem("我的世界_height", JSON.stringify(height));
+	localStorage.setItem("我的世界_scale", JSON.stringify(scale));
 	
 	location.href = "main.html";
 	let msg = $("<dialog>加载中……</dialog>");

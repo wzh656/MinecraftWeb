@@ -1537,24 +1537,24 @@ let map = new BlockMap([
 	{x: 8, y: 64, z: 8}
 ],{
 	seed: localStorage.getItem("我的世界_seed"),
-	height: {
-		max: 64,
+	height: JSON.parse(localStorage.getItem("我的世界_height")) || {
 		min: 1,
+		max: 64,
 		//ave: 10,
 		q: 166,
 		error:{
-			max: 1,
 			min: -1,
+			max: 1,
 			q: 36
 		}
 	},
-	scale: {
-		max: 0.1,
+	scale: JSON.parse(localStorage.getItem("我的世界_scale")) || {
 		min: 0.4,
+		max: 0.1,
 		q: 66,
 		error:{
-			max: 1,
-			min: -1,
+			min: -0.1,
+			max: 0.1,
 			q: 36
 		}
 	}
