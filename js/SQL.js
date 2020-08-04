@@ -43,7 +43,7 @@ function SQL(dbName, version, decision, size){
 	this.insertData = function(tName, dataName, data, errCallback = this.errCallback, successCallback = this.successCallback){
 		this.db.transaction(function (tx){
 			tx.executeSql(`INSERT INTO ${tName} (${ dataName.join(",") }) VALUES (${ data.join(",") })`);
-			//console.log(`INSERT INTO ${tName} (${ dataName.join(",") }) VALUES (${ data.join(",") })`);
+			// console.log(`INSERT INTO ${tName} (${ dataName.join(",") }) VALUES (${ data.join(",") })`);
 		}, errCallback, successCallback);
 	};
 	//读取数据

@@ -325,8 +325,8 @@
 		</script>
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
-		<script>//eruda.init();</script>
-		<script>//new VConsole();</script>
+		<script>eruda.init();</script>
+		<script>new VConsole();</script>
 		<script src="./js/three.min.js"></script>
 		<script src="./js/simplex-noise.js"></script>
 		<script src="./js/dat.gui.min.js"></script>
@@ -682,7 +682,10 @@ function Thing(opinion){
 		if (opinion.block.face){ //贴图 位置
 			this.block.face = [];
 			for (let i=0; i<opinion.block.face.length; i++)
-				this.block.face[i] = opinion.block.face[i];
+				if (opinion.block.parent && opinion.block.parent[i])
+					this.block.face[i] = opinion.block.parent[i] + opinion.block.face[i]
+				else
+					this.block.face[i] = `./img/blocks/${this.id}/` + opinion.block.face[i];
 		}
 		this.block.editFace = (index, value)=>{
 			if (index != undefined){ //有索引（单个）
@@ -805,6 +808,19 @@ SimplexNoise.prototype.more3D = function(xin, yin, zin, more){
 	}
 	return sum;
 };
+function seed_error(noise, t, id, x, z){
+	return noise.more3D(id, x/t.q, z/t.q, 3) *t.k +t.b;
+}
+function seed_height(noise, t, x, z){
+	let value = ( noise.more3D(0.6,	x/t.q, z/t.q, 3)+
+		noise.more3D(-3.1415926,	x/t.q, z/t.q, 3)+
+		noise.more3D(54.782,		x/t.q, z/t.q, 3) )/3;
+	value = 1-Math.sin( (1-value)*90/180*Math.PI );
+	return value *t.k +t.b +seed_error(noise, t.e, -1428.57, x, z);
+}
+function seed_scale(noise, t, x, z){
+	return noise.more3D(6.6, x/t.q, z/t.q, 6) *t.k +t.b +seed_error(noise, t.e, -52.6338, x, z);
+}
 function BlockMap(size, seed, perloadLength){
 	//一区块大小
 	this.size = {};
@@ -842,14 +858,24 @@ function BlockMap(size, seed, perloadLength){
 				min: seed.height.min,
 				//ave: seed.height.ave,
 				/*de: seed.height.de,*/
-				q: seed.height.q
+				q: seed.height.q,
+				e: {
+					max: seed.height.error.max,
+					min: seed.height.error.min,
+					q: seed.height.error.q
+				}
 			},
 			s: {
 				max: seed.scale.max,
 				min: seed.scale.min,
 				/*ave: seed.scale.ave,
 				de: seed.scale.de,*/
-				q: seed.scale.q
+				q: seed.scale.q,
+				e: {
+					max: seed.scale.error.max,
+					min: seed.scale.error.min,
+					q: seed.scale.error.q
+				}
 			}
 		};
 		this.seed.noise = new SimplexNoise(this.seed.seed);
@@ -859,8 +885,12 @@ function BlockMap(size, seed, perloadLength){
 		this.seed.s.b = (this.seed.s.max + this.seed.s.min)/2; */
 		this.seed.h.k = this.seed.h.max - this.seed.h.min;
 		this.seed.h.b = this.seed.h.min;
+		this.seed.h.e.k = (this.seed.h.e.max - this.seed.h.e.min)/2;
+		this.seed.h.e.b = (this.seed.h.e.max + this.seed.h.e.min)/2;
 		this.seed.s.k = (this.seed.s.max - this.seed.s.min)/2;
 		this.seed.s.b = (this.seed.s.max + this.seed.s.min)/2;
+		this.seed.s.e.k = (this.seed.s.e.max - this.seed.s.e.min)/2;
+		this.seed.s.e.b = (this.seed.s.e.max + this.seed.s.e.min)/2;
 	}
 	
 	
@@ -1054,11 +1084,11 @@ function BlockMap(size, seed, perloadLength){
 		
 		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
 			for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-				let height = t.noise.noise3D(0.6, (ox+dx)/t.h.q, (oz+dz)/t.h.q) *t.h.de + t.h.ave;
+				let height = seed_height(t.noise, t.h, ox+dx, oz+dz);
 				let grass = false;
 				for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
 					
-					let earth = height - height * (t.noise.noise3D(6.6, (ox+dx)/t.s.q, (oz+dz)/t.s.q) *t.s.de + t.s.ave);
+					let earth = height - height * seed_scale(t.noise, t.s, ox+dx, oz+dz);
 					let id = 0;
 					if (dy > height){
 						id = 0; // 空气/真空 (null)：不用加载
@@ -1070,7 +1100,12 @@ function BlockMap(size, seed, perloadLength){
 							grass = true;
 						}
 					}else{
-						id = 5; //石头
+						if (!grass && t.noise.more3D(375.12, ox+dx, oz+dz, 3)<0.99){
+							id = 2; //草方块
+							grass = true;
+						}else{
+							id = 5; //石头
+						}
 					}
 					
 					if (!new Array(...edit).some((value, index, arr) => {
@@ -1129,11 +1164,15 @@ function BlockMap(size, seed, perloadLength){
 						
 						//正常代码
 						for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-							let noise = ( t.noise.more3D(0.6, (ox+dx)/t.h.q, (oz+dz)/t.h.q, 3)+
+							let height = seed_height(t.noise, t.h, ox+dx, oz+dz);
+							
+							/* let noise = ( t.noise.more3D(0.6, (ox+dx)/t.h.q, (oz+dz)/t.h.q, 3)+
 								t.noise.more3D(-3.1415926, (ox+dx)/t.h.q, (oz+dz)/t.h.q, 3)+
 								t.noise.more3D(54.782, (ox+dx)/t.h.q, (oz+dz)/t.h.q, 3) )/3;
 							noise = 1-Math.sin( (1-noise)*90/180*Math.PI );
-							let height = noise *t.h.k +t.h.b;
+							let height = noise *t.h.k +t.h.b+
+								t.noise.more3D(-1428.57, (ox+dx)/t.h.e.q, (oz+dz)/t.h.e.q, 3) *t.h.e.k +t.h.e.b; */
+								
 							/*let noise = Math.abs(t.noise.more3D(0.6, (ox+dx)/t.h.q/2, (oz+dz)/t.h.q/2, 5));
 							let height = noise*noise*noise*(noise*(noise*6-15)+10) //*t.h.k +t.h.b;
 							height = Math.pow(t.h.k, height) + t.h.b;*/
@@ -1147,9 +1186,10 @@ function BlockMap(size, seed, perloadLength){
 							let grass = false;
 							for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
 								
-								let earth = height - height * (Math.abs( t.noise.noise3D(6.6, (ox+dx)/t.s.q, (oz+dz)/t.s.q) ) *t.s.k + t.s.b);
+								let earth = height - height * seed_scale(t.noise, t.s, ox+dx, oz+dz);
+								/* let earth = height - height * (t.noise.more3D(6.6, (ox+dx)/t.s.q, (oz+dz)/t.s.q, 6) *t.s.k +t.s.b)+
+									t.noise.more3D(-52.6338, (ox+dx)/t.s.e.q, (oz+dz)/t.s.e.q, 3) *t.s.e.k +t.s.e.b; */
 								let id = 0;
-								if (dx == -2 && dz == 0)debugger;
 								if (dy > height){
 									id = 0; // 空气/真空 (null)：不用加载
 								}else if (dy > earth){
@@ -1160,11 +1200,11 @@ function BlockMap(size, seed, perloadLength){
 										grass = true;
 									}
 								}else{
-									if (grass){
-										id = 5; //石头
-									}else{
+									if (!grass && t.noise.more3D(375.12, ox+dx, oz+dz, 3)<0.99){
 										id = 2; //草方块
 										grass = true;
+									}else{
+										id = 5; //石头
 									}
 								}
 								
@@ -1204,11 +1244,11 @@ function BlockMap(size, seed, perloadLength){
 							
 							//正常代码
 							for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-								let height = t.noise.noise3D(0.6, (ox+dx)/t.h.q, (oz+dz)/t.h.q) *t.h.de + t.h.ave;
+								let height = seed_height(t.noise, t.h, ox+dx, oz+dz);
 								let grass = false;
 								for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
 									
-									let earth = height - height * (t.noise.noise3D(6.6, (ox+dx)/t.s.q, (oz+dz)/t.s.q) *t.s.k + t.s.b);
+									let earth = height - height * seed_scale(t.noise, t.s, ox+dx, oz+dz);
 									let id = 0;
 									
 									if (dy > height){
@@ -1221,11 +1261,11 @@ function BlockMap(size, seed, perloadLength){
 											grass = true;
 										}
 									}else{
-										if (grass){
-											id = 5; //石头
-										}else{
+										if (!grass && t.noise.more3D(375.12, ox+dx, oz+dz, 3)<0.99){
 											id = 2; //草方块
 											grass = true;
+										}else{
+											id = 5; //石头
 										}
 									}
 									
@@ -1501,12 +1541,22 @@ let map = new BlockMap([
 		max: 64,
 		min: 1,
 		//ave: 10,
-		q: 166
+		q: 166,
+		error:{
+			max: 1,
+			min: -1,
+			q: 36
+		}
 	},
 	scale: {
 		max: 0.1,
 		min: 0.4,
-		q: 66
+		q: 66,
+		error:{
+			max: 1,
+			min: -1,
+			q: 36
+		}
 	}
 },300);
 document.title = "我的世界:"+map.seed.seed||"读取数据失败";
@@ -1608,10 +1658,10 @@ let block_load = {
 // for (let i=1; i<template.length; i++){
 $("#schedule progress")[0].max = template.length;
 block_load.id = setInterval(function(){
-	for (let j=0; j<6; j++){
+	for (let j=0; j<template[block_load.i].block.face.length; j++){
 		template[block_load.i].block.setTexture(
 			new THREE.TextureLoader()
-				.load(`./img/blocks/${block_load.i}/${template[block_load.i].block.face[j]}`), j);
+				.load( template[block_load.i].block.face[j] ), j);
 		//$("#schedule2").text( Math.round( (j+1)/6*100 *100)/100 );
 	}
 	
@@ -1844,7 +1894,7 @@ let WIDTH = window.innerWidth,
 
 var camera = new THREE.PerspectiveCamera(45, WIDTH/HEIGHT, 1, 1000*100);
 //								 view_angle, aspect, near, far(1km)
-camera.position.set(0, 128*100, 0); //设置相机位置
+camera.position.set(0, ( Math.floor(seed_height(map.seed.noise, map.seed.h, 0, 0))+2 )*100, 0); //设置相机位置
 camera.lookAt(scene.position); //设置相机方向(指向的场景对象)
 /*setTimeout(function(){
 	console.info(camera);

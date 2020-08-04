@@ -21,7 +21,6 @@
 			user-select: none;
 			
 			font-family: zyyt, serif;
-			text-align: center;
 			
 			min-height: 100%;
 			background: #1b2036 url("./img/background.jpg") no-repeat fixed center;
@@ -37,7 +36,7 @@
 			overflow: hidden;
 		}
 		p{
-			font-size: 2vmax;
+			font-size: 3vmin;
 			margin: 0;
 		}
 		button,label,summary{
@@ -48,6 +47,7 @@
 			width: 100%;
 			height: 100%;
 			margin: 0;
+			text-align: center;
 			
 			display: -webkit-flex;
 			display: -moz-box;
@@ -56,18 +56,19 @@
 			flex-direction: column;
 			justify-content: space-around;
 		}
-		.init > h1{
+		.init h1{
 			color: white;
-			font-size: 10vmax;
+			font-size: 16vmin;
 			margin: 0;
 		}
 		.init > button{
 			width: 66%;
 			/* height: 16%; */
-			font-size: 6vmax;
+			font-size: 10vmin;
 			margin: 0 auto;
 			font-family: zyyt, serif;
 		}
+		
 		.new_world{
 			position: absolute;
 			width: 100%;
@@ -77,36 +78,47 @@
 			margin: 0;
 			background-color: white;
 			opacity: 0;
+			text-align: center;
 		}
-		.new_world > h2{
-			font-size: 6vmax;
+		.new_world h2{
+			font-size: 10vmin;
 		}
-		.new_world span{
-			font-size: 3vmax;
+		.new_world label{
+			font-size: 6vmin;
 		}
 		.new_world input{
 			width: 66%;
-			font-size: 3vmax;
+			font-size: 6vmin;
 		}
-		.new_world > button{
+		.new_world button{
 			width: 46%;
 			/*height: 6.8%;*/
 			margin: 3px;
-			font-size: 3vmax;
+			font-size: 6vmin;
 		}
+		
 		.more{
 			margin: 3px;
+			text-align: left;
 		}
 		.more[open]{
 			border: 1px solid black;
 			border-radius: 3px;
 		}
 		.more > summary{
-			font-size: 3vmax;
+			font-size: 6vmin;
 			text-align: left;
 			margin-left: 1%;
 			outline: none;
 		}
+		.more h3{
+			font-size: 5vmin;
+			margin: 0;
+		}
+		.more input{
+			width: 16%;
+		}
+		
 		dialog{
 			border-radius: 6px;
 			
@@ -132,11 +144,22 @@
 		</div>
 		<div class="new_world">
 			<h2>新的世界<p>NEW WORLD</p></h2>
-			<label for="seed"><span>种子(seed)：</span></label><input name="seed" id="seed" placeholder="不输入则随机生成" />
+			<label for="seed">种子(seed)：</label><input name="seed" id="seed" placeholder="不输入则随机生成" />
 			<br/>
 			<details class="more">
 				<summary>高级设置</summary>
-				<span>暂无</span>
+				<div class="height">
+					<h3>高度(height)</h3>
+					最小/m：1<input type="range" min="1" max="64" step="1" value="1" name="min" onchange="$(this).next().html(this.value+'m')" />64 <span>1m</span><br/>
+					最大/m：1<input type="range" min="1" max="64" step="1" value="64" name="max" onchange="$(this).next().html(this.value+'m')" />64 <span>64m</span><br/>
+					平滑程度：1<input type="range" min="1" max="1000" step="1" value="166" name="max" onchange="$(this).next().html(this.value)" />1000 <span>166</span>
+					<div class="error">
+						<h3>误差(error)</h3>
+						最小/m：-5<input type="range" min="-5" max="5" value="-1" name="min" onchange="$(this).next().html(this.value+'m')" />5 <span>-1m</span><br/>
+						最大/m：-5<input type="range" min="-5" max="5" value="1" name="max" onchange="$(this).next().html(this.value+'m')" />5 <span>1m</span><br/>
+						平滑程度：1<input type="range" min="1" max="1000" value="166" name="max" onchange="$(this).next().html(this.value)" />1000 <span>166</span>
+					</div>
+				</div>
 			</details>
 			<button>取消<p>CANCEL</p></button>
 			<button>开始游戏<p>OK</p></button>
