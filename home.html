@@ -14,13 +14,15 @@
 			font-family:zyyt; /*资源圆体*/
 			src:url("./fonts/zyyt.woff2");
 		}
+		*{
+			font-family: zyyt, serif;
+			outline: none;
+		}
 		
 		html{
 			-moz-user-select: none;
 			-khtml-user-select: none;
 			user-select: none;
-			
-			font-family: zyyt, serif;
 			
 			min-height: 100%;
 			background: #1b2036 url("./img/background.jpg") no-repeat fixed center;
@@ -36,7 +38,7 @@
 			overflow: hidden;
 		}
 		p{
-			font-size: 3vmin;
+			font-size: 2vmax;
 			margin: 0;
 		}
 		button,label,summary{
@@ -58,13 +60,13 @@
 		}
 		.init h1{
 			color: white;
-			font-size: 16vmin;
+			font-size: 10vmax;
 			margin: 0;
 		}
 		.init > button{
 			width: 66%;
 			/* height: 16%; */
-			font-size: 10vmin;
+			font-size: 6vmax;
 			margin: 0 auto;
 			font-family: zyyt, serif;
 		}
@@ -82,20 +84,20 @@
 			overflow-y: auto;
 		}
 		.new_world h2{
-			font-size: 10vmin;
+			font-size: 6vmax;
 		}
 		.new_world label{
-			font-size: 6vmin;
+			font-size: 3vmax;
 		}
 		.new_world input{
 			width: 66%;
-			font-size: 6vmin;
+			font-size: 3vmax;
 		}
 		.new_world button{
-			width: 46%;
+			width: 46vw;
 			/*height: 6.8%;*/
 			margin: 3px;
-			font-size: 6vmin;
+			font-size: 3vmax;
 		}
 		
 		.more{
@@ -108,28 +110,33 @@
 			/* clear:both; */
 		}
 		.more > summary{
-			font-size: 6vmin;
+			font-size: 3vmax;
 			text-align: left;
 			margin-left: 1%;
 			outline: none;
 		}
 		.more h3{
-			font-size: 5vmin;
+			font-size: 3vmax;
 			margin: 0;
 		}
 		.more h4{
-			font-size: 3vmin;
+			font-size: 2vmax;
 			margin: 0;
 		}
-		.more input{
+		.more input:not([type="range"]){
+			width: 6vw;
+			font-size: 2vmax;
+		}
+		.more input[type="range"]{
 			width: 16vw;
 		}
 		
 		.more > div{
 			float: left;
+			/*border: 1px solid black;*/
 		}
 		.more div{
-			margin-left: 6vw;
+			margin-left: 2vw;
 		}
 		
 		dialog{
@@ -157,33 +164,36 @@
 		</div>
 		<div class="new_world">
 			<h2>新的世界<p>NEW WORLD</p></h2>
-			<label for="seed">种子(seed)：</label><input name="seed" id="seed" placeholder="不输入则随机生成" />
+			<label for="seed">种子(seed)：</label><input name="seed" id="seed" placeholder="不输入则随机生成" autofocus />
 			<br/>
 			<details class="more">
 				<summary>高级设置</summary>
 				<div class="height">
 					<h3>高度(height)</h3>
-					最小/m：1<input type="range" min="1" max="64" step="1" value="1" name="min" onchange="$(this).next().html(this.value+'m')" />64 <span>1m</span><br/>
-					最大/m：1<input type="range" min="1" max="64" step="1" value="64" name="max" onchange="$(this).next().html(this.value+'m')" />64 <span>64m</span><br/>
-					平滑程度：1<input type="range" min="1" max="1000" step="1" value="166" name="q" onchange="$(this).next().html(this.value)" />1000 <span>166</span>
+					最小/m：1m<input type="range" min="1" max="64" step="1" value="1" name="min" />64m <input value="1" />m<br/>
+					最大/m：1m<input type="range" min="1" max="64" step="1" value="64" name="max" />64m <input value="64"/>m<br/>
+					平滑程度：1<input type="range" min="1" max="1000" step="1" value="166" name="q" />1000 <input value="166"/>
 					<div class="error">
 						<h4>误差(error)</h4>
-						最小/m：-5<input type="range" min="-5" max="5" step="0.1" value="-1" name="min" onchange="$(this).next().html(this.value+'m')" />5 <span>-1m</span><br/>
-						最大/m：-5<input type="range" min="-5" max="5" step="0.1" value="1" name="max" onchange="$(this).next().html(this.value+'m')" />5 <span>1m</span><br/>
-						平滑程度：1<input type="range" min="1" max="1000" value="166" name="q" onchange="$(this).next().html(this.value)" />1000 <span>166</span>
+						最小/m：-5m<input type="range" min="-5" max="5" step="0.1" value="-1" name="min" />5m <input value="-1"/>m<br/>
+						最大/m：-5m<input type="range" min="-5" max="5" step="0.1" value="1" name="max" />5m <input value="1"/>m<br/>
+						平滑程度：1<input type="range" min="1" max="1000" value="166" name="q" />1000 <input value="166"/>
 					</div>
 				</div>
 				<div class="scale">
 					<h3>泥土与石头之比(scale)</h3>
-					最小：0.01<input type="range" min="0.01" max="0.99" value="0.1" step="0.01" name="min" onchange="$(this).next().html(this.value)" />0.99 <span>0.1</span><br/>
-					最大：0.01<input type="range" min="0.01" max="0.99" value="0.4" step="0.01" name="max" onchange="$(this).next().html(this.value)" />0.99 <span>0.4</span><br/>
-					平滑程度：1<input type="range" min="1" max="1000" step="1" value="166" name="q" onchange="$(this).next().html(this.value)" />1000 <span>166</span>
+					最小：0.01<input type="range" min="0.01" max="0.99" value="0.1" step="0.01" name="min" />0.99 <input value="0.1"/><br/>
+					最大：0.01<input type="range" min="0.01" max="0.99" value="0.4" step="0.01" name="max" />0.99 <input value="0.4"/><br/>
+					平滑程度：1<input type="range" min="1" max="1000" step="1" value="166" name="q" />1000 <input value="166"/>
 					<div class="error">
 						<h4>误差(error)</h4>
-						最小：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="-0.1" name="min" onchange="$(this).next().html(this.value)" />0.5 <span>-0.1m</span><br/>
-						最大：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="0.1" name="max" onchange="$(this).next().html(this.value)" />0.5 <span>0.1m</span><br/>
-						平滑程度：1<input type="range" min="1" max="1000" value="166" name="q" onchange="$(this).next().html(this.value)" />1000 <span>166</span>
+						最小：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="-0.1" name="min" />0.5 <input value="-0.1"/><br/>
+						最大：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="0.1" name="max" />0.5 <input value="0.1"/><br/>
+						平滑程度：1<input type="range" min="1" max="1000" value="166" name="q" />1000 <input value="166"/>
 					</div>
+				</div>
+				<div style="clear:both;">
+					<button onclick="reset();" style="clear:both;">重置</button>
 				</div>
 				<br style="clear:both;" />
 			</details>
@@ -192,6 +202,27 @@
 		</div>
 		
 <script>
+let e = $(".more input");
+for (let i of e)
+	i["data-init"] = i.value;
+
+function reset(){
+	let e = $(".more input");
+	for (let i of e)
+		i.value = i["data-init"];
+}
+
+$(".more input[type='range']").on("change", function(){
+	$(this).next().val(this.value);
+});
+$(".more input:not([type='range'])").on("change", function(){
+	if (isNaN(this.value))
+		this.value = this["data-init"];
+	$(this).prev().val( Number(this.value) );
+	this.value=$(this).prev().val();
+});
+
+
 if (localStorage.getItem("我的世界_seed") !== null){
 	location.href = "main.html";
 	let msg = $("<dialog>加载中……</dialog>");
@@ -312,6 +343,20 @@ $("h2").on("dblclick",function(){
 		opacity: 1
 	},10);
 });
+
+$("*").attr("tabindex","-1");
+setInterval(function(){
+	window.scrollTo(0, 0);
+},0);
+document.onkeydown = function(e){
+	if (e.keyCode == 9){ //Tab
+		if (e.preventDefault){
+			e.preventDefault();
+		}else{
+			e.returnValue = false;
+		}
+	}
+}
 </script>
 	</body>
 </html>
