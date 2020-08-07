@@ -1146,42 +1146,42 @@ function BlockMap(size, seed, perloadLength){
 				switch (type){
 					case 0: //森林
 						if (grass){
-							id = 3; //泥土
+							id = 4; //泥土
 						}else{
-							id = 2; //草方块
+							id = 3; //草方块
 							grass = true;
 						}
 						break;
 					case 1: //草原
 						if (grass){
-							id = 3; //泥土
+							id = 4; //泥土
 						}else{
-							id = 2; //草方块
+							id = 3; //草方块
 							grass = true;
 						}
 						break;
 					case 2: //沙漠
-						id = 6;
+						id = 7;
 						break;
 				}
 			}else{
 				if (!grass && t.noise.more3D(375.12, x, z, 3)<0.99){
 					switch (type){
 						case 0: //森林
-							id = 2; //草方块
+							id = 3; //草方块
 							grass = true;
 							break;
 						case 1: //草原
-							id = 2; //草方块
+							id = 3; //草方块
 							grass = true;
 							break;
 						case 2: //沙漠
-							id = 6;
+							id = 7;
 							grass = true;
 							break;
 					}
 				}else{
-					id = 5; //石头
+					id = 6; //石头
 				}
 			}
 			
