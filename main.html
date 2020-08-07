@@ -679,6 +679,7 @@ function Thing(opinion){
 	//方块
 	this.block = {};
 	if (opinion.block){
+		//face
 		if (opinion.block.face){ //贴图 位置
 			this.block.face = [];
 			for (let i=0; i<opinion.block.face.length; i++)
@@ -704,7 +705,15 @@ function Thing(opinion){
 			}
 			return this;
 		}
+		this.block.deleteFace = (index)=>{
+			if (index != undefined){ //有索引
+				delete this.block.face[index];
+			}else{ //无索引
+				this.block.face = [];
+			}
+		}
 		
+		//texture
 		if (opinion.block.texture){ //贴图 数据
 			this.block.texture = [];
 			for (let i=0; i<opinion.block.texture.length; i++)
@@ -736,6 +745,7 @@ function Thing(opinion){
 			return this;
 		}
 		
+		//material
 		if (opinion.block.material){ //材质
 			this.block.material = opinion.block.material;
 		}
@@ -757,6 +767,7 @@ function Thing(opinion){
 			return this;
 		}
 		
+		//mesh
 		if (opinion.block.mesh){ //网格模型
 			this.block.mesh = opinion.block.mesh;
 		}
@@ -771,7 +782,8 @@ function Thing(opinion){
 			return this;
 		}
 		this.block.deleteMesh = (index)=>{
-			this.block.mesh.material.dispose();
+			for (let i of this.block.mesh.material)
+				i.dispose();
 			this.block.mesh.geometry.dispose(); //清除内存
 			delete this.block.mesh;
 			return this;
@@ -1489,8 +1501,8 @@ function BlockMap(size, seed, perloadLength){
 	//预加载区块
 	this.perloadBlock = (length = this.perloadLength)=>{
 		let block = [];
-		for (let x=-1; x<=1; x++){
-			for (let z=-1; z<=1; z++){
+		for (let x of [-1,1,0]){
+			for (let z of [-1,1,0]){
 				let push = [
 					Math.round((deskgood.pos.x + x*length)/100/map.size.x),
 					Math.round((deskgood.pos.z + z*length)/100/map.size.z),
@@ -1522,17 +1534,17 @@ function BlockMap(size, seed, perloadLength){
 				let find = false;
 				for (let i in block){
 					if (block[i][0] == push[0] && block[i][1] == push[1]){ //相同
-						if (Number(block[i][2].slice(-1)) <= Number(push[2].slice(-1))){
+						if (Number(block[i][2].slice(-1)) <= Number(push[2].slice(-1))) //block小
 							block[i] = push;
-							find = true;
-							break;
-						}
+						find = true;
+						break;
 					}
 				}
 				if (!find)
 					block.push(push);
 			}
 		}
+		
 		for (let i in block){
 			if (this.initedBlock.every(function(value, index, arr){
 				return value[0] != block[i][0] || value[1] != block[i][1];
@@ -1599,62 +1611,76 @@ template.push(new Thing({
 }));
 template.push(new Thing({
 	id: 2,
+	name: "基岩",
+	block: {
+		face: face_url[1]
+	}
+}));
+template.push(new Thing({
+	id: 3,
 	name: "草方块",
 	block: {
 		face: face_url[0]
 	}
 }));
 template.push(new Thing({
-	id: 3,
+	id: 4,
 	name: "泥土",
 	block: {
 		face: face_url[1]
 	}
 }));
 template.push(new Thing({
-	id: 4,
+	id: 5,
 	name: "原石",
 	block: {
 		face: face_url[1]
 	}
 }));
 template.push(new Thing({
-	id: 5,
+	id: 6,
 	name: "石头",
 	block: {
 		face: face_url[1]
 	}
 }));
 template.push(new Thing({
-	id: 6,
+	id: 7,
 	name: "沙子",
 	block: {
 		face: face_url[1]
 	}
 }));
 template.push(new Thing({
-	id: 7,
+	id: 8,
 	name: "仙人掌",
 	block: {
 		face: face_url[0]
 	}
 }));
 template.push(new Thing({
-	id: 8,
+	id: 9,
 	name: "橡木",
 	block: {
 		face: ["side.png", "side.png", "up_down.png", "up_down.png", "side.png", "side.png"],
 	}
 }));
 template.push(new Thing({
-	id: 9,
+	id: 10,
+	name: "树叶",
+	block: {
+		face: face_url[1]
+	}
+}));
+template.push(new Thing({
+	id: 11,
 	name: "木板",
 	block: {
 		face: face_url[1]
 	}
 }));
 template.push(new Thing({
-	id: 10,
+	id: 12,
 	name: "砖",
 	block: {
 		face: face_url[1]
