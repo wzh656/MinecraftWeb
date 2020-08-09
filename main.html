@@ -820,6 +820,13 @@ SimplexNoise.prototype.more3D = function(xin, yin, zin, more){
 	}
 	return sum;
 };
+function rnd(seed){
+	seed = (seed *9301 +49297) %233280; //为何使用这三个数?
+	return seed/233280;
+};
+function rnd_error(noise, t, id, x, z){
+	return rnd( noise.more3D(id, x/t.q, z/t.q, 3) ) *t.k +t.b;
+}
 function seed_error(noise, t, id, x, z){
 	return noise.more3D(id, x/t.q, z/t.q, 3) *t.k +t.b;
 }
@@ -832,10 +839,15 @@ function seed_height(noise, t, x, z){
 }
 function seed_type(noise, t, x, z){
 	let value = Math.abs( noise.noise3D(333.35, x/t.q, z/t.q) );
-	return value<0.4? 0: value<0.8? 1: 2;
+	return value<0.4?0: value<0.8?1: 2;
 }
 function seed_scale(noise, t, x, z){
-	return noise.more3D(6.6, x/t.q, z/t.q, 6) *t.k +t.b +seed_error(noise, t.e, -52.6338, x, z);
+	let value = noise.more3D(6.6, x/t.q, z/t.q, 6) *t.k +t.b +seed_error(noise, t.e, -52.6338, x, z);
+	return value<0?0: value>1?1: value;
+}
+function seed_treeHeight(noise, t, x, z){
+	let value = rnd( noise.more3D(332.976, x/t.q, z/t.q, 6)*666 ) *t.k +t.b +rnd_error(noise, t.e, -541.28, x, z)
+	return value;
 }
 function BlockMap(size, seed, perloadLength){
 	//一区块大小
@@ -897,6 +909,16 @@ function BlockMap(size, seed, perloadLength){
 				max: 2,
 				min: 0,
 				q: seed.type.q
+			},
+			tH: {
+				max: seed.treeHeight.max,
+				min: seed.treeHeight.min,
+				q: seed.treeHeight.q,
+				e: {
+					max: seed.treeHeight.error.max,
+					min: seed.treeHeight.error.min,
+					q: seed.treeHeight.error.q
+				}
 			}
 		};
 		this.seed.noise = new SimplexNoise(this.seed.seed);
@@ -912,6 +934,10 @@ function BlockMap(size, seed, perloadLength){
 		this.seed.s.b = (this.seed.s.max + this.seed.s.min)/2;
 		this.seed.s.e.k = (this.seed.s.e.max - this.seed.s.e.min)/2;
 		this.seed.s.e.b = (this.seed.s.e.max + this.seed.s.e.min)/2;
+		this.seed.tH.k = (this.seed.tH.max - this.seed.tH.min)/2;
+		this.seed.tH.b = (this.seed.tH.max + this.seed.tH.min)/2;
+		this.seed.tH.e.k = (this.seed.tH.e.max - this.seed.tH.e.min)/2;
+		this.seed.tH.e.b = (this.seed.tH.e.max + this.seed.tH.e.min)/2;
 	}
 	
 	
@@ -1005,6 +1031,12 @@ function BlockMap(size, seed, perloadLength){
 		this.update(x, y-1, z);
 		this.update(x, y, z+1);
 		this.update(x, y, z-1);
+	};
+	
+	//更新列方块
+	this.updateColumn = (x, z)=>{
+		for (let dy=this.size[0].y; dy <=this.size[1].y; dy++)
+			this.update(x, dy, z);
 	};
 	
 	//更新区块内所有方块（同步）
@@ -1164,6 +1196,8 @@ function BlockMap(size, seed, perloadLength){
 						id = 7;
 						break;
 				}
+			}else if (dy == 0){
+				id = 2; //基岩
 			}else{
 				if (!grass && t.noise.more3D(375.12, x, z, 3)<0.99){
 					switch (type){
@@ -1220,7 +1254,8 @@ function BlockMap(size, seed, perloadLength){
 		
 		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
 			for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-				
+				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
+					this.loadColumn(ox+dx, oz+dz, edit);
 			}
 		}
 	}
@@ -1244,10 +1279,17 @@ function BlockMap(size, seed, perloadLength){
 				
 				switch (dir.substr(0,2)){
 					case "x-":
-						if (callback){ //有回调（必须setInterval）
+						{
+						//if (callback){ //有回调（必须setInterval）
 							let dx = this.size[1].x;
 							let loadBlock_id = setInterval(()=>{
 								if (dx < this.size[0].x){
+									setTimeout(()=>{
+										for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+											this.updateColumn(ox+dx+1, oz+dz);
+											this.updateColumn(ox+dx, oz+dz);
+										}
+									},0);
 									clearInterval(loadBlock_id);
 									
 									if (this.activeBlock.every(function(value, index, arr){
@@ -1255,39 +1297,65 @@ function BlockMap(size, seed, perloadLength){
 									})) //每个都不一样（不存在）
 										this.activeBlock.push([x,z]);
 									
-									callback();
+									if (callback)
+										callback();
 									return;
 								}
 								
 								//正常代码
-								for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+								for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
 									this.loadColumn(ox+dx, oz+dz, edit);
-								}
+								
+								setTimeout(()=>{
+									this.updateColumn(ox+dx, oz+this.size[0].z-1);
+									this.updateColumn(ox+dx, oz+this.size[1].z+1);
+									for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
+										this.updateColumn(ox+dx+1, dz);
+								}, 0);
 								
 								dx--;
 							},0);
-						}else{ //无回调（不分顺序）
+						/* }else{ //无回调（不分顺序）
 							if (this.activeBlock.every(function(value, index, arr){
 								return value[0] != x || value[1] != z;
 							})) //每个都不一样（不存在）
 								this.activeBlock.push([x,z]);
 							
-							for (let dx=this.size[1].x; dx<=this.size[0].x; dx--){
+							for (let dx=this.size[1].x; dx>=this.size[0].x; dx--){
 								setTimeout(()=>{
+									console.log(dx)
 									//正常代码
-									for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+									for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
 										this.loadColumn(ox+dx, oz+dz, edit);
-									}
+									
+									this.updateColumn(ox+dx, oz+this.size[0].z-1);
+									this.updateColumn(ox+dx, oz+this.size[1].z+1);
+									for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
+										this.updateColumn(ox+dx+1, dz);
+									if (dx == this.size[0].x)
+										for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+											this.updateColumn(ox+dx+1, dz);
+											this.updateColumn(ox+dx, dz);
+										}
+									
 								},0);
 							}
-						}
+						} */
 						break;
+						}
 					
 					case "z+":
-						if (callback){ //有回调（必须setInterval）
+						{
+						//if (callback){ //有回调（必须setInterval）
 							let dz = this.size[0].z;
 							let loadBlock_id = setInterval(()=>{
 								if (dz > this.size[1].z){
+									setTimeout(()=>{
+										for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
+											this.updateColumn(ox+dx, oz+dz-1);
+											this.updateColumn(ox+dx, oz+dz);
+										}
+									},0);
 									clearInterval(loadBlock_id);
 									
 									if (this.activeBlock.every(function(value, index, arr){
@@ -1295,18 +1363,25 @@ function BlockMap(size, seed, perloadLength){
 									})) //每个都不一样（不存在）
 										this.activeBlock.push([x,z]);
 									
-									callback();
+									if (callback)
+										callback();
 									return;
 								}
 								
 								//正常代码
-								for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
+								for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
 									this.loadColumn(ox+dx, oz+dz, edit);
-								}
+								
+								setTimeout(()=>{
+									this.updateColumn(ox+this.size[0].x-1, oz+dz);
+									this.updateColumn(ox+this.size[1].x+1, oz+dz);
+									for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
+										this.updateColumn(dx, oz+dz-1);
+								}, 0);
 								
 								dz++;
 							},0);
-						}else{ //无回调（不分顺序）
+						/* }else{ //无回调（不分顺序）
 							if (this.activeBlock.every(function(value, index, arr){
 								return value[0] != x || value[1] != z;
 							})) //每个都不一样（不存在）
@@ -1320,14 +1395,22 @@ function BlockMap(size, seed, perloadLength){
 									}
 								},0);
 							}
-						}
+						} */
 						break;
+						}
 					
 					case "z-":
-						if (callback){ //有回调（必须setInterval）
+						{
+						//if (callback){ //有回调（必须setInterval）
 							let dz = this.size[1].z;
 							let loadBlock_id = setInterval(()=>{
 								if (dz < this.size[0].z){
+									setTimeout(()=>{
+										for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
+											this.updateColumn(ox+dx, oz+dz+1);
+											this.updateColumn(ox+dx, oz+dz);
+										}
+									},0);
 									clearInterval(loadBlock_id);
 									
 									if (this.activeBlock.every(function(value, index, arr){
@@ -1335,24 +1418,31 @@ function BlockMap(size, seed, perloadLength){
 									})) //每个都不一样（不存在）
 										this.activeBlock.push([x,z]);
 									
-									callback();
+									if (callback)
+										callback();
 									return;
 								}
 								
 								//正常代码
-								for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
+								for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
 									this.loadColumn(ox+dx, oz+dz, edit);
-								}
+								
+								setTimeout(()=>{
+									this.updateColumn(ox+this.size[0].x-1, oz+dz);
+									this.updateColumn(ox+this.size[1].x+1, oz+dz);
+									for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
+										this.updateColumn(dx, oz+dz+1);
+								}, 0);
 								
 								dz--;
 							},0);
-						}else{ //无回调（不分顺序）
+						/* }else{ //无回调（不分顺序）
 							if (this.activeBlock.every(function(value, index, arr){
 								return value[0] != x || value[1] != z;
 							})) //每个都不一样（不存在）
 								this.activeBlock.push([x,z]);
 							
-							for (let dz=this.size[1].z; dz<=this.size[0].z; dz--){
+							for (let dz=this.size[1].z; dz>=this.size[0].z; dz--){
 								setTimeout(()=>{
 									//正常代码
 									for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
@@ -1360,14 +1450,22 @@ function BlockMap(size, seed, perloadLength){
 									}
 								},0);
 							}
-						}
+						} */
 						break;
+						}
 					
 					default: // "x+" or else
-						if (callback){ //有回调（必须setInterval）
+						{
+						//if (callback){ //有回调（必须setInterval）
 							let dx = this.size[0].x;
 							let loadBlock_id = setInterval(()=>{
 								if (dx > this.size[1].x){
+									setTimeout(()=>{
+										for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+											this.updateColumn(ox+dx-1, oz+dz);
+											this.updateColumn(ox+dx, oz+dz);
+										}
+									},0);
 									clearInterval(loadBlock_id);
 									
 									if (this.activeBlock.every(function(value, index, arr){
@@ -1375,18 +1473,25 @@ function BlockMap(size, seed, perloadLength){
 									})) //每个都不一样（不存在）
 										this.activeBlock.push([x,z]);
 									
-									callback();
+									if (callback)
+										callback();
 									return;
 								}
 								
 								//正常代码
-								for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+								for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
 									this.loadColumn(ox+dx, oz+dz, edit);
-								}
+								
+								setTimeout(()=>{
+									this.updateColumn(ox+dx, oz+this.size[0].z-1);
+									this.updateColumn(ox+dx, oz+this.size[1].z+1);
+									for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
+										this.updateColumn(ox+dx-1, dz);
+								}, 0);
 								
 								dx++;
 							},0);
-						}else{ //无回调（不分顺序）
+						/* }else{ //无回调（不分顺序）
 							if (this.activeBlock.every(function(value, index, arr){
 								return value[0] != x || value[1] != z;
 							})) //每个都不一样（不存在）
@@ -1400,9 +1505,10 @@ function BlockMap(size, seed, perloadLength){
 									}
 								},0);
 							}
-						}
+						} */
 						break;
-						
+						}
+					
 				}
 				
 			}
@@ -1425,9 +1531,6 @@ function BlockMap(size, seed, perloadLength){
 		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
 			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
 				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-					if (ox+dx == 24){
-						//
-					};
 					if (this.map[ox+dx][dy][oz+dz] != null){
 						for (let i of this.map[ox+dx][dy][oz+dz].block.mesh.material)
 							i.dispose();
@@ -1452,12 +1555,23 @@ function BlockMap(size, seed, perloadLength){
 			if (this.initedBlock[i][0] == x && this.initedBlock[i][1] == z)
 				this.initedBlock.splice(i,1); //从i开始删除一个元素
 		
-		if (callback){ //有回调（必须setInterval）
+		//if (callback){ //有回调（必须setInterval）
 			let dx = this.size[0].x;
 			let unloadBlock_id = setInterval(()=>{
 				if (dx > this.size[1].x){
+					setTimeout(()=>{
+						for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
+							this.updateColumn(ox+dx, oz+this.size[0].z-1);
+							this.updateColumn(ox+dx, oz+this.size[1].z+1);
+						}
+						for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+							this.updateColumn(ox+this.size[0].x-1, oz+dz);
+							this.updateColumn(ox+this.size[1].x+1, oz+dz);
+						}
+					}, 0);
 					clearInterval(unloadBlock_id);
-					callback();
+					if (callback)
+						callback();
 					return;
 				}
 				
@@ -1476,7 +1590,7 @@ function BlockMap(size, seed, perloadLength){
 				
 				dx++;
 			},0);
-		}else{ //无回调（不分顺序）
+		/* }else{ //无回调（不分顺序）
 			for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
 				setTimeout(()=>{
 					
@@ -1495,7 +1609,7 @@ function BlockMap(size, seed, perloadLength){
 					
 				},0);
 			}
-		}
+		} */
 	};
 	
 	//预加载区块
@@ -1550,9 +1664,9 @@ function BlockMap(size, seed, perloadLength){
 				return value[0] != block[i][0] || value[1] != block[i][1];
 			})){ //每个都不一样（不存在 & 不在加载中）
 				this.initBlock(block[i][0], block[i][1]);
-				this.loadBlockAsync(...block[i], ()=>{
+				this.loadBlockAsync(...block[i]/* , ()=>{
 					this.updateBlockAsync(block[i][0], block[i][1]); //更新区块
-				}); //用噪声填充区块
+				} */); //用噪声填充区块
 			}
 		}
 		
@@ -1719,6 +1833,16 @@ let map = new BlockMap([
 	},
 	type: {
 		q: 166
+	},
+	treeHeight: JSON.parse(localStorage.getItem("我的世界_treeHeight")) || {
+		min: 1,
+		max: 10,
+		q: 66,
+		error:{
+			min: -1,
+			max: 1,
+			q: 36
+		}
 	}
 },300);
 document.title = "我的世界:"+map.seed.seed||"读取数据失败";
@@ -1731,7 +1855,7 @@ scene.fog = new THREE.Fog("#fff", 0.01, 300*100);
 //						 雾气颜色，近处的距离，远处的距离(66m)
 let scene_folder = gui.addFolder("场景(scene)");
 	scene_folder.add(scene.children, "length", 0, 10000).name("物体(object)个数").listen();
-	scene_folder.add(map.seed, "seed").name("地图种子");
+	scene_folder.add(localStorage, "我的世界_seed").name("地图种子");
 	let scene_fog_folder = scene_folder.addFolder("雾(fog)");
 		scene_fog_folder.add(scene.fog, "far", 15*100, 1000*100, 100);
 		scene_fog_folder.add(scene.fog, "near", 0.001, 10);
@@ -2668,7 +2792,7 @@ deskgood.goZ = z=>deskgood.go(0,0,z);
 const sql = new SQL("Minecraft", "1.0", "我的世界游戏存档", 10*1024*1024);
 sql.setErrCallback(function(err){
 	console.error("SQL运行出错：", err, err.message);
-	alert("存档 读取/写入 错误");
+	alert("SQL存档数据库 读取/写入 错误");
 });
 sql.createTable("file", [
 	"type UNSIGNED TINYINT",
@@ -2858,10 +2982,10 @@ deskgood_folder.open();
 		deskgood_tools_folder.add(deskgood, "choice", 0, 3, 1).listen().name("选择工具").onChange(deskgood.tools_choice_refresh);
 		let deskgood_tools_things_folder = deskgood_tools_folder.addFolder("物品");
 		deskgood_tools_things_folder.open();
-			deskgood_tools_things_folder.add(deskgood.tools, 0, 0, 9, 1).listen().onChange(deskgood.tools_things_refresh);
-			deskgood_tools_things_folder.add(deskgood.tools, 1, 0, 9, 1).listen().onChange(deskgood.tools_things_refresh);
-			deskgood_tools_things_folder.add(deskgood.tools, 2, 0, 9, 1).listen().onChange(deskgood.tools_things_refresh);
-			deskgood_tools_things_folder.add(deskgood.tools, 3, 0, 9, 1).listen().onChange(deskgood.tools_things_refresh);
+			deskgood_tools_things_folder.add(deskgood.tools, 0, 0, 12, 1).listen().onChange(deskgood.tools_things_refresh);
+			deskgood_tools_things_folder.add(deskgood.tools, 1, 0, 12, 1).listen().onChange(deskgood.tools_things_refresh);
+			deskgood_tools_things_folder.add(deskgood.tools, 2, 0, 12, 1).listen().onChange(deskgood.tools_things_refresh);
+			deskgood_tools_things_folder.add(deskgood.tools, 3, 0, 12, 1).listen().onChange(deskgood.tools_things_refresh);
 
 
 /* //多线程
