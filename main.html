@@ -846,8 +846,31 @@ function seed_scale(noise, t, x, z){
 	return value<0?0: value>1?1: value;
 }
 function seed_treeHeight(noise, t, x, z){
-	let value = rnd( noise.more3D(332.976, x/t.q, z/t.q, 6)*666 ) *t.k +t.b +rnd_error(noise, t.e, -541.28, x, z)
-	return value;
+	let result = [0];
+	let value = rnd( noise.more3D(332.976, x/t.q, z/t.q, 6)*666666 );
+	if (3/6 < value && value < 4/6) // 1/12
+		result[0] = rnd( noise.more3D(-5.4128, x/t.q, z/t.q, 6)*666666 ) *t.k +t.b+
+			rnd_error(noise, t.e, -8.766164554948489, x, z);
+	value = rnd( noise.more3D(332.976, (x+1)/t.q, z/t.q, 6)*666666 );
+	if (3/6 < value && value < 4/6) // 1/12
+		result[1] = rnd( noise.more3D(-5.4128, (x+1)/t.q, z/t.q, 6)*666666 ) *t.k +t.b+
+			rnd_error(noise, t.e, -8.766164554948489, (x+1), z);
+	value = rnd( noise.more3D(332.976, (x-1)/t.q, z/t.q, 6)*666666 );
+	if (3/6 < value && value < 4/6) // 1/12
+		result[2] = rnd( noise.more3D(-5.4128, (x-1)/t.q, z/t.q, 6)*666666 ) *t.k +t.b+
+			rnd_error(noise, t.e, -8.766164554948489, (x-1), z);
+	value = rnd( noise.more3D(332.976, x/t.q, (z+1)/t.q, 6)*666666 );
+	if (3/6 < value && value < 4/6) // 1/12
+		result[3] = rnd( noise.more3D(-5.4128, x/t.q, (z+1)/t.q, 6)*666666 ) *t.k +t.b+
+			rnd_error(noise, t.e, -8.766164554948489, x, (z+1));
+	value = rnd( noise.more3D(332.976, x/t.q, (z-1)/t.q, 6)*666666 );
+	if (3/6 < value && value < 4/6) // 1/12
+		result[4] = rnd( noise.more3D(-5.4128, x/t.q, (z-1)/t.q, 6)*666666 ) *t.k +t.b+
+			rnd_error(noise, t.e, -8.766164554948489, x, (z-1));
+	if (result.splice(1).some(function(value){
+		return value != 0;
+	})) result[0] = 0;
+	return result[0];
 }
 function BlockMap(size, seed, perloadLength){
 	//一区块大小
@@ -1157,7 +1180,7 @@ function BlockMap(size, seed, perloadLength){
 		// 40+ 高山（无树，有草）
 		// 26+ 丘陵（树）
 		// type
-		if (height > 54){
+		if (height > 54){ // 54+ 高原（草木不生，积雪覆盖）
 			grass = true;
 		}else if (height > 40){
 			
@@ -1172,51 +1195,84 @@ function BlockMap(size, seed, perloadLength){
 			/* let earth = height - height * (t.noise.more3D(6.6, x/t.s.q, z/t.s.q, 6) *t.s.k +t.s.b)+
 			t.noise.more3D(-52.6338, x/t.s.e.q, z/t.s.e.q, 3) *t.s.e.k +t.s.e.b; */
 			let id = 0;
-			if (dy > height){
-				id = 0; // 空气/真空 (null)：不用加载
-			}else if (dy > earth){
-				switch (type){
-					case 0: //森林
-						if (grass){
-							id = 4; //泥土
-						}else{
-							id = 3; //草方块
-							grass = true;
-						}
-						break;
-					case 1: //草原
-						if (grass){
-							id = 4; //泥土
-						}else{
-							id = 3; //草方块
-							grass = true;
-						}
-						break;
-					case 2: //沙漠
-						id = 7;
-						break;
-				}
-			}else if (dy == 0){
-				id = 2; //基岩
-			}else{
-				if (!grass && t.noise.more3D(375.12, x, z, 3)<0.99){
-					switch (type){
-						case 0: //森林
-							id = 3; //草方块
-							grass = true;
-							break;
-						case 1: //草原
-							id = 3; //草方块
-							grass = true;
-							break;
-						case 2: //沙漠
-							id = 7;
-							grass = true;
-							break;
+			let treeHeight = height + seed_treeHeight(t.noise, t.tH, x, z);
+			switch (type){
+				case 0: //森林
+					
+					if (height > 40){ // 40+ 高山（无树，有草）
+						treeHeight = height;
 					}
-				}else{
-					id = 6; //石头
-				}
+					if (dy > treeHeight){
+						id = 0; // 空气/真空 (null)
+					}else if (dy > height){
+						id = 9; //橡木
+					}else if (dy > earth){
+						if (grass){
+							id = 4; //泥土
+						}else{
+							id = 3; //草方块
+							grass = true;
+						}
+					}else if (dy == 0){
+						id = 2; //基岩
+					}else{
+						if (!grass && t.noise.more3D(375.12, x, z, 3)<0.99){
+							id = 3; //草方块
+							grass = true;
+						}else{
+							id = 6; //石头
+						}
+					}
+					break;
+					
+				case 1: //草原
+					
+					if (height <= 26){ // 26+ 丘陵（树）
+						treeHeight = height;
+					}
+					if (dy > treeHeight){
+						id = 0; // 空气/真空 (null)
+					}else if (dy > height){
+						id = 9; //橡木
+					}else if (dy > earth){
+						if (grass){
+							id = 4; //泥土
+						}else{
+							id = 3; //草方块
+							grass = true;
+						}
+					}else if (dy == 0){
+						id = 2; //基岩
+					}else{
+						if (!grass && t.noise.more3D(375.12, x, z, 3)<0.99){
+							id = 3; //草方块
+							grass = true;
+						}else{
+							id = 6; //石头
+						}
+					}
+					break;
+					
+				case 2: //沙漠
+					
+					if (dy > height){
+						id = 0; // 空气/真空 (null)
+					}else if (dy > earth){
+						id = 7; //沙子
+					}else if (dy == 0){
+						id = 2; //基岩
+					}else{
+						if (!grass && t.noise.more3D(375.12, x, z, 3)<0.99){
+							id = 7; //沙子
+							grass = true;
+						}else{
+							id = 6; //石头
+						}
+					}
+					break;
+				
+				default:
+					id = 0;
 			}
 			
 			if (!new Array(...edit).some((value, index, arr) => {
@@ -1578,7 +1634,7 @@ function BlockMap(size, seed, perloadLength){
 				//正常代码
 				for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
 					for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-						if (this.map[ox+dx][dy][oz+dz] != null){ //非空气
+						if (this.map[ox+dx][dy][oz+dz]){ //非空气 & 非未加载
 							for (let i of this.map[ox+dx][dy][oz+dz].block.mesh.material)
 								i.dispose();
 							this.map[ox+dx][dy][oz+dz].block.mesh.geometry.dispose(); //清除内存
@@ -2924,7 +2980,7 @@ deskgood_folder.open();
 		f(){deskgood.die("使用命令自杀")}
 	}, "f").name("Game Over（自杀 deskgood.die()）");
 	deskgood_folder.add(deskgood, "sensitivity", 0.1, 10).name("灵敏度");
-	deskgood_folder.add(deskgood, "jump_v", 1, 10).name("跳跃速度");
+	deskgood_folder.add(deskgood, "jump_v", 1, 36).name("跳跃速度");
 	let deskgood_position_folder = deskgood_folder.addFolder("位置/px");
 	deskgood_position_folder.open();
 		deskgood_position_folder.add(deskgood.pos, "x", -1000, 1000, 0.01).listen();
