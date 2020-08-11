@@ -981,24 +981,38 @@ function BlockMap(size, seed, perloadLength){
 	};
 	
 	//添加方块
-	this.add = (thing, pos)=>{
+	this.add = (thing, pos, type=true)=>{
 		[pos.x, pos.y, pos.z] = [pos.x, pos.y, pos.z].map(Math.round); //规范化
 		
-		//console.log(thing.block.mesh, pos)
+		if (this.get(pos.x, pos.y, pos.z) === undefined) return;
+		if (
+			this.get(pos.x, pos.y, pos.z) !== null &&
+			this.get(pos.x, pos.y, pos.z) !== false
+		) //有方块
+			if (type){ //替换
+				for (let i of this.map[pos.x][pos.y][pos.z].block.mesh.material)
+					i.dispose();
+				this.map[pos.x][pos.y][pos.z].block.mesh.geometry.dispose(); //清除内存
+				scene.remove(this.map[pos.x][pos.y][pos.z].block.mesh);
+				this.map[pos.x][pos.y][pos.z] = null;
+			}else{ //不替换
+				return;
+			}
+		
 		thing.block.mesh.position.x = pos.x*100;
 		thing.block.mesh.position.y = pos.y*100;
 		thing.block.mesh.position.z = pos.z*100;
-		//thing.block.visible = false; //默认不绘制
 		
 		scene.add(thing.block.mesh); //网格模型添加到场景中
-		//thing.block.mesh = thing.block.mesh;
 		this.map[pos.x][pos.y][pos.z] = thing;
 	};
 	//根据 模板和ID 添加方块
-	this.addID = (id, pos, template)=>{
+	this.addID = (id, pos, template, type=true)=>{
 		if (id == 0){
 			[pos.x, pos.y, pos.z] = [pos.x, pos.y, pos.z].map(Math.round); //规范化
-			this.map[pos.x][pos.y][pos.z] = null; //空气
+			try{
+				this.map[pos.x][pos.y][pos.z] = null; //空气
+			}catch(e){} //防止不存在
 			return;
 		}
 		
@@ -1011,7 +1025,8 @@ function BlockMap(size, seed, perloadLength){
 				x:pos.x,
 				y:pos.y,
 				z:pos.z,
-			}
+			},
+			type
 		); //以模板建立
 	};
 	
@@ -1182,13 +1197,8 @@ function BlockMap(size, seed, perloadLength){
 		// type
 		if (height > 54){ // 54+ 高原（草木不生，积雪覆盖）
 			grass = true;
-		}else if (height > 40){
-			
-		}else if (height > 26){
-			
-		}else{
-			
 		}
+		let treeTop = null;
 		for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
 			
 			let earth = height - height * seed_scale(t.noise, t.s, x, z);
@@ -1205,6 +1215,7 @@ function BlockMap(size, seed, perloadLength){
 					if (dy > treeHeight){
 						id = 0; // 空气/真空 (null)
 					}else if (dy > height){
+						if (!treeTop) treeTop = dy;
 						id = 9; //橡木
 					}else if (dy > earth){
 						if (grass){
@@ -1233,6 +1244,7 @@ function BlockMap(size, seed, perloadLength){
 					if (dy > treeHeight){
 						id = 0; // 空气/真空 (null)
 					}else if (dy > height){
+						if (!treeTop) treeTop = dy;
 						id = 9; //橡木
 					}else if (dy > earth){
 						if (grass){
@@ -1294,6 +1306,35 @@ function BlockMap(size, seed, perloadLength){
 					z: z
 				}, template);
 			}
+			
+		}
+		
+		if (treeTop){ //非强制添加树叶(10)
+			this.addID(10, {
+				x: x,
+				y: treeTop+1,
+				z: z
+			}, template, false);
+			this.addID(10, {
+				x: x+1,
+				y: treeTop,
+				z: z
+			}, template, false);
+			this.addID(10, {
+				x: x-1,
+				y: treeTop,
+				z: z
+			}, template, false);
+			this.addID(10, {
+				x: x,
+				y: treeTop,
+				z: z+1
+			}, template, false);
+			this.addID(10, {
+				x: x,
+				y: treeTop,
+				z: z-1
+			}, template, false);
 			
 		}
 	}
