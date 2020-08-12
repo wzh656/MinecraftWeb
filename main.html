@@ -325,8 +325,8 @@
 		</script>
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
-		<script>eruda.init();</script>
-		<script>new VConsole();</script>
+		<script>//eruda.init();</script>
+		<script>//new VConsole();</script>
 		<script src="./js/three.min.js"></script>
 		<script src="./js/simplex-noise.js"></script>
 		<script src="./js/dat.gui.min.js"></script>
@@ -745,18 +745,20 @@ function Thing(opinion){
 			return this;
 		}
 		
+		this.block.transparent = opinion.block.transparent || false;
+		
 		//material
 		if (opinion.block.material){ //材质
 			this.block.material = opinion.block.material;
 		}
 		this.block.makeMaterial = ()=>{
 			this.block.material = [
-				new THREE.MeshLambertMaterial({ map:this.block.texture[0], transparent:true/*, visible:false*/ }),
-				new THREE.MeshLambertMaterial({ map:this.block.texture[1], transparent:true/*, visible:false*/ }),
-				new THREE.MeshLambertMaterial({ map:this.block.texture[2], transparent:true/*, visible:false*/ }),
-				new THREE.MeshLambertMaterial({ map:this.block.texture[3], transparent:true/*, visible:false*/ }),
-				new THREE.MeshLambertMaterial({ map:this.block.texture[4], transparent:true/*, visible:false*/ }),
-				new THREE.MeshLambertMaterial({ map:this.block.texture[5], transparent:true/*, visible:false*/ })
+				new THREE.MeshLambertMaterial({ map:this.block.texture[0], transparent:this.block.transparent }),
+				new THREE.MeshLambertMaterial({ map:this.block.texture[1], transparent:this.block.transparent }),
+				new THREE.MeshLambertMaterial({ map:this.block.texture[2], transparent:this.block.transparent }),
+				new THREE.MeshLambertMaterial({ map:this.block.texture[3], transparent:this.block.transparent }),
+				new THREE.MeshLambertMaterial({ map:this.block.texture[4], transparent:this.block.transparent }),
+				new THREE.MeshLambertMaterial({ map:this.block.texture[5], transparent:this.block.transparent })
 			]; //材质对象 MeshLambertMaterial
 			return this;
 		}
@@ -847,29 +849,34 @@ function seed_scale(noise, t, x, z){
 }
 function seed_treeHeight(noise, t, x, z){
 	let result = [0];
-	let value = rnd( noise.more3D(332.976, x/t.q, z/t.q, 6)*666666 );
+	let value = noise.more3D(332.976, x/t.q, z/t.q, 6);
 	if (3/6 < value && value < 4/6) // 1/12
-		result[0] = rnd( noise.more3D(-5.4128, x/t.q, z/t.q, 6)*666666 ) *t.k +t.b+
-			rnd_error(noise, t.e, -8.766164554948489, x, z);
-	value = rnd( noise.more3D(332.976, (x+1)/t.q, z/t.q, 6)*666666 );
+		result[0] = noise.more3D(-5.4128, x/t.q, z/t.q, 6) *t.k +t.b+
+			seed_error(noise, t.e, -8.766164554948489, x, z);
+	
+	value = noise.more3D(332.976, (x+1)/t.q, z/t.q, 6);
 	if (3/6 < value && value < 4/6) // 1/12
-		result[1] = rnd( noise.more3D(-5.4128, (x+1)/t.q, z/t.q, 6)*666666 ) *t.k +t.b+
-			rnd_error(noise, t.e, -8.766164554948489, (x+1), z);
-	value = rnd( noise.more3D(332.976, (x-1)/t.q, z/t.q, 6)*666666 );
+		result[1] = noise.more3D(-5.4128, (x+1)/t.q, z/t.q, 6) *t.k +t.b+
+			seed_error(noise, t.e, -8.766164554948489, (x+1), z);
+	
+	value = noise.more3D(332.976, (x-1)/t.q, z/t.q, 6);
 	if (3/6 < value && value < 4/6) // 1/12
-		result[2] = rnd( noise.more3D(-5.4128, (x-1)/t.q, z/t.q, 6)*666666 ) *t.k +t.b+
-			rnd_error(noise, t.e, -8.766164554948489, (x-1), z);
-	value = rnd( noise.more3D(332.976, x/t.q, (z+1)/t.q, 6)*666666 );
+		result[2] = noise.more3D(-5.4128, (x-1)/t.q, z/t.q, 6) *t.k +t.b+
+			seed_error(noise, t.e, -8.766164554948489, (x-1), z);
+	
+	value = noise.more3D(332.976, x/t.q, (z+1)/t.q, 6);
 	if (3/6 < value && value < 4/6) // 1/12
-		result[3] = rnd( noise.more3D(-5.4128, x/t.q, (z+1)/t.q, 6)*666666 ) *t.k +t.b+
-			rnd_error(noise, t.e, -8.766164554948489, x, (z+1));
-	value = rnd( noise.more3D(332.976, x/t.q, (z-1)/t.q, 6)*666666 );
+		result[3] = noise.more3D(-5.4128, x/t.q, (z+1)/t.q, 6) *t.k +t.b+
+			seed_error(noise, t.e, -8.766164554948489, x, (z+1));
+	
+	value = noise.more3D(332.976, x/t.q, (z-1)/t.q, 6);
 	if (3/6 < value && value < 4/6) // 1/12
-		result[4] = rnd( noise.more3D(-5.4128, x/t.q, (z-1)/t.q, 6)*666666 ) *t.k +t.b+
-			rnd_error(noise, t.e, -8.766164554948489, x, (z-1));
+		result[4] = noise.more3D(-5.4128, x/t.q, (z-1)/t.q, 6) *t.k +t.b+
+			seed_error(noise, t.e, -8.766164554948489, x, (z-1));
+	
 	if (result.splice(1).some(function(value){
 		return value != 0;
-	})) result[0] = 0;
+	})) result[0] = 0; //防止树木过密
 	return result[0];
 }
 function BlockMap(size, seed, perloadLength){
@@ -970,8 +977,12 @@ function BlockMap(size, seed, perloadLength){
 		[x, y, z] = [x, y, z].map(Math.round); //规范化
 		
 		try{
-			if (this.map[x][y][z] == undefined){
+			if (this.map[x][y][z] === undefined){
 				return undefined;
+			}else if (this.map[x][y][z] === null){
+				return null;
+			}else if (this.map[x][y][z] === false){
+				return false;
 			}else{
 				return this.map[x][y][z];
 			}
@@ -988,16 +999,17 @@ function BlockMap(size, seed, perloadLength){
 		if (
 			this.get(pos.x, pos.y, pos.z) !== null &&
 			this.get(pos.x, pos.y, pos.z) !== false
-		) //有方块
+		){ //有方块
 			if (type){ //替换
-				for (let i of this.map[pos.x][pos.y][pos.z].block.mesh.material)
+				/* for (let i of this.map[pos.x][pos.y][pos.z].block.mesh.material)
 					i.dispose();
 				this.map[pos.x][pos.y][pos.z].block.mesh.geometry.dispose(); //清除内存
 				scene.remove(this.map[pos.x][pos.y][pos.z].block.mesh);
-				this.map[pos.x][pos.y][pos.z] = null;
+				this.map[pos.x][pos.y][pos.z] = null; */
 			}else{ //不替换
 				return;
 			}
+		}
 		
 		thing.block.mesh.position.x = pos.x*100;
 		thing.block.mesh.position.y = pos.y*100;
@@ -1880,7 +1892,8 @@ template.push(new Thing({
 	id: 10,
 	name: "树叶",
 	block: {
-		face: face_url[1]
+		face: face_url[1],
+		transparent: true
 	}
 }));
 template.push(new Thing({
@@ -1934,11 +1947,11 @@ let map = new BlockMap([
 	treeHeight: JSON.parse(localStorage.getItem("我的世界_treeHeight")) || {
 		min: 1,
 		max: 10,
-		q: 66,
+		q: 1,
 		error:{
 			min: -1,
 			max: 1,
-			q: 36
+			q: 1
 		}
 	}
 },300);
@@ -3445,9 +3458,9 @@ let deskgood_choice_folder = deskgood_folder.addFolder("选择物体");
 	deskgood_choice_folder.add(mouse_choice, "faceIndex", 0, 12, 1).listen();
 	deskgood_choice_folder.add(mouse_choice, "id", 0, 9, 1).listen();
 
-/*document.addEventListener("click", function (e){
+document.addEventListener("click", function (e){
 	console.log( ray({},deskgood.look)[0] );
-});*/
+});
 document.addEventListener("mousemove", function (e){
 	if (stop)
 		return;
@@ -4482,7 +4495,7 @@ function get_choice_object(phone, x, y){
 	mouse.y = phone? -2*(y/HEIGHT)+1: 0;
 	//mouse.x = phone? (x/window.innerWidth)*0.9-0.6: 0;
 	//mouse.y = phone? (y/window.innerHeight)*1.8-0.6: 0;
-	console.log("get:", x, y, mouse.x, mouse.y);
+	//console.log("get:", x, y, mouse.x, mouse.y);
 	//以camera为z坐标，确定所点击物体的3D空间位置
 	raycaster.setFromCamera(mouse, camera);
 	//确定所点击位置上的物体数量
