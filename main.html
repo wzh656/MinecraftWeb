@@ -3,7 +3,7 @@
 <html lang="zh">
 	<head>
 		<meta charset="UTF-8" />
-		<meta content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+		<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
 		<title>我的世界</title>
 		
 		<!--icon-->
@@ -325,8 +325,8 @@
 		</script>
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
-		<script>//eruda.init();</script>
-		<script>//new VConsole();</script>
+		<script>eruda.init();</script>
+		<script>new VConsole();</script>
 		<script src="./js/three.min.js"></script>
 		<script src="./js/simplex-noise.js"></script>
 		<script src="./js/dat.gui.min.js"></script>
@@ -746,7 +746,6 @@ function Thing(opinion){
 		}
 		
 		this.block.transparent = opinion.block.transparent || false;
-		
 		//material
 		if (opinion.block.material){ //材质
 			this.block.material = opinion.block.material;
@@ -977,15 +976,15 @@ function BlockMap(size, seed, perloadLength){
 		[x, y, z] = [x, y, z].map(Math.round); //规范化
 		
 		try{
-			if (this.map[x][y][z] === undefined){
+			/*if (this.map[x][y][z] === undefined){
 				return undefined;
 			}else if (this.map[x][y][z] === null){
 				return null;
 			}else if (this.map[x][y][z] === false){
 				return false;
-			}else{
+			}else{*/
 				return this.map[x][y][z];
-			}
+			//}
 		}catch(err){ //超过范围
 			return undefined;
 		}
@@ -996,16 +995,13 @@ function BlockMap(size, seed, perloadLength){
 		[pos.x, pos.y, pos.z] = [pos.x, pos.y, pos.z].map(Math.round); //规范化
 		
 		if (this.get(pos.x, pos.y, pos.z) === undefined) return;
-		if (
-			this.get(pos.x, pos.y, pos.z) !== null &&
-			this.get(pos.x, pos.y, pos.z) !== false
-		){ //有方块
+		if ( this.get(pos.x, pos.y, pos.z) ){ //有方块
 			if (type){ //替换
-				/* for (let i of this.map[pos.x][pos.y][pos.z].block.mesh.material)
+				for (let i of this.map[pos.x][pos.y][pos.z].block.mesh.material)
 					i.dispose();
 				this.map[pos.x][pos.y][pos.z].block.mesh.geometry.dispose(); //清除内存
 				scene.remove(this.map[pos.x][pos.y][pos.z].block.mesh);
-				this.map[pos.x][pos.y][pos.z] = null; */
+				this.map[pos.x][pos.y][pos.z] = null;
 			}else{ //不替换
 				return;
 			}
@@ -1015,16 +1011,20 @@ function BlockMap(size, seed, perloadLength){
 		thing.block.mesh.position.y = pos.y*100;
 		thing.block.mesh.position.z = pos.z*100;
 		
-		scene.add(thing.block.mesh); //网格模型添加到场景中
 		this.map[pos.x][pos.y][pos.z] = thing;
+		scene.add(thing.block.mesh); //网格模型添加到场景中
 	};
 	//根据 模板和ID 添加方块
 	this.addID = (id, pos, template, type=true)=>{
 		if (id == 0){
 			[pos.x, pos.y, pos.z] = [pos.x, pos.y, pos.z].map(Math.round); //规范化
-			try{
-				this.map[pos.x][pos.y][pos.z] = null; //空气
-			}catch(e){} //防止不存在
+			if ( this.get(pos.x, pos.y, pos.z) ){ //有方块
+				for (let i of this.map[pos.x][pos.y][pos.z].block.mesh.material)
+					i.dispose();
+				this.map[pos.x][pos.y][pos.z].block.mesh.geometry.dispose(); //清除内存
+				scene.remove(this.map[pos.x][pos.y][pos.z].block.mesh);
+			}
+			this.map[pos.x][pos.y][pos.z] = null; //空气
 			return;
 		}
 		
@@ -1064,12 +1064,12 @@ function BlockMap(size, seed, perloadLength){
 		if (!this.get(x,y,z)) // 没有方块(null)/不在范围(undefined)/加载中(false)
 			return;
 		
-		this.map[x][y][z].block.material[0].visible = !this.get(x+1, y, z);
-		this.map[x][y][z].block.material[1].visible = !this.get(x-1, y, z);
-		this.map[x][y][z].block.material[2].visible = !this.get(x, y+1, z);
-		this.map[x][y][z].block.material[3].visible = !this.get(x, y-1, z);
-		this.map[x][y][z].block.material[4].visible = !this.get(x, y, z+1);
-		this.map[x][y][z].block.material[5].visible = !this.get(x, y, z-1);
+		this.map[x][y][z].block.material[0].visible = this.get(x+1, y, z) || !this.get(x+1, y, z).block.transparent; //透明 或 没方块
+		this.map[x][y][z].block.material[1].visible = this.get(x-1, y, z) || !this.get(x-1, y, z).block.transparent;
+		this.map[x][y][z].block.material[2].visible = this.get(x, y+1, z) || !this.get(x, y+1, z).block.transparent;
+		this.map[x][y][z].block.material[3].visible = this.get(x, y-1, z) || !this.get(x, y-1, z).block.transparent;
+		this.map[x][y][z].block.material[4].visible = this.get(x, y, z+1) || !this.get(x, y, z+1).block.transparent;
+		this.map[x][y][z].block.material[5].visible = this.get(x, y, z-1) || !this.get(x, y, z-1).block.transparent;
 	};
 	
 	//更新方块及周围
@@ -1322,6 +1322,7 @@ function BlockMap(size, seed, perloadLength){
 		}
 		
 		if (treeTop){ //非强制添加树叶(10)
+			setTimeout(()=>{
 			this.addID(10, {
 				x: x,
 				y: treeTop+1,
@@ -1347,6 +1348,7 @@ function BlockMap(size, seed, perloadLength){
 				y: treeTop,
 				z: z-1
 			}, template, false);
+			},0);
 			
 		}
 	}
@@ -1893,7 +1895,7 @@ template.push(new Thing({
 	name: "树叶",
 	block: {
 		face: face_url[1],
-		transparent: true
+		transparent: true //透明方块
 	}
 }));
 template.push(new Thing({
