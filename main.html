@@ -1117,21 +1117,12 @@ function BlockMap(size, seed, perloadLength){
 		if (!this.get(x,y,z)) // 没有方块(null)/不在范围(undefined)/加载中(false)
 			return;
 		
-		this.map[x][y][z].block.material[0].visible = !!(this.get(x+1, y, z) || !(this.get(x+1, y, z) && this.get(x+1, y, z).block.transparent) ) //透明 或 没方块
-		this.map[x][y][z].block.material[1].visible = !!(this.get(x-1, y, z) || !(this.get(x-1, y, z) && this.get(x-1, y, z).block.transparent) )
-		this.map[x][y][z].block.material[2].visible = !!(this.get(x, y+1, z) || !(this.get(x, y+1, z) && this.get(x, y+1, z).block.transparent) )
-		this.map[x][y][z].block.material[3].visible = !!(this.get(x, y-1, z) || !(this.get(x, y-1, z) && this.get(x, y-1, z).block.transparent) )
-		this.map[x][y][z].block.material[4].visible = !!(this.get(x, y, z+1) || !(this.get(x, y, z+1) && this.get(x, y, z+1).block.transparent) )
-		this.map[x][y][z].block.material[5].visible = !!(this.get(x, y, z-1) || !(this.get(x, y, z-1) && this.get(x, y, z-1).block.transparent) )
-		
-		/* console.log(
-			this.map[x][y][z].block.material[0].visible,
-			this.map[x][y][z].block.material[1].visible,
-			this.map[x][y][z].block.material[2].visible,
-			this.map[x][y][z].block.material[3].visible,
-			this.map[x][y][z].block.material[4].visible,
-			this.map[x][y][z].block.material[5].visible
-		) */
+		this.map[x][y][z].block.material[0].visible = !( this.get(x+1, y, z) && !this.get(x+1, y, z).block.transparent ); //透明 或 没方块
+		this.map[x][y][z].block.material[1].visible = !( this.get(x-1, y, z) && !this.get(x-1, y, z).block.transparent );
+		this.map[x][y][z].block.material[2].visible = !( this.get(x, y+1, z) && !this.get(x, y+1, z).block.transparent );
+		this.map[x][y][z].block.material[3].visible = !( this.get(x, y-1, z) && !this.get(x, y-1, z).block.transparent );
+		this.map[x][y][z].block.material[4].visible = !( this.get(x, y, z+1) && !this.get(x, y, z+1).block.transparent );
+		this.map[x][y][z].block.material[5].visible = !( this.get(x, y, z-1) && !this.get(x, y, z-1).block.transparent );
 	};
 	
 	//更新方块及周围
@@ -1147,7 +1138,7 @@ function BlockMap(size, seed, perloadLength){
 	
 	//更新列方块
 	this.updateColumn = (x, z)=>{
-		console.log("updateColumn:",x,z,+new Date);
+		//console.log("updateColumn:",x,z,+new Date);
 		for (let dy=this.size[0].y; dy<=this.size[1].y; dy++)
 			this.update(x, dy, z);
 	};
@@ -4609,12 +4600,18 @@ setInterval(function(){
 <body style="background-color: black; color: white; margin:0; padding:0;">
 <h1 style="font-size:16vmin; width:100%; margin:0; text-align:center; position:absolute; top:50%; transform:translateY(-50%);">欢迎来到天堂！<br/>welcome to Infinity.</h1>
 		`);
+		setTimeout(()=>{
+			deskgood.die("上天堂");
+		},3*1000);
 	}else if (deskgood.pos.y < -1800*100){
 		document.body.innerHTML = "";
 		document.write(`
 <body style="background-color: black; color: white; margin:0; padding:0;">
 <h1 style="font-size:16vmin; width:100%; margin:0; text-align:center; position:absolute; top:50%; transform:translateY(-50%);">欢迎来到地狱！<br/>welcome to L-18.</h1>
 		`);
+		setTimeout(()=>{
+			deskgood.die("下地狱");
+		},3*1000);
 	}
 },1000);
 
