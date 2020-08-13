@@ -746,6 +746,7 @@ function Thing(opinion){
 		}
 		
 		this.block.transparent = opinion.block.transparent || false;
+		this.block.through = opinion.block.through || false;
 		//material
 		if (opinion.block.material){ //材质
 			this.block.material = opinion.block.material;
@@ -780,6 +781,8 @@ function Thing(opinion){
 			}
 			this.block.mesh.castShadow = true;
 			this.block.mesh.receiveShadow = true;
+			this.block.mesh.userData.through = !!this.block.through;
+			this.block.mesh.userData.type = "block";
 			return this;
 		}
 		this.block.deleteMesh = (index)=>{
@@ -821,6 +824,21 @@ SimplexNoise.prototype.more3D = function(xin, yin, zin, more){
 	}
 	return sum;
 };
+const SEED_RANDOM_CONSTANT = [
+	0.6,
+	-3.1415926,
+	54.782,
+	-1428.57,
+	333.35,
+	6.6,
+	-52.6338,
+	332.976,
+	-5.4128,
+	-8.766164554948489,
+	93.139,
+	3528.17,
+	644.157
+];
 function rnd(seed){
 	seed = (seed *9301 +49297) %233280; //为何使用这三个数?
 	return seed/233280;
@@ -832,51 +850,61 @@ function seed_error(noise, t, id, x, z){
 	return noise.more3D(id, x/t.q, z/t.q, 3) *t.k +t.b;
 }
 function seed_height(noise, t, x, z){
-	let value = ( noise.more3D(0.6,	x/t.q, z/t.q, 3)+
-		noise.more3D(-3.1415926,	x/t.q, z/t.q, 3)+
-		noise.more3D(54.782,		x/t.q, z/t.q, 3) )/3;
+	let value = ( noise.more3D(SEED_RANDOM_CONSTANT[0],	x/t.q, z/t.q, 3)+
+		noise.more3D(SEED_RANDOM_CONSTANT[1],			x/t.q, z/t.q, 3)+
+		noise.more3D(SEED_RANDOM_CONSTANT[2],			x/t.q, z/t.q, 3) )/3;
 	value = 1-Math.sin( (1-value)*90/180*Math.PI );
-	return value *t.k +t.b +seed_error(noise, t.e, -1428.57, x, z);
+	return value *t.k +t.b +seed_error(noise, t.e, SEED_RANDOM_CONSTANT[3], x, z);
 }
 function seed_type(noise, t, x, z){
-	let value = Math.abs( noise.noise3D(333.35, x/t.q, z/t.q) );
+	let value = Math.abs( noise.noise3D(SEED_RANDOM_CONSTANT[4], x/t.q, z/t.q) );
 	return value<0.4?0: value<0.8?1: 2;
 }
 function seed_scale(noise, t, x, z){
-	let value = noise.more3D(6.6, x/t.q, z/t.q, 6) *t.k +t.b +seed_error(noise, t.e, -52.6338, x, z);
+	let value = noise.more3D(SEED_RANDOM_CONSTANT[5], x/t.q, z/t.q, 6) *t.k +t.b+
+		seed_error(noise, t.e, SEED_RANDOM_CONSTANT[6], x, z);
 	return value<0?0: value>1?1: value;
 }
 function seed_treeHeight(noise, t, x, z){
 	let result = [0];
-	let value = noise.more3D(332.976, x/t.q, z/t.q, 6);
+	let value = noise.more3D(SEED_RANDOM_CONSTANT[7], x/t.q, z/t.q, 6);
 	if (3/6 < value && value < 4/6) // 1/12
-		result[0] = noise.more3D(-5.4128, x/t.q, z/t.q, 6) *t.k +t.b+
-			seed_error(noise, t.e, -8.766164554948489, x, z);
+		result[0] = noise.more3D(SEED_RANDOM_CONSTANT[8], x/t.q, z/t.q, 6) *t.k +t.b+
+			seed_error(noise, t.e, SEED_RANDOM_CONSTANT[9], x, z);
 	
 	value = noise.more3D(332.976, (x+1)/t.q, z/t.q, 6);
 	if (3/6 < value && value < 4/6) // 1/12
-		result[1] = noise.more3D(-5.4128, (x+1)/t.q, z/t.q, 6) *t.k +t.b+
-			seed_error(noise, t.e, -8.766164554948489, (x+1), z);
+		result[1] = noise.more3D(SEED_RANDOM_CONSTANT[8], (x+1)/t.q, z/t.q, 6) *t.k +t.b+
+			seed_error(noise, t.e, SEED_RANDOM_CONSTANT[9], (x+1), z);
 	
 	value = noise.more3D(332.976, (x-1)/t.q, z/t.q, 6);
 	if (3/6 < value && value < 4/6) // 1/12
-		result[2] = noise.more3D(-5.4128, (x-1)/t.q, z/t.q, 6) *t.k +t.b+
-			seed_error(noise, t.e, -8.766164554948489, (x-1), z);
+		result[2] = noise.more3D(SEED_RANDOM_CONSTANT[8], (x-1)/t.q, z/t.q, 6) *t.k +t.b+
+			seed_error(noise, t.e, SEED_RANDOM_CONSTANT[9], (x-1), z);
 	
 	value = noise.more3D(332.976, x/t.q, (z+1)/t.q, 6);
 	if (3/6 < value && value < 4/6) // 1/12
-		result[3] = noise.more3D(-5.4128, x/t.q, (z+1)/t.q, 6) *t.k +t.b+
-			seed_error(noise, t.e, -8.766164554948489, x, (z+1));
+		result[3] = noise.more3D(SEED_RANDOM_CONSTANT[8], x/t.q, (z+1)/t.q, 6) *t.k +t.b+
+			seed_error(noise, t.e, SEED_RANDOM_CONSTANT[9], x, (z+1));
 	
 	value = noise.more3D(332.976, x/t.q, (z-1)/t.q, 6);
 	if (3/6 < value && value < 4/6) // 1/12
-		result[4] = noise.more3D(-5.4128, x/t.q, (z-1)/t.q, 6) *t.k +t.b+
-			seed_error(noise, t.e, -8.766164554948489, x, (z-1));
+		result[4] = noise.more3D(SEED_RANDOM_CONSTANT[8], x/t.q, (z-1)/t.q, 6) *t.k +t.b+
+			seed_error(noise, t.e, SEED_RANDOM_CONSTANT[9], x, (z-1));
 	
 	if (result.splice(1).some(function(value){
 		return value != 0;
 	})) result[0] = 0; //防止树木过密
 	return result[0];
+}
+function seed_openStone(noise, t, x, z){
+	let value = noise.more3D(SEED_RANDOM_CONSTANT[10], x/t.q, z/t.q, 6) *t.k +t.b;
+	return value>0? true: false;
+}
+function seed_leavesScale(noise, t, x, z){
+	let value = noise.more3D(SEED_RANDOM_CONSTANT[11], x/t.q, z/t.q, 6) *t.k +t.b+
+		seed_error(noise, t.e, SEED_RANDOM_CONSTANT[12], x, z);
+	return value<0?0: value>1?1: value;
 }
 function BlockMap(size, seed, perloadLength){
 	//一区块大小
@@ -948,6 +976,21 @@ function BlockMap(size, seed, perloadLength){
 					min: seed.treeHeight.error.min,
 					q: seed.treeHeight.error.q
 				}
+			},
+			oS: {
+				max: seed.openStone.max,
+				min: seed.openStone.min,
+				q: seed.openStone.q
+			},
+			lS: {
+				max: seed.leavesScale.max,
+				min: seed.leavesScale.min,
+				q: seed.leavesScale.q,
+				e: {
+					max: seed.leavesScale.error.max,
+					min: seed.leavesScale.error.min,
+					q: seed.leavesScale.error.q
+				}
 			}
 		};
 		this.seed.noise = new SimplexNoise(this.seed.seed);
@@ -959,14 +1002,24 @@ function BlockMap(size, seed, perloadLength){
 		this.seed.h.b = this.seed.h.min;
 		this.seed.h.e.k = (this.seed.h.e.max - this.seed.h.e.min)/2;
 		this.seed.h.e.b = (this.seed.h.e.max + this.seed.h.e.min)/2;
+		
 		this.seed.s.k = (this.seed.s.max - this.seed.s.min)/2;
 		this.seed.s.b = (this.seed.s.max + this.seed.s.min)/2;
 		this.seed.s.e.k = (this.seed.s.e.max - this.seed.s.e.min)/2;
 		this.seed.s.e.b = (this.seed.s.e.max + this.seed.s.e.min)/2;
+		
 		this.seed.tH.k = (this.seed.tH.max - this.seed.tH.min)/2;
 		this.seed.tH.b = (this.seed.tH.max + this.seed.tH.min)/2;
 		this.seed.tH.e.k = (this.seed.tH.e.max - this.seed.tH.e.min)/2;
 		this.seed.tH.e.b = (this.seed.tH.e.max + this.seed.tH.e.min)/2;
+		
+		this.seed.oS.k = (this.seed.oS.max - this.seed.oS.min)/2;
+		this.seed.oS.b = (this.seed.oS.max + this.seed.oS.min)/2;
+		
+		this.seed.lS.k = (this.seed.lS.max - this.seed.lS.min)/2;
+		this.seed.lS.b = (this.seed.lS.max + this.seed.lS.min)/2;
+		this.seed.lS.e.k = (this.seed.lS.e.max - this.seed.lS.e.min)/2;
+		this.seed.lS.e.b = (this.seed.lS.e.max + this.seed.lS.e.min)/2;
 	}
 	
 	
@@ -1064,12 +1117,21 @@ function BlockMap(size, seed, perloadLength){
 		if (!this.get(x,y,z)) // 没有方块(null)/不在范围(undefined)/加载中(false)
 			return;
 		
-		this.map[x][y][z].block.material[0].visible = this.get(x+1, y, z) || !this.get(x+1, y, z).block.transparent; //透明 或 没方块
-		this.map[x][y][z].block.material[1].visible = this.get(x-1, y, z) || !this.get(x-1, y, z).block.transparent;
-		this.map[x][y][z].block.material[2].visible = this.get(x, y+1, z) || !this.get(x, y+1, z).block.transparent;
-		this.map[x][y][z].block.material[3].visible = this.get(x, y-1, z) || !this.get(x, y-1, z).block.transparent;
-		this.map[x][y][z].block.material[4].visible = this.get(x, y, z+1) || !this.get(x, y, z+1).block.transparent;
-		this.map[x][y][z].block.material[5].visible = this.get(x, y, z-1) || !this.get(x, y, z-1).block.transparent;
+		this.map[x][y][z].block.material[0].visible = !!(this.get(x+1, y, z) || !(this.get(x+1, y, z) && this.get(x+1, y, z).block.transparent) ) //透明 或 没方块
+		this.map[x][y][z].block.material[1].visible = !!(this.get(x-1, y, z) || !(this.get(x-1, y, z) && this.get(x-1, y, z).block.transparent) )
+		this.map[x][y][z].block.material[2].visible = !!(this.get(x, y+1, z) || !(this.get(x, y+1, z) && this.get(x, y+1, z).block.transparent) )
+		this.map[x][y][z].block.material[3].visible = !!(this.get(x, y-1, z) || !(this.get(x, y-1, z) && this.get(x, y-1, z).block.transparent) )
+		this.map[x][y][z].block.material[4].visible = !!(this.get(x, y, z+1) || !(this.get(x, y, z+1) && this.get(x, y, z+1).block.transparent) )
+		this.map[x][y][z].block.material[5].visible = !!(this.get(x, y, z-1) || !(this.get(x, y, z-1) && this.get(x, y, z-1).block.transparent) )
+		
+		/* console.log(
+			this.map[x][y][z].block.material[0].visible,
+			this.map[x][y][z].block.material[1].visible,
+			this.map[x][y][z].block.material[2].visible,
+			this.map[x][y][z].block.material[3].visible,
+			this.map[x][y][z].block.material[4].visible,
+			this.map[x][y][z].block.material[5].visible
+		) */
 	};
 	
 	//更新方块及周围
@@ -1085,7 +1147,8 @@ function BlockMap(size, seed, perloadLength){
 	
 	//更新列方块
 	this.updateColumn = (x, z)=>{
-		for (let dy=this.size[0].y; dy <=this.size[1].y; dy++)
+		console.log("updateColumn:",x,z,+new Date);
+		for (let dy=this.size[0].y; dy<=this.size[1].y; dy++)
 			this.update(x, dy, z);
 	};
 	
@@ -1104,7 +1167,6 @@ function BlockMap(size, seed, perloadLength){
 	};
 	//更新区块内所有方块（异步）
 	this.updateBlockAsync = (x, z, callback)=>{
-		//console.log("updateBlock:",x,z,+new Date);
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
@@ -1211,13 +1273,13 @@ function BlockMap(size, seed, perloadLength){
 			grass = true;
 		}
 		let treeTop = null;
+		let earth = height - height * seed_scale(t.noise, t.s, x, z);
+		let treeHeight = height + seed_treeHeight(t.noise, t.tH, x, z);
 		for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
 			
-			let earth = height - height * seed_scale(t.noise, t.s, x, z);
 			/* let earth = height - height * (t.noise.more3D(6.6, x/t.s.q, z/t.s.q, 6) *t.s.k +t.s.b)+
 			t.noise.more3D(-52.6338, x/t.s.e.q, z/t.s.e.q, 3) *t.s.e.k +t.s.e.b; */
 			let id = 0;
-			let treeHeight = height + seed_treeHeight(t.noise, t.tH, x, z);
 			switch (type){
 				case 0: //森林
 					
@@ -1239,7 +1301,7 @@ function BlockMap(size, seed, perloadLength){
 					}else if (dy == 0){
 						id = 2; //基岩
 					}else{
-						if (!grass && t.noise.more3D(375.12, x, z, 3)<0.99){
+						if (!grass && seed_openStone(t.noise, t.oS, x, z)){
 							id = 3; //草方块
 							grass = true;
 						}else{
@@ -1268,7 +1330,7 @@ function BlockMap(size, seed, perloadLength){
 					}else if (dy == 0){
 						id = 2; //基岩
 					}else{
-						if (!grass && t.noise.more3D(375.12, x, z, 3)<0.99){
+						if (!grass && seed_openStone(t.noise, t.oS, x, z)){
 							id = 3; //草方块
 							grass = true;
 						}else{
@@ -1286,7 +1348,7 @@ function BlockMap(size, seed, perloadLength){
 					}else if (dy == 0){
 						id = 2; //基岩
 					}else{
-						if (!grass && t.noise.more3D(375.12, x, z, 3)<0.99){
+						if (!grass && seed_openStone(t.noise, t.oS, x, z)){
 							id = 7; //沙子
 							grass = true;
 						}else{
@@ -1323,31 +1385,34 @@ function BlockMap(size, seed, perloadLength){
 		
 		if (treeTop){ //非强制添加树叶(10)
 			setTimeout(()=>{
-			this.addID(10, {
-				x: x,
-				y: treeTop+1,
-				z: z
-			}, template, false);
-			this.addID(10, {
-				x: x+1,
-				y: treeTop,
-				z: z
-			}, template, false);
-			this.addID(10, {
-				x: x-1,
-				y: treeTop,
-				z: z
-			}, template, false);
-			this.addID(10, {
-				x: x,
-				y: treeTop,
-				z: z+1
-			}, template, false);
-			this.addID(10, {
-				x: x,
-				y: treeTop,
-				z: z-1
-			}, template, false);
+				this.addID(10, {
+					x: x,
+					y: treeTop+1,
+					z: z
+				}, template, false);
+				let leavesHeight = seed_leavesScale(t.noise, t.lS, x, z) *(treeHeight - height);
+				for (let i=0; i<=leavesHeight; i++){
+					this.addID(10, {
+						x: x+1,
+						y: treeTop-i,
+						z: z
+					}, template, false);
+					this.addID(10, {
+						x: x-1,
+						y: treeTop-i,
+						z: z
+					}, template, false);
+					this.addID(10, {
+						x: x,
+						y: treeTop-i,
+						z: z+1
+					}, template, false);
+					this.addID(10, {
+						x: x,
+						y: treeTop-i,
+						z: z-1
+					}, template, false);
+				}
 			},0);
 			
 		}
@@ -1888,6 +1953,7 @@ template.push(new Thing({
 	name: "橡木",
 	block: {
 		face: ["side.png", "side.png", "up_down.png", "up_down.png", "side.png", "side.png"],
+		through: true //可穿过
 	}
 }));
 template.push(new Thing({
@@ -1895,7 +1961,8 @@ template.push(new Thing({
 	name: "树叶",
 	block: {
 		face: face_url[1],
-		transparent: true //透明方块
+		transparent: true, //透明方块
+		through: true //可穿过
 	}
 }));
 template.push(new Thing({
@@ -1954,6 +2021,21 @@ let map = new BlockMap([
 			min: -1,
 			max: 1,
 			q: 1
+		}
+	},
+	openStone: JSON.parse(localStorage.getItem("我的世界_openStone")) || {
+		min: -0.99,
+		max: 0.01,
+		q: 1
+	},
+	leavesScale: JSON.parse(localStorage.getItem("我的世界_leavesScale")) || {
+		min: 0.4,
+		max: 0.8,
+		q: 16,
+		error:{
+			min: -0.1,
+			max: 0.1,
+			q: 16
 		}
 	}
 },300);
@@ -2425,8 +2507,6 @@ function ray(start, end, near, far){
 	if (end.x === undefined) end.x = 0;
 	if (end.y === undefined) end.y = 0;
 	if (end.z === undefined) end.z = 0;
-	/* if (!end.y)
-		console.log("ray", start, end,far) */
 	
 	let ray = new THREE.Raycaster(
 		new THREE.Vector3(start.x, start.y, start.z),
@@ -2582,7 +2662,7 @@ var deskgood = {
 				{x: 1},
 				0,
 				x+60
-			);
+			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
 				let fx = Math.min(...objs.map(v => v.point.x))-10; //获取碰撞点，计算移动位置
 				rt[0] = fx-(deskgood.pos.x+x);
@@ -2597,7 +2677,7 @@ var deskgood = {
 				{x: 1},
 				0,
 				x+60
-			);
+			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
 				let fx = Math.min(...objs.map(v => v.point.x))-10; //获取碰撞点，计算移动位置
 				rt[0] = fx-(deskgood.pos.x+x);
@@ -2613,7 +2693,7 @@ var deskgood = {
 				{x: -1},
 				0,
 				-x+60
-			);
+			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
 				let fx = Math.max(...objs.map(v => v.point.x))+10; //获取碰撞点，计算移动位置
 				rt[0] = fx-(deskgood.pos.x+x);
@@ -2629,7 +2709,7 @@ var deskgood = {
 				{x: -1},
 				0,
 				-x+60
-			);
+			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
 				let fx = Math.max(...objs.map(v => v.point.x))+10; //获取碰撞点，计算移动位置
 				rt[0] = fx-(deskgood.pos.x+x);
@@ -2648,7 +2728,7 @@ var deskgood = {
 				{y: 1},
 				0,
 				y
-			);
+			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
 				/*let fy = Math.min(...ray(
 					{y: deskgood.pos.y+50},
@@ -2666,7 +2746,7 @@ var deskgood = {
 				{y: -1},
 				0,
 				-y
-			);
+			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
 				/*let fy = Math.max(...ray(
 					{y: deskgood.pos.y-150},
@@ -2688,7 +2768,7 @@ var deskgood = {
 				{z: 1},
 				0,
 				z+60
-			);
+			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
 				let fz = Math.min(...objs.map(v => v.point.z))-10; //获取碰撞点，计算移动位置
 				rt[2] = fz-(deskgood.pos.z+z);
@@ -2703,7 +2783,7 @@ var deskgood = {
 				{z: 1},
 				0,
 				z+60
-			);
+			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
 				let fz = Math.min(...objs.map(v => v.point.z))-10; //获取碰撞点，计算移动位置
 				rt[2] = fz-(deskgood.pos.z+z);
@@ -2719,7 +2799,7 @@ var deskgood = {
 				{z: -1},
 				0,
 				-z+60
-			);
+			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
 				let fz = Math.max(...objs.map(v => v.point.z))+10; //获取碰撞点，计算移动位置
 				rt[2] = fz-(deskgood.pos.z+z);
@@ -2735,7 +2815,7 @@ var deskgood = {
 				{z: -1},
 				0,
 				-z+60
-			);
+			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
 				let fz = Math.max(...objs.map(v => v.point.z))+10; //获取碰撞点，计算移动位置
 				rt[2] = fz-(deskgood.pos.z+z);
@@ -3127,9 +3207,10 @@ function render(){
 	try{
 		if (map.get(deskgood.pos.x/100,
 				deskgood.pos.y/100,
-				deskgood.pos.z/100)
-			!=
-				null
+				deskgood.pos.z/100) != null &&
+			!map.get(deskgood.pos.x/100,
+					deskgood.pos.y/100,
+					deskgood.pos.z/100).block.mesh.userData.through
 		){ //头被卡住
 			warn.push("头被卡住？");
 			message("<font style='font-size: 16px;'>想窒息吗？还往头上放方块，看你怎么出来！</font>", 1);
