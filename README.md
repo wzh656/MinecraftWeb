@@ -1,5 +1,5 @@
 # 我的世界（仿）
-修改日期:2020.7.17(v1.0.0.3-alpha)
+修改日期:2020.8.13(v1.0.0.3-alpha+)
 
 # 运行
 + [手机版(apk)v1.0.0.3-alpha临时完整版（较大，30+MB）（与之前不兼容，无存档，需先卸载重装）](https://github.com/wzh656/MinecraftWeb/releases/download/v1.0.0.3-alpha/full.apk)
@@ -64,9 +64,7 @@
 
 
 ## ㈥注意事项
-### ⑴不应到达地图边缘，若到达则会发生：
-+ ~~可能被**卡住**~~（已修复）  
-+ 可能**掉落虚空**(null)，掉落虚空后，将会发现速度不断增大，直到空气阻力与重力平衡  
+### ⑴不应跑得比地图加载快（~~Although没什么后果，只有一条提示~~），BUT 有时候会 **掉落虚空**(null)，掉落虚空后，将会发现速度不断增大，直到空气阻力与重力平衡，然后便到达*地狱*了  
 
 ### ⑵You'd better not修改*dat.gui.js(control)*里面的东西
 尤其是
@@ -77,6 +75,13 @@
 1. 使用调试工具(输入`camera.userData.pos.y=1000;`)  
 2. 删除应用数据  
 3. 重装应用  
+
+### ⑷*地狱*和*天堂*
+1. *地狱*：当玩家的Y坐标达到-18*10000px(cm)=-18*100m以下（~~即-18层地狱~~）时，将会到达地狱。约3s后，角色`deskgodd`将会死亡
+2. *天堂*：当玩家的Y坐标达到无限(Infinity)以上时，将会到达天堂。约3s后，角色`deskgodd`也会死亡
+
+### ⑸关于角色`deskgood`的死亡
+当`deskgood`死亡时，将会自动删除存档，弹出提示，并自动关闭，**无法复活**，只能重新开始游戏*（生命诚可贵，生命只有一次，请珍爱生命）*
 
 
 ## ㈦关于工具
@@ -113,6 +118,8 @@
     + [手机版(apk)v1.0.0.3-alpha临时简化版（在线字体、BGM，6+MB）（与之前不兼容，无存档，需先卸载重装）](https://github.com/wzh656/MinecraftWeb/releases/download/v1.0.0.3-alpha/full.apk)
     + [手机版(apk)v0.5.0-alpha完整版（较大，20+MB）](https://github.com/wzh656/MinecraftWeb/releases/download/v0.5.0-alpha/Minecraft-full.apk)  
     + [手机版(apk)v0.5.0-alpha简化版（在线字体、BGM，5+MB）](https://github.com/wzh656/MinecraftWeb/releases/download/v0.5.0-alpha/Minecraft-simplified.apk)  
+
+（简化版只是因为觉得完整版太大了，并且可能有一些不必要的资源占内存）
 
 ## ㈨关于效果（图片）
 
