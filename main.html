@@ -1943,8 +1943,7 @@ template.push(new Thing({
 	id: 9,
 	name: "橡木",
 	block: {
-		face: ["side.png", "side.png", "up_down.png", "up_down.png", "side.png", "side.png"],
-		through: true //可穿过
+		face: ["side.png", "side.png", "up_down.png", "up_down.png", "side.png", "side.png"]
 	}
 }));
 template.push(new Thing({
@@ -2057,9 +2056,9 @@ console.info(`降水概率:${weather}滴/s/m²`, `降水范围：地图有效区
 let sprite_system = [],
 	sprite_lastTime = null,
 	sprite_material = new THREE.SpriteMaterial({
-		// color: "#4c51a7", //设置精灵矩形区域颜色
+		color: "#4c51a7", //设置精灵矩形区域颜色
 		// rotation: Math.PI/180*45, //旋转精灵对象45度，弧度值
-		map: new THREE.TextureLoader().load("img/rain.png"), //设置精灵纹理贴图
+		// map: new THREE.TextureLoader().load("img/rain.png"), //设置精灵纹理贴图
 	});
 setInterval(function(){
 	if (sprite_lastTime == null)
