@@ -131,12 +131,14 @@
 			width: 16vw;
 		}
 		
-		.more > div{
+		.more > div[class]{
 			float: left;
-			/*border: 1px solid black;*/
+			padding-top: 2vh;
+			border: 1px solid black;
+			border-radius: 1vmax;
 		}
 		.more div{
-			margin-left: 2vw;
+			padding-left: 2vw;
 		}
 		
 		dialog{
@@ -170,8 +172,8 @@
 				<summary>高级设置</summary>
 				<div class="height">
 					<h3>高度(height)</h3>
-					最小/m：1m<input type="range" min="1" max="64" step="1" value="1" name="min" />64m <input value="1" />m<br/>
-					最大/m：1m<input type="range" min="1" max="64" step="1" value="64" name="max" />64m <input value="64"/>m<br/>
+					最小/m：1m<input type="range" min="1" max="64" step="0.1" value="1" name="min" />64m <input value="1" />m<br/>
+					最大/m：1m<input type="range" min="1" max="64" step="0.1" value="64" name="max" />64m <input value="64"/>m<br/>
 					平滑程度：1<input type="range" min="1" max="1000" step="1" value="166" name="q" />1000 <input value="166"/>
 					<div class="error">
 						<h4>误差(error)</h4>
@@ -191,6 +193,45 @@
 						最大：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="0.1" name="max" />0.5 <input value="0.1"/><br/>
 						平滑程度：1<input type="range" min="1" max="1000" value="166" name="q" />1000 <input value="166"/>
 					</div>
+				</div>
+				<div class="type">
+					<h3>区块</h3>
+					平滑程度：1<input type="range" min="1" max="1000" step="1" value="166" name="q" />1000 <input value="166"/>
+				</div>
+				<div class="treeHeight">
+					<h3>树高(treeHeight)</h3>
+					<div class="allow">
+						<h4>允许生成树(allow)</h4>
+						最小：-1<input type="range" min="-1" max="1" value="0.5" step="0.1" name="min" />1 <input value="0.5"/><br/>
+						最大：-1<input type="range" min="-1" max="1" value="0.6666667" step="0.1" name="max" />1 <input value="0.6666667"/><br/>
+					</div>
+					最小：1<input type="range" min="1" max="30" value="1" step="0.1" name="min" />10 <input value="1"/><br/>
+					最大：1<input type="range" min="1" max="30" value="10" step="0.1" name="max" />10 <input value="10"/><br/>
+					平滑程度：1<input type="range" min="1" max="100" step="1" value="1" name="q" />100 <input value="1"/>
+					<div class="error">
+						<h4>误差(error)</h4>
+						最小：-5<input type="range" min="-5" max="5" step="0.1" value="-1" name="min" />5 <input value="-1"/><br/>
+						最大：-5<input type="range" min="-5" max="5" step="0.1" value="1" name="max" />5 <input value="1"/><br/>
+						平滑程度：1<input type="range" min="1" max="100" value="1" name="q" />100 <input value="1"/>
+					</div>
+				</div>
+				<div class="leavesScale">
+					<h3>树叶高度与树高之比(leavesScale)</h3>
+					最小：0.01<input type="range" min="0.01" max="0.99" value="0.1" step="0.01" name="min" />0.99 <input value="0.1"/><br/>
+					最大：0.01<input type="range" min="0.01" max="0.99" value="0.4" step="0.01" name="max" />0.99 <input value="0.4"/><br/>
+					平滑程度：1<input type="range" min="1" max="100" step="1" value="16" name="q" />100 <input value="16"/>
+					<div class="error">
+						<h4>误差(error)</h4>
+						最小：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="-0.1" name="min" />0.5 <input value="-0.1"/><br/>
+						最大：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="0.1" name="max" />0.5 <input value="0.1"/><br/>
+						平滑程度：1<input type="range" min="1" max="100" value="6" name="q" />100 <input value="6"/>
+					</div>
+				</div>
+				<div class="openStone">
+					<h3>允许石头露天出现（负值不允许）(openStone)</h3>
+					最小：-5<input type="range" min="-5" max="5" value="-0.99" step="0.01" name="min" />5 <input value="-0.99"/><br/>
+					最大：-5<input type="range" min="-5" max="5" value="0.01" step="0.01" name="max" />5 <input value="0.01"/><br/>
+					平滑程度：1<input type="range" min="1" max="1000" step="1" value="1" name="q" />1000 <input value="1"/>
 				</div>
 				<div style="clear:both;">
 					<button onclick="reset();" style="clear:both;">重置</button>
@@ -297,6 +338,38 @@ $(".new_world > button:eq(1)").click(function(){
 				max: Number( $(".more > .scale > .error > [name='max']").val() ),
 				q: Number( $(".more > .scale > .error > [name='q']").val() )
 			}
+		},
+		type={
+			q: Number( $(".more > .type > [name='q']").val() )
+		},
+		treeHeight={
+			allow:{
+				min: Number( $(".more > .treeHeight > .allow > [name='min']").val() ),
+				max: Number( $(".more > .treeHeight > .allow > [name='max']").val() )
+			},
+			min: Number( $(".more > .treeHeight > [name='min']").val() ),
+			max: Number( $(".more > .treeHeight > [name='max']").val() ),
+			q: Number( $(".more > .treeHeight > [name='q']").val() ),
+			error:{
+				min: Number( $(".more > .treeHeight > .error > [name='min']").val() ),
+				max: Number( $(".more > .treeHeight > .error > [name='max']").val() ),
+				q: Number( $(".more > .treeHeight > .error > [name='q']").val() )
+			}
+		},
+		leavesScale={
+			min: Number( $(".more > .leavesScale > [name='min']").val() ),
+			max: Number( $(".more > .leavesScale > [name='max']").val() ),
+			q: Number( $(".more > .leavesScale > [name='q']").val() ),
+			error:{
+				min: Number( $(".more > .leavesScale > .error > [name='min']").val() ),
+				max: Number( $(".more > .leavesScale > .error > [name='max']").val() ),
+				q: Number( $(".more > .leavesScale > .error > [name='q']").val() )
+			}
+		},
+		openStone={
+			min: Number( $(".more > .openStone > [name='min']").val() ),
+			max: Number( $(".more > .openStone > [name='max']").val() ),
+			q: Number( $(".more > .openStone > [name='q']").val() )
 		};
 	if ($("[name='seed']").val() === ""){ //随机种子
 		seed = Math.random().toString(36).substring(2);
@@ -306,6 +379,10 @@ $(".new_world > button:eq(1)").click(function(){
 	localStorage.setItem("我的世界_seed", seed);
 	localStorage.setItem("我的世界_height", JSON.stringify(height));
 	localStorage.setItem("我的世界_scale", JSON.stringify(scale));
+	localStorage.setItem("我的世界_type", JSON.stringify(type));
+	localStorage.setItem("我的世界_treeHeight", JSON.stringify(treeHeight));
+	localStorage.setItem("我的世界_leavesScale", JSON.stringify(leavesScale));
+	localStorage.setItem("我的世界_openStone", JSON.stringify(openStone));
 	
 	location.href = "main.html";
 	let msg = $("<dialog>加载中……</dialog>");

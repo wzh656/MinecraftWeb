@@ -868,27 +868,27 @@ function seed_scale(noise, t, x, z){
 function seed_treeHeight(noise, t, x, z){
 	let result = [0];
 	let value = noise.more3D(SEED_RANDOM_CONSTANT[7], x/t.q, z/t.q, 6);
-	if (3/6 < value && value < 4/6) // 1/12
+	if (t.al.min < value && value < t.al.max) // 1/12
 		result[0] = noise.more3D(SEED_RANDOM_CONSTANT[8], x/t.q, z/t.q, 6) *t.k +t.b+
 			seed_error(noise, t.e, SEED_RANDOM_CONSTANT[9], x, z);
 	
 	value = noise.more3D(332.976, (x+1)/t.q, z/t.q, 6);
-	if (3/6 < value && value < 4/6) // 1/12
+	if (t.al.min < value && value < t.al.max) // 1/12
 		result[1] = noise.more3D(SEED_RANDOM_CONSTANT[8], (x+1)/t.q, z/t.q, 6) *t.k +t.b+
 			seed_error(noise, t.e, SEED_RANDOM_CONSTANT[9], (x+1), z);
 	
 	value = noise.more3D(332.976, (x-1)/t.q, z/t.q, 6);
-	if (3/6 < value && value < 4/6) // 1/12
+	if (t.al.min < value && value < t.al.max) // 1/12
 		result[2] = noise.more3D(SEED_RANDOM_CONSTANT[8], (x-1)/t.q, z/t.q, 6) *t.k +t.b+
 			seed_error(noise, t.e, SEED_RANDOM_CONSTANT[9], (x-1), z);
 	
 	value = noise.more3D(332.976, x/t.q, (z+1)/t.q, 6);
-	if (3/6 < value && value < 4/6) // 1/12
+	if (t.al.min < value && value < t.al.max) // 1/12
 		result[3] = noise.more3D(SEED_RANDOM_CONSTANT[8], x/t.q, (z+1)/t.q, 6) *t.k +t.b+
 			seed_error(noise, t.e, SEED_RANDOM_CONSTANT[9], x, (z+1));
 	
 	value = noise.more3D(332.976, x/t.q, (z-1)/t.q, 6);
-	if (3/6 < value && value < 4/6) // 1/12
+	if (t.al.min < value && value < t.al.max) // 1/12
 		result[4] = noise.more3D(SEED_RANDOM_CONSTANT[8], x/t.q, (z-1)/t.q, 6) *t.k +t.b+
 			seed_error(noise, t.e, SEED_RANDOM_CONSTANT[9], x, (z-1));
 	
@@ -899,7 +899,7 @@ function seed_treeHeight(noise, t, x, z){
 }
 function seed_openStone(noise, t, x, z){
 	let value = noise.more3D(SEED_RANDOM_CONSTANT[10], x/t.q, z/t.q, 6) *t.k +t.b;
-	return value>0? true: false;
+	return value>=0? true: false;
 }
 function seed_leavesScale(noise, t, x, z){
 	let value = noise.more3D(SEED_RANDOM_CONSTANT[11], x/t.q, z/t.q, 6) *t.k +t.b+
@@ -968,6 +968,10 @@ function BlockMap(size, seed, perloadLength){
 				q: seed.type.q
 			},
 			tH: {
+				al:{
+					min: seed.treeHeight.allow.min,
+					max: seed.treeHeight.allow.max
+				}
 				max: seed.treeHeight.max,
 				min: seed.treeHeight.min,
 				q: seed.treeHeight.q,
@@ -2000,10 +2004,14 @@ let map = new BlockMap([
 			q: 36
 		}
 	},
-	type: {
+	type: JSON.parse(localStorage.getItem("我的世界_type")) || {
 		q: 166
 	},
 	treeHeight: JSON.parse(localStorage.getItem("我的世界_treeHeight")) || {
+		allow: {
+			min: 3/6,
+			max: 4/6
+		}
 		min: 1,
 		max: 10,
 		q: 1,
@@ -2013,11 +2021,6 @@ let map = new BlockMap([
 			q: 1
 		}
 	},
-	openStone: JSON.parse(localStorage.getItem("我的世界_openStone")) || {
-		min: -0.99,
-		max: 0.01,
-		q: 1
-	},
 	leavesScale: JSON.parse(localStorage.getItem("我的世界_leavesScale")) || {
 		min: 0.4,
 		max: 0.8,
@@ -2025,8 +2028,13 @@ let map = new BlockMap([
 		error:{
 			min: -0.1,
 			max: 0.1,
-			q: 16
+			q: 6
 		}
+	},
+	openStone: JSON.parse(localStorage.getItem("我的世界_openStone")) || {
+		min: -0.99,
+		max: 0.01,
+		q: 1
 	}
 },300);
 document.title = "我的世界:"+map.seed.seed||"读取数据失败";
