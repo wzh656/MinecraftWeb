@@ -195,15 +195,18 @@
 					</div>
 				</div>
 				<div class="type">
-					<h3>区块</h3>
+					<h3>区块类型(type)</h3>
+					生成森林(forest)的概率：0<input type="range" min="0" max="1" step="0.01" value="0.4" name="forest" />1 <input name="forest" value="0.4"/><br/>
+					生成草原(grassland)的概率：0<input type="range" min="0" max="1" step="0.01" value="0.4" name="grassland" />1 <input name="grassland" value="0.4"/><br/>
+					生成沙漠(desert)的概率：0<input type="range" min="0" max="1" step="0.01" value="0.2" name="desert" />1 <input name="desert" value="0.2"/><br/>
 					平滑程度：1<input type="range" min="1" max="1000" step="1" value="166" name="q" />1000 <input value="166"/>
 				</div>
 				<div class="treeHeight">
 					<h3>树高(treeHeight)</h3>
-					<div class="allow">
-						<h4>允许生成树(allow)</h4>
-						最小：-1<input type="range" min="-1" max="1" value="0.5" step="0.1" name="min" />1 <input value="0.5"/><br/>
-						最大：-1<input type="range" min="-1" max="1" value="0.6666667" step="0.1" name="max" />1 <input value="0.6666667"/><br/>
+					<div class="plant">
+						<h4>允许生成树(plant)</h4>
+						最小：-1<input type="range" min="-1" max="1" value="0.5" step="0.001" name="min" />1 <input value="0.5"/><br/>
+						最大：-1<input type="range" min="-1" max="1" value="0.667" step="0.001" name="max" />1 <input value="0.667"/><br/>
 					</div>
 					最小：1<input type="range" min="1" max="30" value="1" step="0.1" name="min" />10 <input value="1"/><br/>
 					最大：1<input type="range" min="1" max="30" value="10" step="0.1" name="max" />10 <input value="10"/><br/>
@@ -261,6 +264,22 @@ $(".more input:not([type='range'])").on("change", function(){
 		this.value = this["data-init"];
 	$(this).prev().val( Number(this.value) );
 	this.value=$(this).prev().val();
+});
+$(`.more > .type > input[name='forest'],
+.more > .type > input[name='grassland'],
+.more > .type > input[name='desert']`).on("change", function(){
+	for (let i=0; i<100; i++){
+		let sum = +( $(".more > .type > input[name='forest'][type='range']").val() )+
+			+( $(".more > .type > input[name='grassland'][type='range']").val() )+
+			+( $(".more > .type > input[name='desert'][type='range']").val() );
+		sum = Math.round(sum*10e5)/10e5;
+		$(".more > .type > input[name='forest']").val( $(".more > .type > input[name='forest'][type='range']").val()/sum );
+		$(".more > .type > input[name='grassland']").val( $(".more > .type > input[name='grassland'][type='range']").val()/sum );
+		$(".more > .type > input[name='desert']").val( $(".more > .type > input[name='desert'][type='range']").val()/sum );
+	}
+	$(".more > .type > input[name='forest']:not([type='range'])").val( $(".more > .type > input[name='forest'][type='range']").val() );
+	$(".more > .type > input[name='grassland']:not([type='range'])").val( $(".more > .type > input[name='grassland'][type='range']").val() );
+	$(".more > .type > input[name='desert']:not([type='range'])").val( $(".more > .type > input[name='desert'][type='range']").val() );
 });
 
 
@@ -340,12 +359,15 @@ $(".new_world > button:eq(1)").click(function(){
 			}
 		},
 		type={
+			foreset: Number( $(".more > .type > [name='foreset']").val() ),
+			grassland: Number( $(".more > .type > [name='grassland']").val() ),
+			desert: Number( $(".more > .type > [name='desert']").val() ),
 			q: Number( $(".more > .type > [name='q']").val() )
 		},
 		treeHeight={
-			allow:{
-				min: Number( $(".more > .treeHeight > .allow > [name='min']").val() ),
-				max: Number( $(".more > .treeHeight > .allow > [name='max']").val() )
+			plant:{
+				min: Number( $(".more > .treeHeight > .plant > [name='min']").val() ),
+				max: Number( $(".more > .treeHeight > .plant > [name='max']").val() )
 			},
 			min: Number( $(".more > .treeHeight > [name='min']").val() ),
 			max: Number( $(".more > .treeHeight > [name='max']").val() ),

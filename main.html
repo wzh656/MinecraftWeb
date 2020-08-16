@@ -858,7 +858,7 @@ function seed_height(noise, t, x, z){
 }
 function seed_type(noise, t, x, z){
 	let value = Math.abs( noise.noise3D(SEED_RANDOM_CONSTANT[4], x/t.q, z/t.q) );
-	return value<0.4?0: value<0.8?1: 2;
+	return value < t.desert?2: value < t.desert+t.grassland?1: 0;
 }
 function seed_scale(noise, t, x, z){
 	let value = noise.more3D(SEED_RANDOM_CONSTANT[5], x/t.q, z/t.q, 6) *t.k +t.b+
@@ -868,27 +868,27 @@ function seed_scale(noise, t, x, z){
 function seed_treeHeight(noise, t, x, z){
 	let result = [0];
 	let value = noise.more3D(SEED_RANDOM_CONSTANT[7], x/t.q, z/t.q, 6);
-	if (t.al.min < value && value < t.al.max) // 1/12
+	if (t.plt.min < value && value < t.plt.max) // 1/12
 		result[0] = noise.more3D(SEED_RANDOM_CONSTANT[8], x/t.q, z/t.q, 6) *t.k +t.b+
 			seed_error(noise, t.e, SEED_RANDOM_CONSTANT[9], x, z);
 	
 	value = noise.more3D(332.976, (x+1)/t.q, z/t.q, 6);
-	if (t.al.min < value && value < t.al.max) // 1/12
+	if (t.plt.min < value && value < t.plt.max) // 1/12
 		result[1] = noise.more3D(SEED_RANDOM_CONSTANT[8], (x+1)/t.q, z/t.q, 6) *t.k +t.b+
 			seed_error(noise, t.e, SEED_RANDOM_CONSTANT[9], (x+1), z);
 	
 	value = noise.more3D(332.976, (x-1)/t.q, z/t.q, 6);
-	if (t.al.min < value && value < t.al.max) // 1/12
+	if (t.plt.min < value && value < t.plt.max) // 1/12
 		result[2] = noise.more3D(SEED_RANDOM_CONSTANT[8], (x-1)/t.q, z/t.q, 6) *t.k +t.b+
 			seed_error(noise, t.e, SEED_RANDOM_CONSTANT[9], (x-1), z);
 	
 	value = noise.more3D(332.976, x/t.q, (z+1)/t.q, 6);
-	if (t.al.min < value && value < t.al.max) // 1/12
+	if (t.plt.min < value && value < t.plt.max) // 1/12
 		result[3] = noise.more3D(SEED_RANDOM_CONSTANT[8], x/t.q, (z+1)/t.q, 6) *t.k +t.b+
 			seed_error(noise, t.e, SEED_RANDOM_CONSTANT[9], x, (z+1));
 	
 	value = noise.more3D(332.976, x/t.q, (z-1)/t.q, 6);
-	if (t.al.min < value && value < t.al.max) // 1/12
+	if (t.plt.min < value && value < t.plt.max) // 1/12
 		result[4] = noise.more3D(SEED_RANDOM_CONSTANT[8], x/t.q, (z-1)/t.q, 6) *t.k +t.b+
 			seed_error(noise, t.e, SEED_RANDOM_CONSTANT[9], x, (z-1));
 	
@@ -931,11 +931,6 @@ function BlockMap(size, seed, perloadLength){
 	this.perloadLength = perloadLength;
 	//种子设置
 	if (seed){
-		/* h:height, s:scale{
-			ave: 均值,
-			de: 最大波动程度,
-			q: 波动程度
-		}*/
 		this.seed = {
 			seed: seed.seed,
 			h: {
@@ -965,12 +960,15 @@ function BlockMap(size, seed, perloadLength){
 			t: {
 				max: 2,
 				min: 0,
+				forest: seed.type.forest,
+				grassland: seed.type.grassland,
+				desert: seed.type.desert,
 				q: seed.type.q
 			},
 			tH: {
-				al:{
-					min: seed.treeHeight.allow.min,
-					max: seed.treeHeight.allow.max
+				plt:{
+					min: seed.treeHeight.plant.min,
+					max: seed.treeHeight.plant.max
 				},
 				max: seed.treeHeight.max,
 				min: seed.treeHeight.min,
@@ -1233,8 +1231,7 @@ function BlockMap(size, seed, perloadLength){
 	//加载列
 	this.loadColumn = (x, z, edit)=>{
 		[x, z] = [x, z].map(Math.round); //规范化
-		let t = this.seed; //临时变量
-		let height = seed_height(t.noise, t.h, x, z);
+		let height = seed_height(this.seed.noise, this.seed.h, x, z);
 		if (height < 1){
 			height = 1;
 		}else if (height > 64){
@@ -1259,17 +1256,21 @@ function BlockMap(size, seed, perloadLength){
 		// let height = t.noise.noise3D(0.6, x/t.h.q, z/t.h.q) *t.h.de + t.h.ave;
 		
 		let grass = false;
-		let type = seed_type(t.noise, t.t, x, z);
+		let type = seed_type(this.seed.noise, this.seed.t, x, z);
 		// 54+ 高原（草木不生，积雪覆盖）
 		// 40+ 高山（无树，有草）
 		// 26+ 丘陵（树）
-		// type
+		// 取决于type
 		if (height > 54){ // 54+ 高原（草木不生，积雪覆盖）
 			grass = true;
+		}else if (height > 40){ // 40+ 高山（无树，有草）
+			type = 1;
+		}else if (height > 26){ // 26+ 丘陵（树）
+			type = 0;
 		}
 		let treeTop = null;
-		let earth = height - height * seed_scale(t.noise, t.s, x, z);
-		let treeHeight = height + seed_treeHeight(t.noise, t.tH, x, z);
+		let earth = height - height * seed_scale(this.seed.noise, this.seed.s, x, z);
+		let treeHeight = height + seed_treeHeight(this.seed.noise, this.seed.tH, x, z);
 		for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
 			
 			/* let earth = height - height * (t.noise.more3D(6.6, x/t.s.q, z/t.s.q, 6) *t.s.k +t.s.b)+
@@ -1296,7 +1297,7 @@ function BlockMap(size, seed, perloadLength){
 					}else if (dy == 0){
 						id = 2; //基岩
 					}else{
-						if (!grass && seed_openStone(t.noise, t.oS, x, z)){
+						if (!grass && !seed_openStone(this.seed.noise, this.seed.oS, x, z)){
 							id = 3; //草方块
 							grass = true;
 						}else{
@@ -1325,7 +1326,7 @@ function BlockMap(size, seed, perloadLength){
 					}else if (dy == 0){
 						id = 2; //基岩
 					}else{
-						if (!grass && seed_openStone(t.noise, t.oS, x, z)){
+						if (!grass && !seed_openStone(this.seed.noise, this.seed.oS, x, z)){
 							id = 3; //草方块
 							grass = true;
 						}else{
@@ -1343,7 +1344,7 @@ function BlockMap(size, seed, perloadLength){
 					}else if (dy == 0){
 						id = 2; //基岩
 					}else{
-						if (!grass && seed_openStone(t.noise, t.oS, x, z)){
+						if (!grass && !seed_openStone(this.seed.noise, this.seed.oS, x, z)){
 							id = 7; //沙子
 							grass = true;
 						}else{
@@ -1385,7 +1386,7 @@ function BlockMap(size, seed, perloadLength){
 					y: treeTop+1,
 					z: z
 				}, template, false);
-				let leavesHeight = seed_leavesScale(t.noise, t.lS, x, z) *(treeHeight - height);
+				let leavesHeight = seed_leavesScale(this.seed.noise, this.seed.lS, x, z) *(treeHeight - height);
 				for (let i=0; i<=leavesHeight; i++){
 					this.addID(10, {
 						x: x+1,
@@ -1991,7 +1992,7 @@ let map = new BlockMap([
 		error:{
 			min: -1,
 			max: 1,
-			q: 36
+			q: 6
 		}
 	},
 	scale: JSON.parse(localStorage.getItem("我的世界_scale")) || {
@@ -2005,10 +2006,13 @@ let map = new BlockMap([
 		}
 	},
 	type: JSON.parse(localStorage.getItem("我的世界_type")) || {
+		forest: 0.4,
+		grassland: 0.4,
+		desert: 0.2,
 		q: 166
 	},
 	treeHeight: JSON.parse(localStorage.getItem("我的世界_treeHeight")) || {
-		allow: {
+		plant: {
 			min: 3/6,
 			max: 4/6
 		},
