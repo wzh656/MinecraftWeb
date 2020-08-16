@@ -254,12 +254,16 @@
 			
 			#command > textarea{
 				width: 100%;
-				height: 88.6%;
+				height: 80%;
 				
 				color: black;
 				background-color: #d6d6d6;
 				border: 2px #fff inset;
 				font-size: 3vw;
+			}
+			#command > span{
+				height: 6%;
+				font-size: 3px;
 			}
 			#command > button{
 				width: 48%;
@@ -349,7 +353,8 @@
 deskgood.goY(10000*100);
 deskgood.move(0,10000*100,0);
 deskgood.moveTo(0,10000*100);
-//这是注释，告诉你这三个命令都可以把deskgood送上万米高空"))</textarea>
+//这是注释，告诉你这三个命令都可以把deskgood送上万米高空</textarea>
+			<span>运行代码即表示同意《免责协议》：输入代码产生的一切后果由玩家自行承担</span>
 			<button onclick="state('command');">关闭</button>
 			<button onclick="run($('#command > textarea').val());">运行</button>
 		</div>

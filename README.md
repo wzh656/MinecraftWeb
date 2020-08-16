@@ -1,5 +1,5 @@
 # 我的世界（仿）
-修改日期:2020.8.13
+修改日期:2020.8.15
 
 # 运行
 + [手机版(apk)v1.0.0.3-alpha临时完整版（较大，30+MB）（与之前不兼容，无存档，需先卸载重装）](https://github.com/wzh656/MinecraftWeb/releases/download/v1.0.0.3-alpha/full.apk)
@@ -38,9 +38,10 @@
 2. 《我的世界（仿）》地图使用柏林噪声函数生成，参数可以在`新的世界`中的`高级设置`中调整  
     + 每个区块默认：17\*17\*64  
     + 默认海拔：1~64±1  
-	+ 默认泥土与石头的比例：0.1~0.4±0.1  
-	+ 默认树的高度：1~10±0.1  
-	+ 默认树叶与树高的比例：0.4~0.8±0.1  
+    + 默认泥土与石头的比例：0.1~0.4±0.1  
+    + 默认允许生成树的概率：1/12
+    + 默认树的高度：1~10±0.1  
+    + 默认树叶与树高的比例：0.4~0.8±0.1  
 
 
 ## ㈣关于方块
@@ -52,8 +53,9 @@
     1. 命令：`deskgood.move(x,y,z);`（请在x,y,z处填上对应的值，单位：px或cm）可让角色`deskgood`移动到指定笛卡尔坐标。 e.g. `deskgood.move(0,0,10000*100);`可使角色`deskgood`到达坐标(0,0,1000000) ~~，即坐标原点的万米高空~~  
     2. `deskgood.moveTo(x,y,z);` 同①(`deskgood.move(x,y,z)`)，只是不同名称。  
     3. `deskgood.go(x,y,z);` （请在x,y,z处填上对应的值，单位：px或cm）将角色`deskgood`的坐标向量与向量(x,y,z)相加。 e.g. `deskgood.go(0,0,10000*100);`可使角色`deskgood`往上移动10000m=10000*100cm=1000000px ~~还是万米高空，只是以当前坐标为基础再+10000m~~  
-    4. 其他命令暂请期待……
-    5. 由于是直接运行JavaScript代码，所以可以直接输入原生JavaScript代码。 e.g. `location.href="https://www.baidu.com/";`可改变浏览网址，跳转到百度。而`location.reload();`可刷新页面，相当于重启  
+    4. `deskgood.die();`或`deskgood.die("原因");` （请在原因处填上适当的死亡原因，也可缺省）使角色`deskgood`死亡。 e.g. `deskgood.die("过于懒 且 过于自恋");`  
+    5. 其他命令暂请期待……  
+    6. 由于是直接运行JavaScript代码，所以可以直接输入原生JavaScript代码。 e.g. `location.href="https://www.baidu.com/";`可改变浏览网址，跳转到百度。而`location.reload();`可刷新页面，相当于重启应用  
 
 
 ## ㈤关于天气(weather)
