@@ -49,7 +49,7 @@
 			    color: #fff;
 			    background: #f9cc9d;
 			}
-			:not(textarea):not(input):not(#__vconsole *){ /* 禁止复制选中 */
+			*{ /* 禁止复制选中 */
 				-webkit-touch-callout: none; /* iOS Safari */
 				-webkit-user-select: none; /* Chrome/Safari/Opera */
 				-khtml-user-select: none; /* Konqueror */
@@ -180,7 +180,7 @@
 			
 			dialog{
 				position: absolute;
-				top: 16vmin;
+				top: 16vmax;
 				
 				max-width: 50vw;
 				border-radius: 6px;
@@ -233,7 +233,7 @@
 			
 			#bag, #command{
 				width: 80vw;
-				height: 80vh;
+				/* height: 80vh; */
 				
 				position: absolute;
 				left: 50%;
@@ -254,22 +254,21 @@
 			
 			#command > textarea{
 				width: 100%;
-				height: 80%;
+				height: 70vh;
 				
 				color: black;
 				background-color: #d6d6d6;
 				border: 2px #fff inset;
-				font-size: 3vw;
+				font-size: 3vmax;
 			}
 			#command > span{
-				height: 6%;
-				font-size: 3px;
+				font-size: 66%;
 			}
 			#command > button{
 				width: 48%;
 				height: 9%;
 				margin: 0 0.6%;
-				font-size: 5vmin;
+				font-size: 3vmax;
 			}
 			
 			#bag > div{
@@ -354,7 +353,7 @@ deskgood.goY(10000*100);
 deskgood.move(0,10000*100,0);
 deskgood.moveTo(0,10000*100);
 //这是注释，告诉你这三个命令都可以把deskgood送上万米高空</textarea>
-			<span>运行代码即表示同意《免责协议》：输入代码产生的一切后果由玩家自行承担</span>
+			<span>运行代码即表示同意《免责协议》：输入代码产生的一切后果由玩家自行承担</span><br/>
 			<button onclick="state('command');">关闭</button>
 			<button onclick="run($('#command > textarea').val());">运行</button>
 		</div>
@@ -799,23 +798,17 @@ function Thing(opinion){
 		}
 	}
 	
-	//持有时的效果
-	this.hold = {};
-	if (opinion.hold){
-		if (opinion.hold.tool){
-			this.hold.tool = opinion.hold.tool;
-		}
-		if (opinion.hold.head){
-			this.hold.head = opinion.hold.head;
-		}
-		if (opinion.hold.body){
-			this.hold.body = opinion.hold.body;
-		}
-		if (opinion.hold.leg){
-			this.hold.leg = opinion.hold.leg;
-		}
-		if (opinion.hold.foot){
-			this.hold.foot = opinion.hold.foot;
+	//属性
+	this.attr = {};
+	if (opinion.attr){
+		if (opinion.attr.block){ //方块
+			this.attr.block = {};
+			if (opinion.attr.block.onMouseLeftDown) this.attr.block.onMouseLeftDown = opinion.attr.block.onMouseLeftDown;
+			if (opinion.attr.block.onMouseRightDown) this.attr.block.onMouseRightDown = opinion.attr.block.onMouseRightDown;
+			if (opinion.attr.block.onShortTouch) this.attr.block.onShortTouch = opinion.attr.block.onShortTouch;
+			if (opinion.attr.block.onLongTouch) this.attr.block.onLongTouch = opinion.attr.block.onLongTouch;
+			if (opinion.attr.block.onChangeTo) this.attr.block.onChangeTo = opinion.attr.block.onChangeTo;
+			if (opinion.attr.block.onChangeLeave) this.attr.block.onChangeLeave = opinion.attr.block.onChangeLeave;
 		}
 	}
 }
@@ -2121,7 +2114,7 @@ setInterval(function(){
 
 
 let weather_folder = gui.addFolder("天气(weather)");
-	weather_folder.add(window, "weather", 0, 1/300*1000, 1e-3).name("降水系数").onChange((value)=>{weather = Math.pow(value*300/1000,3)/300*1000});
+	weather_folder.add(window, "weather", 0, 1/300*1000, 1e-3).name("降水系数").onChange((value)=>{weather = (value*300/1000)**3/300*1000});
 	weather_folder.add(sprite_system, "length", 0, 1000, 1).name("雨滴(sprite)个数").listen();
 	weather_folder.add({clean: function(){
 		for (let i in sprite_system){
@@ -2298,8 +2291,8 @@ var directionalLight = new THREE.DirectionalLight("#fff", 1);
 directionalLight.position.set(2, 1, 2);
 directionalLight.castShadow = true;
 directionalLight.onlyShadow = true;
-directionalLight.shadow.mapSize.width = Math.pow(2, 10);  // default:512
-directionalLight.shadow.mapSize.height = Math.pow(2, 10); // default:512
+directionalLight.shadow.mapSize.width = 2**10;  // default:512
+directionalLight.shadow.mapSize.height = 2**10; // default:512
 directionalLight.shadow.camera.near = 0.5;
 directionalLight.shadow.camera.far = 200*100;
 directionalLight.shadow.camera.left = -200*100;
@@ -2335,8 +2328,8 @@ scene.add(directionalLight);
 let scene_light_directionalLight_folder = scene_light_folder.addFolder("平行光(directionalLight)");
 	scene_light_directionalLight_folder.add(directionalLight, "castShadow").name("阴影").listen();
 	let scene_light_directionalLight_mapSize_folder = scene_light_directionalLight_folder.addFolder("阴影贴图大小(mapSize)");
-		scene_light_directionalLight_mapSize_folder.add(directionalLight.shadow.mapSize, "width", Math.pow(2,9), Math.pow(2,12), Math.pow(2,9));
-		scene_light_directionalLight_mapSize_folder.add(directionalLight.shadow.mapSize, "height", Math.pow(2,9), Math.pow(2,12), Math.pow(2,9));
+		scene_light_directionalLight_mapSize_folder.add(directionalLight.shadow.mapSize, "width", 2**9, 2**12, 2**9);
+		scene_light_directionalLight_mapSize_folder.add(directionalLight.shadow.mapSize, "height", 2**9, 2**12, 2**9);
 	let scene_light_directionalLight_position_folder = scene_light_directionalLight_folder.addFolder("位置(position)");
 		scene_light_directionalLight_position_folder.add(directionalLight.position, "x", -3, 3, 0.1);
 		scene_light_directionalLight_position_folder.add(directionalLight.position, "y", -3, 3, 0.1);
@@ -3132,7 +3125,7 @@ deskgood_folder.open();
 	let deskgood_v_folder = deskgood_folder.addFolder("速度/(m/s)");
 		deskgood_v_folder.add(deskgood.v, "x", -10, 10, 1e-3).listen();
 		deskgood_v_folder.add(deskgood.v, "y", -100, 100, 1e-3).listen().onChange((value) => {
-			deskgood.v.y = Math.pow(Math.abs(value)/100,3)*100*value/Math.abs(value);
+			deskgood.v.y = (Math.abs(value)/100)**3 *100 *value /Math.abs(value);
 		});
 		deskgood_v_folder.add(deskgood.v, "z", -10, 10, 1e-3).listen();
 	let deskgood_lookAt_folder = deskgood_folder.addFolder("朝向（球坐标系）");
@@ -3712,9 +3705,9 @@ document.addEventListener("mousedown", function (e){
 						y = click[i].object.position.y,
 						z = click[i].object.position.z;
 					if (Math.sqrt(
-						Math.pow(x - deskgood.pos.x, 2)+
-						Math.pow(y - deskgood.pos.y, 2)+
-						Math.pow(z - deskgood.pos.z, 2)
+						(x - deskgood.pos.x) **2+
+						(y - deskgood.pos.y) **2+
+						(z - deskgood.pos.z) **2
 					) < 500){ //距离小于500
 						/*let free = -1;
 						if (deskgood.tools[deskgood.choice] == 0){
@@ -3769,9 +3762,9 @@ document.addEventListener("mousedown", function (e){
 					z = click[i].object.position.z;
 				if (
 					Math.sqrt(
-						Math.pow(x - deskgood.pos.x, 2)+
-						Math.pow(y - deskgood.pos.y, 2)+
-						Math.pow(z - deskgood.pos.z, 2)
+						(x - deskgood.pos.x) **2+
+						(y - deskgood.pos.y) **2+
+						(z - deskgood.pos.z) **2
 				) < 500){ //距离<500
 					if (map.get(x/100, y/100, z/100) &&
 						map.get(x/100, y/100, z/100).id == 1
@@ -3811,9 +3804,9 @@ document.addEventListener("mousedown", function (e){
 						return console.error("faceIndex wrong:", click[i].faceIndex);
 				}
 				if (Math.sqrt(
-					Math.pow(x-deskgood.pos.x, 2)+
-					Math.pow(y-deskgood.pos.y, 2)+
-					Math.pow(z-deskgood.pos.z, 2)
+					(x-deskgood.pos.x) **2+
+					(y-deskgood.pos.y) **2+
+					(z-deskgood.pos.z) **2
 				) < 500){ //距离<5m
 					map.addID(deskgood.tools[deskgood.choice], {
 						x: x/100,
@@ -4013,10 +4006,7 @@ $("#control").on("touchstart", function(e){
 					dy<0? 180:
 					0
 			);
-			let l = Math.sqrt(
-				Math.pow(dx, 2)+
-				Math.pow(dy, 2)
-			);
+			let l = Math.sqrt(dx**2 + dy**2);
 			l = l>100? 0.26*t: l*t/866;
 			let x = Math.cos( deskgood.lookAt.left_right/180*Math.PI+r )*l;
 			let z = Math.sin( deskgood.lookAt.left_right/180*Math.PI+r )*l;
@@ -4206,10 +4196,7 @@ $("canvas:eq(0)").on("touchstart", function (e){
 	touch_screen.pos = {x,y};
 	touch_screen.loop = setTimeout(()=>{ //长按（删除）
 		touch_screen.loop = null;
-		if (Math.sqrt(
-			Math.pow(touch_screen.pos.x-x, 2)+
-			Math.pow(touch_screen.pos.y-y, 2)
-		) < 36){ //误差36px
+		if (Math.sqrt( (touch_screen.pos.x-x)**2 + (touch_screen.pos.y-y)**2 ) < 36){ //误差36px
 			let click = get_choice_object(true, x, y);
 			for (let i in click){
 				if (click[i].faceIndex){
@@ -4218,9 +4205,9 @@ $("canvas:eq(0)").on("touchstart", function (e){
 							y = click[i].object.position.y,
 							z = click[i].object.position.z;
 						if (Math.sqrt(
-							Math.pow(x - deskgood.pos.x, 2)+
-							Math.pow(y - deskgood.pos.y, 2)+
-							Math.pow(z - deskgood.pos.z, 2)
+							(x - deskgood.pos.x) **2+
+							(y - deskgood.pos.y) **2+
+							(z - deskgood.pos.z) **2
 						) < 500){ //距离小于500
 							/*let free = -1;
 							if (deskgood.tools[deskgood.choice] == 0){
@@ -4320,10 +4307,7 @@ $("canvas:eq(0)").on("touchmove", function (e){
 	
 	deskgood.look_refresh(); //刷新
 	
-	if (Math.sqrt(
-		Math.pow(touch_screen.pos.x-x, 2)+
-		Math.pow(touch_screen.pos.y-y, 2)
-	) >= 100){ //误差100px
+	if (Math.sqrt( (touch_screen.pos.x-x)**2 + (touch_screen.pos.y-y)**2 ) >= 100){ //误差100px
 		touch_screen.pos.x = -666;
 		touch_screen.pos.y = -666;
 	}
@@ -4342,18 +4326,15 @@ $("canvas:eq(0)").on("touchend", function (e){
 	if (touch_screen.loop !== null){ //短按（放置）
 		clearTimeout(touch_screen.loop);
 		touch_screen.loop = null;
-		if (Math.sqrt(
-			Math.pow(touch_screen.pos.x-x, 2)+
-			Math.pow(touch_screen.pos.y-y, 2)
-		) < 36){ //误差36px
+		if (Math.sqrt( (touch_screen.pos.x-x)**2 + (touch_screen.pos.y-y)**2) < 36){ //误差36px
 			let click = get_choice_object(true, x, y);
 			for (let i in click){
 				if (click[i].object instanceof THREE.Mesh){
 					if (
 						Math.sqrt(
-							Math.pow(click[i].object.position.x - deskgood.pos.x, 2)+
-							Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
-							Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
+							(click[i].object.position.x - deskgood.pos.x) **2+
+							(click[i].object.position.y - deskgood.pos.y) **2+
+							(click[i].object.position.z - deskgood.pos.z) **2
 					) < 500){ //距离<500
 						if (
 							map.get(click[i].object.position.x/100,
@@ -4404,9 +4385,9 @@ $("canvas:eq(0)").on("touchend", function (e){
 							return console.error("faceIndex wrong:", click[i].faceIndex);
 					}
 					if (Math.sqrt(
-						Math.pow(x-deskgood.pos.x, 2)+
-						Math.pow(y-deskgood.pos.y, 2)+
-						Math.pow(z-deskgood.pos.z, 2)
+						(x-deskgood.pos.x) **2+
+						(y-deskgood.pos.y) **2+
+						(z-deskgood.pos.z) **2
 					) < 500){ //距离<5m
 						map.addID(deskgood.tools[deskgood.choice], {
 							x: x/100,
