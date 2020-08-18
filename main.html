@@ -692,30 +692,6 @@ function Thing(opinion){
 				else
 					this.block.face[i] = `./img/blocks/${this.id}/` + opinion.block.face[i];
 		}
-		this.block.editFace = (index, value)=>{
-			if (index != undefined){ //有索引（单个）
-				if (value != undefined){ //赋值
-					this.block.face[index] = value;
-				}else{ //取值
-					return this.block.face[index];
-				}
-			}else{ //无索引（所有）
-				if (value != undefined){ //赋值
-					for (let i=0; i<value.length; i++)
-						this.block.face[i] = value[i];
-				}else{
-					return this.block.face;
-				}
-			}
-			return this;
-		}
-		this.block.deleteFace = (index)=>{
-			if (index != undefined){ //有索引
-				delete this.block.face[index];
-			}else{ //无索引
-				this.block.face = [];
-			}
-		}
 		
 		//texture
 		if (opinion.block.texture){ //贴图 数据
@@ -724,96 +700,120 @@ function Thing(opinion){
 				if (opinion.block.texture[i])
 					this.block.texture[i] = opinion.block.texture[i];
 		}
-		this.block.setTexture = (texture, index)=>{
-			if (!this.block.texture){
-				this.block.texture = [];
-			}
-			if (index != undefined){ //有索引
-				this.block.texture[index] = texture;
-			}else{ //无索引
-				for (let i=0; i<texture.length; i++){
-					this.block.texture[i] = texture[i];
-				}
-			}
-			return this;
-		}
-		this.block.deleteTexture = (index)=>{
-			if (index != undefined){ //有索引
-				this.block.texture[index].dispose(); //清除内存
-				delete this.block.texture[index];
-			}else{ //无索引
-				for (let i of this.block.texture)
-					i.dispose(); //清除内存
-				delete this.block.texture;
-			}
-			return this;
-		}
 		
-		this.block.transparent = opinion.block.transparent || false;
-		this.block.through = opinion.block.through || false;
+		if (opinion.block.transparent) this.block.transparent = opinion.block.transparent;
+		if (opinion.block.through) this.block.through = opinion.block.through;
 		//material
 		if (opinion.block.material){ //材质
 			this.block.material = opinion.block.material;
-		}
-		this.block.makeMaterial = ()=>{
-			this.block.material = [
-				new THREE.MeshLambertMaterial({ map:this.block.texture[0], transparent:this.block.transparent }),
-				new THREE.MeshLambertMaterial({ map:this.block.texture[1], transparent:this.block.transparent }),
-				new THREE.MeshLambertMaterial({ map:this.block.texture[2], transparent:this.block.transparent }),
-				new THREE.MeshLambertMaterial({ map:this.block.texture[3], transparent:this.block.transparent }),
-				new THREE.MeshLambertMaterial({ map:this.block.texture[4], transparent:this.block.transparent }),
-				new THREE.MeshLambertMaterial({ map:this.block.texture[5], transparent:this.block.transparent })
-			]; //材质对象 MeshLambertMaterial
-			return this;
-		}
-		this.block.deleteMaterial = ()=>{
-			for (let i of this.block.material)
-				i.dispose(); //清除内存
-			delete this.block.material;
-			return this;
 		}
 		
 		//mesh
 		if (opinion.block.mesh){ //网格模型
 			this.block.mesh = opinion.block.mesh;
 		}
-		this.block.makeMesh = (geometry)=>{
-			if (geometry){
-				this.block.mesh = new THREE.Mesh(geometry, this.block.material); //网格模型对象Mesh
-			}else{ //使用默认
-				this.block.mesh = new THREE.Mesh(Thing.prototype.geometry, this.block.material); //网格模型对象Mesh
-			}
-			this.block.mesh.castShadow = true;
-			this.block.mesh.receiveShadow = true;
-			this.block.mesh.userData.through = !!this.block.through;
-			this.block.mesh.userData.type = "block";
-			return this;
-		}
-		this.block.deleteMesh = (index)=>{
-			for (let i of this.block.mesh.material)
-				i.dispose();
-			this.block.mesh.geometry.dispose(); //清除内存
-			delete this.block.mesh;
-			return this;
-		}
 	}
 	
 	//属性
 	this.attr = {};
 	if (opinion.attr){
+		if (opinion.attr.hardness) this.attr.hardness = opinion.attr.hardness; //硬度
+		if (opinion.attr.durability) this.attr.durability = opinion.attr.durability; //耐久
+		if (opinion.attr.digSpeed) this.attr.digSpeed = opinion.attr.digSpeed; //挖掘速度
+		if (opinion.attr.loss) this.attr.loss = opinion.attr.loss; //损耗
 		if (opinion.attr.block){ //方块
 			this.attr.block = {};
-			if (opinion.attr.block.onMouseLeftDown) this.attr.block.onMouseLeftDown = opinion.attr.block.onMouseLeftDown;
-			if (opinion.attr.block.onMouseRightDown) this.attr.block.onMouseRightDown = opinion.attr.block.onMouseRightDown;
+			if (opinion.attr.block.onLeftMouseDown) this.attr.block.onLeftMouseDown = opinion.attr.block.onLeftMouseDown;
+			if (opinion.attr.block.onRightMouseDown) this.attr.block.onRightMouseDown = opinion.attr.block.onRightMouseDown;
 			if (opinion.attr.block.onShortTouch) this.attr.block.onShortTouch = opinion.attr.block.onShortTouch;
 			if (opinion.attr.block.onLongTouch) this.attr.block.onLongTouch = opinion.attr.block.onLongTouch;
 			if (opinion.attr.block.onChangeTo) this.attr.block.onChangeTo = opinion.attr.block.onChangeTo;
 			if (opinion.attr.block.onChangeLeave) this.attr.block.onChangeLeave = opinion.attr.block.onChangeLeave;
+			if (opinion.attr.block.onPutToHead) this.attr.block.onPutToHead = opinion.attr.block.onPutToHead;
+			if (opinion.attr.block.onPutToBody) this.attr.block.onPutToBody = opinion.attr.block.onPutToBody;
+			if (opinion.attr.block.onPutToLeg) this.attr.block.onPutToLeg = opinion.attr.block.onPutToHead;
+			if (opinion.attr.block.onPutToFoot) this.attr.block.onPutToFoot = opinion.attr.block.onPutToFoot;
 		}
 	}
 }
-//Thing.prototype.idLength = 0;
 Thing.prototype.geometry = new THREE.BoxGeometry(100, 100, 100);
+Thing.prototype.setFace = function(valu, index){
+	if (index != undefined){ //有索引（单个）
+		this.block.face[index] = value;
+	}else{ //无索引（所有）
+		for (let i=0; i<value.length; i++)
+			this.block.face[i] = value[i];
+	}
+	return this;
+};
+Thing.prototype.deleteFace = function(index){
+	if (index != undefined){ //有索引
+		delete this.block.face[index];
+	}else{ //无索引
+		this.block.face = [];
+	}
+};
+Thing.prototype.setTexture = function(texture, index){
+	if (!this.block.texture){
+		this.block.texture = [];
+	}
+	if (index != undefined){ //有索引
+		this.block.texture[index] = texture;
+	}else{ //无索引
+		for (let i=0; i<texture.length; i++){
+			this.block.texture[i] = texture[i];
+		}
+	}
+	return this;
+};
+Thing.prototype.deleteTexture = function(index){
+	if (index != undefined){ //有索引
+		this.block.texture[index].dispose(); //清除内存
+		delete this.block.texture[index];
+	}else{ //无索引
+		for (let i of this.block.texture)
+			i.dispose(); //清除内存
+		delete this.block.texture;
+	}
+	return this;
+};
+Thing.prototype.makeMaterial = function(){
+	this.block.material = [
+		new THREE.MeshLambertMaterial({ map:this.block.texture[0], transparent:this.block.transparent || false }),
+		new THREE.MeshLambertMaterial({ map:this.block.texture[1], transparent:this.block.transparent || false }),
+		new THREE.MeshLambertMaterial({ map:this.block.texture[2], transparent:this.block.transparent || false }),
+		new THREE.MeshLambertMaterial({ map:this.block.texture[3], transparent:this.block.transparent || false }),
+		new THREE.MeshLambertMaterial({ map:this.block.texture[4], transparent:this.block.transparent || false }),
+		new THREE.MeshLambertMaterial({ map:this.block.texture[5], transparent:this.block.transparent || false })
+	]; //材质对象 MeshLambertMaterial
+	return this;
+};
+Thing.prototype.deleteMaterial = function(){
+	for (let i of this.block.material)
+		i.dispose(); //清除内存
+	delete this.block.material;
+	return this;
+};
+Thing.prototype.makeMesh = function(geometry){
+	if (geometry){
+		this.block.mesh = new THREE.Mesh(geometry, this.block.material); //网格模型对象Mesh
+	}else{ //使用默认
+		this.block.mesh = new THREE.Mesh(Thing.prototype.geometry, this.block.material); //网格模型对象Mesh
+	}
+	this.block.mesh.castShadow = true;
+	this.block.mesh.receiveShadow = true;
+	this.block.mesh.userData.through = !!this.block.through;
+	this.block.mesh.userData.type = "block";
+	return this;
+};
+Thing.prototype.deleteMesh = function(index){
+	for (let i of this.block.mesh.material)
+		i.dispose();
+	this.block.mesh.geometry.dispose(); //清除内存
+	delete this.block.mesh;
+	return this;
+};
+
 
 SimplexNoise.prototype.more3D = function(xin, yin, zin, more){
 	let sum = 0;
@@ -1083,9 +1083,9 @@ function BlockMap(size, seed, perloadLength){
 		
 		this.add(
 			new Thing(template[id])
-				.block.makeMaterial()
-				.block.deleteTexture()
-				.block.makeMesh(),
+				.makeMaterial()
+				.deleteTexture()
+				.makeMesh(),
 			{
 				x:pos.x,
 				y:pos.y,
@@ -1877,7 +1877,7 @@ function BlockMap(size, seed, perloadLength){
 	}; */
 }
 
-const face_url = [
+const FACE_URL = [
 	["side.png", "side.png", "up.png", "down.png", "side.png", "side.png"],
 	["face.png", "face.png", "face.png", "face.png", "face.png", "face.png"]
 ];
@@ -1890,56 +1890,56 @@ template.push(new Thing({
 	id: 1,
 	name: "命令方块",
 	block: {
-		face: face_url[0]
+		face: FACE_URL[0]
 	}
 }));
 template.push(new Thing({
 	id: 2,
 	name: "基岩",
 	block: {
-		face: face_url[1]
+		face: FACE_URL[1]
 	}
 }));
 template.push(new Thing({
 	id: 3,
 	name: "草方块",
 	block: {
-		face: face_url[0]
+		face: FACE_URL[0]
 	}
 }));
 template.push(new Thing({
 	id: 4,
 	name: "泥土",
 	block: {
-		face: face_url[1]
+		face: FACE_URL[1]
 	}
 }));
 template.push(new Thing({
 	id: 5,
 	name: "原石",
 	block: {
-		face: face_url[1]
+		face: FACE_URL[1]
 	}
 }));
 template.push(new Thing({
 	id: 6,
 	name: "石头",
 	block: {
-		face: face_url[1]
+		face: FACE_URL[1]
 	}
 }));
 template.push(new Thing({
 	id: 7,
 	name: "沙子",
 	block: {
-		face: face_url[1]
+		face: FACE_URL[1]
 	}
 }));
 template.push(new Thing({
 	id: 8,
 	name: "仙人掌",
 	block: {
-		face: face_url[0]
+		face: FACE_URL[0]
 	}
 }));
 template.push(new Thing({
@@ -1953,7 +1953,7 @@ template.push(new Thing({
 	id: 10,
 	name: "树叶",
 	block: {
-		face: face_url[1],
+		face: FACE_URL[1],
 		transparent: true, //透明方块
 		through: true //可穿过
 	}
@@ -1962,14 +1962,14 @@ template.push(new Thing({
 	id: 11,
 	name: "木板",
 	block: {
-		face: face_url[1]
+		face: FACE_URL[1]
 	}
 }));
 template.push(new Thing({
 	id: 12,
 	name: "砖",
 	block: {
-		face: face_url[1]
+		face: FACE_URL[1]
 	}
 }));
 
@@ -2139,7 +2139,7 @@ let block_load = {
 $("#schedule progress")[0].max = template.length;
 block_load.id = setInterval(function(){
 	for (let j=0; j<template[block_load.i].block.face.length; j++){
-		template[block_load.i].block.setTexture(
+		template[block_load.i].setTexture(
 			new THREE.TextureLoader()
 				.load( template[block_load.i].block.face[j] ), j);
 		//$("#schedule2").text( Math.round( (j+1)/6*100 *100)/100 );
@@ -3709,6 +3709,12 @@ document.addEventListener("mousedown", function (e){
 						(y - deskgood.pos.y) **2+
 						(z - deskgood.pos.z) **2
 					) < 500){ //距离小于500
+						if (
+							map.get(x/100, y/100, z/100) &&
+							map.get(x/100, y/100, z/100).attr.block &&
+							map.get(x/100, y/100, z/100).attr.block.onLeftMouseDown &&
+							eval(map.get(x/100, y/100, z/100).attr.block.onLeftMouseDown) === false
+						) return;
 						/*let free = -1;
 						if (deskgood.tools[deskgood.choice] == 0){
 							free = deskgood.choice;
@@ -3760,7 +3766,7 @@ document.addEventListener("mousedown", function (e){
 				let x = click[i].object.position.x,
 					y = click[i].object.position.y,
 					z = click[i].object.position.z;
-				if (
+				/* if (
 					Math.sqrt(
 						(x - deskgood.pos.x) **2+
 						(y - deskgood.pos.y) **2+
@@ -3772,7 +3778,7 @@ document.addEventListener("mousedown", function (e){
 						state("command");
 						return;
 					}
-				}
+				} */
 				if (deskgood.tools[deskgood.choice] == 0) //空气
 					return;
 				switch (click[i].faceIndex){
@@ -3808,6 +3814,12 @@ document.addEventListener("mousedown", function (e){
 					(y-deskgood.pos.y) **2+
 					(z-deskgood.pos.z) **2
 				) < 500){ //距离<5m
+					if (
+						map.get(x/100, y/100, z/100) &&
+						map.get(x/100, y/100, z/100).attr.block &&
+						map.get(x/100, y/100, z/100).attr.block.onRightMouseDown &&
+						eval(map.get(x/100, y/100, z/100).attr.block.onRightMouseDown) === false
+					) return;
 					map.addID(deskgood.tools[deskgood.choice], {
 						x: x/100,
 						y: y/100,
@@ -4209,6 +4221,12 @@ $("canvas:eq(0)").on("touchstart", function (e){
 							(y - deskgood.pos.y) **2+
 							(z - deskgood.pos.z) **2
 						) < 500){ //距离小于500
+							if (
+								map.get(x/100, y/100, z/100) &&
+								map.get(x/100, y/100, z/100).attr.block &&
+								map.get(x/100, y/100, z/100).attr.block.onLongTouch &&
+								eval(map.get(x/100, y/100, z/100).attr.block.onLongTouch) === false
+							) return;
 							/*let free = -1;
 							if (deskgood.tools[deskgood.choice] == 0){
 								free = deskgood.choice;
@@ -4389,6 +4407,12 @@ $("canvas:eq(0)").on("touchend", function (e){
 						(y-deskgood.pos.y) **2+
 						(z-deskgood.pos.z) **2
 					) < 500){ //距离<5m
+						if (
+							map.get(x/100, y/100, z/100) &&
+							map.get(x/100, y/100, z/100).attr.block &&
+							map.get(x/100, y/100, z/100).attr.block.onShortTouch &&
+							eval(map.get(x/100, y/100, z/100).attr.block.onShortTouch) === false
+						) return;
 						map.addID(deskgood.tools[deskgood.choice], {
 							x: x/100,
 							y: y/100,
