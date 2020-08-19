@@ -707,6 +707,10 @@ function Thing(opinion){
 		if (opinion.block.material){ //材质
 			this.block.material = opinion.block.material;
 		}
+		//geometry
+		if (opinion.block.geometry){ //几何体
+			this.block.geometry = opinion.block.geometry;
+		}
 		
 		//mesh
 		if (opinion.block.mesh){ //网格模型
@@ -719,8 +723,10 @@ function Thing(opinion){
 	if (opinion.attr){
 		if (opinion.attr.hardness) this.attr.hardness = opinion.attr.hardness; //硬度
 		if (opinion.attr.durability) this.attr.durability = opinion.attr.durability; //耐久
-		if (opinion.attr.digSpeed) this.attr.digSpeed = opinion.attr.digSpeed; //挖掘速度
-		if (opinion.attr.loss) this.attr.loss = opinion.attr.loss; //损耗
+		if (opinion.attr.digSpeed) this.attr.digSpeed = opinion.attr.digSpeed; //挖掘速度 m³/s
+		if (opinion.attr.durabilityLoss) this.attr.durabilityLoss = opinion.attr.durabilityLoss; //耐久损耗 /m³
+		if (opinion.attr.hungerLoss) this.attr.hungerLoss = opinion.attr.hungerLoss; //饥饿损耗 /m³
+		if (opinion.attr.lifeLoss) this.attr.lifeLoss = opinion.attr.lifeLoss; //生命损耗 /m³
 		if (opinion.attr.block){ //方块
 			this.attr.block = {};
 			if (opinion.attr.block.onLeftMouseDown) this.attr.block.onLeftMouseDown = opinion.attr.block.onLeftMouseDown;
@@ -737,6 +743,7 @@ function Thing(opinion){
 	}
 }
 Thing.prototype.geometry = new THREE.BoxGeometry(100, 100, 100);
+//face
 Thing.prototype.setFace = function(valu, index){
 	if (index != undefined){ //有索引（单个）
 		this.block.face[index] = value;
@@ -753,6 +760,7 @@ Thing.prototype.deleteFace = function(index){
 		this.block.face = [];
 	}
 };
+//texture
 Thing.prototype.setTexture = function(texture, index){
 	if (!this.block.texture){
 		this.block.texture = [];
@@ -777,6 +785,7 @@ Thing.prototype.deleteTexture = function(index){
 	}
 	return this;
 };
+//material
 Thing.prototype.makeMaterial = function(){
 	this.block.material = [
 		new THREE.MeshLambertMaterial({ map:this.block.texture[0], transparent:this.block.transparent || false }),
@@ -794,7 +803,16 @@ Thing.prototype.deleteMaterial = function(){
 	delete this.block.material;
 	return this;
 };
-Thing.prototype.makeMesh = function(geometry){
+//geometry
+Thing.prototype.makeGeometry = function(x, y, z){
+	this.block.geometry = new THREE.BoxGeometry(x, y, z);
+}
+Thing.prototype.deleteGeometry = function(){
+	this.block.geometry.dispose();
+	delete this.block.geometry;
+}
+//mesh
+Thing.prototype.makeMesh = function(geometry=this.block.geometry){
 	if (geometry){
 		this.block.mesh = new THREE.Mesh(geometry, this.block.material); //网格模型对象Mesh
 	}else{ //使用默认
@@ -803,7 +821,6 @@ Thing.prototype.makeMesh = function(geometry){
 	this.block.mesh.castShadow = true;
 	this.block.mesh.receiveShadow = true;
 	this.block.mesh.userData.through = !!this.block.through;
-	this.block.mesh.userData.type = "block";
 	return this;
 };
 Thing.prototype.deleteMesh = function(index){
@@ -1891,6 +1908,12 @@ template.push(new Thing({
 	name: "命令方块",
 	block: {
 		face: FACE_URL[0]
+	},
+	attr: {
+		block: {
+			onRightMouseDown: "state('command');false;",
+			onShortTouch: "state('command');false;"
+		}
 	}
 }));
 template.push(new Thing({
@@ -1905,7 +1928,15 @@ template.push(new Thing({
 	name: "草方块",
 	block: {
 		face: FACE_URL[0]
-	}
+	}/* ,
+	attr: {
+		block: {
+			onLeftMouseDown: "alert('左击草方块');false;",
+			onRightMouseDown: "alert('右击草方块');false;",
+			onShortTouch: "alert('短按草方块');false;",
+			onLongTouch: "alert('长按草方块');false;"
+		}
+	} */
 }));
 template.push(new Thing({
 	id: 4,
@@ -1946,7 +1977,9 @@ template.push(new Thing({
 	id: 9,
 	name: "橡木",
 	block: {
-		face: ["side.png", "side.png", "up_down.png", "up_down.png", "side.png", "side.png"]
+		face: ["side.png", "side.png", "up_down.png", "up_down.png", "side.png", "side.png"],
+		transparent: true, //部分透明方块
+		geometry: new THREE.BoxGeometry(70, 100, 70),
 	}
 }));
 template.push(new Thing({
@@ -3779,6 +3812,12 @@ document.addEventListener("mousedown", function (e){
 						return;
 					}
 				} */
+				if (
+					map.get(x/100, y/100, z/100) &&
+					map.get(x/100, y/100, z/100).attr.block &&
+					map.get(x/100, y/100, z/100).attr.block.onRightMouseDown &&
+					eval(map.get(x/100, y/100, z/100).attr.block.onRightMouseDown) === false
+				) return;
 				if (deskgood.tools[deskgood.choice] == 0) //空气
 					return;
 				switch (click[i].faceIndex){
@@ -3814,12 +3853,6 @@ document.addEventListener("mousedown", function (e){
 					(y-deskgood.pos.y) **2+
 					(z-deskgood.pos.z) **2
 				) < 500){ //距离<5m
-					if (
-						map.get(x/100, y/100, z/100) &&
-						map.get(x/100, y/100, z/100).attr.block &&
-						map.get(x/100, y/100, z/100).attr.block.onRightMouseDown &&
-						eval(map.get(x/100, y/100, z/100).attr.block.onRightMouseDown) === false
-					) return;
 					map.addID(deskgood.tools[deskgood.choice], {
 						x: x/100,
 						y: y/100,
@@ -4348,7 +4381,10 @@ $("canvas:eq(0)").on("touchend", function (e){
 			let click = get_choice_object(true, x, y);
 			for (let i in click){
 				if (click[i].object instanceof THREE.Mesh){
-					if (
+					let x = click[i].object.position.x,
+						y = click[i].object.position.y,
+						z = click[i].object.position.z;
+					/* if (
 						Math.sqrt(
 							(click[i].object.position.x - deskgood.pos.x) **2+
 							(click[i].object.position.y - deskgood.pos.y) **2+
@@ -4368,12 +4404,15 @@ $("canvas:eq(0)").on("touchend", function (e){
 							state("command");
 							return;
 						}
-					}
+					} */
+					if (
+						map.get(x/100, y/100, z/100) &&
+						map.get(x/100, y/100, z/100).attr.block &&
+						map.get(x/100, y/100, z/100).attr.block.onShortTouch &&
+						eval(map.get(x/100, y/100, z/100).attr.block.onShortTouch) === false
+					) return;
 					if (deskgood.tools[deskgood.choice] == 0) //空气
 						return;
-					let x = click[i].object.position.x,
-						y = click[i].object.position.y,
-						z = click[i].object.position.z;
 					switch (click[i].faceIndex){
 						case 0:
 						case 1:
@@ -4407,12 +4446,6 @@ $("canvas:eq(0)").on("touchend", function (e){
 						(y-deskgood.pos.y) **2+
 						(z-deskgood.pos.z) **2
 					) < 500){ //距离<5m
-						if (
-							map.get(x/100, y/100, z/100) &&
-							map.get(x/100, y/100, z/100).attr.block &&
-							map.get(x/100, y/100, z/100).attr.block.onShortTouch &&
-							eval(map.get(x/100, y/100, z/100).attr.block.onShortTouch) === false
-						) return;
 						map.addID(deskgood.tools[deskgood.choice], {
 							x: x/100,
 							y: y/100,
