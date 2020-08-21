@@ -1195,6 +1195,7 @@ function BlockMap(size, seed, perloadLength){
 	};
 	//更新区块内所有方块（异步）
 	this.updateBlockAsync = (x, z, callback)=>{
+		console.log("update", x, z, callback)
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
@@ -1295,14 +1296,6 @@ function BlockMap(size, seed, perloadLength){
 		// 54+ 高原（草木不生，积雪覆盖）
 		// 40+ 高山（无树，有草）
 		// 26+ 丘陵（树）
-		// 取决于type
-		if (height > 54){ // 54+ 高原（草木不生，积雪覆盖）
-			grass = true;
-		}else if (height > 40){ // 40+ 高山（无树，有草）
-			type = 1;
-		}else if (height > 26){ // 26+ 丘陵（树）
-			type = 0;
-		}
 		let treeTop = null;
 		let earth = height - height * seed_scale(this.seed.noise, this.seed.s, x, z);
 		let treeHeight = height + seed_treeHeight(this.seed.noise, this.seed.tH, x, z);
@@ -1314,9 +1307,12 @@ function BlockMap(size, seed, perloadLength){
 			switch (type){
 				case 0: //森林
 					
-					if (height > 40){ // 40+ 高山（无树，有草）
+					if (height > 54){ // 54+ 高原（草木不生，积雪覆盖）
+						grass = true;
+					}else if (height > 40){ // 40+ 高山（无树，有草）
 						treeHeight = height;
 					}
+					
 					if (dy > treeHeight){
 						id = 0; // 空气/真空 (null)
 					}else if (dy > height){
@@ -1343,9 +1339,10 @@ function BlockMap(size, seed, perloadLength){
 					
 				case 1: //草原
 					
-					if (height <= 26){ // 26+ 丘陵（树）
-						treeHeight = height;
+					if (height > 54){ // 54+ 高原（草木不生，积雪覆盖）
+						grass = true;
 					}
+					
 					if (dy > treeHeight){
 						id = 0; // 空气/真空 (null)
 					}else if (dy > height){
@@ -1871,9 +1868,9 @@ function BlockMap(size, seed, perloadLength){
 				return value[0] != block[i][0] || value[1] != block[i][1];
 			})){ //每个都不一样（不存在 & 不在加载中）
 				this.initBlock(block[i][0], block[i][1]);
-				this.loadBlockAsync(...block[i]/* , ()=>{
+				this.loadBlockAsync(...block[i], ()=>{
 					this.updateBlockAsync(block[i][0], block[i][1]); //更新区块
-				} */); //用噪声填充区块
+				}); //用噪声填充区块
 			}
 		}
 		
@@ -2037,12 +2034,12 @@ if (localStorage.getItem("我的世界_seed") === null){
 }
 let map = new BlockMap([
 	{x: -8, y: 0, z: -8},
-	{x: 8, y: 128, z: 8}
+	{x: 8, y: 256, z: 8}
 ],{
 	seed: localStorage.getItem("我的世界_seed"),
 	height: JSON.parse(localStorage.getItem("我的世界_height")) || {
-		min: 1,
-		max: 128,
+		min: 30,
+		max: 256,
 		//ave: 10,
 		q: 166,
 		error:{
