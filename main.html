@@ -271,53 +271,28 @@
 				font-size: 3vmax;
 			}
 			
-			#bag > div{
-				height: 20%;
-				font-size: 3.7vw;
-				margin: 6px;
-			}
-			#bag > div > ul{
-				display: -webkit-flex; 
-				display: -moz-box;
-				display: -mz-flexbox;
-				display: flex; 
+			#bag > nav > ul{
+				display: flex;
+				display: -webkit-flex; /* Safari */
+				justify-content: space-around;
 				
-				width: 50%;
-				overflow-x: auto;
-				overflow: none;
-				
-				list-style: none;
-				margin: 0;
-				margin-left: 5.2vw;
-				margin-top: -36px;
+				width: 100%;
 				padding: 0;
 			}
-			#bag > div > ul > li{
-				float: left;
-				flex: 0 0 auto;
-			}
-			#bag > div > ul > li > *{
-				width: 100%;
-				height: 100%;
-			}
-			.thing{
-				/* position: absolute; */
-				width: 7vw;
-				height: 7vw;
-				
+			#bag > nav > ul > li{
 				display: inline-block;
-				border: 3px inset #fff;
-				margin: 0.3vw;
-			}
-			.delete{
-				/* position: absolute; */
-				width: 7vw;
-				height: 7vw;
 				
-				font-size: 26px;
-				display: inline-block;
-				border: 3px inset #fff;
-				margin: 0.3vw;
+				width: 30%;
+				padding: 3px;
+				background-color: rgb(116,116,116);
+				border: 3px outset #aaa;
+				
+				text-align: center;
+				font-size: 3vmax;
+			}
+			#bag > nav > ul > li.selected{
+				background-color: #aaa;
+				border: 3px outset rgb(116,116,116);
 			}
 		</style>
 		
@@ -358,41 +333,21 @@ deskgood.moveTo(0,10000*100);
 			<button onclick="run($('#command > textarea').val());">运行</button>
 		</div>
 		<div id="bag">
-			<div>
-				头：
+			<nav>
 				<ul>
-					<li class="thing"></li>
-					<li class="thing"></li>
-					<li class="thing"></li>
-					<li class="thing"></li>
-					<li class="thing"></li>
-					<li class="thing"></li>
-					<li class="thing"></li>
-					<li class="thing"></li>
-					<li class="thing"></li>
-					<li class="delete"><img src="img/delete.png" /></li>
+					<li class="selected">物品</li>
+					<li>状态</li>
+					<li>智造</li>
 				</ul>
+			</nav>
+			<div>
+				
 			</div>
 			<div>
-				身：
-				<ul>
-					<li class="thing"></li>
-					<li class="delete"><img src="img/delete.png" /></li>
-				</ul>
+				
 			</div>
 			<div>
-				腿：
-				<ul>
-					<li class="thing"></li>
-					<li class="delete"><img src="img/delete.png" /></li>
-				</ul>
-			</div>
-			<div>
-				脚：
-				<ul>
-					<li class="thing"></li>
-					<li class="delete"><img src="img/delete.png" /></li>
-				</ul>
+				
 			</div>
 		</div>
 		<h1 id="schedule" style="z-index: 2;">
@@ -945,9 +900,9 @@ function BlockMap(size, seed, perloadLength){
 	//所有方块
 	this.map = [];
 	//已初始化的区块
-	this.initedBlock = [];
+	this.initedZone = [];
 	//活动区块（加载完毕）
-	this.activeBlock = [];
+	this.activeZone = [];
 	//区块预加载范围
 	this.perloadLength = perloadLength;
 	//种子设置
@@ -1181,7 +1136,7 @@ function BlockMap(size, seed, perloadLength){
 	};
 	
 	//更新区块内所有方块（同步）
-	this.updateBlock = (x, z)=>{
+	this.updateZone = (x, z)=>{
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
@@ -1194,16 +1149,16 @@ function BlockMap(size, seed, perloadLength){
 		}
 	};
 	//更新区块内所有方块（异步）
-	this.updateBlockAsync = (x, z, callback)=>{
+	this.updateZoneAsync = (x, z, callback)=>{
 		console.log("update", x, z, callback)
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
 		if (callback){ //有回调（必须setInterval）
 			let dx = this.size[0].x;
-			let updateBlock_id = setInterval(()=>{
+			let updateZone_id = setInterval(()=>{
 				if (dx > this.size[1].x){
-					clearInterval(updateBlock_id);
+					clearInterval(updateZone_id);
 					callback();
 					return;
 				}
@@ -1243,15 +1198,15 @@ function BlockMap(size, seed, perloadLength){
 	
 	
 	//初始化区块
-	this.initBlock = (x, z)=>{
+	this.initZone = (x, z)=>{
 		[x, z] = [x, z].map(Math.round); //规范化
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
-		if (this.initedBlock.every(function(value, index, arr){
+		if (this.initedZone.every(function(value, index, arr){
 			return value[0] != x || value[1] != z;
 		})) //每个都不一样（不存在）
-			this.initedBlock.push([x,z]);
+			this.initedZone.push([x,z]);
 		
 		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
 			this.map[ox+dx] = this.map[ox+dx] || [];
@@ -1446,15 +1401,15 @@ function BlockMap(size, seed, perloadLength){
 		}
 	}
 	//加载区块（同步）
-	this.loadBlock = (x, z)=>{
+	this.loadZone = (x, z)=>{
 		[x, z] = [x, z].map(Math.round); //规范化
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 			
-		if (this.activeBlock.every(function(value, index, arr){
+		if (this.activeZone.every(function(value, index, arr){
 			return value[0] != x || value[1] != z;
 		})) //每个都不一样（不存在）
-			this.activeBlock.push([x,z]);
+			this.activeZone.push([x,z]);
 		
 		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
 			for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
@@ -1464,7 +1419,7 @@ function BlockMap(size, seed, perloadLength){
 		}
 	}
 	//加载区块（异步）
-	this.loadBlockAsync = (x, z, callback, dir="")=>{
+	this.loadZoneAsync = (x, z, callback, dir="")=>{
 		if (typeof callback != "function")
 			[dir, callback] = [callback, dir];
 		
@@ -1486,7 +1441,7 @@ function BlockMap(size, seed, perloadLength){
 						{
 						//if (callback){ //有回调（必须setInterval）
 							let dx = this.size[1].x;
-							let loadBlock_id = setInterval(()=>{
+							let loadZone_id = setInterval(()=>{
 								if (dx < this.size[0].x){
 									setTimeout(()=>{
 										for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
@@ -1494,12 +1449,12 @@ function BlockMap(size, seed, perloadLength){
 											this.updateColumn(ox+dx, oz+dz);
 										}
 									},0);
-									clearInterval(loadBlock_id);
+									clearInterval(loadZone_id);
 									
-									if (this.activeBlock.every(function(value, index, arr){
+									if (this.activeZone.every(function(value, index, arr){
 										return value[0] != x || value[1] != z;
 									})) //每个都不一样（不存在）
-										this.activeBlock.push([x,z]);
+										this.activeZone.push([x,z]);
 									
 									if (callback)
 										callback();
@@ -1520,10 +1475,10 @@ function BlockMap(size, seed, perloadLength){
 								dx--;
 							},0);
 						/* }else{ //无回调（不分顺序）
-							if (this.activeBlock.every(function(value, index, arr){
+							if (this.activeZone.every(function(value, index, arr){
 								return value[0] != x || value[1] != z;
 							})) //每个都不一样（不存在）
-								this.activeBlock.push([x,z]);
+								this.activeZone.push([x,z]);
 							
 							for (let dx=this.size[1].x; dx>=this.size[0].x; dx--){
 								setTimeout(()=>{
@@ -1552,7 +1507,7 @@ function BlockMap(size, seed, perloadLength){
 						{
 						//if (callback){ //有回调（必须setInterval）
 							let dz = this.size[0].z;
-							let loadBlock_id = setInterval(()=>{
+							let loadZone_id = setInterval(()=>{
 								if (dz > this.size[1].z){
 									setTimeout(()=>{
 										for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
@@ -1560,12 +1515,12 @@ function BlockMap(size, seed, perloadLength){
 											this.updateColumn(ox+dx, oz+dz);
 										}
 									},0);
-									clearInterval(loadBlock_id);
+									clearInterval(loadZone_id);
 									
-									if (this.activeBlock.every(function(value, index, arr){
+									if (this.activeZone.every(function(value, index, arr){
 										return value[0] != x || value[1] != z;
 									})) //每个都不一样（不存在）
-										this.activeBlock.push([x,z]);
+										this.activeZone.push([x,z]);
 									
 									if (callback)
 										callback();
@@ -1586,10 +1541,10 @@ function BlockMap(size, seed, perloadLength){
 								dz++;
 							},0);
 						/* }else{ //无回调（不分顺序）
-							if (this.activeBlock.every(function(value, index, arr){
+							if (this.activeZone.every(function(value, index, arr){
 								return value[0] != x || value[1] != z;
 							})) //每个都不一样（不存在）
-								this.activeBlock.push([x,z]);
+								this.activeZone.push([x,z]);
 							
 							for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
 								setTimeout(()=>{
@@ -1607,7 +1562,7 @@ function BlockMap(size, seed, perloadLength){
 						{
 						//if (callback){ //有回调（必须setInterval）
 							let dz = this.size[1].z;
-							let loadBlock_id = setInterval(()=>{
+							let loadZone_id = setInterval(()=>{
 								if (dz < this.size[0].z){
 									setTimeout(()=>{
 										for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
@@ -1615,12 +1570,12 @@ function BlockMap(size, seed, perloadLength){
 											this.updateColumn(ox+dx, oz+dz);
 										}
 									},0);
-									clearInterval(loadBlock_id);
+									clearInterval(loadZone_id);
 									
-									if (this.activeBlock.every(function(value, index, arr){
+									if (this.activeZone.every(function(value, index, arr){
 										return value[0] != x || value[1] != z;
 									})) //每个都不一样（不存在）
-										this.activeBlock.push([x,z]);
+										this.activeZone.push([x,z]);
 									
 									if (callback)
 										callback();
@@ -1641,10 +1596,10 @@ function BlockMap(size, seed, perloadLength){
 								dz--;
 							},0);
 						/* }else{ //无回调（不分顺序）
-							if (this.activeBlock.every(function(value, index, arr){
+							if (this.activeZone.every(function(value, index, arr){
 								return value[0] != x || value[1] != z;
 							})) //每个都不一样（不存在）
-								this.activeBlock.push([x,z]);
+								this.activeZone.push([x,z]);
 							
 							for (let dz=this.size[1].z; dz>=this.size[0].z; dz--){
 								setTimeout(()=>{
@@ -1662,7 +1617,7 @@ function BlockMap(size, seed, perloadLength){
 						{
 						//if (callback){ //有回调（必须setInterval）
 							let dx = this.size[0].x;
-							let loadBlock_id = setInterval(()=>{
+							let loadZone_id = setInterval(()=>{
 								if (dx > this.size[1].x){
 									setTimeout(()=>{
 										for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
@@ -1670,12 +1625,12 @@ function BlockMap(size, seed, perloadLength){
 											this.updateColumn(ox+dx, oz+dz);
 										}
 									},0);
-									clearInterval(loadBlock_id);
+									clearInterval(loadZone_id);
 									
-									if (this.activeBlock.every(function(value, index, arr){
+									if (this.activeZone.every(function(value, index, arr){
 										return value[0] != x || value[1] != z;
 									})) //每个都不一样（不存在）
-										this.activeBlock.push([x,z]);
+										this.activeZone.push([x,z]);
 									
 									if (callback)
 										callback();
@@ -1696,10 +1651,10 @@ function BlockMap(size, seed, perloadLength){
 								dx++;
 							},0);
 						/* }else{ //无回调（不分顺序）
-							if (this.activeBlock.every(function(value, index, arr){
+							if (this.activeZone.every(function(value, index, arr){
 								return value[0] != x || value[1] != z;
 							})) //每个都不一样（不存在）
-								this.activeBlock.push([x,z]);
+								this.activeZone.push([x,z]);
 							
 							for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
 								setTimeout(()=>{
@@ -1720,17 +1675,17 @@ function BlockMap(size, seed, perloadLength){
 	};
 	
 	//卸载区块（同步）
-	this.unloadBlock = (x, z)=>{
+	this.unloadZone = (x, z)=>{
 		[x, z] = [x, z].map(Math.round); //规范化
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
-		for (let i in this.activeBlock)
-			if (this.activeBlock[i][0] == x && this.activeBlock[i][1] == z)
-				this.activeBlock.splice(i,1); //从i开始删除一个元素
-		for (let i in this.initedBlock)
-			if (this.initedBlock[i][0] == x && this.initedBlock[i][1] == z)
-				this.initedBlock.splice(i,1); //从i开始删除一个元素
+		for (let i in this.activeZone)
+			if (this.activeZone[i][0] == x && this.activeZone[i][1] == z)
+				this.activeZone.splice(i,1); //从i开始删除一个元素
+		for (let i in this.initedZone)
+			if (this.initedZone[i][0] == x && this.initedZone[i][1] == z)
+				this.initedZone.splice(i,1); //从i开始删除一个元素
 		
 		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
 			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
@@ -1747,21 +1702,21 @@ function BlockMap(size, seed, perloadLength){
 		}
 	};
 	//卸载区块（异步）
-	this.unloadBlockAsync = (x, z, callback)=>{
+	this.unloadZoneAsync = (x, z, callback)=>{
 		[x, z] = [x, z].map(Math.round); //规范化
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
-		for (let i in this.activeBlock)
-			if (this.activeBlock[i][0] == x && this.activeBlock[i][1] == z)
-				this.activeBlock.splice(i,1); //从i开始删除一个元素
-		for (let i in this.initedBlock)
-			if (this.initedBlock[i][0] == x && this.initedBlock[i][1] == z)
-				this.initedBlock.splice(i,1); //从i开始删除一个元素
+		for (let i in this.activeZone)
+			if (this.activeZone[i][0] == x && this.activeZone[i][1] == z)
+				this.activeZone.splice(i,1); //从i开始删除一个元素
+		for (let i in this.initedZone)
+			if (this.initedZone[i][0] == x && this.initedZone[i][1] == z)
+				this.initedZone.splice(i,1); //从i开始删除一个元素
 		
 		//if (callback){ //有回调（必须setInterval）
 			let dx = this.size[0].x;
-			let unloadBlock_id = setInterval(()=>{
+			let unloadZone_id = setInterval(()=>{
 				if (dx > this.size[1].x){
 					setTimeout(()=>{
 						for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
@@ -1773,7 +1728,7 @@ function BlockMap(size, seed, perloadLength){
 							this.updateColumn(ox+this.size[1].x+1, oz+dz);
 						}
 					}, 0);
-					clearInterval(unloadBlock_id);
+					clearInterval(unloadZone_id);
 					if (callback)
 						callback();
 					return;
@@ -1817,7 +1772,7 @@ function BlockMap(size, seed, perloadLength){
 	};
 	
 	//预加载区块
-	this.perloadBlock = (length = this.perloadLength)=>{
+	this.perloadZone = (length = this.perloadLength)=>{
 		let block = [];
 		for (let x of [-1,1,0]){
 			for (let z of [-1,1,0]){
@@ -1864,24 +1819,24 @@ function BlockMap(size, seed, perloadLength){
 		}
 		
 		for (let i in block){
-			if (this.initedBlock.every(function(value, index, arr){
+			if (this.initedZone.every(function(value, index, arr){
 				return value[0] != block[i][0] || value[1] != block[i][1];
 			})){ //每个都不一样（不存在 & 不在加载中）
-				this.initBlock(block[i][0], block[i][1]);
-				this.loadBlockAsync(...block[i], ()=>{
-					this.updateBlockAsync(block[i][0], block[i][1]); //更新区块
+				this.initZone(block[i][0], block[i][1]);
+				this.loadZoneAsync(...block[i], ()=>{
+					this.updateZoneAsync(block[i][0], block[i][1]); //更新区块
 				}); //用噪声填充区块
 			}
 		}
 		
-		for (let i of this.activeBlock)
+		for (let i of this.activeZone)
 			if (
 				(i[0] != 0 || i[1] != 0)&&
 				block.every((value, index, arr)=>{
 					return i[0] != value[0] || i[1] != value[1];
 				}) //不与任何block相等
 			)
-				this.unloadBlockAsync(...i); //卸载区块
+				this.unloadZoneAsync(...i); //卸载区块
 	};
 	
 	/* //保存为数组字符串
@@ -2209,11 +2164,11 @@ block_load.id = setInterval(function(){
 		delete block_load;
 		$("#schedule header").text("载入方块中……");
 		
-		map.initBlock(0, 0); //初始化区块
-		map.loadBlockAsync(0, 0, function(){
-			map.updateBlockAsync(0, 0); //更新区块
+		map.initZone(0, 0); //初始化区块
+		map.loadZoneAsync(0, 0, function(){
+			map.updateZoneAsync(0, 0); //更新区块
 			if (++perload_condition >= 2){
-				map.perloadBlock();
+				map.perloadZone();
 			}
 			console.log(perload_condition)
 			$("#schedule span").text("100");
@@ -2258,8 +2213,8 @@ for (let i=1; i<template.length; i++){
 				render();
 				$("#schedule").remove();
 			}else{ //初始化地形
-				map.loadBlock(0, 0);
-				map.initBlock(0, 0);
+				map.loadZone(0, 0);
+				map.initZone(0, 0);
 				
 				$("#schedule1").text("100");
 				//纹理贴图加载成功后，调用渲染函数执行渲染操作
@@ -2615,7 +2570,7 @@ var deskgood = {
 		y: 0,
 		z: 0
 	},
-	tools: [0,0,0,0],
+	hold: [0,0,0,0],
 	choice: 0,
 	sensitivity: 1, //灵敏度
 	die(reason){
@@ -2636,20 +2591,20 @@ var deskgood = {
 			}catch(e){}
 		});
 	},
-	tools_choice_refresh(){
-		for (let i in deskgood.tools){
+	hold_choice_refresh(){
+		for (let i in deskgood.hold){
 			$("#tools > img:eq("+i+")")
 				.css("borderColor", (i==deskgood.choice)?"#fff":"#aaa")
 				.css("borderWidth", (i==deskgood.choice)?"6px":"3px");
 		}
 	},
-	tools_things_refresh(){
-		for (let i in deskgood.tools)
+	hold_things_refresh(){
+		for (let i in deskgood.hold)
 			$("#tools > img")[i].src =
-				deskgood.tools[i] == 0?
+				deskgood.hold[i] == 0?
 					"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP4//8/AwAI/AL+eMSysAAAAABJRU5ErkJggg==" //透明图片
 				:
-					(template[ deskgood.tools[i] ].block.parent||`./img/blocks/${template[ deskgood.tools[i] ].id}/`) + template[ deskgood.tools[i] ].block.face[0]
+					(template[ deskgood.hold[i] ].block.parent||`./img/blocks/${template[ deskgood.hold[i] ].id}/`) + template[ deskgood.hold[i] ].block.face[0]
 			;
 	},
 	look_refresh(x,y,z){
@@ -2684,7 +2639,7 @@ var deskgood = {
 					[Math.round(z/100)]
 				!== undefined
 				&&*/
-				map.initedBlock.some((item, index, value)=>{
+				map.initedZone.some((item, index, value)=>{
 					return item[0] == Math.round(x/100/map.size.x) &&
 						item[1] == Math.round(z/100/map.size.z);
 				}) //含有（已加载和加载中的区块）
@@ -2693,7 +2648,7 @@ var deskgood = {
 			){
 				let t = deskgood.pos.x == x && deskgood.pos.z == z; //未改变区块
 				[deskgood.pos.x, deskgood.pos.y, deskgood.pos.z] = [x,y,z];
-				if (!t) map.perloadBlock();
+				if (!t) map.perloadZone();
 			}else{
 				throw "";
 			}
@@ -3057,7 +3012,7 @@ sql.selectData("file", ["x", "y", "z", "id", "attr"], "type=1", function(result)
 		[deskgood.lookAt.left_right, deskgood.lookAt.top_bottom] = result[0].attr.split(" ").map(Number);
 		deskgood.look_refresh();
 		if (++perload_condition >= 2){
-			map.perloadBlock();
+			map.perloadZone();
 		}
 		console.log(perload_condition)
 	}
@@ -3071,17 +3026,17 @@ sql.selectData("file", ["x", "y", "z"], "type=2", function(result){
 });
 sql.selectData("file", ["id", "attr"], "type=3 AND x=0", function(result){ //物品栏
 	if (result.length){
-		for (let i in deskgood.tools){
-			deskgood.tools[i] = result[i].id;
+		for (let i in deskgood.hold){
+			deskgood.hold[i] = result[i].id;
 			//...
 		}
-		deskgood.tools_things_refresh();
+		deskgood.hold_things_refresh();
 	}
 });
 sql.selectData("file", ["id"], "type=3 AND x=1", function(result){ //选择物品
 	if (result.length){
 		deskgood.choice = result[0].id;
-		deskgood.tools_choice_refresh();
+		deskgood.hold_choice_refresh();
 	}
 });
 function save(){
@@ -3104,7 +3059,7 @@ function save(){
 		]);
 	});
 	sql.deleteData("file", "type=3", undefined, function(){
-		for (let i of deskgood.tools){
+		for (let i of deskgood.hold){
 			sql.insertData("file", ["type", "x", "id", "attr"], [
 				3,
 				0, //物品栏
@@ -3125,7 +3080,7 @@ function save(){
 	localStorage.setItem("我的世界.存档.玩家.位置", JSON.stringify(deskgood.pos));
 	localStorage.setItem("我的世界.存档.玩家.朝向", JSON.stringify(deskgood.lookAt));
 	localStorage.setItem("我的世界.存档.玩家.物品.工具栏", JSON.stringify({
-		tools: deskgood.tools,
+		hold: deskgood.hold,
 		choice: deskgood.choice
 	}));
 	console.log("备份成功"); */
@@ -3143,23 +3098,23 @@ if (localStorage.getItem("我的世界.存档.玩家.朝向")){
 	deskgood.lookAt.top_bottom = JSON.parse(localStorage.getItem("我的世界.存档.玩家.朝向")).top_bottom;
 }
 if (localStorage.getItem("我的世界.存档.玩家.物品.工具栏")){
-	deskgood.tools = JSON.parse(localStorage.getItem("我的世界.存档.玩家.物品.工具栏")).tools;
+	deskgood.hold = JSON.parse(localStorage.getItem("我的世界.存档.玩家.物品.工具栏")).hold;
 	deskgood.choice = Number(JSON.parse(localStorage.getItem("我的世界.存档.玩家.物品.工具栏")).choice);
 } */
 
-for (let i in deskgood.tools){
-	/* if (deskgood.tools[i] != 0){
-		$("#tools > img")[i].src = "./img/blocks/"+deskgood.tools[i]+"/"+template[deskgood.tools[i]].face[0];
+for (let i in deskgood.hold){
+	/* if (deskgood.hold[i] != 0){
+		$("#tools > img")[i].src = "./img/blocks/"+deskgood.hold[i]+"/"+template[deskgood.hold[i]].face[0];
 	} */
 	$("#tools > img")[i].onclick = ()=>{
 		deskgood.choice = i;
-		deskgood.tools_choice_refresh();
+		deskgood.hold_choice_refresh();
 	};
 }
 
 //初始化
-deskgood.tools_choice_refresh();
-deskgood.tools_things_refresh();
+deskgood.hold_choice_refresh();
+deskgood.hold_things_refresh();
 deskgood.look_refresh();
 
 //gui
@@ -3223,15 +3178,15 @@ deskgood_folder.open();
 					}
 				); }catch(err){} */
 			});
-	let deskgood_tools_folder = deskgood_folder.addFolder("工具栏(tools)");
-	deskgood_tools_folder.open();
-		deskgood_tools_folder.add(deskgood, "choice", 0, 3, 1).listen().name("选择工具").onChange(deskgood.tools_choice_refresh);
-		let deskgood_tools_things_folder = deskgood_tools_folder.addFolder("物品");
-		deskgood_tools_things_folder.open();
-			deskgood_tools_things_folder.add(deskgood.tools, 0, 0, 12, 1).listen().onChange(deskgood.tools_things_refresh);
-			deskgood_tools_things_folder.add(deskgood.tools, 1, 0, 12, 1).listen().onChange(deskgood.tools_things_refresh);
-			deskgood_tools_things_folder.add(deskgood.tools, 2, 0, 12, 1).listen().onChange(deskgood.tools_things_refresh);
-			deskgood_tools_things_folder.add(deskgood.tools, 3, 0, 12, 1).listen().onChange(deskgood.tools_things_refresh);
+	let deskgood_hold_folder = deskgood_folder.addFolder("工具栏(tools)");
+	deskgood_hold_folder.open();
+		deskgood_hold_folder.add(deskgood, "choice", 0, 3, 1).listen().name("选择工具").onChange(deskgood.hold_choice_refresh);
+		let deskgood_hold_things_folder = deskgood_hold_folder.addFolder("物品");
+		deskgood_hold_things_folder.open();
+			deskgood_hold_things_folder.add(deskgood.hold, 0, 0, 12, 1).listen().onChange(deskgood.hold_things_refresh);
+			deskgood_hold_things_folder.add(deskgood.hold, 1, 0, 12, 1).listen().onChange(deskgood.hold_things_refresh);
+			deskgood_hold_things_folder.add(deskgood.hold, 2, 0, 12, 1).listen().onChange(deskgood.hold_things_refresh);
+			deskgood_hold_things_folder.add(deskgood.hold, 3, 0, 12, 1).listen().onChange(deskgood.hold_things_refresh);
 
 
 /* //多线程
@@ -3323,6 +3278,7 @@ function render(){
 			Aw = [] //空气阻力产生的加速度/(m/s²)
 		for (let i=0; i<3; i++){
 			Fw[i] = (1/2) * c * ρ * s[i] * v[i]*v[i]; //F = (1/2)CρSV²
+			if (v[i] > 0) Fw[i] *= -1; //方向相反
 			Aw[i] = Fw[i] / m; //F=ma => a=F/m
 		}
 		
@@ -3345,7 +3301,7 @@ function render(){
 			:
 				-deskgood.v.z
 		;
-		//console.info("aw:",Aw, "Fw:",Fw, "v:", deskgood.v)
+		// console.info("aw:",Aw[1], "Fw:",Fw[1], "v:", deskgood.v)
 		
 		let rt = deskgood.go(deskgood.v.x*100*t/1000, deskgood.v.y*100*t/1000, deskgood.v.z*100*t/1000);
 		//					m/s*100*ms/1000 => cm/s*s => cm => px
@@ -3722,23 +3678,23 @@ $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind�
 		if (wheel > 0) { //当滑轮向上滚动时
 			console.log("上滚轮");
 			up();
-			deskgood.tools_choice_refresh();
+			deskgood.hold_choice_refresh();
 		}  
 		if (wheel < 0) { //当滑轮向下滚动时
 			console.log("下滚轮");
 			down();
-			deskgood.tools_choice_refresh();
+			deskgood.hold_choice_refresh();
 		}  
 	}else if (event.originalEvent.detail){ //Firefox滚轮事件
 		if (detal > 0) { //当滑轮向下滚动时
 			console.log("下滚轮");
 			down();
-			deskgood.tools_choice_refresh();
+			deskgood.hold_choice_refresh();
 		}
 		if (detal < 0) { //当滑轮向上滚动时
 			console.log("上滚轮");
 			up();
-			deskgood.tools_choice_refresh();
+			deskgood.hold_choice_refresh();
 		}
 	}  
 });
@@ -3770,24 +3726,24 @@ document.addEventListener("mousedown", function (e){
 							eval(map.get(x/100, y/100, z/100).attr.block.onLeftMouseDown) === false
 						) return;
 						/*let free = -1;
-						if (deskgood.tools[deskgood.choice] == 0){
+						if (deskgood.hold[deskgood.choice] == 0){
 							free = deskgood.choice;
 						}else{
-							for (let j in deskgood.tools){
-								if (deskgood.tools[j] == 0){
+							for (let j in deskgood.hold){
+								if (deskgood.hold[j] == 0){
 									free = j;
 									break;
 								}
 							}
 						}*/
-						let free = deskgood.tools[deskgood.choice]==0? deskgood.choice: deskgood.tools.indexOf(0);
+						let free = deskgood.hold[deskgood.choice]==0? deskgood.choice: deskgood.hold.indexOf(0);
 						if (free == -1){
 							console.info("not free!");
 							message("<font style='font-size:14px;'>两只手拿4m³方块已经够多了，反正我是拿不下了</font>", 3);
 						}else{
 							console.log("delete:", click[i].object.position);
-							deskgood.tools[free] = map.get(x/100, y/100, z/100).id; //放在手中
-							deskgood.tools_things_refresh(); //刷新方块
+							deskgood.hold[free] = map.get(x/100, y/100, z/100).id; //放在手中
+							deskgood.hold_things_refresh(); //刷新方块
 							map.delete(x/100, y/100, z/100); //删除方块
 							map.updateRound(x/100, y/100, z/100); //刷新方块及周围
 							//SQL
@@ -3839,7 +3795,7 @@ document.addEventListener("mousedown", function (e){
 					map.get(x/100, y/100, z/100).attr.block.onRightMouseDown &&
 					eval(map.get(x/100, y/100, z/100).attr.block.onRightMouseDown) === false
 				) return;
-				if (deskgood.tools[deskgood.choice] == 0) //空气
+				if (deskgood.hold[deskgood.choice] == 0) //空气
 					return;
 				switch (click[i].faceIndex){
 					case 0:
@@ -3874,19 +3830,19 @@ document.addEventListener("mousedown", function (e){
 					(y-deskgood.pos.y) **2+
 					(z-deskgood.pos.z) **2
 				) < 500){ //距离<5m
-					map.addID(deskgood.tools[deskgood.choice], {
+					map.addID(deskgood.hold[deskgood.choice], {
 						x: x/100,
 						y: y/100,
 						z: z/100
 					}, template);
-					/* map.add(new Thing(template[ deskgood.tools[deskgood.choice] ]).block.makeMaterial().block.deleteTexture().block.makeMesh(), {
+					/* map.add(new Thing(template[ deskgood.hold[deskgood.choice] ]).block.makeMaterial().block.deleteTexture().block.makeMesh(), {
 						x: x/100,
 						y: y/100,
 						z: z/100
 					}); */
 					map.updateRound(x/100, y/100, z/100); //刷新方块及周围
 					//SQL
-					let thing_id = deskgood.tools[deskgood.choice];
+					let thing_id = deskgood.hold[deskgood.choice];
 					[x, y, z] = [x, y, z].map(v => Math.round(v/100));
 					sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
 						sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
@@ -3898,8 +3854,8 @@ document.addEventListener("mousedown", function (e){
 							`""`
 						])
 					});
-					deskgood.tools[deskgood.choice] = 0; //删除手里的方块
-					deskgood.tools_things_refresh(); //刷新方块
+					deskgood.hold[deskgood.choice] = 0; //删除手里的方块
+					deskgood.hold_things_refresh(); //刷新方块
 					break; //跳出 寻找有效放置的 循环
 				}
 				/*if (click[i].faceIndex == 0 | click[i].faceIndex == 1){
@@ -3909,9 +3865,9 @@ document.addEventListener("mousedown", function (e){
 						Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
 						Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
 					) < 500){ //距离<500
-						let thing = new Thing(template[ deskgood.tools[deskgood.choice] ]);
+						let thing = new Thing(template[ deskgood.hold[deskgood.choice] ]);
 						thing.block.makeMesh();
-						let mesh = new THREE.Mesh(block_geometry, template[ deskgood.tools[deskgood.choice] ].material);
+						let mesh = new THREE.Mesh(block_geometry, template[ deskgood.hold[deskgood.choice] ].material);
 						mesh.position.x = click[i].object.position.x+100;
 						mesh.position.y = click[i].object.position.y;
 						mesh.position.z = click[i].object.position.z;
@@ -3920,9 +3876,9 @@ document.addEventListener("mousedown", function (e){
 						mesh.receiveShadow = true;
 						
 						scene.add(mesh); //网格模型添加到场景中
-						every[ click[i].object.position.x/100+1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = deskgood.tools[deskgood.choice];
-						deskgood.tools[deskgood.choice] = 0; //删除手里的方块
-						deskgood.tools_things_refresh(); //刷新方块
+						every[ click[i].object.position.x/100+1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = deskgood.hold[deskgood.choice];
+						deskgood.hold[deskgood.choice] = 0; //删除手里的方块
+						deskgood.hold_things_refresh(); //刷新方块
 						break;
 					}
 				}else if (click[i].faceIndex == 2 | click[i].faceIndex == 3){
@@ -3932,7 +3888,7 @@ document.addEventListener("mousedown", function (e){
 						Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
 						Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
 					) < 500){ //距离<500
-						let mesh = new THREE.Mesh(block_geometry, template[ deskgood.tools[deskgood.choice]].material);
+						let mesh = new THREE.Mesh(block_geometry, template[ deskgood.hold[deskgood.choice]].material);
 						mesh.position.x = click[i].object.position.x-100;
 						mesh.position.y = click[i].object.position.y;
 						mesh.position.z = click[i].object.position.z;
@@ -3941,9 +3897,9 @@ document.addEventListener("mousedown", function (e){
 						mesh.receiveShadow = true;
 						
 						scene.add(mesh); //网格模型添加到场景中
-						every[ click[i].object.position.x/100-1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = deskgood.tools[deskgood.choice];
-						deskgood.tools[deskgood.choice] = 0; //删除手里的方块
-						deskgood.tools_things_refresh(); //刷新方块
+						every[ click[i].object.position.x/100-1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = deskgood.hold[deskgood.choice];
+						deskgood.hold[deskgood.choice] = 0; //删除手里的方块
+						deskgood.hold_things_refresh(); //刷新方块
 						break;
 					}
 				}else if (click[i].faceIndex == 4 | click[i].faceIndex == 5){
@@ -3952,7 +3908,7 @@ document.addEventListener("mousedown", function (e){
 					 	Math.pow((click[i].object.position.y+100) - deskgood.pos.y, 2)+
 						Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
 					) < 500){ //距离<500
-						let mesh = new THREE.Mesh(block_geometry, template[ deskgood.tools[deskgood.choice]].material);
+						let mesh = new THREE.Mesh(block_geometry, template[ deskgood.hold[deskgood.choice]].material);
 						mesh.position.x = click[i].object.position.x;
 						mesh.position.y = click[i].object.position.y+100;
 						mesh.position.z = click[i].object.position.z;
@@ -3961,9 +3917,9 @@ document.addEventListener("mousedown", function (e){
 						mesh.receiveShadow = true;
 						
 						scene.add(mesh); //网格模型添加到场景中
-						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100+1 ][ click[i].object.position.z/100 ] = deskgood.tools[deskgood.choice];
-						deskgood.tools[deskgood.choice] = 0; //删除手里的方块
-						deskgood.tools_things_refresh(); //刷新方块
+						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100+1 ][ click[i].object.position.z/100 ] = deskgood.hold[deskgood.choice];
+						deskgood.hold[deskgood.choice] = 0; //删除手里的方块
+						deskgood.hold_things_refresh(); //刷新方块
 						break;
 					}
 				}else if (click[i].faceIndex == 6 | click[i].faceIndex == 7){
@@ -3972,7 +3928,7 @@ document.addEventListener("mousedown", function (e){
 						Math.pow((click[i].object.position.y-100) - deskgood.pos.y, 2)+
 						Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
 					) < 500){ //距离<500
-						let mesh = new THREE.Mesh(block_geometry, template[ deskgood.tools[deskgood.choice]].material);
+						let mesh = new THREE.Mesh(block_geometry, template[ deskgood.hold[deskgood.choice]].material);
 						mesh.position.x = click[i].object.position.x;
 						mesh.position.y = click[i].object.position.y-100;
 						mesh.position.z = click[i].object.position.z;
@@ -3981,9 +3937,9 @@ document.addEventListener("mousedown", function (e){
 						mesh.receiveShadow = true;
 						
 						scene.add(mesh); //网格模型添加到场景中
-						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100-1 ][ click[i].object.position.z/100 ] = deskgood.tools[deskgood.choice];
-						deskgood.tools[deskgood.choice] = 0; //删除手里的方块
-						deskgood.tools_things_refresh(); //刷新方块
+						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100-1 ][ click[i].object.position.z/100 ] = deskgood.hold[deskgood.choice];
+						deskgood.hold[deskgood.choice] = 0; //删除手里的方块
+						deskgood.hold_things_refresh(); //刷新方块
 						break;
 					}
 				}else if (click[i].faceIndex == 8 | click[i].faceIndex == 9){
@@ -3992,7 +3948,7 @@ document.addEventListener("mousedown", function (e){
 						Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
 						Math.pow((click[i].object.position.z+100) - deskgood.pos.z, 2)
 					) < 500){ //距离<500
-						let mesh = new THREE.Mesh(block_geometry, template[ deskgood.tools[deskgood.choice]].material);
+						let mesh = new THREE.Mesh(block_geometry, template[ deskgood.hold[deskgood.choice]].material);
 						mesh.position.x = click[i].object.position.x;
 						mesh.position.y = click[i].object.position.y;
 						mesh.position.z = click[i].object.position.z+100;
@@ -4001,9 +3957,9 @@ document.addEventListener("mousedown", function (e){
 						mesh.receiveShadow = true;
 						
 						scene.add(mesh); //网格模型添加到场景中
-						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100+1 ] = deskgood.tools[deskgood.choice];
-						deskgood.tools[deskgood.choice] = 0; //删除手里的方块
-						deskgood.tools_things_refresh(); //刷新方块
+						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100+1 ] = deskgood.hold[deskgood.choice];
+						deskgood.hold[deskgood.choice] = 0; //删除手里的方块
+						deskgood.hold_things_refresh(); //刷新方块
 						break;
 					}
 				}else if (click[i].faceIndex == 10 | click[i].faceIndex == 11){
@@ -4012,7 +3968,7 @@ document.addEventListener("mousedown", function (e){
 						Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
 						Math.pow((click[i].object.position.z-100) - deskgood.pos.z, 2)
 					) < 500){ //距离<500
-						let mesh = new THREE.Mesh(block_geometry, template[ deskgood.tools[deskgood.choice]].material);
+						let mesh = new THREE.Mesh(block_geometry, template[ deskgood.hold[deskgood.choice]].material);
 						mesh.position.x = click[i].object.position.x;
 						mesh.position.y = click[i].object.position.y;
 						mesh.position.z = click[i].object.position.z-100;
@@ -4021,9 +3977,9 @@ document.addEventListener("mousedown", function (e){
 						mesh.receiveShadow = true;
 						
 						scene.add(mesh); //网格模型添加到场景中
-						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100-1 ] = deskgood.tools[deskgood.choice];
-						deskgood.tools[deskgood.choice] = 0; //删除手里的方块
-						deskgood.tools_things_refresh(); //刷新方块
+						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100-1 ] = deskgood.hold[deskgood.choice];
+						deskgood.hold[deskgood.choice] = 0; //删除手里的方块
+						deskgood.hold_things_refresh(); //刷新方块
 						break;
 					}
 				}*/
@@ -4282,17 +4238,17 @@ $("canvas:eq(0)").on("touchstart", function (e){
 								eval(map.get(x/100, y/100, z/100).attr.block.onLongTouch) === false
 							) return;
 							/*let free = -1;
-							if (deskgood.tools[deskgood.choice] == 0){
+							if (deskgood.hold[deskgood.choice] == 0){
 								free = deskgood.choice;
 							}else{
-								for (let j in deskgood.tools){
-									if (deskgood.tools[j] == 0){
+								for (let j in deskgood.hold){
+									if (deskgood.hold[j] == 0){
 										free = j;
 										break;
 									}
 								}
 							}*/
-							let free = deskgood.tools[deskgood.choice]==0? deskgood.choice: deskgood.tools.indexOf(0);
+							let free = deskgood.hold[deskgood.choice]==0? deskgood.choice: deskgood.hold.indexOf(0);
 							if (free == -1){
 								console.info("not free!");
 								message("<font style='font-size:14px;'>两只手拿4m³方块已经够多了，反正我是拿不下了</font>", 3);
@@ -4309,8 +4265,8 @@ $("canvas:eq(0)").on("touchstart", function (e){
 								}catch(err){} */
 							}else{
 								console.log("delete:", click[i].object.position);
-								deskgood.tools[free] = map.get(x/100, y/100, z/100).id; //放在手中
-								deskgood.tools_things_refresh(); //刷新方块
+								deskgood.hold[free] = map.get(x/100, y/100, z/100).id; //放在手中
+								deskgood.hold_things_refresh(); //刷新方块
 								map.delete(x/100, y/100, z/100); //删除方块
 								map.updateRound(x/100, y/100, z/100); //更新方块
 								//SQL
@@ -4432,7 +4388,7 @@ $("canvas:eq(0)").on("touchend", function (e){
 						map.get(x/100, y/100, z/100).attr.block.onShortTouch &&
 						eval(map.get(x/100, y/100, z/100).attr.block.onShortTouch) === false
 					) return;
-					if (deskgood.tools[deskgood.choice] == 0) //空气
+					if (deskgood.hold[deskgood.choice] == 0) //空气
 						return;
 					switch (click[i].faceIndex){
 						case 0:
@@ -4467,18 +4423,18 @@ $("canvas:eq(0)").on("touchend", function (e){
 						(y-deskgood.pos.y) **2+
 						(z-deskgood.pos.z) **2
 					) < 500){ //距离<5m
-						map.addID(deskgood.tools[deskgood.choice], {
+						map.addID(deskgood.hold[deskgood.choice], {
 							x: x/100,
 							y: y/100,
 							z: z/100
 						}, template);
-						/* map.add(new Thing(template[ deskgood.tools[deskgood.choice] ]).block.makeMaterial().block.deleteTexture().block.makeMesh(), {
+						/* map.add(new Thing(template[ deskgood.hold[deskgood.choice] ]).block.makeMaterial().block.deleteTexture().block.makeMesh(), {
 							x: x/100,
 							y: y/100,
 							z: z/100
 						}); */
 						map.updateRound(x/100, y/100, z/100); //更新方块及周围方块
-						let thing_id = deskgood.tools[deskgood.choice];
+						let thing_id = deskgood.hold[deskgood.choice];
 						//SQL
 						[x, y, z] = [x, y, z].map(v => Math.round(v/100));
 						sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
@@ -4491,8 +4447,8 @@ $("canvas:eq(0)").on("touchend", function (e){
 								`""`
 							])
 						});
-						deskgood.tools[deskgood.choice] = 0; //删除手里的方块
-						deskgood.tools_things_refresh(); //刷新方块
+						deskgood.hold[deskgood.choice] = 0; //删除手里的方块
+						deskgood.hold_things_refresh(); //刷新方块
 						break; //跳出 寻找有效放置的 循环
 					}
 					/*if (click[i].faceIndex == 0 | click[i].faceIndex == 1){
@@ -4501,7 +4457,7 @@ $("canvas:eq(0)").on("touchend", function (e){
 							Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
 							Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
 						) < 500){ //距离<50
-							let mesh = new THREE.Mesh(block_geometry, template[ deskgood.tools[deskgood.choice]].material);
+							let mesh = new THREE.Mesh(block_geometry, template[ deskgood.hold[deskgood.choice]].material);
 							mesh.position.x = click[i].object.position.x+100;
 							mesh.position.y = click[i].object.position.y;
 							mesh.position.z = click[i].object.position.z;
@@ -4510,9 +4466,9 @@ $("canvas:eq(0)").on("touchend", function (e){
 							mesh.receiveShadow = true;
 							
 							scene.add(mesh); //网格模型添加到场景中
-							every[ click[i].object.position.x/100+1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = deskgood.tools[deskgood.choice];
-							deskgood.tools[deskgood.choice] = 0; //删除手里的方块
-							deskgood.tools_things_refresh(); //刷新方块
+							every[ click[i].object.position.x/100+1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = deskgood.hold[deskgood.choice];
+							deskgood.hold[deskgood.choice] = 0; //删除手里的方块
+							deskgood.hold_things_refresh(); //刷新方块
 							break;
 						}
 					}else if (click[i].faceIndex == 2 | click[i].faceIndex == 3){
@@ -4521,7 +4477,7 @@ $("canvas:eq(0)").on("touchend", function (e){
 							Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
 							Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
 						) < 500){ //距离<500
-							let mesh = new THREE.Mesh(block_geometry, template[ deskgood.tools[deskgood.choice]].material);
+							let mesh = new THREE.Mesh(block_geometry, template[ deskgood.hold[deskgood.choice]].material);
 							mesh.position.x = click[i].object.position.x-100;
 							mesh.position.y = click[i].object.position.y;
 							mesh.position.z = click[i].object.position.z;
@@ -4530,9 +4486,9 @@ $("canvas:eq(0)").on("touchend", function (e){
 							mesh.receiveShadow = true;
 							
 							scene.add(mesh); //网格模型添加到场景中
-							every[ click[i].object.position.x/100-1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = deskgood.tools[deskgood.choice];
-							deskgood.tools[deskgood.choice] = 0; //删除手里的方块
-							deskgood.tools_things_refresh(); //刷新方块
+							every[ click[i].object.position.x/100-1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = deskgood.hold[deskgood.choice];
+							deskgood.hold[deskgood.choice] = 0; //删除手里的方块
+							deskgood.hold_things_refresh(); //刷新方块
 							break;
 						}
 					}else if (click[i].faceIndex == 4 | click[i].faceIndex == 5){
@@ -4541,7 +4497,7 @@ $("canvas:eq(0)").on("touchend", function (e){
 						 	Math.pow((click[i].object.position.y+100) - deskgood.pos.y, 2)+
 							Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
 						) < 500){ //距离<500
-							let mesh = new THREE.Mesh(block_geometry, template[ deskgood.tools[deskgood.choice]].material);
+							let mesh = new THREE.Mesh(block_geometry, template[ deskgood.hold[deskgood.choice]].material);
 							mesh.position.x = click[i].object.position.x;
 							mesh.position.y = click[i].object.position.y+100;
 							mesh.position.z = click[i].object.position.z;
@@ -4550,9 +4506,9 @@ $("canvas:eq(0)").on("touchend", function (e){
 							mesh.receiveShadow = true;
 							
 							scene.add(mesh); //网格模型添加到场景中
-							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100+1 ][ click[i].object.position.z/100 ] = deskgood.tools[deskgood.choice];
-							deskgood.tools[deskgood.choice] = 0; //删除手里的方块
-							deskgood.tools_things_refresh(); //刷新方块
+							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100+1 ][ click[i].object.position.z/100 ] = deskgood.hold[deskgood.choice];
+							deskgood.hold[deskgood.choice] = 0; //删除手里的方块
+							deskgood.hold_things_refresh(); //刷新方块
 							break;
 						}
 					}else if (click[i].faceIndex == 6 | click[i].faceIndex == 7){
@@ -4561,7 +4517,7 @@ $("canvas:eq(0)").on("touchend", function (e){
 							Math.pow((click[i].object.position.y-100) - deskgood.pos.y, 2)+
 							Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
 						) < 500){ //距离<500
-							let mesh = new THREE.Mesh(block_geometry, template[ deskgood.tools[deskgood.choice]].material);
+							let mesh = new THREE.Mesh(block_geometry, template[ deskgood.hold[deskgood.choice]].material);
 							mesh.position.x = click[i].object.position.x;
 							mesh.position.y = click[i].object.position.y-100;
 							mesh.position.z = click[i].object.position.z;
@@ -4570,9 +4526,9 @@ $("canvas:eq(0)").on("touchend", function (e){
 							mesh.receiveShadow = true;
 							
 							scene.add(mesh); //网格模型添加到场景中
-							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100-1 ][ click[i].object.position.z/100 ] = deskgood.tools[deskgood.choice];
-							deskgood.tools[deskgood.choice] = 0; //删除手里的方块
-							deskgood.tools_things_refresh(); //刷新方块
+							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100-1 ][ click[i].object.position.z/100 ] = deskgood.hold[deskgood.choice];
+							deskgood.hold[deskgood.choice] = 0; //删除手里的方块
+							deskgood.hold_things_refresh(); //刷新方块
 							break;
 						}
 					}else if (click[i].faceIndex == 8 | click[i].faceIndex == 9){
@@ -4581,7 +4537,7 @@ $("canvas:eq(0)").on("touchend", function (e){
 							Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
 							Math.pow((click[i].object.position.z+100) - deskgood.pos.z, 2)
 						) < 500){ //距离<500
-							let mesh = new THREE.Mesh(block_geometry, template[ deskgood.tools[deskgood.choice]].material);
+							let mesh = new THREE.Mesh(block_geometry, template[ deskgood.hold[deskgood.choice]].material);
 							mesh.position.x = click[i].object.position.x;
 							mesh.position.y = click[i].object.position.y;
 							mesh.position.z = click[i].object.position.z+100;
@@ -4590,9 +4546,9 @@ $("canvas:eq(0)").on("touchend", function (e){
 							mesh.receiveShadow = true;
 							
 							scene.add(mesh); //网格模型添加到场景中
-							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100+1 ] = deskgood.tools[deskgood.choice];
-							deskgood.tools[deskgood.choice] = 0; //删除手里的方块
-							deskgood.tools_things_refresh(); //刷新方块
+							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100+1 ] = deskgood.hold[deskgood.choice];
+							deskgood.hold[deskgood.choice] = 0; //删除手里的方块
+							deskgood.hold_things_refresh(); //刷新方块
 							break;
 						}
 					}else if (click[i].faceIndex == 10 | click[i].faceIndex == 11){
@@ -4601,7 +4557,7 @@ $("canvas:eq(0)").on("touchend", function (e){
 							Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
 							Math.pow((click[i].object.position.z-100) - deskgood.pos.z, 2)
 						) < 500){ //距离<500
-							let mesh = new THREE.Mesh(block_geometry, template[ deskgood.tools[deskgood.choice]].material);
+							let mesh = new THREE.Mesh(block_geometry, template[ deskgood.hold[deskgood.choice]].material);
 							mesh.position.x = click[i].object.position.x;
 							mesh.position.y = click[i].object.position.y;
 							mesh.position.z = click[i].object.position.z-100;
@@ -4610,9 +4566,9 @@ $("canvas:eq(0)").on("touchend", function (e){
 							mesh.receiveShadow = true;
 							
 							scene.add(mesh); //网格模型添加到场景中
-							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100-1 ] = deskgood.tools[deskgood.choice];
-							deskgood.tools[deskgood.choice] = 0; //删除手里的方块
-							deskgood.tools_things_refresh(); //刷新方块
+							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100-1 ] = deskgood.hold[deskgood.choice];
+							deskgood.hold[deskgood.choice] = 0; //删除手里的方块
+							deskgood.hold_things_refresh(); //刷新方块
 							break;
 						}
 					}*/
