@@ -308,7 +308,10 @@
 				background-color: rgb(200,200,200);
 				border: 3px outset rgb(116,116,116);
 			}
-			
+			#bag #view{
+				width: 50px;
+				height: 50px;
+			}
 		</style>
 		
 		<script src="./js/jquery.min.js"></script>
@@ -351,6 +354,7 @@ deskgood.moveTo(0,10000*100);
 			<input type="radio" name="bag-nav" id="bag-nav-choice1" checked />
 			<div>
 				1
+				<div id="view"></div>
 			</div>
 			<input type="radio" name="bag-nav" id="bag-nav-choice2" />
 			<div>
@@ -627,8 +631,8 @@ let gui = new dat.GUI({
 	closeOnTop: true // 关闭按钮是否在顶部
 });
 gui.close();
-gui.add(window, "TimeK", 0.5, 3600*24, 0.1).name("时间流逝速度").onChange((value) => {
-	TimeK = (value/3600/24)**3 *3600*24;
+gui.add(window, "TimeK", 1, 3600, 1).name("时间流逝速度").onChange((value) => {
+	TimeK = ((value-1)/(3600-1))**6 *(3600-1)+1;
 });
 gui.add({f:function(){
 	run(prompt("请输入命令：","deskgood.goY(3000*100);"))
@@ -650,11 +654,7 @@ function get_date(){
 }
 function Thing(opinion){
 	//物品ID
-	try{
-		this.id = Number(opinion.id);
-	}catch(e){
-		debugger
-	}
+	this.id = Number(opinion.id);
 	//this.id = Thing.prototype.idLength++; //同时自增
 	
 	//名称
@@ -1153,7 +1153,7 @@ function BlockMap(size, seed, perloadLength){
 	
 	//更新列方块
 	this.updateColumn = (x, z)=>{
-		//console.log("updateColumn:",x,z,+get_date);
+		//console.log("updateColumn:",x,z,+get_date());
 		for (let dy=this.size[0].y; dy<=this.size[1].y; dy++)
 			this.update(x, dy, z);
 	};
@@ -3350,7 +3350,7 @@ function state(id, pointerLock){
 		document.body.requestPointerLock();
 		console.log(id, ":close");
 	}else{ //未显示
-		$("#"+id).css("display", $("#"+id).attr("data-display") ?? "block");
+		$("#"+id).css("display", $("#"+id).attr("data-display") || "block");
 		stop = id;
 		document.exitPointerLock();
 		console.log(id, ":open");
@@ -4633,6 +4633,23 @@ function get_choice_object(phone, x, y){
 	}
 	return null;
 }
+
+/*
+* bag
+*/
+let bag_view = {
+	camera: new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.01, 10 ),
+	scene: new THREE.Scene(),
+	renderer: new THREE.WebGLRenderer({ antialias: true })
+};
+bag_view.camera = bag_view.camera.position.z = 1;
+bag_view.renderer.setSize(50, 50);
+bag_view.deskgood_top_geometry = new THREE.BoxGeometry(100, 100, 100);
+bag_view.deskgood_top_material = new THREE.MeshNormalMaterial();
+bag_view.deskgood_top_mesh = new THREE.Mesh(bag_view.deskgood_top_geometry, bag_view.deskgood_top_material);
+bag_view.deskgood_top_mesh.position.y = 50;
+scene.add( bag_view.deskgood_top_mesh );
+$("#bag #view")[0].appendChild( bag_view.renderer.domElement );
 
 //屏蔽鼠标右键
 document.oncontextmenu = function (e){
