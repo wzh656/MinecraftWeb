@@ -231,6 +231,10 @@
 				resize: none;
 			}
 			
+			.cr.function > div > span.property-name{
+				width: 100%;
+			}
+			
 			#bag, #command{
 				width: 80vw;
 				/* height: 80vh; */
@@ -308,9 +312,17 @@
 				background-color: rgb(200,200,200);
 				border: 3px outset rgb(116,116,116);
 			}
-			#bag #view{
-				width: 50px;
-				height: 50px;
+			#bag > div:nth-of-type(1) > #bag_deskgood{
+				margin: 3px;
+				border: 3px inset rgb(200,200,200);
+			}
+			#bag > div:nth-of-type(1) > ul{
+				display: flex;
+				flex-direction: column;
+				justify-content: space-around;
+			}
+			#bag > div:nth-of-type(1) > ul > li{
+				display: block;
 			}
 		</style>
 		
@@ -321,8 +333,8 @@
 		</script>
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
-		<script>eruda.init();</script>
-		<script>new VConsole();</script>
+		<script>//eruda.init();</script>
+		<script>//new VConsole();</script>
 		<script src="./js/three.min.js"></script>
 		<script src="./js/simplex-noise.js"></script>
 		<script src="./js/dat.gui.min.js"></script>
@@ -353,8 +365,32 @@ deskgood.moveTo(0,10000*100);
 		<div id="bag" data-display="flex">
 			<input type="radio" name="bag-nav" id="bag-nav-choice1" checked />
 			<div>
-				1
-				<div id="view"></div>
+				<ul>
+					<li>
+						头(Head)：
+						<ul>
+							<li></li>
+						</ul>
+					</li>
+					<li>
+						身(Body)：
+						<ul>
+							<li></li>
+						</ul>
+					</li>
+					<li>
+						腿(leg)：
+						<ul>
+							<li></li>
+						</ul>
+					</li>
+					<li>
+						脚(foot)：
+						<ul>
+							<li></li>
+						</ul>
+					</li>
+				</ul>
 			</div>
 			<input type="radio" name="bag-nav" id="bag-nav-choice2" />
 			<div>
@@ -482,7 +518,7 @@ document.addEventListener("plusready", playBGM);
 document.addEventListener("touchstart", playBGM);
 
 var stop = true;
-var TimeK = 2;
+var TimeK = 1;
 /**
 * 判断手机电脑
 */
@@ -650,7 +686,8 @@ gui.add(location, "reload").name("刷新(reload)");
 * 初始化
 */
 function get_date(){
-	return new Date( (+new Date)*TimeK );
+	//return new Date( (+new Date)*TimeK );
+	return new Date();
 }
 function Thing(opinion){
 	//物品ID
@@ -2105,9 +2142,9 @@ let sprite_system = [],
 	});
 setInterval(function(){
 	if (sprite_lastTime == null)
-		sprite_lastTime = get_date();
-	let t = Math.round((get_date() - sprite_lastTime)/1000*map.size.x*map.size.z*weather);
-	sprite_lastTime = get_date();
+		sprite_lastTime = +new Date();
+	let t = Math.round((+new Date() - sprite_lastTime)/1000*map.size.x*map.size.z*weather);
+	sprite_lastTime = +new Date();
 	
 	if (stop)
 		return;
@@ -2421,6 +2458,7 @@ renderer.setClearColor("#eef", 1); //设置背景颜色
 renderer.domElement.style.margin = "0";
 document.body.appendChild(renderer.domElement); //body元素中插入canvas对象
 renderer.domElement.style.cursor = "none";
+renderer.domElement.id = "game";
 renderer.shadowMapEnabled = true; //阴影
 //执行渲染操作   指定场景、相机作为参数
 renderer.render(scene, camera);
@@ -3597,8 +3635,8 @@ document.addEventListener("mousemove", function (e){
 		0
 	;
 	
-	deskgood.lookAt.left_right += dx/document.getElementsByTagName("canvas")[0].offsetWidth*360*deskgood.sensitivity;
-	deskgood.lookAt.top_bottom -= dy/document.getElementsByTagName("canvas")[0].offsetHeight*360*deskgood.sensitivity;
+	deskgood.lookAt.left_right += dx/$("#game")[0].offsetWidth*360*deskgood.sensitivity;
+	deskgood.lookAt.top_bottom -= dy/$("#game")[0].offsetHeight*360*deskgood.sensitivity;
 	
 	if (deskgood.lookAt.left_right > 360)
 		while (deskgood.lookAt.left_right > 360)
@@ -4638,18 +4676,67 @@ function get_choice_object(phone, x, y){
 * bag
 */
 let bag_view = {
-	camera: new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.01, 10 ),
+	camera: new THREE.PerspectiveCamera(70, 1, 0.01, 1000),
 	scene: new THREE.Scene(),
-	renderer: new THREE.WebGLRenderer({ antialias: true })
+	renderer: new THREE.WebGLRenderer({ antialias: true }),
+	deskgood: {
+		top: {},
+		legs: []
+	}
 };
-bag_view.camera = bag_view.camera.position.z = 1;
-bag_view.renderer.setSize(50, 50);
-bag_view.deskgood_top_geometry = new THREE.BoxGeometry(100, 100, 100);
-bag_view.deskgood_top_material = new THREE.MeshNormalMaterial();
-bag_view.deskgood_top_mesh = new THREE.Mesh(bag_view.deskgood_top_geometry, bag_view.deskgood_top_material);
-bag_view.deskgood_top_mesh.position.y = 50;
-scene.add( bag_view.deskgood_top_mesh );
-$("#bag #view")[0].appendChild( bag_view.renderer.domElement );
+bag_view.camera.position.z = 260;
+bag_view.renderer.setSize(100, 100);
+bag_view.renderer.setClearColor("rgb(196,196,196)");
+bag_view.renderer.domElement.id = "bag_deskgood";
+$("#bag > div:eq(0)")[0].prepend( bag_view.renderer.domElement );
+
+bag_view.geometry = new THREE.Geometry();
+
+bag_view.deskgood.top.geometry = new THREE.BoxGeometry(150, 30, 100);
+bag_view.deskgood.top.mesh = new THREE.Mesh(bag_view.deskgood.top.geometry);
+bag_view.deskgood.top.mesh.position.y = 65;
+bag_view.deskgood.top.mesh.updateMatrix();
+bag_view.geometry.merge(bag_view.deskgood.top.mesh.geometry, bag_view.deskgood.top.mesh.matrix);
+
+bag_view.deskgood.legs.geometry = new THREE.BoxGeometry(30, 100, 30);
+
+bag_view.deskgood.legs[0] = {};
+bag_view.deskgood.legs[0].mesh = new THREE.Mesh(bag_view.deskgood.legs.geometry);
+bag_view.deskgood.legs[0].mesh.position.x = 150/2-30/2;
+bag_view.deskgood.legs[0].mesh.position.z = 100/2-30/2;
+bag_view.deskgood.legs[0].mesh.updateMatrix();
+bag_view.geometry.merge(bag_view.deskgood.legs[0].mesh.geometry, bag_view.deskgood.legs[0].mesh.matrix);
+
+bag_view.deskgood.legs[1] = {};
+bag_view.deskgood.legs[1].mesh = new THREE.Mesh(bag_view.deskgood.legs.geometry);
+bag_view.deskgood.legs[1].mesh.position.x = -(150/2-30/2);
+bag_view.deskgood.legs[1].mesh.position.z = 100/2-30/2;
+bag_view.deskgood.legs[1].mesh.updateMatrix();
+bag_view.geometry.merge(bag_view.deskgood.legs[1].mesh.geometry, bag_view.deskgood.legs[1].mesh.matrix);
+
+bag_view.deskgood.legs[2] = {};
+bag_view.deskgood.legs[2].mesh = new THREE.Mesh(bag_view.deskgood.legs.geometry);
+bag_view.deskgood.legs[2].mesh.position.x = 150/2-30/2;
+bag_view.deskgood.legs[2].mesh.position.z = -(100/2-30/2);
+bag_view.deskgood.legs[2].mesh.updateMatrix();
+bag_view.geometry.merge(bag_view.deskgood.legs[2].mesh.geometry, bag_view.deskgood.legs[2].mesh.matrix);
+
+bag_view.deskgood.legs[3] = {};
+bag_view.deskgood.legs[3].mesh = new THREE.Mesh(bag_view.deskgood.legs.geometry);
+bag_view.deskgood.legs[3].mesh.position.x = -(150/2-30/2);
+bag_view.deskgood.legs[3].mesh.position.z = -(100/2-30/2);
+bag_view.deskgood.legs[3].mesh.updateMatrix();
+bag_view.geometry.merge(bag_view.deskgood.legs[3].mesh.geometry, bag_view.deskgood.legs[3].mesh.matrix);
+
+bag_view.mesh = new THREE.Mesh(bag_view.geometry, new THREE.MeshBasicMaterial({
+	map: new THREE.TextureLoader().load("img/deskgood.jpg")
+}));
+bag_view.mesh.rotation.x = Math.PI/4;
+bag_view.scene.add(bag_view.mesh);
+setInterval(function(){
+	bag_view.mesh.rotation.y += 0.02;
+	bag_view.renderer.render(bag_view.scene, bag_view.camera);
+},30);
 
 //屏蔽鼠标右键
 document.oncontextmenu = function (e){
@@ -4663,6 +4750,9 @@ document.oncontextmenu = function (e){
 };*/
 
 
+/*
+* 天堂、地狱
+*/
 setInterval(function(){
 	if (deskgood.v.y == Infinity && deskgood.pos.y == Infinity){
 		document.body.innerHTML = "";
