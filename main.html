@@ -13,7 +13,7 @@
 			/* 我的世界颜色：
 			按钮：(116,116,116),
 			物品：(140,140,140),
-			背景：(199,199,199),
+			背景：(200,200,200),
 			852*480 => 400*40
 			*/
 			@font-face{
@@ -247,7 +247,7 @@
 				display: none;
 				z-index: 1;
 				
-				background-color: #c4c4c4;
+				background-color: rgb(200,200,200);
 				border: 3px #fff outset;
 				padding: 1.6%;
 			}
@@ -296,7 +296,7 @@
 			}
 			#bag > nav > label{
 				width: 33%;
-				height: 4.6vmax;
+				height: 4vmax;
 				color: rgb(200,200,200);
 				background-color: rgb(116,116,116);
 				border: 3px outset rgb(200,200,200);
@@ -304,6 +304,15 @@
 				text-align: center;
 				font-size: 3vmax;
 				line-height: 4.6vmax;
+			}
+			#bag > nav > label[onclick]{
+				width: 10%;
+				border-radius: 666px;
+			}
+			#bag > nav > label[onclick]:hover{
+				color: black;
+				background-color: rgb(200,200,200);
+				border: 3px outset rgb(116,116,116);
 			}
 			#bag > input:nth-of-type(1)[type="radio"][name="bag-nav"]#bag-nav-choice1:checked ~ nav > label:nth-of-type(1),
 			#bag > input:nth-of-type(2)[type="radio"][name="bag-nav"]#bag-nav-choice2:checked ~ nav > label:nth-of-type(2),
@@ -317,12 +326,26 @@
 				border: 3px inset rgb(200,200,200);
 			}
 			#bag > div:nth-of-type(1) > ul{
-				display: flex;
+				display: inline-flex;
 				flex-direction: column;
 				justify-content: space-around;
+				margin: 0;
+				padding: 0;
 			}
 			#bag > div:nth-of-type(1) > ul > li{
 				display: block;
+				font-size: 3vmax;
+			}
+			#bag > div:nth-of-type(1) > ul > li > ol{
+				display: inline-flex;
+				margin: 0;
+				padding: 0;
+			}
+			#bag > div:nth-of-type(1) > ul > li > ol > li{
+				display: block;
+				width: 6vmax;
+				height: 6vmax;
+				border: 2px inset rgb(116,116,116);
 			}
 		</style>
 		
@@ -333,8 +356,8 @@
 		</script>
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
-		<script>//eruda.init();</script>
-		<script>//new VConsole();</script>
+		<script>eruda.init();</script>
+		<script>new VConsole();</script>
 		<script src="./js/three.min.js"></script>
 		<script src="./js/simplex-noise.js"></script>
 		<script src="./js/dat.gui.min.js"></script>
@@ -368,27 +391,27 @@ deskgood.moveTo(0,10000*100);
 				<ul>
 					<li>
 						头(Head)：
-						<ul>
+						<ol>
 							<li></li>
-						</ul>
+						</ol>
 					</li>
 					<li>
 						身(Body)：
-						<ul>
+						<ol>
 							<li></li>
-						</ul>
+						</ol>
 					</li>
 					<li>
 						腿(leg)：
-						<ul>
+						<ol>
 							<li></li>
-						</ul>
+						</ol>
 					</li>
 					<li>
 						脚(foot)：
-						<ul>
+						<ol>
 							<li></li>
-						</ul>
+						</ol>
 					</li>
 				</ul>
 			</div>
@@ -404,6 +427,7 @@ deskgood.moveTo(0,10000*100);
 				<label for="bag-nav-choice1">物品</label>
 				<label for="bag-nav-choice2">状态</label>
 				<label for="bag-nav-choice3">智造</label>
+				<label onclick="state('bag');">关闭</label>
 			</nav>
 		</div>
 		<h1 id="schedule" style="z-index: 2;">
