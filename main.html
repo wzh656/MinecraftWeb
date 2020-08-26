@@ -166,16 +166,32 @@
 				);
 			}
 			
-			#warning > button, #die > button{
+			#warning > button{
 				width: 80%;
 				/* height: 60px; */
 				position: relative;
-				top: 26px;
-				font-size: 8vmin;
+				top: 3vamx;
+				font-size: 6vmax;
 				font-family: hwxk, serif;
 			}
+			#die{
+				background-image: none;
+				background-color: rgba(200,0,0,0.392157);
+				font-size: 3.6vamx;
+			}
+			#die::before{
+				content: "\a";
+			}
+			#die button{
+				width: 50%;
+				font-size: 6vmax;
+				font-family: hwxk, serif;
+			}
+			#die span{
+				font-size: 5.6vamx;
+			}
 			#die p{
-				font-size: 2vmax;
+				font-size: 1.6vmax;
 				margin: 0;
 			}
 			*{
@@ -2686,8 +2702,8 @@ var deskgood = {
 			gui.close();
 			$("#help").hide();
 			$("body").append(
-				$(`<h1 id="die" style="z-index:4; background-image:none; background-color:rgba(255,100,200,0.5);">
-					<span style="font-size: 6.6vmax;">游戏结束！</span><p>GAME OVER</p><br/>
+				$(`<h1 id="die" style="z-index: 4;">
+					<span>游戏结束！</span><p>GAME OVER</p>
 					角色deskgood死亡<br/>
 					死因：${reason || "无从考证"}<br/>
 					注：生命诚可贵，生命只有一次，请珍爱生命，deskgood无法重生，游戏即将关闭<br/>
@@ -4314,13 +4330,13 @@ $("canvas:eq(0)").on("touchstart", function (e){
 	
 	let x = e.originalEvent.targetTouches[0].pageX;
 	let y = e.originalEvent.targetTouches[0].pageY
-	console.log("touchstart(screen):", x, y, Number(get_date()));
+	//console.log("touchstart(screen):", x, y, +get_date());
 	
-	[x0,y0] = [x, y];
+	//[x0,y0] = [x, y];
 	
 	touch_screen.t = get_date();
 	touch_screen.pos = {x,y};
-	touch_screen.loop = setTimeout(()=>{ //长按（删除）
+	touch_screen.loop = setTimeout(()=>{ //长按1000ms（删除）
 		touch_screen.loop = null;
 		if (Math.sqrt( (touch_screen.pos.x-x)**2 + (touch_screen.pos.y-y)**2 ) < 36){ //误差36px
 			let click = get_choice_object(true, x, y);
@@ -4412,18 +4428,19 @@ $("canvas:eq(0)").on("touchmove", function (e){
 	if (stop)
 		return false;
 	
-	if (x0 === null | y0 === null)
+	if (touch_screen.pos.x === null | touch_screen.pos.y === null)
 		return false;
 	
 	let x = e.originalEvent.targetTouches[0].pageX;
 	let y = e.originalEvent.targetTouches[0].pageY;
 	console.log("touchmove:", x, y);
 	
-	let [dx, dy] = [x-x0, y-y0];
-	[x0, y0] = [x, y];
+	let [dx, dy] = [x - touch_screen.pos.x, y - touch_screen.pos.y];
+	touch_screen.pos = {x,y};
+	//[x0, y0] = [x, y];
 	console.log("move:", dx, dy);
-	deskgood.lookAt.left_right += dx/document.getElementsByTagName("canvas")[0].offsetWidth*90*deskgood.sensitivity;
-	deskgood.lookAt.top_bottom -= dy/document.getElementsByTagName("canvas")[0].offsetHeight*90*deskgood.sensitivity;
+	deskgood.lookAt.left_right += dx/$("#game")[0].offsetWidth*90*deskgood.sensitivity;
+	deskgood.lookAt.top_bottom -= dy/$("#game")[0].offsetHeight*90*deskgood.sensitivity;
 	
 	if (deskgood.lookAt.left_right > 360)
 		while (deskgood.lookAt.left_right > 360)
@@ -4453,7 +4470,8 @@ $("canvas:eq(0)").on("touchend", function (e){
 	let y = e.originalEvent.changedTouches[0].pageY;
 	//console.log("touchend:", x, y, Number(get_date()));
 	
-	x0 = null, y0 = null;
+	touch_screen.pos = {x: null, y:null};
+	//x0 = null, y0 = null;
 	
 	if (touch_screen.loop !== null){ //短按（放置）
 		clearTimeout(touch_screen.loop);
@@ -4689,7 +4707,8 @@ $("canvas:eq(0)").on("touchcancel", function (e){
 	let y = e.originalEvent.changedTouches[0].pageY;
 	console.log("touchcancel:", x, y, Number(get_date()));
 	
-	x0 = null, y0 = null;
+	touch_screen.pos = {x: null, y:null};
+	//x0 = null, y0 = null;
 	
 	if (touch_screen.loop !== null){ //短按（放置）
 		clearTimeout(touch_screen.loop);
