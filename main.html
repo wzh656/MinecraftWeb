@@ -70,6 +70,7 @@
 			}
 			h1{
 				position: absolute;
+				top: 0;
 				width: 100%;
 				height: 100%;
 				margin: 0;
@@ -165,13 +166,17 @@
 				);
 			}
 			
-			#warning > button{
+			#warning > button, #die > button{
 				width: 80%;
-				height: 60px;
+				/* height: 60px; */
 				position: relative;
 				top: 26px;
 				font-size: 8vmin;
 				font-family: hwxk, serif;
+			}
+			#die p{
+				font-size: 2vmax;
+				margin: 0;
 			}
 			*{
 				font-family: qq2, serif;
@@ -185,7 +190,7 @@
 				max-width: 50vw;
 				border-radius: 6px;
 				
-				z-index: 4;
+				z-index: 5;
 			}
 			
 			#control{
@@ -347,6 +352,10 @@
 				height: 6vmax;
 				border: 2px inset rgb(116,116,116);
 			}
+			#bag > div:nth-of-type(1) > ul > li > ol > li > img{
+				width: 100%;
+				height: 100%;
+			}
 		</style>
 		
 		<script src="./js/jquery.min.js"></script>
@@ -392,25 +401,25 @@ deskgood.moveTo(0,10000*100);
 					<li>
 						头(Head)：
 						<ol>
-							<li></li>
+							<li><img/></li>
 						</ol>
 					</li>
 					<li>
 						身(Body)：
 						<ol>
-							<li></li>
+							<li><img/></li>
 						</ol>
 					</li>
 					<li>
 						腿(leg)：
 						<ol>
-							<li></li>
+							<li><img/></li>
 						</ol>
 					</li>
 					<li>
 						脚(foot)：
 						<ol>
-							<li></li>
+							<li><img/></li>
 						</ol>
 					</li>
 				</ul>
@@ -442,7 +451,7 @@ deskgood.moveTo(0,10000*100);
 		</h1>
 		<audio id="bgm" perload loop style="display: none;" src="./music/1.m4a" ></audio>
 		<!--<audio id="bgm" autoplay perload loop style="display: none;" src="https://vdse.bdstatic.com/876934f28995e8042230ec598237c67e.mp4?authorization=bce-auth-v1/fb297a5cc0fb434c971b8fa103e8dd7b/2017-05-11T09:02:31Z/-1//ab5b458a478fae53b754e194ab270b96f23aa23ba71c2e63b06fc06d0543040c"></audio>-->
-		<noscript><h1 style="z-index: 5;">你的浏览器不支持JavaScript，无法运行！</h1></noscript>
+		<noscript><h1 style="z-index: 6;">你的浏览器不支持JavaScript，无法运行！</h1></noscript>
 <script>
 document.addEventListener("plusready", function(){
 	plus.device.setWakelock(true); //屏幕常亮
@@ -478,6 +487,12 @@ document.addEventListener("plusready", function(){
 </script>
 
 <script>
+function exit(){
+	window.open("home.html", "_self").close();
+	try{
+		plus.runtime.quit();
+	}catch(e){}
+}
 function run(code){
 	try{
 		eval(code);
@@ -710,8 +725,8 @@ gui.add(location, "reload").name("刷新(reload)");
 * 初始化
 */
 function get_date(){
-	//return new Date( (+new Date)*TimeK );
-	return new Date();
+	return new Date( (+new Date)*TimeK );
+	//return new Date();
 }
 function Thing(opinion){
 	//物品ID
@@ -1106,7 +1121,7 @@ function BlockMap(size, seed, perloadLength){
 	};
 	
 	//添加方块
-	this.add = (thing, pos, type=true)=>{
+	this.add = (thing, pos, type=true, attr)=>{
 		[pos.x, pos.y, pos.z] = [pos.x, pos.y, pos.z].map(Math.round); //规范化
 		
 		if (this.get(pos.x, pos.y, pos.z) === undefined) return;
@@ -1131,7 +1146,10 @@ function BlockMap(size, seed, perloadLength){
 		thing.block.addTo = true;
 	};
 	//根据 模板和ID 添加方块
-	this.addID = (id, pos, template, type=true)=>{
+	this.addID = (id, pos, template, type=true, attr)=>{
+		if (typeof type != "boolean"){
+			[type, attr] = [undefined, type];
+		}
 		if (id == 0){
 			[pos.x, pos.y, pos.z] = [pos.x, pos.y, pos.z].map(Math.round); //规范化
 			if ( this.get(pos.x, pos.y, pos.z) ){ //有方块
@@ -1144,17 +1162,20 @@ function BlockMap(size, seed, perloadLength){
 			return;
 		}
 		
+		let thing = new Thing(template[id])
+			.makeMaterial()
+			.deleteTexture()
+			.makeMesh();
+		thing.attr = attr;
 		this.add(
-			new Thing(template[id])
-				.makeMaterial()
-				.deleteTexture()
-				.makeMesh(),
+			thing,
 			{
 				x:pos.x,
 				y:pos.y,
 				z:pos.z,
 			},
-			type
+			type,
+			attr
 		); //以模板建立
 	};
 	
@@ -1332,8 +1353,8 @@ function BlockMap(size, seed, perloadLength){
 		
 		let grass = false;
 		let type = seed_type(this.seed.noise, this.seed.t, x, z);
-		// 54+ 高原（草木不生，积雪覆盖）
-		// 40+ 高山（无树，有草）
+		// 90%+ 高原（草木不生，积雪覆盖）
+		// 70%+ 高山（无树，有草）
 		// 26+ 丘陵（树）
 		let treeTop = null;
 		let earth = height - height * seed_scale(this.seed.noise, this.seed.s, x, z);
@@ -1346,9 +1367,9 @@ function BlockMap(size, seed, perloadLength){
 			switch (type){
 				case 0: //森林
 					
-					if (height > 54){ // 54+ 高原（草木不生，积雪覆盖）
+					if (height > 0.9*this.size[1].y){ // 90%+ 高原（草木不生，积雪覆盖）
 						grass = true;
-					}else if (height > 40){ // 40+ 高山（无树，有草）
+					}else if (height > 0.7*this.size[1].y){ // 70%+ 高山（无树，有草）
 						treeHeight = height;
 					}
 					
@@ -1378,7 +1399,7 @@ function BlockMap(size, seed, perloadLength){
 					
 				case 1: //草原
 					
-					if (height > 54){ // 54+ 高原（草木不生，积雪覆盖）
+					if (height > 0.9*this.size[1].y){ // 90%+ 高原（草木不生，积雪覆盖）
 						grass = true;
 					}
 					
@@ -1437,7 +1458,7 @@ function BlockMap(size, seed, perloadLength){
 						x: x,
 						y: dy,
 						z: z
-					}, template);
+					}, template, JSON.parse("{"+value.attr+"}") );
 				}
 				return ret;
 			})){ //未编辑
@@ -1518,7 +1539,7 @@ function BlockMap(size, seed, perloadLength){
 			` (z BETWEEN ${ oz+this.size[0].z } AND ${ oz+this.size[1].z })`,
 			(edit) => {
 				
-				console.log("edit(sql):",edit);
+				console.log("edit(sql):", edit);
 				
 				switch (dir.substr(0,2)){
 					case "x-":
@@ -2662,18 +2683,17 @@ var deskgood = {
 		sql.deleteTable("file", undefined, function(){
 			localStorage.removeItem("我的世界_seed");
 			
-			alert(
-				"游戏结束！\n"+
-				"角色deskgood死亡\n"+
-				"死因："+(reason || "无从考证")+"\n"+
-				"注：生命诚可贵，生命只有一次，请珍爱生命，deskgood无法重生，游戏即将关闭"
-			);
-			
-			window.open("home.html", "_self").close();
-			
-			try{
-				plus.runtime.quit();
-			}catch(e){}
+			gui.close();
+			$("#help").hide();
+			$("body").append(
+				$(`<h1 id="die" style="z-index:4; background-image:none; background-color:rgba(255,100,200,0.5);">
+					<span style="font-size: 6.6vmax;">游戏结束！</span><p>GAME OVER</p><br/>
+					角色deskgood死亡<br/>
+					死因：${reason || "无从考证"}<br/>
+					注：生命诚可贵，生命只有一次，请珍爱生命，deskgood无法重生，游戏即将关闭<br/>
+					<button onclick="exit();">结束<p>OVER</p></button>
+				</h1>`).hide().show("slow")
+			)
 		});
 	},
 	hold_choice_refresh(){
@@ -3078,7 +3098,7 @@ deskgood.goZ = z=>deskgood.go(0,0,z);
 const sql = new SQL("Minecraft", "1.0", "我的世界游戏存档", 10*1024*1024);
 sql.setErrCallback(function(err){
 	console.error("SQL运行出错：", err, err.message);
-	alert("SQL存档数据库 读取/写入 错误");
+	//alert("SQL存档数据库 读取/写入 错误");
 });
 sql.createTable("file", [
 	"type UNSIGNED TINYINT",
