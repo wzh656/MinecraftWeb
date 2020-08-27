@@ -381,8 +381,8 @@
 		</script>
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
-		<script>//eruda.init();</script>
-		<script>//new VConsole();</script>
+		<script>eruda.init();</script>
+		<script>new VConsole();</script>
 		<script src="./js/three.min.js"></script>
 		<script src="./js/TrackballControls.js"></script>
 		<script src="./js/simplex-noise.js"></script>
@@ -2128,6 +2128,15 @@ template.push(new Thing({
 		face: FACE_URL[1]
 	}
 }));
+const template_maker = function (id, opt){
+	let obj = {};
+	Object.defineProperty(obj, "attr", {
+		get(){
+			return $.extend(template[id], opt);
+		}
+	});
+	return obj.attr;
+};
 
 if (localStorage.getItem("我的世界_seed") === null){
 	location.href = "home.html";
