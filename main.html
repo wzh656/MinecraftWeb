@@ -365,9 +365,10 @@
 		</script>
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
-		<script>eruda.init();</script>
-		<script>new VConsole();</script>
+		<script>//eruda.init();</script>
+		<script>//new VConsole();</script>
 		<script src="./js/three.min.js"></script>
+		<script src="./js/TrackballControls.js"></script>
 		<script src="./js/simplex-noise.js"></script>
 		<script src="./js/dat.gui.min.js"></script>
 		<script src="./js/stats.min.js"></script>
@@ -728,74 +729,91 @@ function get_date(){
 	return new Date( (+new Date)*TimeK );
 	//return new Date();
 }
-function Thing(opinion){
+function Thing(opt, template){
 	//物品ID
-	this.id = Number(opinion.id);
+	this.id = Number(opt.id);
 	//this.id = Thing.prototype.idLength++; //同时自增
 	
+	if (template){
+		for (let i of Object.keys(template)){
+			if (typeof template[i] == "object" && typeof opt[i] == "object"){
+				for (let j in template[i]){
+					if (template[i][j] != opt[i][j])
+						this[i][j] = opt[i][j];
+						//Object.defineProperties();
+				}
+			}else if (template[i] != opt[i]){
+				this[i] = template[i];
+			}
+		}
+		return;
+	}
+	
 	//名称
-	if (opinion.name)
-		this.name = String(opinion.name);
+	if (opt.name)
+		this.name = String(opt.name);
 	
 	//方块
 	this.block = {};
-	if (opinion.block){
+	if (opt.block){
 		//face
-		if (opinion.block.face){ //贴图 位置
+		if (opt.block.face){ //贴图 位置
 			this.block.face = [];
-			for (let i=0; i<opinion.block.face.length; i++)
-				this.block.face[i] = opinion.block.face[i];
+			for (let i=0; i<opt.block.face.length; i++)
+				this.block.face[i] = opt.block.face[i];
 		}
-		if (opinion.block.parent) this.block.parent = opinion.block.parent;
+		if (opt.block.parent) this.block.parent = opt.block.parent;
 		
 		//texture
-		if (opinion.block.texture){ //贴图 数据
+		if (opt.block.texture){ //贴图 数据
 			this.block.texture = [];
-			for (let i=0; i<opinion.block.texture.length; i++)
-				if (opinion.block.texture[i])
-					this.block.texture[i] = opinion.block.texture[i];
+			for (let i=0; i<opt.block.texture.length; i++)
+				if (opt.block.texture[i])
+					this.block.texture[i] = opt.block.texture[i];
 		}
 		
-		if (opinion.block.transparent) this.block.transparent = opinion.block.transparent;
-		if (opinion.block.noTransparent) this.block.noTransparent = opinion.block.noTransparent;
-		if (opinion.block.through) this.block.through = opinion.block.through;
 		this.block.addTo = false; //加入scene
 		//material
-		if (opinion.block.material){ //材质
-			this.block.material = opinion.block.material;
+		if (opt.block.material){ //材质
+			this.block.material = opt.block.material;
 		}
 		//geometry
-		if (opinion.block.geometry){ //几何体
-			this.block.geometry = opinion.block.geometry;
+		if (opt.block.geometry){ //几何体
+			this.block.geometry = opt.block.geometry;
 		}
 		
 		//mesh
-		if (opinion.block.mesh){ //网格模型
-			this.block.mesh = opinion.block.mesh;
+		if (opt.block.mesh){ //网格模型
+			this.block.mesh = opt.block.mesh;
 		}
 	}
 	
 	//属性
 	this.attr = {};
-	if (opinion.attr){
-		if (opinion.attr.hardness) this.attr.hardness = opinion.attr.hardness; //硬度
-		if (opinion.attr.durability) this.attr.durability = opinion.attr.durability; //耐久
-		if (opinion.attr.digSpeed) this.attr.digSpeed = opinion.attr.digSpeed; //挖掘速度 m³/s
-		if (opinion.attr.durabilityLoss) this.attr.durabilityLoss = opinion.attr.durabilityLoss; //耐久损耗 /m³
-		if (opinion.attr.hungerLoss) this.attr.hungerLoss = opinion.attr.hungerLoss; //饥饿损耗 /m³
-		if (opinion.attr.lifeLoss) this.attr.lifeLoss = opinion.attr.lifeLoss; //生命损耗 /m³
-		if (opinion.attr.block){ //方块
-			this.attr.block = {};
-			if (opinion.attr.block.onLeftMouseDown) this.attr.block.onLeftMouseDown = opinion.attr.block.onLeftMouseDown;
-			if (opinion.attr.block.onRightMouseDown) this.attr.block.onRightMouseDown = opinion.attr.block.onRightMouseDown;
-			if (opinion.attr.block.onShortTouch) this.attr.block.onShortTouch = opinion.attr.block.onShortTouch;
-			if (opinion.attr.block.onLongTouch) this.attr.block.onLongTouch = opinion.attr.block.onLongTouch;
-			if (opinion.attr.block.onChangeTo) this.attr.block.onChangeTo = opinion.attr.block.onChangeTo;
-			if (opinion.attr.block.onChangeLeave) this.attr.block.onChangeLeave = opinion.attr.block.onChangeLeave;
-			if (opinion.attr.block.onPutToHead) this.attr.block.onPutToHead = opinion.attr.block.onPutToHead;
-			if (opinion.attr.block.onPutToBody) this.attr.block.onPutToBody = opinion.attr.block.onPutToBody;
-			if (opinion.attr.block.onPutToLeg) this.attr.block.onPutToLeg = opinion.attr.block.onPutToHead;
-			if (opinion.attr.block.onPutToFoot) this.attr.block.onPutToFoot = opinion.attr.block.onPutToFoot;
+	this.attr.block = {};
+	if (opt.attr){
+		if (opt.attr.hardness) this.attr.hardness = opt.attr.hardness; //硬度
+		if (opt.attr.durability) this.attr.durability = opt.attr.durability; //耐久
+		if (opt.attr.digSpeed) this.attr.digSpeed = opt.attr.digSpeed; //挖掘速度 m³/s
+		if (opt.attr.durabilityLoss) this.attr.durabilityLoss = opt.attr.durabilityLoss; //耐久损耗 /m³
+		if (opt.attr.hungerLoss) this.attr.hungerLoss = opt.attr.hungerLoss; //饥饿损耗 /m³
+		if (opt.attr.lifeLoss) this.attr.lifeLoss = opt.attr.lifeLoss; //生命损耗 /m³
+		
+		if (opt.attr.block){ //方块
+			if (opt.attr.block.transparent) this.attr.block.transparent = opt.attr.block.transparent; //透明方块（其他方块必须显示）
+			if (opt.attr.block.noTransparent) this.attr.block.noTransparent = opt.attr.block.noTransparent; //必须显示本方块
+			if (opt.attr.block.through) this.attr.block.through = opt.attr.block.through; //运行穿过
+			
+			if (opt.attr.block.onLeftMouseDown) this.attr.block.onLeftMouseDown = opt.attr.block.onLeftMouseDown;
+			if (opt.attr.block.onRightMouseDown) this.attr.block.onRightMouseDown = opt.attr.block.onRightMouseDown;
+			if (opt.attr.block.onShortTouch) this.attr.block.onShortTouch = opt.attr.block.onShortTouch;
+			if (opt.attr.block.onLongTouch) this.attr.block.onLongTouch = opt.attr.block.onLongTouch;
+			if (opt.attr.block.onChangeTo) this.attr.block.onChangeTo = opt.attr.block.onChangeTo;
+			if (opt.attr.block.onChangeLeave) this.attr.block.onChangeLeave = opt.attr.block.onChangeLeave;
+			if (opt.attr.block.onPutToHead) this.attr.block.onPutToHead = opt.attr.block.onPutToHead;
+			if (opt.attr.block.onPutToBody) this.attr.block.onPutToBody = opt.attr.block.onPutToBody;
+			if (opt.attr.block.onPutToLeg) this.attr.block.onPutToLeg = opt.attr.block.onPutToHead;
+			if (opt.attr.block.onPutToFoot) this.attr.block.onPutToFoot = opt.attr.block.onPutToFoot;
 		}
 	}
 }
@@ -848,12 +866,12 @@ Thing.prototype.deleteTexture = function(index){
 //material
 Thing.prototype.makeMaterial = function(){
 	this.block.material = [
-		new THREE.MeshLambertMaterial({ map:this.block.texture[0], transparent:this.block.transparent || false }),
-		new THREE.MeshLambertMaterial({ map:this.block.texture[1], transparent:this.block.transparent || false }),
-		new THREE.MeshLambertMaterial({ map:this.block.texture[2], transparent:this.block.transparent || false }),
-		new THREE.MeshLambertMaterial({ map:this.block.texture[3], transparent:this.block.transparent || false }),
-		new THREE.MeshLambertMaterial({ map:this.block.texture[4], transparent:this.block.transparent || false }),
-		new THREE.MeshLambertMaterial({ map:this.block.texture[5], transparent:this.block.transparent || false })
+		new THREE.MeshLambertMaterial({ map:this.block.texture[0], transparent:this.attr.block.transparent || false }),
+		new THREE.MeshLambertMaterial({ map:this.block.texture[1], transparent:this.attr.block.transparent || false }),
+		new THREE.MeshLambertMaterial({ map:this.block.texture[2], transparent:this.attr.block.transparent || false }),
+		new THREE.MeshLambertMaterial({ map:this.block.texture[3], transparent:this.attr.block.transparent || false }),
+		new THREE.MeshLambertMaterial({ map:this.block.texture[4], transparent:this.attr.block.transparent || false }),
+		new THREE.MeshLambertMaterial({ map:this.block.texture[5], transparent:this.attr.block.transparent || false })
 	]; //材质对象 MeshLambertMaterial
 	return this;
 };
@@ -880,7 +898,7 @@ Thing.prototype.makeMesh = function(geometry=this.block.geometry){
 	}
 	this.block.mesh.castShadow = true;
 	this.block.mesh.receiveShadow = true;
-	this.block.mesh.userData.through = !!this.block.through;
+	this.block.mesh.userData.through = !!this.attr.block.through;
 	return this;
 };
 Thing.prototype.deleteMesh = function(index){
@@ -1146,10 +1164,11 @@ function BlockMap(size, seed, perloadLength){
 		thing.block.addTo = true;
 	};
 	//根据 模板和ID 添加方块
-	this.addID = (id, pos, template, type=true, attr)=>{
+	this.addID = (id, pos, template, type=true, attr={})=>{
 		if (typeof type != "boolean"){
 			[type, attr] = [undefined, type];
 		}
+		// if (!attr.block) attr.block = {};
 		if (id == 0){
 			[pos.x, pos.y, pos.z] = [pos.x, pos.y, pos.z].map(Math.round); //规范化
 			if ( this.get(pos.x, pos.y, pos.z) ){ //有方块
@@ -1162,11 +1181,10 @@ function BlockMap(size, seed, perloadLength){
 			return;
 		}
 		
-		let thing = new Thing(template[id])
+		let thing = new Thing({id}, template[id])
 			.makeMaterial()
 			.deleteTexture()
 			.makeMesh();
-		thing.attr = attr;
 		this.add(
 			thing,
 			{
@@ -1201,12 +1219,12 @@ function BlockMap(size, seed, perloadLength){
 		if (!this.get(x,y,z)) // 没有方块(null)/不在范围(undefined)/加载中(false)
 			return;
 		
-		this.map[x][y][z].block.material[0].visible = !( this.get(x+1, y, z) && !this.get(x+1, y, z).block.transparent);
-		this.map[x][y][z].block.material[1].visible = !( this.get(x-1, y, z) && !this.get(x-1, y, z).block.transparent);
-		this.map[x][y][z].block.material[2].visible = !( this.get(x, y+1, z) && !this.get(x, y+1, z).block.transparent);
-		this.map[x][y][z].block.material[3].visible = !( this.get(x, y-1, z) && !this.get(x, y-1, z).block.transparent);
-		this.map[x][y][z].block.material[4].visible = !( this.get(x, y, z+1) && !this.get(x, y, z+1).block.transparent);
-		this.map[x][y][z].block.material[5].visible = !( this.get(x, y, z-1) && !this.get(x, y, z-1).block.transparent);
+		this.map[x][y][z].block.material[0].visible = !( this.get(x+1, y, z) && !this.get(x+1, y, z).attr.block.transparent);
+		this.map[x][y][z].block.material[1].visible = !( this.get(x-1, y, z) && !this.get(x-1, y, z).attr.block.transparent);
+		this.map[x][y][z].block.material[2].visible = !( this.get(x, y+1, z) && !this.get(x, y+1, z).attr.block.transparent);
+		this.map[x][y][z].block.material[3].visible = !( this.get(x, y-1, z) && !this.get(x, y-1, z).attr.block.transparent);
+		this.map[x][y][z].block.material[4].visible = !( this.get(x, y, z+1) && !this.get(x, y, z+1).attr.block.transparent);
+		this.map[x][y][z].block.material[5].visible = !( this.get(x, y, z-1) && !this.get(x, y, z-1).attr.block.transparent);
 		if (this.map[x][y][z].block.addTo == true && this.map[x][y][z].block.material.every(value => !value.visible)){ //已加入 且 可隐藏
 			scene.remove(this.map[x][y][z].block.mesh);
 			this.map[x][y][z].block.addTo = false;
@@ -1217,7 +1235,7 @@ function BlockMap(size, seed, perloadLength){
 			this.map[x][y][z].block.addTo = true;
 			// console.log("显示", this.map[x][y][z])
 		}
-		if (this.map[x][y][z].block.noTransparent) //不可透明
+		if (this.map[x][y][z].attr.block.noTransparent) //不可透明
 			for (let i of this.map[x][y][z].block.material)
 				i.visible = true;
 	};
@@ -2048,9 +2066,11 @@ template[9.1] = new Thing({
 	block: {
 		parent: "./img/blocks/9/",
 		face: ["side.png", "side.png", "up_down.png", "up_down.png", "side.png", "side.png"],
+		geometry: new THREE.BoxGeometry(70, 100, 70)
+	},
+	attr: {
 		transparent: true, //部分透明方块（不让相邻方块透明）
 		noTransparent: true, //不让本方块透明
-		geometry: new THREE.BoxGeometry(70, 100, 70)
 	}
 });
 template[9.2] = new Thing({
@@ -2059,16 +2079,21 @@ template[9.2] = new Thing({
 	block: {
 		parent: "./img/blocks/9/",
 		face: ["side.png", "side.png", "up_down.png", "up_down.png", "side.png", "side.png"],
+		geometry: new THREE.BoxGeometry(100, 100, 100)
+	},
+	attr: {
 		transparent: true, //部分透明方块（不让相邻方块透明）
 		noTransparent: true, //不让本方块透明
-		geometry: new THREE.BoxGeometry(100, 100, 100)
 	}
 });
 template[10] = new Thing({
 	id: 10,
 	name: "树叶",
 	block: {
-		face: FACE_URL[1],
+		face: FACE_URL[1]
+	},
+	attr: {
+		
 		transparent: true, //透明方块
 		through: true //可穿过
 	}
@@ -3440,6 +3465,9 @@ function state(id, pointerLock){
 	return;
 }
 
+/*
+* keydown
+*/
 let keydown = {
 	key: new Set(),
 	double_run: [],
@@ -3467,7 +3495,7 @@ document.addEventListener("keydown", function (e){
 		console.log("ESC:", keydown.key);
 		
 		stop = true;
-		$("canvas:eq(0),#mouse").css("cursor", "default");
+		$("#game,#mouse").css("cursor", "default");
 		save();
 		document.exitPointerLock();
 		
@@ -3638,6 +3666,9 @@ setInterval(function(){
 }, 16.667);
 
 
+/*
+* mouse
+*/
 let mouse_choice = {
 	view: false,
 	obj: [],
@@ -3655,7 +3686,7 @@ let deskgood_choice_folder = deskgood_folder.addFolder("选择物体");
 	deskgood_choice_folder.add(mouse_choice, "faceIndex", 0, 12, 1).listen();
 	deskgood_choice_folder.add(mouse_choice, "id", 0, 9, 1).listen();
 
-document.addEventListener("click", function (e){
+$(document).on("click", function (e){
 	console.log( ray({},deskgood.look)[0] );
 });
 document.addEventListener("mousemove", function (e){
@@ -4308,7 +4339,7 @@ let touch_screen = {
 	pos: {x: null, y: null},
 	loop: null
 };
-$("canvas:eq(0)").on("touchstart", function (e){
+$("#game").on("touchstart", function (e){
 	if (stop)
 		return;
 	
@@ -4408,7 +4439,7 @@ $("canvas:eq(0)").on("touchstart", function (e){
 	
 	return false;
 });
-$("canvas:eq(0)").on("touchmove", function (e){
+$("#game").on("touchmove", function (e){
 	if (stop)
 		return false;
 	
@@ -4445,7 +4476,7 @@ $("canvas:eq(0)").on("touchmove", function (e){
 	}
 	return false;
 });
-$("canvas:eq(0)").on("touchend", function (e){
+$("#game").on("touchend", function (e){
 	if (stop)
 		return;
 	
@@ -4681,7 +4712,7 @@ $("canvas:eq(0)").on("touchend", function (e){
 		}
 	}
 });
-$("canvas:eq(0)").on("touchcancel", function (e){
+$("#game").on("touchcancel", function (e){
 	if (stop)
 		return;
 	
@@ -4777,9 +4808,15 @@ bag_view.mesh = new THREE.Mesh(bag_view.geometry, new THREE.MeshBasicMaterial({
 }));
 bag_view.mesh.rotation.x = Math.PI/4;
 bag_view.scene.add(bag_view.mesh);
+
+bag_view.controls = new THREE.TrackballControls( bag_view.camera, bag_view.renderer.domElement );
+bag_view.controls.minDistance = 160;
+bag_view.controls.maxDistance = 400;
+bag_view.controls.update();	//更新控制器
 setInterval(function(){
 	bag_view.mesh.rotation.y += 0.02;
 	bag_view.renderer.render(bag_view.scene, bag_view.camera);
+	bag_view.controls.update();	//更新控制器
 },30);
 
 //屏蔽鼠标右键
