@@ -227,7 +227,7 @@ $("#game").on("touchstart", function (e){
 	touch_screen.loop = setTimeout(()=>{ //长按1000ms（删除）
 		touch_screen.loop = null;
 		if (Math.sqrt( (touch_screen.pos.x-x)**2 + (touch_screen.pos.y-y)**2 ) < 36){ //误差36px
-			let click = get_choice_object(true, x, y);
+			let click = ray2D(true, x, y);
 			for (let i in click){
 				if (click[i].faceIndex){
 					if (click[i].object instanceof THREE.Mesh){
@@ -365,7 +365,7 @@ $("#game").on("touchend", function (e){
 		clearTimeout(touch_screen.loop);
 		touch_screen.loop = null;
 		if (Math.sqrt( (touch_screen.pos.x-x)**2 + (touch_screen.pos.y-y)**2) < 36){ //误差36px
-			let click = get_choice_object(true, x, y);
+			let click = ray2D(true, x, y);
 			for (let i in click){
 				if (click[i].object instanceof THREE.Mesh){
 					let x = click[i].object.position.x,

@@ -1,29 +1,10 @@
-function Thing(opt, template){
+function Thing(opt, template=true){
 	//物品ID
 	this.id = Number(opt.id);
 	//this.id = Thing.prototype.idLength++; //同时自增
 	
-	if (template){
-		for (let i of Object.keys(template)){
-			if ((i == "block" || i == "attr") && i in opt){
-				for (let j in template[i]){
-					if ((i == "attr" && j == "block") && j in opt){
-						for (let k in template[i][j]){
-							if (template[i][j][k] != opt[i][j][k]){
-								this[i][j][k] = template[i][j][k];
-							}
-						}
-					}else if (template[i][j] != opt[i][j]){
-						this[i][j] = template[i][j];
-					}
-				}
-			}else if (template[i] != opt[i]){
-				this[i] = template[i];
-			}
-			//Object.defineProperties();
-		}
-		return;
-	}
+	//Object.defineProperties();
+	this.template = !!template;
 	
 	//名称
 	if (opt.name)
@@ -57,7 +38,6 @@ function Thing(opt, template){
 		if (opt.block.geometry){ //几何体
 			this.block.geometry = opt.block.geometry;
 		}
-		
 		//mesh
 		if (opt.block.mesh){ //网格模型
 			this.block.mesh = opt.block.mesh;
@@ -102,93 +82,136 @@ function Thing(opt, template){
 	}
 }
 Thing.prototype.geometry = new THREE.BoxGeometry(100, 100, 100);
+Thing.prototype.get = function(...attr){
+	let this_part = this,
+		template_part = template[this.id];
+	//let type = !!this.template;
+	for (let i of attr){
+		try{
+			this_part = this_part[i];
+		}catch(err){}
+		template_part = template_part[i];
+		//if (this_part === undefined) type=true;
+	}
+	return this_part===undefined? template_part: this_part;
+};
+Thing.prototype.set = function(...attr){
+	let this_part = this;
+	let value = attr.pop();
+	for (let i of attr.slice(0,-1)){
+		if (this_part[i] === undefined)
+			this_part[i] = {};
+		this_part = this_part[i];
+	}
+	this_part[attr.pop()] = value;
+	return this;
+};
+Thing.prototype.have = function(...attr){
+	let part = this;
+	for (let i of attr){
+		part = part[i];
+		if (part === undefined) return false;
+	}
+	return true;
+};
 //face
 Thing.prototype.setFace = function(value, index){
 	if (index != undefined){ //有索引（单个）
-		this.block.face[index] = value;
+		this.set("block", "face", index, value);
 	}else{ //无索引（所有）
 		for (let i=0; i<value.length; i++)
-			this.block.face[i] = value[i];
+			this.set("block", "face", i, value[i]);
 	}
 	return this;
 };
 Thing.prototype.deleteFace = function(index){
 	if (index != undefined){ //有索引
-		delete this.block.face[index];
+		this.set("block", "face", index, null); //半保留
 	}else{ //无索引
-		this.block.face = [];
+		this.set("block", "face", []); //半保留
 	}
+	return this;
 };
 Thing.prototype.editParent = function(value){
-	this.block.parent = value;
-}
+	this.set("block", "parent", value);
+	return this;
+};
 //texture
 Thing.prototype.setTexture = function(texture, index){
-	if (!this.block.texture){
+	/*if (!this.block.texture){ //不存在texture
 		this.block.texture = [];
-	}
+	}*/
 	if (index != undefined){ //有索引
-		this.block.texture[index] = texture;
+		this.set("block", "texture", index, texture);
 	}else{ //无索引
-		for (let i=0; i<texture.length; i++){
-			this.block.texture[i] = texture[i];
-		}
+		for (let i=0; i<texture.length; i++)
+			this.set("block", "texture", i, texture[i]);
 	}
 	return this;
 };
 Thing.prototype.deleteTexture = function(index){
 	if (index != undefined){ //有索引
-		this.block.texture[index].dispose(); //清除内存
-		delete this.block.texture[index];
+		if (this.have("block", "texture", index))
+			this.block.texture[index].dispose(); //清除内存
+		this.set("block", "texture", index, null); //半保留
 	}else{ //无索引
-		for (let i of this.block.texture)
-			i.dispose(); //清除内存
-		delete this.block.texture;
+		if (this.have("block", "texture"))
+			for (let i of this.get("block", "texture"))
+				i.dispose(); //清除内存
+		this.set("block", "texture", []); //半保留
 	}
 	return this;
 };
 //material
 Thing.prototype.makeMaterial = function(){
-	this.block.material = [
-		new THREE.MeshLambertMaterial({ map:this.block.texture[0], transparent:this.attr.block.transparent || false }),
-		new THREE.MeshLambertMaterial({ map:this.block.texture[1], transparent:this.attr.block.transparent || false }),
-		new THREE.MeshLambertMaterial({ map:this.block.texture[2], transparent:this.attr.block.transparent || false }),
-		new THREE.MeshLambertMaterial({ map:this.block.texture[3], transparent:this.attr.block.transparent || false }),
-		new THREE.MeshLambertMaterial({ map:this.block.texture[4], transparent:this.attr.block.transparent || false }),
-		new THREE.MeshLambertMaterial({ map:this.block.texture[5], transparent:this.attr.block.transparent || false })
-	]; //材质对象 MeshLambertMaterial
+	let textures = this.get("block", "texture"),
+		transparent = this.get("attr", "block", "transparent") || false;
+	this.set("block", "material", [
+		new THREE.MeshLambertMaterial({ map:textures[0], transparent }),
+		new THREE.MeshLambertMaterial({ map:textures[1], transparent }),
+		new THREE.MeshLambertMaterial({ map:textures[2], transparent }),
+		new THREE.MeshLambertMaterial({ map:textures[3], transparent }),
+		new THREE.MeshLambertMaterial({ map:textures[4], transparent }),
+		new THREE.MeshLambertMaterial({ map:textures[5], transparent })
+	]); //材质对象 MeshLambertMaterial
 	return this;
 };
 Thing.prototype.deleteMaterial = function(){
-	for (let i of this.block.material)
-		i.dispose(); //清除内存
-	delete this.block.material;
+	if (this.have("block", "material"))
+		for (let i of this.get("block", "material"))
+			i.dispose(); //清除内存
+	this.set("block", "material", null); //半保留
 	return this;
 };
 //geometry
 Thing.prototype.makeGeometry = function(x, y, z){
-	this.block.geometry = new THREE.BoxGeometry(x, y, z);
-}
+	this.set("block", "geometry", new THREE.BoxGeometry(x, y, z));
+	return this;
+};
 Thing.prototype.deleteGeometry = function(){
-	this.block.geometry.dispose();
-	delete this.block.geometry;
-}
+	if (this.have("block", "geometry"))
+		this.block.geometry.dispose();
+	this.set("block", "geometry", null); //半保留
+	return this;
+};
 //mesh
-Thing.prototype.makeMesh = function(geometry=this.block.geometry){
+Thing.prototype.makeMesh = function(geometry=this.get("block", "geometry")){
 	if (geometry){
-		this.block.mesh = new THREE.Mesh(geometry, this.block.material); //网格模型对象Mesh
+		this.set("block", "mesh", new THREE.Mesh(geometry, this.block.material)); //网格模型对象Mesh
 	}else{ //使用默认
-		this.block.mesh = new THREE.Mesh(Thing.prototype.geometry, this.block.material); //网格模型对象Mesh
+		this.set("block", "mesh", new THREE.Mesh(Thing.prototype.geometry, this.block.material)); //网格模型对象Mesh
 	}
-	this.block.mesh.castShadow = true;
-	this.block.mesh.receiveShadow = true;
-	this.block.mesh.userData.through = !!this.attr.block.through;
+	this.get("block", "mesh").castShadow = true;
+	this.get("block", "mesh").receiveShadow = true;
+	this.get("block", "mesh").userData.through = this.get("attr", "block", "through");
 	return this;
 };
 Thing.prototype.deleteMesh = function(index){
-	for (let i of this.block.mesh.material)
-		i.dispose();
-	this.block.mesh.geometry.dispose(); //清除内存
-	delete this.block.mesh;
+	if (this.have("block", "mesh", "material"))
+		for (let i of this.get("block", "mesh", "material"))
+			i.dispose();
+	if (this.have("block", "mesh", "geometry"))
+		this.get("block", "mesh", "geometry").dispose(); //清除内存
+	this.set("block", "mesh", null); //半保留
 	return this;
 };

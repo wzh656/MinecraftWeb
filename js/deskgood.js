@@ -1,7 +1,7 @@
 /**
 * 玩家(deskgood)
 */
-function ray(start, end, near, far){
+function ray3D(start, end, near, far){
 	if (start.x === undefined) start.x = deskgood.pos.x;
 	if (start.y === undefined) start.y = deskgood.pos.y;
 	if (start.z === undefined) start.z = deskgood.pos.z;
@@ -125,27 +125,35 @@ var deskgood = {
 		
 		try{
 			if (
-				/*map.map[Math.round(x/100)]
-					[Math.round(y/100)]
-					[Math.round(z/100)]
-				!== undefined
-				&&*/
+				map.get(x/100, y/100, z/100) !== false && //不能移动到未加载的方块
 				map.initedZone.some((item, index, value)=>{
 					return item[0] == Math.round(x/100/map.size.x) &&
 						item[1] == Math.round(z/100/map.size.z);
 				}) //含有（已加载和加载中的区块）
-				&&
-				map.get(x/100, y/100, z/100) !== false
 			){
-				let t = deskgood.pos.x == x && deskgood.pos.z == z; //未改变区块
-				[deskgood.pos.x, deskgood.pos.y, deskgood.pos.z] = [x,y,z];
-				if (!t) map.perloadZone();
+				if (
+					(
+						map.get(deskgood.pos.x/100, deskgood.pos.y/100, deskgood.pos.z/100) && //有方块在头上
+						(
+							map.get(deskgood.pos.x/100, deskgood.pos.y/100, deskgood.pos.z/100).get("block", "through") || //可穿透
+							map.get(deskgood.pos.x/100, deskgood.pos.y/100, deskgood.pos.z/100).get("block", "transparent") //透明
+						)
+					) || !map.get(deskgood.pos.x/100, deskgood.pos.y/100, deskgood.pos.z/100) //没有方块在头上
+				){
+					[deskgood.pos.x, deskgood.pos.y, deskgood.pos.z] = [x,y,z];
+					if (deskgood.pos.x != x || deskgood.pos.z != z) //改变了x|z坐标
+						map.perloadZone();
+				}else{
+					deskgood.v.y = 0;
+					throw "";
+				}
 			}else{
-				throw "";
+				throw "block";
 			}
 		}catch(err){
-			/* 未加载区块，禁止进入 */
-			message(`<font style="font-size: 16px;">区块暂未加载完成，禁止进入<br/>（想加载快可以调节区块预加载范围，只要不卡死就行）</font>`, 1);
+			if (err == "block"){ // 未加载区块，禁止进入
+				message(`<font style="font-size: 16px;">区块暂未加载完成，禁止进入<br/>（想加载快可以调节区块预加载范围，只要不卡死就行）</font>`, 1);
+			}
 		}
 	},
 	go (x=0, y=0, z=0){
@@ -157,7 +165,7 @@ var deskgood = {
 		//X
 		if (x > 0){
 			//上半身
-			let objs = ray(
+			let objs = ray3D(
 				{x: deskgood.pos.x-50},
 				{x: 1},
 				0,
@@ -172,7 +180,7 @@ var deskgood = {
 				deskgood.moveX(deskgood.pos.x+x);
 			}
 			//下半身
-			objs = ray(
+			objs = ray3D(
 				{x: deskgood.pos.x-50, y: deskgood.pos.y-100},
 				{x: 1},
 				0,
@@ -188,7 +196,7 @@ var deskgood = {
 			}
 		}else if (x < 0){
 			//上半身
-			let objs = ray(
+			let objs = ray3D(
 				{x: deskgood.pos.x+50},
 				{x: -1},
 				0,
@@ -204,7 +212,7 @@ var deskgood = {
 				// console.log("x- 上 无碰撞",x)
 			}
 			//下半身
-			objs = ray(
+			objs = ray3D(
 				{x: deskgood.pos.x+50, y: deskgood.pos.y-100},
 				{x: -1},
 				0,
@@ -223,14 +231,14 @@ var deskgood = {
 		
 		//Y
 		if (y > 0){ //上
-			let objs = ray(
+			let objs = ray3D(
 				{y: deskgood.pos.y+50},
 				{y: 1},
 				0,
 				y
 			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
-				/*let fy = Math.min(...ray(
+				/*let fy = Math.min(...ray3D(
 					{y: deskgood.pos.y+50},
 					{y: 1}
 				).map(v => v.point.y))-50;*/
@@ -241,14 +249,14 @@ var deskgood = {
 				deskgood.moveY(deskgood.pos.y+y);
 			}
 		}else if (y < 0){ //下
-			let objs = ray(
+			let objs = ray3D(
 				{y: deskgood.pos.y-150},
 				{y: -1},
 				0,
 				-y
 			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
-				/*let fy = Math.max(...ray(
+				/*let fy = Math.max(...ray3D(
 					{y: deskgood.pos.y-150},
 					{y: -1}
 				).map(v => v.point.y))+150;*/
@@ -263,7 +271,7 @@ var deskgood = {
 		//z
 		if (z > 0){
 			//上半身
-			let objs = ray(
+			let objs = ray3D(
 				{z: deskgood.pos.z-50},
 				{z: 1},
 				0,
@@ -278,7 +286,7 @@ var deskgood = {
 				deskgood.moveZ(deskgood.pos.z+z);
 			}
 			//下半身
-			objs = ray(
+			objs = ray3D(
 				{z: deskgood.pos.z-50, y: deskgood.pos.y-100},
 				{z: 1},
 				0,
@@ -294,7 +302,7 @@ var deskgood = {
 			}
 		}else if (z < 0){
 			//上半身
-			let objs = ray(
+			let objs = ray3D(
 				{z: deskgood.pos.z+50},
 				{z: -1},
 				0,
@@ -310,7 +318,7 @@ var deskgood = {
 				// console.log("z- 上 无碰撞",z)
 			}
 			//下半身
-			objs = ray(
+			objs = ray3D(
 				{z: deskgood.pos.z+50, y: deskgood.pos.y-100},
 				{z: -1},
 				0,
@@ -478,6 +486,8 @@ deskgood.moveZ = z=>deskgood.move(undefined, undefined, z);
 deskgood.goX = x=>deskgood.go(x);
 deskgood.goY = y=>deskgood.go(0,y);
 deskgood.goZ = z=>deskgood.go(0,0,z);
+
+SQL_read();
 
 //初始化
 deskgood.hold_choice_refresh();

@@ -218,12 +218,13 @@ function BlockMap(size, seed, perloadLength){
 		if (!this.get(x,y,z)) // 没有方块(null)/不在范围(undefined)/加载中(false)
 			return;
 		
-		this.map[x][y][z].block.material[0].visible = !( this.get(x+1, y, z) && !this.get(x+1, y, z).attr.block.transparent);
-		this.map[x][y][z].block.material[1].visible = !( this.get(x-1, y, z) && !this.get(x-1, y, z).attr.block.transparent);
-		this.map[x][y][z].block.material[2].visible = !( this.get(x, y+1, z) && !this.get(x, y+1, z).attr.block.transparent);
-		this.map[x][y][z].block.material[3].visible = !( this.get(x, y-1, z) && !this.get(x, y-1, z).attr.block.transparent);
-		this.map[x][y][z].block.material[4].visible = !( this.get(x, y, z+1) && !this.get(x, y, z+1).attr.block.transparent);
-		this.map[x][y][z].block.material[5].visible = !( this.get(x, y, z-1) && !this.get(x, y, z-1).attr.block.transparent);
+		this.map[x][y][z].block.material[0].visible = !( this.get(x+1, y, z) && !this.get(x+1, y, z).get("attr", "block", "transparent"));
+		this.map[x][y][z].block.material[1].visible = !( this.get(x-1, y, z) && !this.get(x-1, y, z).get("attr", "block", "transparent"));
+		this.map[x][y][z].block.material[2].visible = !( this.get(x, y+1, z) && !this.get(x, y+1, z).get("attr", "block", "transparent"));
+		this.map[x][y][z].block.material[3].visible = !( this.get(x, y-1, z) && !this.get(x, y-1, z).get("attr", "block", "transparent"));
+		this.map[x][y][z].block.material[4].visible = !( this.get(x, y, z+1) && !this.get(x, y, z+1).get("attr", "block", "transparent"));
+		this.map[x][y][z].block.material[5].visible = !( this.get(x, y, z-1) && !this.get(x, y, z-1).get("attr", "block", "transparent"));
+		
 		if (this.map[x][y][z].block.addTo == true && this.map[x][y][z].block.material.every(value => !value.visible)){ //已加入 且 可隐藏
 			scene.remove(this.map[x][y][z].block.mesh);
 			this.map[x][y][z].block.addTo = false;
@@ -234,7 +235,8 @@ function BlockMap(size, seed, perloadLength){
 			this.map[x][y][z].block.addTo = true;
 			// console.log("显示", this.map[x][y][z])
 		}
-		if (this.map[x][y][z].attr.block.noTransparent) //不可透明
+		
+		if (this.map[x][y][z].get("attr", "block", "noTransparent")) //不可透明
 			for (let i of this.map[x][y][z].block.material)
 				i.visible = true;
 	};

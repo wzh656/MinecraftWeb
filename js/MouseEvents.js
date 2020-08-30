@@ -19,7 +19,7 @@ let deskgood_choice_folder = deskgood_folder.addFolder("选择物体");
 	deskgood_choice_folder.add(mouse_choice, "id", 0, 9, 1).listen();
 
 $(document).on("click", function (e){
-	console.log( ray({},deskgood.look)[0] );
+	console.log( ray3D({},deskgood.look)[0] );
 });
 document.addEventListener("mousemove", function (e){
 	if (stop)
@@ -174,7 +174,7 @@ document.addEventListener("mousedown", function (e){
 		return;
 	
 	if (e.button == 0){ //左键（删除）
-		let click = get_choice_object();
+		let click = ray2D();
 		for (let i in click){
 			if (click[i].faceIndex){
 				if (click[i].object instanceof THREE.Mesh){
@@ -237,7 +237,7 @@ document.addEventListener("mousedown", function (e){
 			}
 		}
 	}else if (e.button == 2){ //右键（放置）
-		let click = get_choice_object();
+		let click = ray2D();
 		for (let i in click){
 			if (click[i].object instanceof THREE.Mesh){
 				let x = click[i].object.position.x,

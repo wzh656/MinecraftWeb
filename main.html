@@ -541,7 +541,7 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 		document.getElementById("__vconsole").childNodes[1].style.borderRadius = "66px";
 	};
 	document.body.appendChild(vconsole);*/
-	new VConsole();
+	//new VConsole();
 }else{ //电脑
 	device = false;
 	let mouse = document.createElement("div");
@@ -634,7 +634,7 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 			console.log("pointerLock no");
 			stop = true;
 			$("#help").css("display", "inline-block");
-			save();
+			SQL_save();
 		}
 	};
 	
@@ -654,7 +654,7 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 	document.addEventListener("webkitpointerlockerror", pointerlockerror, false);
 }
 
-function get_choice_object(phone, x, y){
+function ray2D(phone, x, y){
 	let raycaster = new THREE.Raycaster(); //光线投射，用于确定鼠标点击位置
 	let mouse = new THREE.Vector2(); //创建二维平面
 	mouse.x = phone? 2*(x/WIDTH)-1: 0;
@@ -725,35 +725,34 @@ function message(text, time=5){
 		}, time*1000);
 	//}
 }
-var save = new Function();
 </script>
-		<script src="js/sendMessage.js"></script>
-		<script src="js/playBGM.js"></script>
+		<script src="./js/sendMessage.js"></script>
+		<script src="./js/playBGM.js"></script>
 		
-		<script src="js/init_dat.gui.js"></script>
-		<script src="js/init_stats.js"></script>
+		<script src="./js/init_SQL.js"></script>
+		<script src="./js/dat.gui.js"></script>
+		<script src="./js/stats.js"></script>
 		
-		<script src="js/Thing.js"></script>
-		<script src="js/init_SimplexNoise.js"></script>
+		<script src="./js/Thing.js"></script>
 		
-		<script src="js/read_SQL.js"></script>
+		<script src="./js/SimplexNoise.js"></script>
+		<script src="./js/BlockMap.js"></script>
 		
-		<script src="js/BlockMap.js"></script>
-		<script src="js/template.js"></script>
-		<script src="js/init_Map.js"></script>
+		<script src="./js/template.js"></script>
+		<script src="./js/init_Map.js"></script>
 		
-		<script src="js/loadTexture.js"></script>
+		<script src="./js/loadTexture.js"></script>
 		
-		<script src="js/init_THREE.js"></script>
-		<script src="js/weather.js"></script>
-		<script src="js/init_deskgood.js"></script>
+		<script src="./js/THREE.js"></script>
+		<script src="./js/weather.js"></script>
+		<script src="./js/deskgood.js"></script>
 		
-		<script src="js/changeState.js"></script>
-		<script src="js/init_bagView.js"></script>
+		<script src="./js/changeState.js"></script>
+		<script src="./js/bagView.js"></script>
 		
-		<script src="js/keyEvents.js"></script>
-		<script src="js/MouseEvents.js"></script>
-		<script src="js/touchEvents.js"></script>
+		<script src="./js/keyEvents.js"></script>
+		<script src="./js/mouseEvents.js"></script>
+		<script src="./js/touchEvents.js"></script>
 
 	</body>
 </html>

@@ -12,7 +12,7 @@ sql.createTable("file", [
 	"id UNSIGNED FLOAT(5,2)",
 	"attr TEXT"
 ]);
-function read(){
+function SQL_read(){
 	sql.selectData("file", ["x", "y", "z", "id", "attr"], "type=1", function(result){
 		if (result.length){
 			deskgood.pos.x = result[0].x;
@@ -50,18 +50,8 @@ function read(){
 		}
 	});
 }
-if (typeof deskgood != "undefined"){
-	read();
-}else{
-	let id = setInterval(function(){
-		if (typeof deskgood != "undefined"){
-			clearInterval(id);
-			read();
-		}
-	},10);
-}
 
-function save(){
+function SQL_save(){
 	sql.deleteData("file", "type=1", undefined, function(){
 		sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
 			1,
@@ -107,7 +97,7 @@ function save(){
 	}));
 	console.log("备份成功"); */
 }
-setInterval(save, 10*1000); // 10s
+setInterval(SQL_save, 10*1000); // 10s
 
 /* //读取
 if (localStorage.getItem("我的世界.存档.玩家.位置")){

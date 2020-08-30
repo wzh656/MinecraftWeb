@@ -85,8 +85,10 @@ template[9.1] = new Thing({
 		geometry: new THREE.BoxGeometry(40, 100, 40)
 	},
 	attr: {
-		transparent: true, //部分透明方块（不让相邻方块透明）
-		noTransparent: true, //不让本方块透明
+		block: {
+			transparent: true, //部分透明方块（不让相邻方块透明）
+			noTransparent: true, //不让本方块透明
+		}
 	}
 });
 template[9.2] = new Thing({
@@ -98,8 +100,10 @@ template[9.2] = new Thing({
 		geometry: new THREE.BoxGeometry(70, 100, 70)
 	},
 	attr: {
-		transparent: true, //部分透明方块（不让相邻方块透明）
-		noTransparent: true, //不让本方块透明
+		block: {
+			transparent: true, //部分透明方块（不让相邻方块透明）
+			noTransparent: true, //不让本方块透明
+		}
 	}
 });
 template[10] = new Thing({
@@ -109,8 +113,10 @@ template[10] = new Thing({
 		face: FACE_URL[1]
 	},
 	attr: {
-		transparent: true, //透明方块
-		through: true //可穿过
+		block: {
+			transparent: true, //透明方块
+			through: true //可穿过
+		}
 	}
 });
 template.push(new Thing({

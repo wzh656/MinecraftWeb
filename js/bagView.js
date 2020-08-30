@@ -60,6 +60,7 @@ bag_view.mesh = new THREE.Mesh(bag_view.geometry, new THREE.MeshBasicMaterial({
 bag_view.mesh.rotation.x = Math.PI/4;
 bag_view.scene.add(bag_view.mesh);
 
+bag_view.renderer.domElement.style.cursor = "pointer";
 bag_view.controls = new THREE.OrbitControls(bag_view.camera, bag_view.renderer.domElement);//创建控件对象
 setInterval(function(){
 	bag_view.mesh.rotation.y += 0.02;
