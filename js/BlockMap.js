@@ -968,8 +968,10 @@ function BlockMap(size, seed, perloadLength){
 				return value[0] != block[i][0] || value[1] != block[i][1];
 			})){ //每个都不一样（不存在 & 不在加载中）
 				this.initZone(block[i][0], block[i][1]);
-				this.loadZoneAsync(...block[i], ()=>{
-					this.updateZoneAsync(block[i][0], block[i][1]); //更新区块
+				this.loadZoneAsync(...block[i], {
+					callback: ()=>{
+						this.updateZoneAsync(block[i][0], block[i][1]); //更新区块
+					}
 				}); //用噪声填充区块
 			}
 		}

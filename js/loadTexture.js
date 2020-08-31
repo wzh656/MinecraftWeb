@@ -28,18 +28,20 @@ block_load.id = setInterval(function(){
 		$("#schedule header").text("载入方块中……");
 		
 		map.initZone(0, 0); //初始化区块
-		map.loadZoneAsync(0, 0, function(){
-			map.updateZoneAsync(0, 0); //更新区块
-			if (++perload_condition >= 2){
-				map.perloadZone();
+		map.loadZoneAsync(0, 0, {
+			callback: function(){
+				map.updateZoneAsync(0, 0); //更新区块
+				if (++perload_condition >= 2){
+					map.perloadZone();
+				}
+				console.log(perload_condition)
+				$("#schedule span").text("100");
+				$("#schedule progress")[0].value = Object.keys(template).length;
+				setTimeout(function(){
+					render(); //纹理贴图加载成功后，调用渲染函数执行渲染操作
+					$("#schedule").remove();
+				},0);
 			}
-			console.log(perload_condition)
-			$("#schedule span").text("100");
-			$("#schedule progress")[0].value = Object.keys(template).length;
-			setTimeout(function(){
-				render(); //纹理贴图加载成功后，调用渲染函数执行渲染操作
-				$("#schedule").remove();
-			},0);
 		}); //用噪声填充区块
 	}
 },0);
