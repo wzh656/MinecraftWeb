@@ -97,9 +97,10 @@
 					0 0 30px rgba(255,255,0, .7);
 			}
 			#schedule{
-				animation-name: backgroundColor;
+				/* animation-name: backgroundColor;
 				animation-duration: 1s;
-				animation-iteration-count: infinite;
+				animation-iteration-count: infinite; */
+				background-image: url(./img/loading.png);
 			}
 			h1::before{
 				content: "\a\a";
@@ -127,7 +128,7 @@
 				font-family: kt, serif;
 			}
 			
-			@keyframes backgroundColor{
+			/* @keyframes backgroundColor{
 				0%{
 					background-image: radial-gradient(#333, #112, #011);
 				}
@@ -143,7 +144,7 @@
 				100%{
 					background-image: radial-gradient(#999, #556, #455);
 				}
-			}
+			} */
 			progress{
 				background-color: red;
 				width: 63vw;
@@ -381,8 +382,8 @@
 		</script>
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
-		<script>eruda.init();</script>
-		<script>new VConsole();</script>
+		<script>//eruda.init();</script>
+		<script>//new VConsole();</script>
 		<script src="./js/modules/three.min.js"></script>
 		<script src="./js/modules/OrbitControls.js"></script>
 		<script src="./js/modules/simplex-noise.js"></script>

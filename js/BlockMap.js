@@ -138,7 +138,8 @@ function BlockMap(size, seed, perloadLength){
 	};
 	
 	//添加方块
-	this.add = (thing, pos, type=true, attr)=>{
+	this.add = (thing, pos, opt={})=>{
+		let {type=true, attr} = opt;
 		[pos.x, pos.y, pos.z] = [pos.x, pos.y, pos.z].map(Math.round); //规范化
 		
 		if (this.get(pos.x, pos.y, pos.z) === undefined) return;
@@ -163,10 +164,11 @@ function BlockMap(size, seed, perloadLength){
 		thing.block.addTo = true;
 	};
 	//根据 模板和ID 添加方块
-	this.addID = (id, pos, template, type=true, attr={})=>{
-		if (typeof type != "boolean"){
+	this.addID = (id, pos, template, opt={})=>{
+		let {type=true, attr={}} = opt;
+		/* if (typeof type != "boolean"){
 			[type, attr] = [undefined, type];
-		}
+		} */
 		// if (!attr.block) attr.block = {};
 		if (id == 0){
 			[pos.x, pos.y, pos.z] = [pos.x, pos.y, pos.z].map(Math.round); //规范化
@@ -191,8 +193,10 @@ function BlockMap(size, seed, perloadLength){
 				y:pos.y,
 				z:pos.z,
 			},
-			type,
-			attr
+			{
+				type,
+				attr
+			}
 		); //以模板建立
 	};
 	
@@ -273,12 +277,13 @@ function BlockMap(size, seed, perloadLength){
 		}
 	};
 	//更新区块内所有方块（异步）
-	this.updateZoneAsync = (x, z, callback)=>{
-		console.log("update", x, z, callback)
+	this.updateZoneAsync = (x, z, opt={})=>{
+		let {callback, progressBack} = opt;
+		// console.log("update", x, z, callback, progressBack)
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
-		if (callback){ //有回调（必须setInterval）
+		if (callback || progressBack){ //有回调（必须setInterval）
 			let dx = this.size[0].x;
 			let updateZone_id = setInterval(()=>{
 				if (dx > this.size[1].x){
@@ -295,6 +300,9 @@ function BlockMap(size, seed, perloadLength){
 				}
 				
 				dx++;
+				
+				if (progressBack)
+					progressBack((dx-this.size[0].x)/(this.size[1].x-this.size[0].x));
 			},0);
 		}else{ //无回调（不分顺序）
 			for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
@@ -477,7 +485,9 @@ function BlockMap(size, seed, perloadLength){
 						x: x,
 						y: dy,
 						z: z
-					}, template, JSON.parse("{"+value.attr+"}") );
+					}, template, {
+						attr: JSON.parse("{"+value.attr+"}")
+					});
 				}
 				return ret;
 			})){ //未编辑
@@ -496,29 +506,39 @@ function BlockMap(size, seed, perloadLength){
 					x: x,
 					y: treeTop+1,
 					z: z
-				}, template, false);
+				}, template, {
+					type: false
+				});
 				let leavesHeight = seed_leavesScale(this.seed.noise, this.seed.lS, x, z) *(treeHeight - height);
 				for (let i=0; i<=leavesHeight; i++){
 					this.addID(10, {
 						x: x+1,
 						y: treeTop-i,
 						z: z
-					}, template, false);
+					}, template, {
+						type: false
+					});
 					this.addID(10, {
 						x: x-1,
 						y: treeTop-i,
 						z: z
-					}, template, false);
+					}, template, {
+						type: false
+					});
 					this.addID(10, {
 						x: x,
 						y: treeTop-i,
 						z: z+1
-					}, template, false);
+					}, template, {
+						type: false
+					});
 					this.addID(10, {
 						x: x,
 						y: treeTop-i,
 						z: z-1
-					}, template, false);
+					}, template, {
+						type: false
+					});
 				}
 			},0);
 			
@@ -543,9 +563,10 @@ function BlockMap(size, seed, perloadLength){
 		}
 	}
 	//加载区块（异步）
-	this.loadZoneAsync = (x, z, callback, dir="")=>{
-		if (typeof callback != "function")
-			[dir, callback] = [callback, dir];
+	this.loadZoneAsync = (x, z, opt={})=>{
+		let {callback, dir=""} = opt;
+		/* if (typeof callback != "function")
+			[dir, callback] = [callback, dir]; */
 		
 		[x, z] = [x, z].map(Math.round); //规范化
 		let ox = x*this.size.x,

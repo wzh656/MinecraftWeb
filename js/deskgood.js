@@ -131,22 +131,22 @@ var deskgood = {
 						item[1] == Math.round(z/100/map.size.z);
 				}) //含有（已加载和加载中的区块）
 			){
-				if (
+				/* if (
 					(
 						map.get(deskgood.pos.x/100, deskgood.pos.y/100, deskgood.pos.z/100) && //有方块在头上
 						(
-							map.get(deskgood.pos.x/100, deskgood.pos.y/100, deskgood.pos.z/100).get("block", "through") || //可穿透
-							map.get(deskgood.pos.x/100, deskgood.pos.y/100, deskgood.pos.z/100).get("block", "transparent") //透明
+							map.get(deskgood.pos.x/100, deskgood.pos.y/100, deskgood.pos.z/100).get("attr", "block", "through") || //可穿透
+							map.get(deskgood.pos.x/100, deskgood.pos.y/100, deskgood.pos.z/100).get("attr", "block", "transparent") //透明
 						)
 					) || !map.get(deskgood.pos.x/100, deskgood.pos.y/100, deskgood.pos.z/100) //没有方块在头上
-				){
+				){ */
+					let t = deskgood.pos.x != x || deskgood.pos.z != z; //改变了x|z坐标
 					[deskgood.pos.x, deskgood.pos.y, deskgood.pos.z] = [x,y,z];
-					if (deskgood.pos.x != x || deskgood.pos.z != z) //改变了x|z坐标
-						map.perloadZone();
-				}else{
+					if (t) map.perloadZone();
+				/* }else{
 					deskgood.v.y = 0;
 					throw "";
-				}
+				} */
 			}else{
 				throw "block";
 			}

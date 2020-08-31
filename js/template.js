@@ -6,7 +6,7 @@ const template = []; //模板
 template.push(new Thing({
 	id: 0,
 	name: "空气"
-}));
+}, false));
 template.push(new Thing({
 	id: 1,
 	name: "命令方块",
@@ -19,7 +19,7 @@ template.push(new Thing({
 			onShortTouch: "state('command');false;"
 		}
 	}
-}));
+}, false));
 template.push(new Thing({
 	id: 2,
 	name: "基岩",
@@ -27,7 +27,7 @@ template.push(new Thing({
 		face: FACE_URL[1]
 	},
 	attr: {}
-}));
+}, false));
 template.push(new Thing({
 	id: 3,
 	name: "草方块",
@@ -35,7 +35,7 @@ template.push(new Thing({
 		face: FACE_URL[0]
 	},
 	attr: {}
-}));
+}, false));
 template.push(new Thing({
 	id: 4,
 	name: "泥土",
@@ -43,7 +43,7 @@ template.push(new Thing({
 		face: FACE_URL[1]
 	},
 	attr: {}
-}));
+}, false));
 template.push(new Thing({
 	id: 5,
 	name: "原石",
@@ -51,7 +51,7 @@ template.push(new Thing({
 		face: FACE_URL[1]
 	},
 	attr: {}
-}));
+}, false));
 template.push(new Thing({
 	id: 6,
 	name: "石头",
@@ -59,7 +59,7 @@ template.push(new Thing({
 		face: FACE_URL[1]
 	},
 	attr: {}
-}));
+}, false));
 template.push(new Thing({
 	id: 7,
 	name: "沙子",
@@ -67,7 +67,7 @@ template.push(new Thing({
 		face: FACE_URL[1]
 	},
 	attr: {}
-}));
+}, false));
 template.push(new Thing({
 	id: 8,
 	name: "仙人掌",
@@ -75,7 +75,7 @@ template.push(new Thing({
 		face: FACE_URL[0]
 	},
 	attr: {}
-}));
+}, false));
 template[9.1] = new Thing({
 	id: 9.1,
 	name: "细橡木",
@@ -126,7 +126,7 @@ template.push(new Thing({
 		face: FACE_URL[1]
 	},
 	attr: {}
-}));
+}, false));
 template.push(new Thing({
 	id: 12,
 	name: "砖",
@@ -134,4 +134,4 @@ template.push(new Thing({
 		face: FACE_URL[1]
 	},
 	attr: {}
-}));
+}, false));

@@ -4,6 +4,7 @@
 let scene = new THREE.Scene();
 scene.fog = new THREE.Fog("#fff", 0.01, 300*100);
 //						 雾气颜色，近处的距离，远处的距离(66m)
+
 let scene_folder = gui.addFolder("场景(scene)");
 	scene_folder.add(scene.children, "length", 0, 10000).name("物体(object)个数").listen();
 	scene_folder.add(localStorage, "我的世界_seed").name("地图种子");
@@ -13,8 +14,6 @@ let scene_folder = gui.addFolder("场景(scene)");
 		scene_fog_folder.addColor(scene.fog, "color");
 	let scene_block_folder = scene_folder.addFolder("区块(block)");
 		scene_block_folder.add(map, "perloadLength", 1, 1000, 1).name("预加载范围/px");
-
-
 
 
 /* let floor_geometry = new THREE.PlaneGeometry(1000, 1000, 6, 6);
@@ -80,8 +79,7 @@ setTimeout(function(){
 	);
 }); */
 scene.add(directionalLight);
-// 光照指向平地
-//directionalLight.target = ;
+
 let scene_light_directionalLight_folder = scene_light_folder.addFolder("平行光(directionalLight)");
 	scene_light_directionalLight_folder.add(directionalLight, "castShadow").name("阴影").listen();
 	let scene_light_directionalLight_mapSize_folder = scene_light_directionalLight_folder.addFolder("阴影贴图大小(mapSize)");
@@ -247,47 +245,55 @@ setInterval(function(){
 }, 5*1000); // 5s/次
 
 
-let T0 = get_date();//上次时间
+let body_block = [];
+let T0 = get_date(); //上次时间
 function render(){
 	let t = get_date()-T0;//时间差
-	T0 = get_date();//把本次时间赋值给上次时间
+	T0 = get_date(); //把本次时间赋值给上次时间
 	requestAnimationFrame(render);
-	renderer.render(scene, camera);//执行渲染操作
+	renderer.render(scene, camera); //执行渲染操作
+	stats.update();
 	
 	let warn = [];
-	try{
-		if (map.get(deskgood.pos.x/100,
-				deskgood.pos.y/100,
-				deskgood.pos.z/100) != null &&
+	if (map.get(deskgood.pos.x/100,
+			deskgood.pos.y/100,
+			deskgood.pos.z/100) != null &&
+		!map.get(deskgood.pos.x/100,
+			deskgood.pos.y/100,
+			deskgood.pos.z/100).get("attr", "block", "through")
+	){ //头被卡住
+		warn.push("头被卡住？");
+		if (
 			!map.get(deskgood.pos.x/100,
-					deskgood.pos.y/100,
-					deskgood.pos.z/100).block.mesh.userData.through
-		){ //头被卡住
-			warn.push("头被卡住？");
-			message("<font style='font-size: 16px;'>想窒息吗？还往头上放方块，看你怎么出来！</font>", 1);
-			/* try{
-				plus.nativeUI.toast(
-					"<font size=\"16\">想窒息吗？还往头上放方块，看你怎么出来！</font>",
-					{
-						type:"richtext",
-						verticalAlign: "top",
-						richTextStyle:{align:"center"}
-					}
-				);
-			}catch(err){} */
-			/*setTimeout(function(){
-				try{ plus.nativeUI.closeToast(); }catch(err){}
-			},1);*/
-		}
-		if (map.get(deskgood.pos.x/100,
-				deskgood.pos.y/100-1,
-				deskgood.pos.z/100)
-			!=
-				null
-		){ //脚被卡住
-			warn.push("脚被卡住？");
-		}
-	}catch(err){}
+				deskgood.pos.y/100,
+				deskgood.pos.z/100).get("attr", "block", "transparent") //不透明
+		) message("<font style='font-size: 16px;'>想窒息吗？还往头上放方块，看你怎么出来！</font>", 1);
+		/* try{
+			plus.nativeUI.toast(
+				"<font size=\"16\">想窒息吗？还往头上放方块，看你怎么出来！</font>",
+				{
+					type:"richtext",
+					verticalAlign: "top",
+					richTextStyle:{align:"center"}
+				}
+			);
+		}catch(err){} */
+		/*setTimeout(function(){
+			try{ plus.nativeUI.closeToast(); }catch(err){}
+		},1);*/
+	}
+	if (map.get(deskgood.pos.x/100,
+			deskgood.pos.y/100-1,
+			deskgood.pos.z/100)
+		!=
+			null &&
+		!map.get(deskgood.pos.x/100,
+			deskgood.pos.y/100-1,
+			deskgood.pos.z/100).get("attr", "block", "through")
+	){ //脚被卡住
+		warn.push("脚被卡住？");
+	}
+	
 	if (warn.length && !stop){
 		if (!map.get(deskgood.pos.x/100,
 			deskgood.pos.y/100,
@@ -307,6 +313,34 @@ function render(){
 			console.warn(warn[0], warn[1]);
 		}else{
 			console.warn(warn[0]);
+		}
+	}
+	
+	for (let i of body_block)
+		if (i)
+			map.update(i.x, i.y, i.z); //重新更新
+	body_block[0] = {
+		x: deskgood.pos.x/100,
+		y: deskgood.pos.y/100,
+		z: deskgood.pos.z/100
+	}; //上半身
+	body_block[1] = {
+		x: deskgood.pos.x/100,
+		y: deskgood.pos.y/100-1,
+		z: deskgood.pos.z/100
+	}; //下半身
+	for (let i of body_block){
+		let block = map.get(i.x, i.y, i.z);
+		if (block){
+			block.block.material.forEach((item, index, arr) => {
+				arr[index].visible = true;
+			}); //显示所有
+			console.info("显示面", i, [i.x,i.y,i.z].map(Math.round), block);
+			if (!block.block.addTo){
+				scene.add(block.block.mesh);
+				block.block.addTo = true;
+				console.info("显示体", i, [i.x,i.y,i.z].map(Math.round), block);
+			}
 		}
 	}
 	
@@ -351,9 +385,6 @@ function render(){
 		if (rt[1]) deskgood.v.y = 0;
 		if (rt[2]) deskgood.v.x = 0;
 	}
-	
-	
-	stats.update();
 }
 // render();
 // 间隔30ms周期性调用函数fun
