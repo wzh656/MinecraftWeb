@@ -18,6 +18,28 @@ document.addEventListener("keydown", function (e){
 		state("command");
 		return false;
 	}
+	if (e.keyCode == 19){ //Pause-Break 切换
+		if (stop){ //暂停
+			if (typeof stop == "string"){ //打开窗口
+				let stop0 = stop;
+				state(stop);
+				console.log("Pause-Break", stop0, "changeTo", stop);
+			}else{ //普通暂停
+				let stop0 = stop;
+				document.body.requestPointerLock();
+				stop = false;
+				console.log("Pause-Break", stop0, "changeTo", stop);
+			}
+		}else{ //未暂停
+			let stop0 = stop;
+			stop = true;
+			$("#game,#mouse").css("cursor", "default");
+			SQL_save();
+			document.exitPointerLock();
+			console.log("Pause-Break", stop0, "changeTo", stop);
+		}
+		return false;
+	}
 	
 	if (stop){
 		keydown.double_run = [];
@@ -29,7 +51,7 @@ document.addEventListener("keydown", function (e){
 		
 		stop = true;
 		$("#game,#mouse").css("cursor", "default");
-		save();
+		SQL_save();
 		document.exitPointerLock();
 		
 		return false;

@@ -278,17 +278,49 @@ function BlockMap(size, seed, perloadLength){
 	};
 	//更新区块内所有方块（异步）
 	this.updateZoneAsync = (x, z, opt={})=>{
-		let {callback, progressBack} = opt;
-		// console.log("update", x, z, callback, progressBack)
+		let {
+			finishCallback,
+			progressCallback,
+			speed,
+			breakPoint={
+				dx: this.size[0].x,
+				dy: this.size[0].y,
+				dz: this.size[0].z
+			}
+		} = opt;
+		// console.log("update", x, z, finishCallback, progressCallback)
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
-		if (callback || progressBack){ //有回调（必须setInterval）
-			let dx = this.size[0].x;
+		if (finishCallback || progressCallback || speed){ // 有回调（必须setInterval）or限速
+			speed = speed || 36;
+			let t0 = new Date();
+			for (let dx=breakPoint.dx; dx<=this.size[1].x; dx++){
+				for (let dz=breakPoint.dz; dz<=this.size[1].z; dz++){
+					for (let dy=breakPoint.dy; dy<=this.size[1].y; dy++){
+						this.update(ox+dx, dy, oz+dz);
+					}
+					if (new Date()-t0 > speed){
+						setTimeout(()=>{
+							this.updateZoneAsync(x, z, {
+								finishCallback,
+								progressCallback,
+								speed,
+								breakPoint: {dx, dy:0, dz:dz+1}
+							});
+						},0);
+						return;
+					}
+				}
+				if (progressCallback)
+					progressCallback((dx-this.size[0].x)/(this.size[1].x-this.size[0].x));
+			}
+			if (finishCallback) finishCallback();
+			/* let dx = this.size[0].x;
 			let updateZone_id = setInterval(()=>{
 				if (dx > this.size[1].x){
 					clearInterval(updateZone_id);
-					callback();
+					finishCallback();
 					return;
 				}
 				
@@ -301,9 +333,9 @@ function BlockMap(size, seed, perloadLength){
 				
 				dx++;
 				
-				if (progressBack)
-					progressBack((dx-this.size[0].x)/(this.size[1].x-this.size[0].x));
-			},0);
+				if (progressCallback)
+					progressCallback((dx-this.size[0].x)/(this.size[1].x-this.size[0].x));
+			},0); */
 		}else{ //无回调（不分顺序）
 			for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
 				setTimeout(()=>{
@@ -564,7 +596,7 @@ function BlockMap(size, seed, perloadLength){
 	}
 	//加载区块（异步）
 	this.loadZoneAsync = (x, z, opt={})=>{
-		let {callback, dir=""} = opt;
+		let {finishCallback, progressCallback, speed, dir=""} = opt;
 		/* if (typeof callback != "function")
 			[dir, callback] = [callback, dir]; */
 		
@@ -601,8 +633,8 @@ function BlockMap(size, seed, perloadLength){
 									})) //每个都不一样（不存在）
 										this.activeZone.push([x,z]);
 									
-									if (callback)
-										callback();
+									if (finishCallback)
+										finishCallback();
 									return;
 								}
 								
@@ -667,8 +699,8 @@ function BlockMap(size, seed, perloadLength){
 									})) //每个都不一样（不存在）
 										this.activeZone.push([x,z]);
 									
-									if (callback)
-										callback();
+									if (finishCallback)
+										finishCallback();
 									return;
 								}
 								
@@ -722,8 +754,8 @@ function BlockMap(size, seed, perloadLength){
 									})) //每个都不一样（不存在）
 										this.activeZone.push([x,z]);
 									
-									if (callback)
-										callback();
+									if (finishCallback)
+										finishCallback();
 									return;
 								}
 								
@@ -777,8 +809,8 @@ function BlockMap(size, seed, perloadLength){
 									})) //每个都不一样（不存在）
 										this.activeZone.push([x,z]);
 									
-									if (callback)
-										callback();
+									if (finishCallback)
+										finishCallback();
 									return;
 								}
 								
@@ -847,7 +879,9 @@ function BlockMap(size, seed, perloadLength){
 		}
 	};
 	//卸载区块（异步）
-	this.unloadZoneAsync = (x, z, callback)=>{
+	this.unloadZoneAsync = (x, z, opt={})=>{
+		let {finishCallback, progressCallback, speed=36} = opt;
+		
 		[x, z] = [x, z].map(Math.round); //规范化
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
@@ -859,7 +893,7 @@ function BlockMap(size, seed, perloadLength){
 			if (this.initedZone[i][0] == x && this.initedZone[i][1] == z)
 				this.initedZone.splice(i,1); //从i开始删除一个元素
 		
-		//if (callback){ //有回调（必须setInterval）
+		//if (finishCallback){ //有回调（必须setInterval）
 			let dx = this.size[0].x;
 			let unloadZone_id = setInterval(()=>{
 				if (dx > this.size[1].x){
@@ -874,8 +908,8 @@ function BlockMap(size, seed, perloadLength){
 						}
 					}, 0);
 					clearInterval(unloadZone_id);
-					if (callback)
-						callback();
+					if (finishCallback)
+						finishCallback();
 					return;
 				}
 				
@@ -968,9 +1002,12 @@ function BlockMap(size, seed, perloadLength){
 				return value[0] != block[i][0] || value[1] != block[i][1];
 			})){ //每个都不一样（不存在 & 不在加载中）
 				this.initZone(block[i][0], block[i][1]);
-				this.loadZoneAsync(...block[i], {
-					callback: ()=>{
-						this.updateZoneAsync(block[i][0], block[i][1]); //更新区块
+				this.loadZoneAsync(block[i][0], block[i][1], {
+					dir: block[i][2],
+					finishCallback: ()=>{
+						this.updateZoneAsync(block[i][0], block[i][1], {
+							speed: 66
+						}); //更新区块
 					}
 				}); //用噪声填充区块
 			}

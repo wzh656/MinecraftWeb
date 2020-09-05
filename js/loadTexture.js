@@ -29,7 +29,7 @@ block_load.id = setInterval(function(){
 		
 		map.initZone(0, 0); //初始化区块
 		map.loadZoneAsync(0, 0, {
-			callback: function(){
+			finishCallback: function(){
 				map.updateZoneAsync(0, 0); //更新区块
 				if (++perload_condition >= 2){
 					map.perloadZone();

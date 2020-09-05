@@ -71,15 +71,10 @@ var deskgood = {
 			
 			gui.close();
 			$("#help").hide();
-			$("body").append(
-				$(`<h1 id="die" style="z-index: 4;">
-					<span>游戏结束！</span><p>GAME OVER</p>
-					角色deskgood死亡<br/>
-					死因：${reason || "无从考证"}<br/>
-					注：生命诚可贵，生命只有一次，请珍爱生命，deskgood无法重生，游戏即将关闭<br/>
-					<button onclick="exit();">结束<p>OVER</p></button>
-				</h1>`).hide().show("slow")
-			)
+			$("#die")
+				.css("display", "block")
+				.children(".reason").val(reason);
+			$("#die").hide().show("slow");
 		});
 	},
 	hold_choice_refresh(){

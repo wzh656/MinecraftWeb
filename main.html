@@ -16,6 +16,8 @@
 			背景：(200,200,200),
 			852*480 => 400*40
 			*/
+			
+		   /* 字体（似乎太多了） */
 			@font-face{
 				font-family:kt; /*楷体*/
 				src:url("./fonts/kt.ttf");
@@ -45,6 +47,7 @@
 				src:url("./fonts/huawei.ttf");
 			}
 			
+			/* 选择 */
 			::selection {
 			    color: #fff;
 			    background: #f9cc9d;
@@ -175,26 +178,6 @@
 				font-size: 6vmax;
 				font-family: hwxk, serif;
 			}
-			#die{
-				background-image: none;
-				background-color: rgba(200,0,0,0.392157);
-				font-size: 3.6vamx;
-			}
-			#die::before{
-				content: "\a";
-			}
-			#die button{
-				width: 50%;
-				font-size: 6vmax;
-				font-family: hwxk, serif;
-			}
-			#die span{
-				font-size: 5.6vamx;
-			}
-			#die p{
-				font-size: 1.6vmax;
-				margin: 0;
-			}
 			*{
 				font-family: qq2, serif;
 				outline: none;
@@ -257,6 +240,7 @@
 				width: 100%;
 			}
 			
+			/* 窗口 */
 			#bag, #command{
 				width: 80vw;
 				/* height: 80vh; */
@@ -278,6 +262,7 @@
 				height: 86.66%;
 			}*/
 			
+			/* 命令方块 */
 			#command > textarea{
 				width: 100%;
 				height: 70vh;
@@ -297,6 +282,7 @@
 				font-size: 3vmax;
 			}
 			
+			/* 背包 */
 			#bag{ /* 反向 */
 				flex-direction: column-reverse;
 			}
@@ -372,6 +358,28 @@
 			#bag > div:nth-of-type(1) > ul > li > ol > li > img{
 				width: 100%;
 				height: 100%;
+			}
+			
+			/* 死亡 */
+			#die{
+				background-image: none;
+				background-color: rgba(200,0,0,0.392157);
+				font-size: 3.6vmax;
+			}
+			#die::before{
+				content: "\a";
+			}
+			#die button{
+				width: 50%;
+				font-size: 6vmax;
+				font-family: hwxk, serif;
+			}
+			#die span:first-child{
+				font-size: 5.6vmax;
+			}
+			#die p{
+				font-size: 0.3em;
+				margin: 0;
 			}
 		</style>
 		
@@ -465,6 +473,13 @@ deskgood.moveTo(0,10000*100);
 		<h1 id="warning" style="z-index: 3;">
 			推荐使用横屏运行（启用浏览器横屏或<a href="https://github.com/wzh656/MinecraftWeb/releases/download/v0.4.0-alpha/Minecraft-full.apk">下载apk（完整版）</a>or<a href="https://github.com/wzh656/MinecraftWeb/releases/download/v0.4.0-alpha/Minecraft-simplified.apk">（简化版）</a>）<br/>
 			<button onclick="this.parentElement.remove();">继续竖屏</button>
+		</h1>
+		<h1 id="die" style="z-index: 4; display: none;">
+			<span>游戏结束！<p>GAME OVER</p></span>
+			角色deskgood死亡<br/>
+			死因：<span class="resaon"></span><br/>
+			注：生命诚可贵，生命只有一次，请珍爱生命，deskgood无法重生，游戏即将关闭<br/>
+			<button onclick="exit();">结束<p>OVER</p></button>
 		</h1>
 		<audio id="bgm" perload loop style="display: none;" src="./music/1.m4a" ></audio>
 		<!--<audio id="bgm" autoplay perload loop style="display: none;" src="https://vdse.bdstatic.com/876934f28995e8042230ec598237c67e.mp4?authorization=bce-auth-v1/fb297a5cc0fb434c971b8fa103e8dd7b/2017-05-11T09:02:31Z/-1//ab5b458a478fae53b754e194ab270b96f23aa23ba71c2e63b06fc06d0543040c"></audio>-->
@@ -590,6 +605,19 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 	help.id = "help";
 	document.body.appendChild(help);
 	
+	//请求指针锁定
+	document.body.requestPointerLock =
+		document.body.requestPointerLock ||
+		document.body.mozRequestPointerLock ||
+		document.body.webkitRequestPointerLock
+	;
+	//解除鼠标锁定
+	document.exitPointerLock =
+		document.exitPointerLock ||
+		document.mozExitPointerLock ||
+		document.webkitExitPointerLock
+	;
+	
 	//遮罩层事件
 	help.addEventListener("click", function (){
 		/* if (stop){ //请求解除指针锁定
@@ -600,18 +628,6 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 			;
 			document.exitPointerLock();
 		}else{ */ 
-			//请求指针锁定
-			document.body.requestPointerLock =
-				document.body.requestPointerLock ||
-				document.body.mozRequestPointerLock ||
-				document.body.webkitRequestPointerLock
-			;
-			//解除鼠标锁定
-			document.exitPointerLock =
-				document.exitPointerLock ||
-				document.mozExitPointerLock ||
-				document.webkitExitPointerLock
-			;
 			document.body.requestPointerLock();
 			stop = false;
 			playBGM();

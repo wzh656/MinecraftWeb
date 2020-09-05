@@ -257,7 +257,7 @@ function render(){
 	let warn = [];
 	if (map.get(deskgood.pos.x/100,
 			deskgood.pos.y/100,
-			deskgood.pos.z/100) != null &&
+			deskgood.pos.z/100) &&
 		!map.get(deskgood.pos.x/100,
 			deskgood.pos.y/100,
 			deskgood.pos.z/100).get("attr", "block", "through")
@@ -284,9 +284,7 @@ function render(){
 	}
 	if (map.get(deskgood.pos.x/100,
 			deskgood.pos.y/100-1,
-			deskgood.pos.z/100)
-		!=
-			null &&
+			deskgood.pos.z/100) &&
 		!map.get(deskgood.pos.x/100,
 			deskgood.pos.y/100-1,
 			deskgood.pos.z/100).get("attr", "block", "through")
