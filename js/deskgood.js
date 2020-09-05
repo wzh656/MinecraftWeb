@@ -74,7 +74,7 @@ var deskgood = {
 			$("#die")
 				.css("display", "block")
 				.children(".reason").val(reason);
-			$("#die").hide().show("slow");
+			$("#die").fadeOut().fadeIn("slow");
 		});
 	},
 	hold_choice_refresh(){
