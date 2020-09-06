@@ -358,9 +358,6 @@ $("#game").on("touchend", function (e){
 	let y = e.originalEvent.changedTouches[0].pageY;
 	//console.log("touchend:", x, y, Number(get_date()));
 	
-	touch_screen.pos = {x: null, y:null};
-	//x0 = null, y0 = null;
-	
 	if (touch_screen.loop !== null){ //短按（放置）
 		clearTimeout(touch_screen.loop);
 		touch_screen.loop = null;
@@ -461,131 +458,13 @@ $("#game").on("touchend", function (e){
 						deskgood.hold_things_refresh(); //刷新方块
 						break; //跳出 寻找有效放置的 循环
 					}
-					/*if (click[i].faceIndex == 0 | click[i].faceIndex == 1){
-						if (Math.sqrt(
-							Math.pow((click[i].object.position.x+100) - deskgood.pos.x, 2)+
-							Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
-							Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
-						) < 500){ //距离<50
-							let mesh = new THREE.Mesh(block_geometry, template[ deskgood.hold[deskgood.choice]].material);
-							mesh.position.x = click[i].object.position.x+100;
-							mesh.position.y = click[i].object.position.y;
-							mesh.position.z = click[i].object.position.z;
-							
-							mesh.castShadow = true;
-							mesh.receiveShadow = true;
-							
-							scene.add(mesh); //网格模型添加到场景中
-							every[ click[i].object.position.x/100+1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = deskgood.hold[deskgood.choice];
-							deskgood.hold[deskgood.choice] = 0; //删除手里的方块
-							deskgood.hold_things_refresh(); //刷新方块
-							break;
-						}
-					}else if (click[i].faceIndex == 2 | click[i].faceIndex == 3){
-						if (Math.sqrt(
-							Math.pow((click[i].object.position.x-100) - deskgood.pos.x, 2)+
-							Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
-							Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
-						) < 500){ //距离<500
-							let mesh = new THREE.Mesh(block_geometry, template[ deskgood.hold[deskgood.choice]].material);
-							mesh.position.x = click[i].object.position.x-100;
-							mesh.position.y = click[i].object.position.y;
-							mesh.position.z = click[i].object.position.z;
-							
-							mesh.castShadow = true;
-							mesh.receiveShadow = true;
-							
-							scene.add(mesh); //网格模型添加到场景中
-							every[ click[i].object.position.x/100-1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = deskgood.hold[deskgood.choice];
-							deskgood.hold[deskgood.choice] = 0; //删除手里的方块
-							deskgood.hold_things_refresh(); //刷新方块
-							break;
-						}
-					}else if (click[i].faceIndex == 4 | click[i].faceIndex == 5){
-						if (Math.sqrt(
-								Math.pow(click[i].object.position.x - deskgood.pos.x, 2)+
-						 	Math.pow((click[i].object.position.y+100) - deskgood.pos.y, 2)+
-							Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
-						) < 500){ //距离<500
-							let mesh = new THREE.Mesh(block_geometry, template[ deskgood.hold[deskgood.choice]].material);
-							mesh.position.x = click[i].object.position.x;
-							mesh.position.y = click[i].object.position.y+100;
-							mesh.position.z = click[i].object.position.z;
-							
-							mesh.castShadow = true;
-							mesh.receiveShadow = true;
-							
-							scene.add(mesh); //网格模型添加到场景中
-							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100+1 ][ click[i].object.position.z/100 ] = deskgood.hold[deskgood.choice];
-							deskgood.hold[deskgood.choice] = 0; //删除手里的方块
-							deskgood.hold_things_refresh(); //刷新方块
-							break;
-						}
-					}else if (click[i].faceIndex == 6 | click[i].faceIndex == 7){
-							if (Math.sqrt(
-							Math.pow(click[i].object.position.x - deskgood.pos.x, 2)+
-							Math.pow((click[i].object.position.y-100) - deskgood.pos.y, 2)+
-							Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
-						) < 500){ //距离<500
-							let mesh = new THREE.Mesh(block_geometry, template[ deskgood.hold[deskgood.choice]].material);
-							mesh.position.x = click[i].object.position.x;
-							mesh.position.y = click[i].object.position.y-100;
-							mesh.position.z = click[i].object.position.z;
-							
-							mesh.castShadow = true;
-							mesh.receiveShadow = true;
-							
-							scene.add(mesh); //网格模型添加到场景中
-							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100-1 ][ click[i].object.position.z/100 ] = deskgood.hold[deskgood.choice];
-							deskgood.hold[deskgood.choice] = 0; //删除手里的方块
-							deskgood.hold_things_refresh(); //刷新方块
-							break;
-						}
-					}else if (click[i].faceIndex == 8 | click[i].faceIndex == 9){
-						if (Math.sqrt(
-							Math.pow(click[i].object.position.x - deskgood.pos.x, 2)+
-							Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
-							Math.pow((click[i].object.position.z+100) - deskgood.pos.z, 2)
-						) < 500){ //距离<500
-							let mesh = new THREE.Mesh(block_geometry, template[ deskgood.hold[deskgood.choice]].material);
-							mesh.position.x = click[i].object.position.x;
-							mesh.position.y = click[i].object.position.y;
-							mesh.position.z = click[i].object.position.z+100;
-							
-							mesh.castShadow = true;
-							mesh.receiveShadow = true;
-							
-							scene.add(mesh); //网格模型添加到场景中
-							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100+1 ] = deskgood.hold[deskgood.choice];
-							deskgood.hold[deskgood.choice] = 0; //删除手里的方块
-							deskgood.hold_things_refresh(); //刷新方块
-							break;
-						}
-					}else if (click[i].faceIndex == 10 | click[i].faceIndex == 11){
-						if (Math.sqrt(
-							Math.pow(click[i].object.position.x - deskgood.pos.x, 2)+
-							Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
-							Math.pow((click[i].object.position.z-100) - deskgood.pos.z, 2)
-						) < 500){ //距离<500
-							let mesh = new THREE.Mesh(block_geometry, template[ deskgood.hold[deskgood.choice]].material);
-							mesh.position.x = click[i].object.position.x;
-							mesh.position.y = click[i].object.position.y;
-							mesh.position.z = click[i].object.position.z-100;
-							
-							mesh.castShadow = true;
-							mesh.receiveShadow = true;
-							
-							scene.add(mesh); //网格模型添加到场景中
-							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100-1 ] = deskgood.hold[deskgood.choice];
-							deskgood.hold[deskgood.choice] = 0; //删除手里的方块
-							deskgood.hold_things_refresh(); //刷新方块
-							break;
-						}
-					}*/
 				}
 			}
 		}
 	}
+	
+	touch_screen.pos = {x: null, y:null};
+	//x0 = null, y0 = null;
 });
 $("#game").on("touchcancel", function (e){
 	if (stop)
