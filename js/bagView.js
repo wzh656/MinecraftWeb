@@ -14,7 +14,7 @@ bag_view.camera.position.z = 260;
 bag_view.renderer.setSize(100, 100);
 bag_view.renderer.setClearColor("rgb(196,196,196)");
 bag_view.renderer.domElement.id = "bag_deskgood";
-$("#bag > div:eq(0)")[0].prepend( bag_view.renderer.domElement );
+$("#bag > div:eq(0)").prepend( bag_view.renderer.domElement );
 
 bag_view.geometry = new THREE.Geometry();
 
@@ -61,8 +61,9 @@ bag_view.mesh.rotation.x = Math.PI/4;
 bag_view.scene.add(bag_view.mesh);
 
 bag_view.renderer.domElement.style.cursor = "pointer";
-bag_view.controls = new THREE.OrbitControls(bag_view.camera, bag_view.renderer.domElement);//创建控件对象
+bag_view.controls = new THREE.OrbitControls(bag_view.camera, bag_view.renderer.domElement); //创建控件对象
+let t0=+new Date();
 setInterval(function(){
-	bag_view.mesh.rotation.y += 0.02;
+	bag_view.mesh.rotation.y += 0.036*(new Date()-t0)/17;
 	bag_view.renderer.render(bag_view.scene, bag_view.camera);
 },30);

@@ -21,7 +21,7 @@ setInterval(function(){
 	
 	//雨滴降落
 	for (let i=0; i<sprite_system.length; i++){
-		sprite_system[i].position.y -= 10*1000*t/1000*(Math.random()*0.2+0.9); //10m/s //sprite_system[i].v*t/1000;
+		sprite_system[i].position.y -= 10*1000*t/1000*rnd_error(); //10m/s //sprite_system[i].v*t/1000;
 		if (map.get(
 				sprite_system[i].position.x/100,
 				sprite_system[i].position.y/100,

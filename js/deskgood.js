@@ -153,7 +153,7 @@ var deskgood = {
 	},
 	go (x=0, y=0, z=0){
 		[x, y, z] = [x, y, z].map(
-			value => value*(Math.random()*0.2+0.9)
+			value => value*rnd_error()
 		); //随机化
 		
 		let rt = [0,0,0]; //返回值
@@ -583,7 +583,7 @@ setInterval(function(){
 		`);
 		setTimeout(()=>{
 			deskgood.die("上天堂");
-		},3*1000);
+		},3*1000*rnd_error());
 	}else if (deskgood.pos.y < -1800*100){
 		document.body.innerHTML = "";
 		document.write(`
@@ -592,6 +592,6 @@ setInterval(function(){
 		`);
 		setTimeout(()=>{
 			deskgood.die("下地狱");
-		},3*1000);
+		},3*1000*rnd_error());
 	}
 },1000);

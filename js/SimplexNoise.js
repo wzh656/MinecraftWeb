@@ -20,12 +20,12 @@ const SEED_RANDOM_CONSTANT = [
 	3528.17,
 	644.157
 ];
-function rnd(seed){
+function exp_rnd(seed){ //表达式随机
 	seed = (seed *9301 +49297) %233280; //为何使用这三个数?
 	return seed/233280;
 };
-function rnd_error(noise, t, id, x, z){
-	return rnd( noise.more3D(id, x/t.q, z/t.q, 3) ) *t.k +t.b;
+function exp_rnd_error(noise, t, id, x, z){
+	return exp_rnd( noise.more3D(id, x/t.q, z/t.q, 3) ) *t.k +t.b;
 }
 function seed_error(noise, t, id, x, z){
 	return noise.more3D(id, x/t.q, z/t.q, 3) *t.k +t.b;

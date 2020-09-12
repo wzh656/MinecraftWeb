@@ -141,8 +141,8 @@ $("#control").on("touchstart", function(e){
 			i -= i>0? 10: i<0? -10: 0;
 			j -= j>0? 10: j<0? -10: 0;
 			
-			deskgood.pos.x += i*(Math.random()*0.2+0.9);
-			deskgood.pos.z += j*(Math.random()*0.2+0.9);*/
+			deskgood.pos.x += i*rnd_error();
+			deskgood.pos.z += j*rnd_error();*/
 		}
 	}, 16.667);
 	
@@ -197,7 +197,7 @@ $("#jump").on("touchstart", function(){
 				null
 		){ //脚下有方块
 			if (Number(get_date())-last_jump >= 1000){
-				deskgood.v.y += deskgood.jump_v*(Math.random()*0.2+0.9);
+				deskgood.v.y += deskgood.jump_v*rnd_error();
 				last_jump = Number(get_date());
 			}
 		}

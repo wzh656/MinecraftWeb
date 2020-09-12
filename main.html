@@ -216,20 +216,18 @@
 			
 			#tools{
 				position: absolute;
-				bottom: 12px;
+				bottom: -2px;
 				left: 50%;
 				transform: translateX(-50%);
-				width: 300px;
-				height: 50px;
+				/*width: 36vw;
+				height: 6vw;*/
 			}
 			#tools > img{
-				width: 16%;
-				height: 100%;
+				width: 6vw;
+				height: 6vw;
 				display: inline-block;
 				margin: 0 -2px;
-				border-color: #aaa;
-				border-width: 3px;
-				border-style: groove;
+				border: 3px groove #aaa;
 			}
 			
 			textarea{
@@ -285,6 +283,10 @@
 			/* 背包 */
 			#bag{ /* 反向 */
 				flex-direction: column-reverse;
+				overflow-y: auto;
+				top: 45%;
+				height: 75vh;
+				padding: 0;
 			}
 			#bag > input[type="radio"][name="bag-nav"]{ /* 隐藏input */
 				display: none;
@@ -293,8 +295,11 @@
 				display: none;
 			}
 			#bag > input[type="radio"][name="bag-nav"]:checked + div{ /* 选择的显示 */
-				display: block;
+				display: flex;
 			}
+			/*#bag > input[type="radio"][name="bag-nav"]:nth-of-type(1):checked + div{
+				display: flex;
+			}*/
 			#bag > nav{
 				display: flex;
 				display: -webkit-flex; /* Safari */
@@ -329,15 +334,18 @@
 				background-color: rgb(200,200,200);
 				border: 3px outset rgb(116,116,116);
 			}
+			#bag > div{
+				height: 100%;
+			}
 			#bag > div:nth-of-type(1) > #bag_deskgood{
-				margin: 3px;
+				margin: 1vw;
 				border: 3px inset rgb(200,200,200);
 			}
 			#bag > div:nth-of-type(1) > ul{
 				display: inline-flex;
 				flex-direction: column;
 				justify-content: space-around;
-				margin: 0;
+				margin: 1vw;
 				padding: 0;
 			}
 			#bag > div:nth-of-type(1) > ul > li{
@@ -390,8 +398,8 @@
 		</script>
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
-		<script>//eruda.init();</script>
-		<script>//new VConsole();</script>
+		<script>eruda.init();</script>
+		<script>new VConsole();</script>
 		<script src="./js/modules/three.min.js"></script>
 		<script src="./js/modules/OrbitControls.js"></script>
 		<script src="./js/modules/simplex-noise.js"></script>
@@ -451,11 +459,11 @@ deskgood.moveTo(0,10000*100);
 			</div>
 			<input type="radio" name="bag-nav" id="bag-nav-choice2" />
 			<div>
-				2
+				“状态”功能待开发中……
 			</div>
 			<input type="radio" name="bag-nav" id="bag-nav-choice3" />
 			<div>
-				3
+				“制造”功能待开发中……
 			</div>
 			<nav>
 				<label for="bag-nav-choice1">物品</label>
@@ -741,6 +749,10 @@ function message(text, time=5){
 			msg.fadeOut("slow");
 		}, time*1000);
 	//}
+}
+
+function rnd_error(){
+	return Math.random()*0.2+0.9;
 }
 </script>
 		<script src="./js/sendMessage.js"></script>

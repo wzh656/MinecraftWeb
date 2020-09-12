@@ -304,7 +304,7 @@ function render(){
 		+get_date()-last_jump >= 1000
 		){
 			last_jump = +get_date();
-			deskgood.v.y += deskgood.jump_v*(Math.random()*0.2+0.9); //自动跳跃
+			deskgood.v.y += deskgood.jump_v*rnd_error(); //自动跳跃
 		}
 		
 		if (warn[0] & warn[1]){
@@ -343,8 +343,8 @@ function render(){
 	}
 	
 	if (!stop){
-		let ρ = 1.25*(Math.random()*0.2+0.9), //空气密度/(kg/m³)
-			c = 0.4*(Math.random()*0.2+0.9), //空气阻力系数
+		let ρ = 1.25*rnd_error(), //空气密度/(kg/m³)
+			c = 0.4*rnd_error(), //空气阻力系数
 			s = [0.5, 0.2, 0.5], //面积/m²
 			v = [deskgood.v.x, deskgood.v.y, deskgood.v.z], //速度/(m/s)
 			Fw = [], //空气阻力/N
@@ -356,7 +356,7 @@ function render(){
 			Aw[i] = Fw[i] / m; //F=ma => a=F/m
 		}
 		
-		deskgood.v.y -= 9.8*t/1000*(Math.random()*0.2+0.9); //重力加速度
+		deskgood.v.y -= 9.8*t/1000*rnd_error(); //重力加速度
 		deskgood.v.x +=
 			Math.abs(Aw[0]*t/1000) < Math.abs(deskgood.v.x)?
 				Aw[0]*t/1000

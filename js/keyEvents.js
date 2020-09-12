@@ -40,6 +40,14 @@ document.addEventListener("keydown", function (e){
 		}
 		return false;
 	}
+	if (e.keyCode == 113){ //截图
+		var oA = document.createElement("a");
+		oA.download = "截图";
+		oA.href = $("#game")[0].toDataURL();
+		document.body.appendChild(oA);
+		oA.click();
+		oA.remove(); // 下载之后把创建的元素删除
+	}
 	
 	if (stop){
 		keydown.double_run = [];
@@ -118,31 +126,31 @@ setInterval(function(){
 	
 	if (keydown.key.has(87) | keydown.key.has(38)){ //前
 		console.log("front:", keydown.key);
-		x += Math.cos( (deskgood.lookAt.left_right+0) /180*Math.PI) *(keydown.double_run==true?3:1) *(Math.random()*0.2+0.9);
-		z += Math.sin( (deskgood.lookAt.left_right+0) /180*Math.PI) *(keydown.double_run==true?3:1) *(Math.random()*0.2+0.9);
+		x += Math.cos( (deskgood.lookAt.left_right+0) /180*Math.PI) *(keydown.double_run==true?3:1) *rnd_error();
+		z += Math.sin( (deskgood.lookAt.left_right+0) /180*Math.PI) *(keydown.double_run==true?3:1) *rnd_error();
 	}
 	if (keydown.key.has(83) | keydown.key.has(40)){ //后
 		console.log("behind:", keydown.key);
-		x += Math.cos( (deskgood.lookAt.left_right+180) /180*Math.PI) *(Math.random()*0.2+0.9);
-		z += Math.sin( (deskgood.lookAt.left_right+180) /180*Math.PI) *(Math.random()*0.2+0.9);
+		x += Math.cos( (deskgood.lookAt.left_right+180) /180*Math.PI) *rnd_error();
+		z += Math.sin( (deskgood.lookAt.left_right+180) /180*Math.PI) *rnd_error();
 	}
 	if (keydown.key.has(65) | keydown.key.has(37)){ //左
 		console.log("left:", keydown.key);
-		x += Math.cos( (deskgood.lookAt.left_right-90) /180*Math.PI) *(Math.random()*0.2+0.9);
-		z += Math.sin( (deskgood.lookAt.left_right-90) /180*Math.PI) *(Math.random()*0.2+0.9);
+		x += Math.cos( (deskgood.lookAt.left_right-90) /180*Math.PI) *rnd_error();
+		z += Math.sin( (deskgood.lookAt.left_right-90) /180*Math.PI) *rnd_error();
 	}
 	if (keydown.key.has(68) | keydown.key.has(39)){ //右
 		console.log("right:", keydown.key);
-		x += Math.cos( (deskgood.lookAt.left_right+90) /180*Math.PI) *(Math.random()*0.2+0.9);
-		z += Math.sin( (deskgood.lookAt.left_right+90) /180*Math.PI) *(Math.random()*0.2+0.9);
+		x += Math.cos( (deskgood.lookAt.left_right+90) /180*Math.PI) *rnd_error();
+		z += Math.sin( (deskgood.lookAt.left_right+90) /180*Math.PI) *rnd_error();
 	}
 	if (keydown.key.has(32)){ //上
 		console.log("up:", keydown.key);
-		y += 1*(Math.random()*0.2+0.9);
+		y += 1*rnd_error();
 	}
 	if (keydown.key.has(16)){ //下
 		console.log("down:", keydown.key);
-		y += -1*(Math.random()*0.2+0.9);
+		y += -1*rnd_error();
 	}
 	
 	/* x = x*10 + (x>0? 10: x<0? -10: 0);
@@ -195,8 +203,8 @@ setInterval(function(){
 	x -= (x>0? 10: x<0? -10: 0);
 	z -= (z>0? 10: z<0? -10: 0);
 	
-	deskgood.pos.x += x*(Math.random()*0.2+0.9);
-	deskgood.pos.z += z*(Math.random()*0.2+0.9); */
+	deskgood.pos.x += x*rnd_error();
+	deskgood.pos.z += z*rnd_error(); */
 	
 	if (x && z)
 		console.log("go",x,z);
@@ -213,7 +221,7 @@ setInterval(function(){
 		){ //脚下有方块
 			if (+get_date()-last_jump >= 1000 & y != 0){
 				console.log("jump");
-				deskgood.v.y += y * deskgood.jump_v*(Math.random()*0.2+0.9);
+				deskgood.v.y += y * deskgood.jump_v*rnd_error();
 				last_jump = +get_date();
 			}
 		}

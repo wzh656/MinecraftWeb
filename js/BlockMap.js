@@ -281,7 +281,8 @@ function BlockMap(size, seed, perloadLength){
 		let {
 			finishCallback,
 			progressCallback,
-			speed,
+			breakTime, // 最大执行时间/ms
+			mostSpeed, // 最大速度/次
 			breakPoint
 		} = opt;
 		// console.log("update", x, z, finishCallback, progressCallback)
@@ -289,9 +290,11 @@ function BlockMap(size, seed, perloadLength){
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
-		if (finishCallback || progressCallback || speed){ // 有回调（必须setInterval）or限速
-			speed = speed || 66;
-			let t0 = new Date();
+		if (finishCallback || progressCallback || breakTime || mostSpeed){ // 有回调（必须setInterval）or限速
+			breakTime = breakTime || 66;
+			mostSpeed = mostSpeed || 2;
+			let t0 = new Date(),
+				num = 0;
 			
 			let dx;
 			if (breakPoint){
@@ -311,17 +314,15 @@ function BlockMap(size, seed, perloadLength){
 				}
 				for (; dz<=this.size[1].z; dz++){
 					
-					if (new Date()-t0 > speed){
-						setTimeout(()=>{
+					if (new Date()-t0 > breakTime) //超时
+						return setTimeout(()=>{
 							this.updateZoneAsync(x, z, {
 								finishCallback,
 								progressCallback,
-								speed,
+								breakTime,
 								breakPoint: {dx, dz}
 							});
 						},0);
-						return;
-					}
 					for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
 						this.update(ox+dx, dy, oz+dz);
 					}
@@ -329,6 +330,15 @@ function BlockMap(size, seed, perloadLength){
 				}
 				if (progressCallback)
 					progressCallback((dx-this.size[0].x)/(this.size[1].x-this.size[0].x));
+				if (++num >= mostSpeed) //超数
+					return setTimeout(()=>{
+						this.updateZoneAsync(x, z, {
+							finishCallback,
+							progressCallback,
+							breakTime,
+							breakPoint: {dx:dx+1, dz:0}
+						});
+					},0);
 			}
 			if (finishCallback) finishCallback();
 			/* let dx = this.size[0].x;
@@ -452,22 +462,22 @@ function BlockMap(size, seed, perloadLength){
 						id = 0; // 空气/真空 (null)
 					}else if (dy > height){
 						if (!treeTop) treeTop = dy;
-						id = 9.1; //橡木
+						id = 8.1; //橡木
 					}else if (dy > earth){
 						if (grass){
-							id = 4; //泥土
+							id = 3; //泥土
 						}else{
-							id = 3; //草方块
+							id = 2; //草方块
 							grass = true;
 						}
-					}else if (dy == 0){
+					}/*else if (dy == 0){
 						id = 2; //基岩
-					}else{
+					}*/else{
 						if (!grass && !seed_openStone(this.seed.noise, this.seed.oS, x, z)){
-							id = 3; //草方块
+							id = 2; //草方块
 							grass = true;
 						}else{
-							id = 6; //石头
+							id = 5; //石头
 						}
 					}
 					break;
@@ -482,22 +492,22 @@ function BlockMap(size, seed, perloadLength){
 						id = 0; // 空气/真空 (null)
 					}else if (dy > height){
 						if (!treeTop) treeTop = dy;
-						id = 9.1; //橡木
+						id = 8.1; //橡木
 					}else if (dy > earth){
 						if (grass){
-							id = 4; //泥土
+							id = 3; //泥土
 						}else{
-							id = 3; //草方块
+							id = 2; //草方块
 							grass = true;
 						}
-					}else if (dy == 0){
+					}/*else if (dy == 0){
 						id = 2; //基岩
-					}else{
+					}*/else{
 						if (!grass && !seed_openStone(this.seed.noise, this.seed.oS, x, z)){
-							id = 3; //草方块
+							id = 2; //草方块
 							grass = true;
 						}else{
-							id = 6; //石头
+							id = 5; //石头
 						}
 					}
 					break;
@@ -507,15 +517,15 @@ function BlockMap(size, seed, perloadLength){
 					if (dy > height){
 						id = 0; // 空气/真空 (null)
 					}else if (dy > earth){
-						id = 7; //沙子
-					}else if (dy == 0){
+						id = 6; //沙子
+					}/*else if (dy == 0){
 						id = 2; //基岩
-					}else{
+					}*/else{
 						if (!grass && !seed_openStone(this.seed.noise, this.seed.oS, x, z)){
-							id = 7; //沙子
+							id = 6; //沙子
 							grass = true;
 						}else{
-							id = 6; //石头
+							id = 5; //石头
 						}
 					}
 					break;
@@ -548,9 +558,9 @@ function BlockMap(size, seed, perloadLength){
 			
 		}
 		
-		if (treeTop){ //非强制添加树叶(10)
+		if (treeTop){ //非强制添加树叶(9)
 			setTimeout(()=>{
-				this.addID(10, {
+				this.addID(9, {
 					x: x,
 					y: treeTop+1,
 					z: z
@@ -559,28 +569,28 @@ function BlockMap(size, seed, perloadLength){
 				});
 				let leavesHeight = seed_leavesScale(this.seed.noise, this.seed.lS, x, z) *(treeHeight - height);
 				for (let i=0; i<=leavesHeight; i++){
-					this.addID(10, {
+					this.addID(9, {
 						x: x+1,
 						y: treeTop-i,
 						z: z
 					}, template, {
 						type: false
 					});
-					this.addID(10, {
+					this.addID(9, {
 						x: x-1,
 						y: treeTop-i,
 						z: z
 					}, template, {
 						type: false
 					});
-					this.addID(10, {
+					this.addID(9, {
 						x: x,
 						y: treeTop-i,
 						z: z+1
 					}, template, {
 						type: false
 					});
-					this.addID(10, {
+					this.addID(9, {
 						x: x,
 						y: treeTop-i,
 						z: z-1
@@ -588,7 +598,7 @@ function BlockMap(size, seed, perloadLength){
 						type: false
 					});
 				}
-			},0);
+			}, 1000);
 			
 		}
 	}
@@ -615,7 +625,8 @@ function BlockMap(size, seed, perloadLength){
 		let {
 			finishCallback,
 			progressCallback,
-			speed, // 速度/ms
+			breakTime=66, // 最大执行时间/ms
+			mostSpeed=2, // 最大速度/次
 			dir="", //方向
 			breakPoint
 		} = opt;
@@ -625,19 +636,12 @@ function BlockMap(size, seed, perloadLength){
 			oz = z*this.size.z, //区块中心坐标
 			t = this.seed; //临时变量
 		
-		sql.selectData("file", ["x", "y", "z", "id", "attr"],
-			`type=0 AND`+
-			` (x BETWEEN ${ ox+this.size[0].x } AND ${ ox+this.size[1].x }) AND`+
-			` (z BETWEEN ${ oz+this.size[0].z } AND ${ oz+this.size[1].z })`,
-			(edit) => {
-				
-				console.log("edit(sql):", edit);
-				
+		let func = (edit)=>{
 				switch (dir.substr(0,2)){
 					case "x-":
 						{
-							speed = speed || 66;
-							let t0 = +new Date();
+							let t0 = +new Date(),
+								num = 0;
 							
 							let dx;
 							if (breakPoint){
@@ -656,18 +660,17 @@ function BlockMap(size, seed, perloadLength){
 									dz = this.size[0].z;
 								}
 								for (; dz<=this.size[1].z; dz++){
-									if (new Date-t0 > speed){ //超时
-										setTimeout(()=>{
+									if (new Date-t0 > breakTime) //超时
+										return setTimeout(()=>{
 											this.loadZoneAsync(x, z, {
 												finishCallback,
 												progressCallback,
-												speed,
+												breakTime,
+												mostSpeed,
 												dir,
-												breakPoint: {dx, dz}
+												breakPoint: {dx, dz, edit}
 											});
 										},0);
-										return;
-									}
 									this.loadColumn(ox+dx, oz+dz, edit);
 								}
 								
@@ -679,6 +682,17 @@ function BlockMap(size, seed, perloadLength){
 								}, 0);
 								if (progressCallback)
 									progressCallback( (x-this.size[1].x)/(this.size[0].x-this.size[1].x) );
+								if (++num >= mostSpeed) //超数
+									return setTimeout(()=>{
+										this.loadZoneAsync(x, z, {
+											finishCallback,
+											progressCallback,
+											breakTime,
+											mostSpeed,
+											dir,
+											breakPoint: {dx:dx-1, edit}
+										});
+									},0);
 							}
 							setTimeout(()=>{ //更新
 								for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
@@ -725,8 +739,9 @@ function BlockMap(size, seed, perloadLength){
 					
 					case "z+":
 						{
-							speed = speed || 66;
-							let t0 = +new Date();
+							let t0 = +new Date(),
+								num = 0;
+							
 							let dz;
 							if (breakPoint){
 								dz = breakPoint.dz==undefined? this.size[0].z: breakPoint.dz;
@@ -744,18 +759,17 @@ function BlockMap(size, seed, perloadLength){
 									dx = this.size[0].x;
 								}
 								for (; dx<=this.size[1].z; dx++){
-									if (new Date-t0 > speed){ //超时
-										setTimeout(()=>{
+									if (new Date-t0 > breakTime) //超时
+										return setTimeout(()=>{
 											this.loadZoneAsync(x, z, {
 												finishCallback,
 												progressCallback,
-												speed,
+												breakTime,
+												mostSpeed,
 												dir,
-												breakPoint: {dx, dz}
+												breakPoint: {dx, dz, edit}
 											});
 										},0);
-										return;
-									}
 									this.loadColumn(ox+dx, oz+dz, edit);
 								}
 								
@@ -767,6 +781,17 @@ function BlockMap(size, seed, perloadLength){
 								}, 0);
 								if (progressCallback)
 									progressCallback( (x-this.size[1].x)/(this.size[0].x-this.size[1].x) );
+								if (++num >= mostSpeed) //超数
+									return setTimeout(()=>{
+										this.loadZoneAsync(x, z, {
+											finishCallback,
+											progressCallback,
+											breakTime,
+											mostSpeed,
+											dir,
+											breakPoint: {dz:dz+1, edit}
+										});
+									},0);
 							}
 							setTimeout(()=>{ //更新
 								for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
@@ -821,8 +846,9 @@ function BlockMap(size, seed, perloadLength){
 					
 					case "z-":
 						{
-							speed = speed || 66;
-							let t0 = +new Date();
+							let t0 = +new Date(),
+								num = 0;
+							
 							let dz;
 							if (breakPoint){
 								dz = breakPoint.dz==undefined? this.size[1].z: breakPoint.dz;
@@ -840,18 +866,17 @@ function BlockMap(size, seed, perloadLength){
 									dx = this.size[0].x;
 								}
 								for (; dx<=this.size[1].z; dx++){
-									if (new Date-t0 > speed){ //超时
-										setTimeout(()=>{
-											this.loadZoneAsync(x, z, {
+									if (new Date-t0 > breakTime) //超时
+										return setTimeout(()=>{
+											return this.loadZoneAsync(x, z, {
 												finishCallback,
 												progressCallback,
-												speed,
+												breakTime,
+												mostSpeed,
 												dir,
-												breakPoint: {dx, dz}
+												breakPoint: {dx, dz, edit}
 											});
 										},0);
-										return;
-									}
 									this.loadColumn(ox+dx, oz+dz, edit);
 								}
 								
@@ -863,6 +888,17 @@ function BlockMap(size, seed, perloadLength){
 								}, 0);
 								if (progressCallback)
 									progressCallback( (x-this.size[1].x)/(this.size[0].x-this.size[1].x) );
+								if (++num >= mostSpeed) //超数
+									return setTimeout(()=>{
+										this.loadZoneAsync(x, z, {
+											finishCallback,
+											progressCallback,
+											breakTime,
+											mostSpeed,
+											dir,
+											breakPoint: {dz:dz-1, edit}
+										});
+									},0);
 							}
 							setTimeout(()=>{ //更新
 								for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
@@ -917,8 +953,8 @@ function BlockMap(size, seed, perloadLength){
 					
 					default: // "x+" or else
 						{
-							speed = speed || 66;
-							let t0 = +new Date();
+							let t0 = +new Date(),
+								num = 0;
 							
 							let dx;
 							if (breakPoint){
@@ -937,18 +973,17 @@ function BlockMap(size, seed, perloadLength){
 									dz = this.size[0].z;
 								}
 								for (; dz<=this.size[1].z; dz++){
-									if (new Date-t0 > speed){ //超时
-										setTimeout(()=>{
+									if (new Date-t0 > breakTime) //超时
+										return setTimeout(()=>{
 											this.loadZoneAsync(x, z, {
 												finishCallback,
 												progressCallback,
-												speed,
+												breakTime,
+												mostSpeed,
 												dir,
-												breakPoint: {dx, dz}
+												breakPoint: {dx, dz, edit}
 											});
 										},0);
-										return;
-									}
 									this.loadColumn(ox+dx, oz+dz, edit);
 								}
 								
@@ -960,6 +995,17 @@ function BlockMap(size, seed, perloadLength){
 								}, 0);
 								if (progressCallback)
 									progressCallback( (x-this.size[1].x)/(this.size[0].x-this.size[1].x) );
+								if (++num >= mostSpeed) //超数
+									return setTimeout(()=>{
+										this.loadZoneAsync(x, z, {
+											finishCallback,
+											progressCallback,
+											breakTime,
+											mostSpeed,
+											dir,
+											breakPoint: {dx:dx+1, edit}
+										});
+									},0);
 							}
 							setTimeout(()=>{ //更新
 								for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
@@ -1013,9 +1059,20 @@ function BlockMap(size, seed, perloadLength){
 						}
 					
 				}
-				
-			}
-		)
+		};
+		if (breakPoint && breakPoint.edit){
+			func(breakPoint.edit);
+		}else{
+			sql.selectData("file", ["x", "y", "z", "id", "attr"],
+				`type=0 AND`+
+				` (x BETWEEN ${ ox+this.size[0].x } AND ${ ox+this.size[1].x }) AND`+
+				` (z BETWEEN ${ oz+this.size[0].z } AND ${ oz+this.size[1].z })`,
+				(edit)=>{
+					console.log("edit(sql):", edit);
+					func(edit);
+				}
+			);
+		}
 	};
 	
 	//卸载区块（同步）
@@ -1050,7 +1107,8 @@ function BlockMap(size, seed, perloadLength){
 		let {
 			finishCallback,
 			progressCallback,
-			speed,
+			breakTime=66, // 最大执行时间/ms
+			mostSpeed=2, // 最大次数/次
 			breakPoint
 		} = opt;
 		
@@ -1067,8 +1125,8 @@ function BlockMap(size, seed, perloadLength){
 		
 		//if (finishCallback){ //有回调（必须setInterval）
 		
-		speed = speed || 66;
-		let t0 = +new Date();
+		let t0 = +new Date(),
+			num = 0;
 		
 		let dx;
 		if (breakPoint){
@@ -1096,17 +1154,16 @@ function BlockMap(size, seed, perloadLength){
 					dz = this.size[0].z;
 				}
 				for (; dz<=this.size[1].z; dz++){
-					if (new Date-t0 > speed){
-						setTimeout(()=>{
+					if (new Date-t0 > breakTime) //超时
+						return setTimeout(()=>{
 							this.unloadZoneAsync(x, z, {
 								finishCallback,
 								progressCallback,
-								speed,
+								breakTime,
+								mostSpeed,
 								breakPoint: {dx, dy, dz}
 							});
 						},0);
-						return;
-					}
 					
 					if (this.map[ox+dx][dy][oz+dz]){ //非空气 & 非未加载
 						for (let i of this.map[ox+dx][dy][oz+dz].block.mesh.material)
@@ -1120,6 +1177,16 @@ function BlockMap(size, seed, perloadLength){
 			
 			if (progressCallback)
 				progressCallback( (dx-this.size[0].x)/(this.size[1].x-this.size[0].x) )
+			if (++num >= mostSpeed) //超数
+				return setTimeout(()=>{
+					this.unloadZoneAsync(x, z, {
+						finishCallback,
+						progressCallback,
+						breakTime,
+						mostSpeed,
+						breakPoint: {dx:dx+1}
+					});
+				},0);
 		}
 			/* let dx = this.size[0].x;
 			let unloadZone_id = setInterval(()=>{
@@ -1233,7 +1300,7 @@ function BlockMap(size, seed, perloadLength){
 					dir: block[i][2],
 					finishCallback: ()=>{
 						this.updateZoneAsync(block[i][0], block[i][1], {
-							speed: 66
+							breakTime: 36
 						}); //更新区块
 					}
 				}); //用噪声填充区块
