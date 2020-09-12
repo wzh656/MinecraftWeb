@@ -138,7 +138,9 @@ camera.lookAt(scene.position); //设置相机方向(指向的场景对象)
 /**
 * 创建渲染器对象
 */
-let renderer = new THREE.WebGLRenderer();
+let renderer = new THREE.WebGLRenderer({
+	preserveDrawingBuffer: true // required to support .toDataURL()
+});
 renderer.setSize(WIDTH, HEIGHT);//设置渲染区域尺寸
 renderer.setClearColor("#eef", 1); //设置背景颜色
 renderer.domElement.style.margin = "0";
