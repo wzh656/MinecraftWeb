@@ -37,8 +37,14 @@ function SQL_read(){
 	sql.selectData("file", ["id", "attr"], "type=3 AND x=0", function(result){ //物品栏
 		if (result.length){
 			for (let i in deskgood.hold){
-				deskgood.hold[i] = result[i].id;
-				//...
+				if (result[i].id == 0){
+					deskgood.hold[i] = null;
+				}else{
+					deskgood.hold[i] = new Thing({
+						id: result[i].id,
+						attr: JSON.parse("{"+result[i].attr+"}")
+					});
+				}
 			}
 			deskgood.hold_things_refresh();
 		}
@@ -72,11 +78,12 @@ function SQL_save(){
 	});
 	sql.deleteData("file", "type=3", undefined, function(){
 		for (let i of deskgood.hold){
+			console.log(i? JSON.stringify(i.attr).slice(1,-1): "")
 			sql.insertData("file", ["type", "x", "id", "attr"], [
 				3,
 				0, //物品栏
-				i,
-				`""` //...
+				i? i.id: 0,
+				i? `'${JSON.stringify(i.attr).slice(1,-1)}'`: '""'
 			]);
 		}
 		sql.insertData("file", ["type", "x", "id"], [
@@ -98,6 +105,7 @@ function SQL_save(){
 	console.log("备份成功"); */
 }
 setInterval(SQL_save, 10*1000); // 10s
+document.addEventListener("background", SQL_save, false);
 
 /* //读取
 if (localStorage.getItem("我的世界.存档.玩家.位置")){

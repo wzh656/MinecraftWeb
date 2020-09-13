@@ -319,27 +319,95 @@ function render(){
 	for (let i of body_block)
 		if (i)
 			map.update(i.x, i.y, i.z); //重新更新
-	body_block[0] = {
+	body_block = [];
+	body_block.push({
 		x: deskgood.pos.x/100,
 		y: deskgood.pos.y/100,
 		z: deskgood.pos.z/100
-	}; //上半身
-	body_block[1] = {
+	}); //上半身
+	body_block.push({
 		x: deskgood.pos.x/100,
 		y: deskgood.pos.y/100-1,
 		z: deskgood.pos.z/100
-	}; //下半身
+	}); //下半身
+	
+	body_block.push({
+		x: deskgood.pos.x/100,
+		y: deskgood.pos.y/100+1,
+		z: deskgood.pos.z/100
+	}); //上
+	body_block.push({
+		x: deskgood.pos.x/100,
+		y: deskgood.pos.y/100-2,
+		z: deskgood.pos.z/100
+	}); //下
+	
+	body_block.push({
+		x: deskgood.pos.x/100,
+		y: deskgood.pos.y/100+2,
+		z: deskgood.pos.z/100
+	}); //上上
+	body_block.push({
+		x: deskgood.pos.x/100,
+		y: deskgood.pos.y/100-3,
+		z: deskgood.pos.z/100
+	}); //下下
+	
+	body_block.push({
+		x: deskgood.pos.x/100+1,
+		y: deskgood.pos.y/100,
+		z: deskgood.pos.z/100
+	}); //前上
+	body_block.push({
+		x: deskgood.pos.x/100+1,
+		y: deskgood.pos.y/100-1,
+		z: deskgood.pos.z/100
+	}); //前下
+	
+	body_block.push({
+		x: deskgood.pos.x/100-1,
+		y: deskgood.pos.y/100,
+		z: deskgood.pos.z/100
+	}); //后上
+	body_block.push({
+		x: deskgood.pos.x/100-1,
+		y: deskgood.pos.y/100-1,
+		z: deskgood.pos.z/100
+	}); //后下
+	
+	body_block.push({
+		x: deskgood.pos.x/100,
+		y: deskgood.pos.y/100,
+		z: deskgood.pos.z/100+1
+	}); //左上
+	body_block.push({
+		x: deskgood.pos.x/100,
+		y: deskgood.pos.y/100-1,
+		z: deskgood.pos.z/100+1
+	}); //左下
+	
+	body_block.push({
+		x: deskgood.pos.x/100,
+		y: deskgood.pos.y/100,
+		z: deskgood.pos.z/100-1
+	}); //右上
+	body_block.push({
+		x: deskgood.pos.x/100,
+		y: deskgood.pos.y/100-1,
+		z: deskgood.pos.z/100-1
+	}); //右下
+	
 	for (let i of body_block){
 		let block = map.get(i.x, i.y, i.z);
 		if (block){
 			block.block.material.forEach((item, index, arr) => {
 				arr[index].visible = true;
 			}); //显示所有
-			console.info("显示面", i, [i.x,i.y,i.z].map(Math.round), block);
+			// console.info("显示面", i, [i.x,i.y,i.z].map(Math.round), block);
 			if (!block.block.addTo){
 				scene.add(block.block.mesh);
 				block.block.addTo = true;
-				console.info("显示体", i, [i.x,i.y,i.z].map(Math.round), block);
+				// console.info("显示体", i, [i.x,i.y,i.z].map(Math.round), block);
 			}
 		}
 	}

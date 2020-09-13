@@ -203,18 +203,21 @@ document.addEventListener("mousedown", function (e){
 								}
 							}
 						}*/
-						let free = deskgood.hold[deskgood.choice]==0? deskgood.choice: deskgood.hold.indexOf(0);
+						let free = !deskgood.hold[deskgood.choice]? deskgood.choice: deskgood.hold.indexOf(null);
 						if (free == -1){
 							console.info("not free!");
 							message("<font style='font-size:14px;'>两只手拿4m³方块已经够多了，反正我是拿不下了</font>", 3);
 						}else{
 							console.log("delete:", click[i].object.position);
-							deskgood.hold[free] = map.get(x/100, y/100, z/100).id; //放在手中
-							deskgood.hold_things_refresh(); //刷新方块
-							map.delete(x/100, y/100, z/100); //删除方块
-							map.updateRound(x/100, y/100, z/100); //刷新方块及周围
-							//SQL
+							
 							[x, y, z] = [x, y, z].map(v => Math.round(v/100));
+							
+							deskgood.hold[free] = new Thing(map.get(x, y, z)); //放在手中
+							deskgood.hold_things_refresh(); //刷新方块
+							let attr = `'${JSON.stringify(map.get(x, y, z).attr).slice(1,-1)}'`;
+							map.delete(x, y, z); //删除方块
+							map.updateRound(x, y, z); //刷新方块及周围
+							//SQL
 							sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
 								sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
 									0,
@@ -222,7 +225,7 @@ document.addEventListener("mousedown", function (e){
 									y,
 									z,
 									0,
-									`""`
+									attr
 								])
 							});
 							/*scene.remove(click[i].object);
@@ -297,28 +300,30 @@ document.addEventListener("mousedown", function (e){
 					(y-deskgood.pos.y) **2+
 					(z-deskgood.pos.z) **2
 				) < 500){ //距离<5m
-					map.addID(deskgood.hold[deskgood.choice], {
-						x: x/100,
-						y: y/100,
-						z: z/100
-					}, template);
-					/* map.add(new Thing(template[ deskgood.hold[deskgood.choice] ]).block.makeMaterial().block.deleteTexture().block.makeMesh(), {
-						x: x/100,
-						y: y/100,
-						z: z/100
-					}); */
-					map.updateRound(x/100, y/100, z/100); //刷新方块及周围
-					//SQL
-					let thing_id = deskgood.hold[deskgood.choice];
 					[x, y, z] = [x, y, z].map(v => Math.round(v/100));
+					/* map.addID(deskgood.hold[deskgood.choice].id, {
+						x: x,
+						y: y,
+						z: z
+					}, template); */
+					map.add(new Thing({
+						
+					}).block.makeMaterial().block.deleteTexture().block.makeMesh(), {
+						x,
+						y,
+						z
+					});
+					map.updateRound(x, y, z); //刷新方块及周围
+					//SQL
+					let thing = deskgood.hold[deskgood.choice];
 					sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
 						sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
 							0,
 							x,
 							y,
 							z,
-							thing_id,
-							`""`
+							thing.id,
+							`'${JSON.stringify(thing.attr).slice(1,-1)}'`
 						])
 					});
 					deskgood.hold[deskgood.choice] = 0; //删除手里的方块

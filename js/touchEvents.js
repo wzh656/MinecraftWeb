@@ -256,7 +256,7 @@ $("#game").on("touchstart", function (e){
 									}
 								}
 							}*/
-							let free = deskgood.hold[deskgood.choice]==0? deskgood.choice: deskgood.hold.indexOf(0);
+							let free = !deskgood.hold[deskgood.choice]? deskgood.choice: deskgood.hold.indexOf(null);
 							if (free == -1){
 								console.info("not free!");
 								message("<font style='font-size:14px;'>两只手拿4m³方块已经够多了，反正我是拿不下了</font>", 3);
@@ -273,7 +273,7 @@ $("#game").on("touchstart", function (e){
 								}catch(err){} */
 							}else{
 								console.log("delete:", click[i].object.position);
-								deskgood.hold[free] = map.get(x/100, y/100, z/100).id; //放在手中
+								deskgood.hold[free] = new Thing(map.get(x/100, y/100, z/100)); //放在手中
 								deskgood.hold_things_refresh(); //刷新方块
 								map.delete(x/100, y/100, z/100); //删除方块
 								map.updateRound(x/100, y/100, z/100); //更新方块
@@ -395,7 +395,7 @@ $("#game").on("touchend", function (e){
 						map.get(x/100, y/100, z/100).attr.block.onShortTouch &&
 						eval(map.get(x/100, y/100, z/100).attr.block.onShortTouch) === false
 					) return;
-					if (deskgood.hold[deskgood.choice] == 0) //空气
+					if (!deskgood.hold[deskgood.choice]) //空气
 						return;
 					switch (click[i].faceIndex){
 						case 0:
@@ -430,18 +430,25 @@ $("#game").on("touchend", function (e){
 						(y-deskgood.pos.y) **2+
 						(z-deskgood.pos.z) **2
 					) < 500){ //距离<5m
-						map.addID(deskgood.hold[deskgood.choice], {
+						map.add(
+							new Thing(deskgood.hold[deskgood.choice]), {
+								x: x/100,
+								y: y/100,
+								z: z/100
+							}
+						);
+						/*map.addID(deskgood.hold[deskgood.choice], {
 							x: x/100,
 							y: y/100,
 							z: z/100
-						}, template);
+						}, template);*/
 						/* map.add(new Thing(template[ deskgood.hold[deskgood.choice] ]).block.makeMaterial().block.deleteTexture().block.makeMesh(), {
 							x: x/100,
 							y: y/100,
 							z: z/100
 						}); */
 						map.updateRound(x/100, y/100, z/100); //更新方块及周围方块
-						let thing_id = deskgood.hold[deskgood.choice];
+						let thing_id = deskgood.hold[deskgood.choice].id;
 						//SQL
 						[x, y, z] = [x, y, z].map(v => Math.round(v/100));
 						sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
@@ -451,7 +458,7 @@ $("#game").on("touchend", function (e){
 								y,
 								z,
 								thing_id,
-								`""`
+								'""'//JSON.parse(deskgood.hold[deskgood.choice].attr)
 							])
 						});
 						deskgood.hold[deskgood.choice] = 0; //删除手里的方块

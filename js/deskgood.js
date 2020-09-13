@@ -62,7 +62,7 @@ var deskgood = {
 		y: 0,
 		z: 0
 	},
-	hold: [0,0,0,0],
+	hold: [null, null, null, null],
 	choice: 0,
 	sensitivity: 1, //灵敏度
 	die(reason){
@@ -87,10 +87,10 @@ var deskgood = {
 	hold_things_refresh(){
 		for (let i in deskgood.hold)
 			$("#tools > img")[i].src =
-				deskgood.hold[i] == 0?
-					"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP4//8/AwAI/AL+eMSysAAAAABJRU5ErkJggg==" //透明图片
+				deskgood.hold[i]?
+					(deskgood.hold[i].get("block", "parent")||`./img/blocks/${deskgood.hold[i].id}/`) + deskgood.hold[i].get("block", "face")[0]
 				:
-					(template[ deskgood.hold[i] ].block.parent||`./img/blocks/${template[ deskgood.hold[i] ].id}/`) + template[ deskgood.hold[i] ].block.face[0]
+					"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP4//8/AwAI/AL+eMSysAAAAABJRU5ErkJggg==" //透明图片
 			;
 	},
 	look_refresh(x,y,z){
@@ -566,10 +566,10 @@ deskgood_folder.open();
 		deskgood_hold_folder.add(deskgood, "choice", 0, 3, 1).listen().name("选择工具").onChange(deskgood.hold_choice_refresh);
 		let deskgood_hold_things_folder = deskgood_hold_folder.addFolder("物品");
 		deskgood_hold_things_folder.open();
-			deskgood_hold_things_folder.add(deskgood.hold, 0, 0, 12, 1).listen().onChange(deskgood.hold_things_refresh);
-			deskgood_hold_things_folder.add(deskgood.hold, 1, 0, 12, 1).listen().onChange(deskgood.hold_things_refresh);
-			deskgood_hold_things_folder.add(deskgood.hold, 2, 0, 12, 1).listen().onChange(deskgood.hold_things_refresh);
-			deskgood_hold_things_folder.add(deskgood.hold, 3, 0, 12, 1).listen().onChange(deskgood.hold_things_refresh);
+			deskgood_hold_things_folder.add(deskgood.hold[0] || {id:0}, "id", 0, 12, 1).name("0").listen().onChange(deskgood.hold_things_refresh);
+			deskgood_hold_things_folder.add(deskgood.hold[1] || {id:0}, "id", 0, 12, 1).name("1").listen().onChange(deskgood.hold_things_refresh);
+			deskgood_hold_things_folder.add(deskgood.hold[2] || {id:0}, "id", 0, 12, 1).name("2").listen().onChange(deskgood.hold_things_refresh);
+			deskgood_hold_things_folder.add(deskgood.hold[3] || {id:0}, "id", 0, 12, 1).name("3").listen().onChange(deskgood.hold_things_refresh);
 
 /*
 * 天堂、地狱
