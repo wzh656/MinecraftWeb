@@ -1,7 +1,7 @@
-# <font face="楷体">我的世界（仿）</font>
+# <font style="font-family: 楷体;">我的世界（仿）</font>
 修改日期:2020.9.14
 
-> # <font face="楷体">运行</font>
+> # <font style="font-family: 楷体;">运行</font>
 
 最新版：暂未打包，可访问网页版（可能处于调试之中）
 
@@ -15,12 +15,12 @@
 
 可在[后面（㈧关于运行）](#关于运行)详细查看
 
-> # <font face="楷体">目录</font>
+> # <font style="font-family: 楷体;">目录</font>
 0. [（零）序](#零序)
-1. [㈠关于地图(Map)](#关于地图Map)
+1. [㈠关于地图(Map)](#关于地图map)
 2. [㈡关于角(jiǎo)色](#关于角jiǎo色)
 3. [㈢关于移动(move)与按键(key)](#关于移动move与按键key)
-4. [㈣关于物品(Thing)](#关于物品Thing)
+4. [㈣关于物品(Thing)](#关于物品thing)
 5. [㈤关于天气(weather)](#关于天气weather)
 6. [㈥关于工具](#关于工具)
 7. [㈦注意事项](#注意事项)
@@ -29,7 +29,7 @@
 
 ……
 
-> # <font face="楷体">说明（正文）</font>
+> # <font style="font-family: 楷体;">说明（正文）</font>
 
 ## （零）序
 本游戏是基于《我的世界》游戏思想的仿造，仿造原则是：
@@ -128,16 +128,16 @@
 + [ ] *雨滴增加率*随时间t用perline噪声计算
 
 ### 关于雨滴
-雨滴是一种sprite，即只有一个面（永远平行于屏幕）的物体，颜色为<font color=#4c51a7 >#4c51a7</font>
+雨滴是一种sprite，即只有一个面（永远平行于屏幕）的物体，颜色为<font style="background-color: #4c51a7;">#4c51a7</font>
 
 
 ## ㈥关于工具
 > ⑴*state.js*库：左上角(left-top corner)默认蓝色(normal <font style="color:blue;">blue</font>)
 
 可以使用该工具查看当前渲染状态，该工具有3种状态（点击切换(click to change)）
-+ fps:<font color=#0000FF >蓝色fps（默认）</font>，查看当前每秒可渲染的帧数，越大越流畅（一般最佳：61fps（电脑就这样，手机（特烂）只有20+fps））
-+ ms:<font color=#00FF00 >绿色(green)ms</font>，查看渲染每帧需要的时间(ms)，越小越流畅（一般最佳：16ms/帧）
-+ MB:<font color=#FF0000 >红色MB(red)</font>，查看当前使用的内存(MB兆字节)  
++ fps:<font style="color:blue;">蓝色fps（默认）</font>，查看当前每秒可渲染的帧数，越大越流畅（一般最佳：61fps（电脑就这样，手机（特烂）只有20+fps））
++ ms:<font style="color:green;">绿色(green)ms</font>，查看渲染每帧需要的时间(ms)，越小越流畅（一般最佳：16ms/帧）
++ MB:<font style="color:red;">红色MB(red)</font>，查看当前使用的内存(MB兆字节)  
 
 > ⑵*dat.gui.js*库：右上角(right-top corner)，点击可展开
 
