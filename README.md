@@ -1,4 +1,7 @@
 # <font style="font-family: 楷体;">我的世界（仿）</font>
+
+[![Join the chat at https://gitter.im/wzh656/Minecraft](https://badges.gitter.im/wzh656/Minecraft.svg)](https://gitter.im/wzh656/Minecraft?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 修改日期:2020.9.14
 
 > # <font style="font-family: 楷体;">运行</font>
