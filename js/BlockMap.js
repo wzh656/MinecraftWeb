@@ -138,8 +138,7 @@ function BlockMap(size, seed, perloadLength){
 	};
 	
 	//添加方块
-	this.add = (thing, pos, opt={})=>{
-		let {type=true, attr} = opt;
+	this.add = (thing, pos, type)=>{
 		[pos.x, pos.y, pos.z] = [pos.x, pos.y, pos.z].map(Math.round); //规范化
 		
 		if (this.get(pos.x, pos.y, pos.z) === undefined) return;
@@ -182,7 +181,10 @@ function BlockMap(size, seed, perloadLength){
 			return;
 		}
 		
-		let thing = new Thing({id}, template[id])
+		let thing = new Thing({
+			id,
+			attr
+		}, template[id])
 			.makeMaterial()
 			.deleteTexture()
 			.makeMesh();
@@ -193,10 +195,7 @@ function BlockMap(size, seed, perloadLength){
 				y:pos.y,
 				z:pos.z,
 			},
-			{
-				type,
-				attr
-			}
+			type
 		); //以模板建立
 	};
 	
@@ -544,7 +543,7 @@ function BlockMap(size, seed, perloadLength){
 						y: dy,
 						z: z
 					}, template, {
-						attr: JSON.parse("{"+value.attr+"}")
+						attr: value.attr? JSON.parse("{"+value.attr+"}"): {}
 					});
 				}
 				return ret;

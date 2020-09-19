@@ -8,13 +8,14 @@ let keydown = {
 };
 document.addEventListener("keydown", function (e){
 	if (e.keyCode == 69){ //E 切换背包
-		if (stop == "bag" | stop == false){
+		if (stop == "bag" || stop == false){
 			console.log("E:", keydown.key);
 			state("bag");
 			return false;
 		}
 	}
-	if (e.keyCode == 27 & stop == "command"){ //ESC 退出命令方块
+	if (e.keyCode == 27 && stop == "command"){ //ESC 退出界面
+		console.log("ESC:", keydown.key);
 		state("command");
 		return false;
 	}
@@ -40,6 +41,15 @@ document.addEventListener("keydown", function (e){
 		}
 		return false;
 	}
+	if (e.keyCode == 121){ //F10 切换调试
+		console.log("F10:", keydown.key);
+		if (gui.closed){
+			gui.open();
+		}else{
+			gui.close();
+		}
+		return false;
+	}
 	if (e.keyCode == 113){ //截图
 		var oA = document.createElement("a");
 		oA.download = "截图";
@@ -62,15 +72,6 @@ document.addEventListener("keydown", function (e){
 		SQL_save();
 		document.exitPointerLock();
 		
-		return false;
-	}
-	if (e.keyCode == 121){ //F10 打开gui
-		console.log("F10:", keydown.key);
-		if (gui.closed){
-			gui.open();
-		}else{
-			gui.close();
-		}
 		return false;
 	}
 	if (e.keyCode == 87 | e.keyCode == 38){

@@ -564,12 +564,12 @@ deskgood_folder.open();
 	let deskgood_hold_folder = deskgood_folder.addFolder("工具栏(tools)");
 	deskgood_hold_folder.open();
 		deskgood_hold_folder.add(deskgood, "choice", 0, 3, 1).listen().name("选择工具").onChange(deskgood.hold_choice_refresh);
-		let deskgood_hold_things_folder = deskgood_hold_folder.addFolder("物品");
+		let deskgood_hold_things_folder = deskgood_hold_folder.addFolder("物品(只读勿编辑)");
 		deskgood_hold_things_folder.open();
-			deskgood_hold_things_folder.add(deskgood.hold[0] || {id:0}, "id", 0, 12, 1).name("0").listen().onChange(deskgood.hold_things_refresh);
-			deskgood_hold_things_folder.add(deskgood.hold[1] || {id:0}, "id", 0, 12, 1).name("1").listen().onChange(deskgood.hold_things_refresh);
-			deskgood_hold_things_folder.add(deskgood.hold[2] || {id:0}, "id", 0, 12, 1).name("2").listen().onChange(deskgood.hold_things_refresh);
-			deskgood_hold_things_folder.add(deskgood.hold[3] || {id:0}, "id", 0, 12, 1).name("3").listen().onChange(deskgood.hold_things_refresh);
+			deskgood_hold_things_folder.add(deskgood.hold[0] || {id:-1}, "id").name("0").listen().onChange(deskgood.hold_things_refresh);
+			deskgood_hold_things_folder.add(deskgood.hold[1] || {id:-1}, "id").name("1").listen().onChange(deskgood.hold_things_refresh);
+			deskgood_hold_things_folder.add(deskgood.hold[2] || {id:-1}, "id").name("2").listen().onChange(deskgood.hold_things_refresh);
+			deskgood_hold_things_folder.add(deskgood.hold[3] || {id:-1}, "id").name("3").listen().onChange(deskgood.hold_things_refresh);
 
 /*
 * 天堂、地狱

@@ -178,19 +178,16 @@ document.addEventListener("mousedown", function (e){
 		for (let i in click){
 			if (click[i].faceIndex){
 				if (click[i].object instanceof THREE.Mesh){
-					let x = click[i].object.position.x,
-						y = click[i].object.position.y,
-						z = click[i].object.position.z;
+					let {x, y, z} = click[i].object.position; // 单位 px=cm
+					[x, y, z] = [x, y, z].map(v => v/100); // 单位 m
 					if (Math.sqrt(
 						(x - deskgood.pos.x) **2+
 						(y - deskgood.pos.y) **2+
 						(z - deskgood.pos.z) **2
 					) < 500){ //距离小于500
 						if (
-							map.get(x/100, y/100, z/100) &&
-							map.get(x/100, y/100, z/100).attr.block &&
-							map.get(x/100, y/100, z/100).attr.block.onLeftMouseDown &&
-							eval(map.get(x/100, y/100, z/100).attr.block.onLeftMouseDown) === false
+							map.get(x, y, z).get("attr", "block", "onLeftMouseDown") &&
+							eval(map.get(x, y, z).get("attr", "block", "onLeftMouseDown")) === false
 						) return;
 						/*let free = -1;
 						if (deskgood.hold[deskgood.choice] == 0){
@@ -208,15 +205,15 @@ document.addEventListener("mousedown", function (e){
 							console.info("not free!");
 							message("<font style='font-size:14px;'>两只手拿4m³方块已经够多了，反正我是拿不下了</font>", 3);
 						}else{
-							console.log("delete:", click[i].object.position);
-							
-							[x, y, z] = [x, y, z].map(v => Math.round(v/100));
+							console.log("delete", click[i].object.position, map.get(x, y, z).id)
 							
 							deskgood.hold[free] = new Thing(map.get(x, y, z)); //放在手中
 							deskgood.hold_things_refresh(); //刷新方块
 							let attr = `'${JSON.stringify(map.get(x, y, z).attr).slice(1,-1)}'`;
 							map.delete(x, y, z); //删除方块
 							map.updateRound(x, y, z); //刷新方块及周围
+							
+							[x, y, z] = [x, y, z].map(Math.round); //存储必须整数
 							//SQL
 							sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
 								sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
@@ -243,9 +240,8 @@ document.addEventListener("mousedown", function (e){
 		let click = ray2D();
 		for (let i in click){
 			if (click[i].object instanceof THREE.Mesh){
-				let x = click[i].object.position.x,
-					y = click[i].object.position.y,
-					z = click[i].object.position.z;
+				let {x, y, z} = click[i].object.position; // 单位px=cm
+				[x, y, z] = [x, y, z].map(v => v/100); //单位 m
 				/* if (
 					Math.sqrt(
 						(x - deskgood.pos.x) **2+
@@ -260,70 +256,65 @@ document.addEventListener("mousedown", function (e){
 					}
 				} */
 				if (
-					map.get(x/100, y/100, z/100) &&
-					map.get(x/100, y/100, z/100).attr.block &&
-					map.get(x/100, y/100, z/100).attr.block.onRightMouseDown &&
-					eval(map.get(x/100, y/100, z/100).attr.block.onRightMouseDown) === false
+					map.get(x, y, z).get("attr", "block", "onRightMouseDown") &&
+					eval(map.get(x, y, z).get("attr", "block", "onRightMouseDown")) === false
 				) return;
-				if (deskgood.hold[deskgood.choice] == 0) //空气
+				if (!deskgood.hold[deskgood.choice]) //空气
 					return;
 				switch (click[i].faceIndex){
 					case 0:
 					case 1:
-						x += 100;
+						x++;
 						break;
 					case 2:
 					case 3:
-						x -= 100;
+						x--;
 						break;
 					case 4:
 					case 5:
-						y += 100;
+						y++;
 						break;
 					case 6:
 					case 7:
-						y -= 100;
+						y--;
 						break;
 					case 8:
 					case 9:
-						z += 100;
+						z++;
 						break;
 					case 10:
 					case 11:
-						z -= 100;
+						z--;
 						break;
 					default:
 						return console.error("faceIndex wrong:", click[i].faceIndex);
 				}
 				if (Math.sqrt(
-					(x-deskgood.pos.x) **2+
-					(y-deskgood.pos.y) **2+
-					(z-deskgood.pos.z) **2
+					(x*100 - deskgood.pos.x) **2+
+					(y*100 - deskgood.pos.y) **2+
+					(z*100 - deskgood.pos.z) **2
 				) < 500){ //距离<5m
-					[x, y, z] = [x, y, z].map(v => Math.round(v/100));
-					/* map.addID(deskgood.hold[deskgood.choice].id, {
-						x: x,
-						y: y,
-						z: z
-					}, template); */
-					map.add(new Thing({
-						
-					}).block.makeMaterial().block.deleteTexture().block.makeMesh(), {
+					console.log("put", {x,y,z}, deskgood.hold[deskgood.choice].id, deskgood.hold[deskgood.choice].attr)
+					map.addID(deskgood.hold[deskgood.choice].id, {
 						x,
 						y,
 						z
+					}, template, {
+						attr: deskgood.hold[deskgood.choice].attr
 					});
 					map.updateRound(x, y, z); //刷新方块及周围
+					
+					[x, y, z] = [x, y, z].map(Math.round); //存储必须整数
 					//SQL
 					let thing = deskgood.hold[deskgood.choice];
 					sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
-						sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
+						sql.insertData("file", ["type", "x", "y", "z", "id"], [
 							0,
 							x,
 							y,
 							z,
-							thing.id,
-							`'${JSON.stringify(thing.attr).slice(1,-1)}'`
+							thing.id //,
+							// `'${JSON.stringify(thing.attr).slice(1,-1)}'` //删除方块无需attr
 						])
 					});
 					deskgood.hold[deskgood.choice] = 0; //删除手里的方块

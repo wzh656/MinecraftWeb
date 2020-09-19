@@ -12,6 +12,8 @@ sql.createTable("file", [
 	"id UNSIGNED FLOAT(5,2)",
 	"attr TEXT"
 ]);
+
+// 读取存档
 function SQL_read(){
 	sql.selectData("file", ["x", "y", "z", "id", "attr"], "type=1", function(result){
 		if (result.length){
@@ -57,6 +59,7 @@ function SQL_read(){
 	});
 }
 
+// 保存存档
 function SQL_save(){
 	sql.deleteData("file", "type=1", undefined, function(){
 		sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
@@ -78,7 +81,11 @@ function SQL_save(){
 	});
 	sql.deleteData("file", "type=3", undefined, function(){
 		for (let i of deskgood.hold){
-			console.log(i? JSON.stringify(i.attr).slice(1,-1): "")
+			console.log(
+				(i? JSON.stringify(i.attr).slice(1,-1): "")+
+				"\n"+
+				(i? `'${JSON.stringify(i.attr).slice(1,-1)}'`: '""')
+			)
 			sql.insertData("file", ["type", "x", "id", "attr"], [
 				3,
 				0, //物品栏
