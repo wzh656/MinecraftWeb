@@ -11,12 +11,33 @@
 		
 		<style>
 		@font-face{
+			font-family:kt; /*楷体*/
+			src:url("./fonts/kt.ttf");
+		}
+		@font-face{
+			font-family:st; /*宋体*/
+			src:url("./fonts/simsun.ttf");
+		}
+		@font-face{
+			font-family:xs; /*QQ*/
+			src:url("./fonts/huawei.ttf");
+		}
+		@font-face{
 			font-family:zyyt; /*资源圆体*/
 			src:url("./fonts/zyyt.woff2");
 		}
 		*{
 			font-family: zyyt, serif;
 			outline: none;
+		}
+		h1,h2,h3,h4{
+			font-family: st, serif;
+		}
+		p,label{
+			font-family: kt, serif;
+		}
+		button{
+			font-family: xs, serif;
 		}
 		
 		html{
@@ -38,7 +59,7 @@
 			overflow: hidden;
 		}
 		p{
-			font-size: 2vmax;
+			font-size: 0.36em;
 			margin: 0;
 		}
 		button,label,summary{

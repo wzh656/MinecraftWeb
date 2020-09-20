@@ -9,7 +9,7 @@ let block_load = {
 	key: Object.keys(template)[1],
 	id: null
 }
-$("#schedule progress")[0].max = template.length;
+$("#progress progress")[0].max = template.length;
 block_load.id = setInterval(function(){
 	for (let j in template[block_load.key].block.face)
 		template[block_load.key].setTexture(
@@ -17,15 +17,15 @@ block_load.id = setInterval(function(){
 				.load( (template[block_load.key].block.parent||`./img/blocks/${template[block_load.key].id}/`) + template[block_load.key].block.face[j] ), j);
 	
 	//单个block加载完毕
-	$("#schedule span").text( Math.round( block_load.i++/(Object.keys(template).length-1)*100 *100)/100 );
-	$("#schedule progress")[0].value = block_load.i;
+	$("#progress span").text( Math.round( block_load.i++/(Object.keys(template).length-1)*100 *100)/100 );
+	$("#progress progress")[0].value = block_load.i;
 	block_load.key = Object.keys(template)[block_load.i];
 	//console.log(block_load.key, block_load.i)
 	
 	if (block_load.i >= Object.keys(template).length){ //所有block加载完毕
 		clearInterval(block_load.id);
 		delete block_load;
-		$("#schedule header").text("载入方块中……");
+		$("#progress header").text("载入方块中……");
 		
 		map.initZone(0, 0); //初始化区块
 		map.loadZoneAsync(0, 0, {
@@ -35,11 +35,11 @@ block_load.id = setInterval(function(){
 					map.perloadZone();
 				}
 				console.log(perload_condition)
-				$("#schedule span").text("100");
-				$("#schedule progress")[0].value = Object.keys(template).length;
+				$("#progress span").text("100");
+				$("#progress progress")[0].value = Object.keys(template).length;
 				setTimeout(function(){
 					render(); //纹理贴图加载成功后，调用渲染函数执行渲染操作
-					$("#schedule").remove();
+					$("#progress").remove();
 				},0);
 			}
 		}); //用噪声填充区块
@@ -61,30 +61,30 @@ for (let i=1; i<template.length; i++){
 			//单个block加载完毕
 			//template[i].block.makeMaterial().block.deleteTexture();
 			//template[i].block.makeMesh().deleteMaterial();
-			$("#schedule2").text( Math.round(i/template.length*100*100)/100 );
+			$("#progress2").text( Math.round(i/template.length*100*100)/100 );
 			
 			for (let k=1; k<template.length; k++)
 				if (!template[k].block.texture/*material*//*)
 					return;
 			
 			//所有block加载完毕
-			$("#schedule_message").text("载入方块中……");
-			$("#schedule1").text("50");
+			$("#progress_message").text("载入方块中……");
+			$("#progress1").text("50");
 			if (localStorage.getItem("我的世界.存档.方块")){
 				map.useSave( JSON.parse(localStorage.getItem("我的世界.存档.方块")) );
 				console.log("achieve loading");
-				$("#schedule1").text("100");
+				$("#progress1").text("100");
 				//纹理贴图加载成功后，调用渲染函数执行渲染操作
 				render();
-				$("#schedule").remove();
+				$("#progress").remove();
 			}else{ //初始化地形
 				map.loadZone(0, 0);
 				map.initZone(0, 0);
 				
-				$("#schedule1").text("100");
+				$("#progress1").text("100");
 				//纹理贴图加载成功后，调用渲染函数执行渲染操作
 				render();
-				$("#schedule").remove();
+				$("#progress").remove();
 				/*let load = {
 					x: null,
 					loop: null
@@ -114,16 +114,16 @@ for (let i=1; i<template.length; i++){
 						}
 					}
 					
-					$("#schedule2").text( Math.round((load.x-map.size[0].x)/map.size.x*100*100)/100 );
+					$("#progress2").text( Math.round((load.x-map.size[0].x)/map.size.x*100*100)/100 );
 					
 					console.log("finish loading:", load.x);
 					if (++load.x > map.size[1].x){
 						console.log("achieve loading");
 						map.updateAll();
-						$("#schedule1").text("100");
+						$("#progress1").text("100");
 						//纹理贴图加载成功后，调用渲染函数执行渲染操作
 						render();
-						$("#schedule").remove();
+						$("#progress").remove();
 						clearInterval(load.loop);
 						/* delete load.loop;
 						delete load.x; *//*

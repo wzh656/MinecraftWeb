@@ -65,16 +65,23 @@ var deskgood = {
 	hold: [null, null, null, null],
 	choice: 0,
 	sensitivity: 1, //灵敏度
-	die(reason){
+	die(reason="使用命令自杀"){
 		sql.deleteTable("file", undefined, function(){
 			localStorage.removeItem("我的世界_seed");
 			
-			gui.close();
-			$("#help").hide();
+			gui.close(); //隐藏gui
+			$("#help, #warn").hide(); //隐藏 遮罩、横屏提示
 			$("#die")
 				.css("display", "block")
-				.children(".reason").val(reason);
-			$("#die").fadeOut().fadeIn("slow");
+				.children(".resaon").html(reason);
+			$("#die").hide().fadeIn("slow");
+			
+			let bgm = $("#bgm")[0];
+			bgm.volume = 1;
+			bgm.src = "./music/凉凉.mp3";
+			bgm.play();
+			
+			console.warn("deskgood死亡");
 		});
 	},
 	hold_choice_refresh(){
@@ -504,9 +511,7 @@ for (let i in deskgood.hold){
 let deskgood_folder = gui.addFolder("玩家/观察者(deskgood)");
 deskgood_folder.open();
 	deskgood_folder.add(window, "stop").listen();
-	deskgood_folder.add({
-		f(){deskgood.die("使用命令自杀")}
-	}, "f").name("Game Over（自杀 deskgood.die()）");
+	deskgood_folder.add(deskgood, "die").name("Game Over(自杀)");
 	deskgood_folder.add(deskgood, "sensitivity", 0.1, 10).name("灵敏度");
 	deskgood_folder.add(deskgood, "jump_v", 1, 36).name("跳跃速度");
 	let deskgood_position_folder = deskgood_folder.addFolder("位置/px");
@@ -566,10 +571,10 @@ deskgood_folder.open();
 		deskgood_hold_folder.add(deskgood, "choice", 0, 3, 1).listen().name("选择工具").onChange(deskgood.hold_choice_refresh);
 		let deskgood_hold_things_folder = deskgood_hold_folder.addFolder("物品(只读勿编辑)");
 		deskgood_hold_things_folder.open();
-			deskgood_hold_things_folder.add(deskgood.hold[0] || {id:-1}, "id").name("0").listen().onChange(deskgood.hold_things_refresh);
-			deskgood_hold_things_folder.add(deskgood.hold[1] || {id:-1}, "id").name("1").listen().onChange(deskgood.hold_things_refresh);
-			deskgood_hold_things_folder.add(deskgood.hold[2] || {id:-1}, "id").name("2").listen().onChange(deskgood.hold_things_refresh);
-			deskgood_hold_things_folder.add(deskgood.hold[3] || {id:-1}, "id").name("3").listen().onChange(deskgood.hold_things_refresh);
+			deskgood_hold_things_folder.add(deskgood.hold[0] || {id:0}, "id").name("0").listen().onChange(deskgood.hold_things_refresh);
+			deskgood_hold_things_folder.add(deskgood.hold[1] || {id:0}, "id").name("1").listen().onChange(deskgood.hold_things_refresh);
+			deskgood_hold_things_folder.add(deskgood.hold[2] || {id:0}, "id").name("2").listen().onChange(deskgood.hold_things_refresh);
+			deskgood_hold_things_folder.add(deskgood.hold[3] || {id:0}, "id").name("3").listen().onChange(deskgood.hold_things_refresh);
 
 /*
 * 天堂、地狱

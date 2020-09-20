@@ -17,34 +17,58 @@
 			852*480 => 400*40
 			*/
 			
-		   /* 字体（似乎太多了） */
+		   /* 字体 */
 			@font-face{
-				font-family:kt; /*楷体*/
+				font-family: kt; /*楷体*/
 				src:url("./fonts/kt.ttf");
 			}
 			@font-face{
-				font-family:hwxk; /*华文楷体*/
+				font-family: st; /*宋体*/
+				src:url("./fonts/simsun.ttf");
+			}
+			@font-face{
+				font-family: xs; /*QQ*/
+				src:url("./fonts/huawei.ttf");
+			}
+			@font-face{
+				font-family: zyyt; /*资源圆体*/
+				src:url("./fonts/zyyt.woff2");
+			}
+			/*@font-face{
+				font-family:hwxk; /*华文楷体*//*
 				src:url("./fonts/hwxk.ttf");
 			}
 			@font-face{
-				font-family:fzybxskt; /*方正硬笔行书楷体*/
+				font-family:fzybxskt; /*方正硬笔行书楷体*//*
 				src:url("./fonts/fzybxskt.ttf");
 			}
 			@font-face{
-				font-family:fzqtjt; /*方正启体简体*/
+				font-family:fzqtjt; /*方正启体简体*//*
 				src:url("./fonts/fzqtjt.ttf");
 			}
 			@font-face{
-				font-family:qq1; /*QQ*/
+				font-family:qq1; /*QQ*//*
 				src:url("./fonts/qq1.ttf");
 			}
 			@font-face{
-				font-family:qq2; /*QQ*/
+				font-family:qq2; /*QQ*//*
 				src:url("./fonts/qq2.ttf");
 			}
 			@font-face{
-				font-family:huawei; /*QQ*/
+				font-family:huawei; /*HUAWEI*//*
 				src:url("./fonts/huawei.ttf");
+			}*/
+			*{
+				font-family: zyyt, serif;
+			}
+			h1, h1 *{
+				font-family: kt, serif;
+			}
+			header{
+				font-family: st, serif;
+			}
+			button{
+				font-family: xs, serif;
 			}
 			
 			/* 选择 */
@@ -52,13 +76,24 @@
 			    color: #fff;
 			    background: #f9cc9d;
 			}
-			*{ /* 禁止复制选中 */
+			*{
+				/* 禁止复制选中 */
 				-webkit-touch-callout: none; /* iOS Safari */
 				-webkit-user-select: none; /* Chrome/Safari/Opera */
 				-khtml-user-select: none; /* Konqueror */
 				-moz-user-select: none; /* Firefox */
 				-ms-user-select: none; /* Internet Explorer/Edge */
 				user-select: none; /* Non-prefixed version, currently not supported by any browser */
+				/* 无点击线 */
+				outline: none;
+			}
+			
+			/* dat.gui */
+			.cr.function > div > span.property-name{
+				width: 100%;
+			}
+			.dg.ac{
+				z-index: 1 !important;
 			}
 			
 			body{
@@ -66,20 +101,13 @@
 				overflow: hidden;
 				/* 隐藏body窗口区域滚动条 */
 			}
-			@media not screen and (orientation:portrait){ /* 电脑 */
-				#warning{
-					display: none;
-				}
-			}
+			
 			h1{
 				position: absolute;
 				top: 0;
 				width: 100%;
 				height: 100%;
 				margin: 0;
-				/* font-size: 8.6vmin; */
-				font-family: qq1, serif;
-				/*padding-top: 20%;*/
 				text-align: center;
 				
 				color: #fff;
@@ -99,16 +127,12 @@
 					0 0 20px rgba(0,0,255, .5),
 					0 0 30px rgba(255,255,0, .7);
 			}
-			#schedule{
-				/* animation-name: backgroundColor;
-				animation-duration: 1s;
-				animation-iteration-count: infinite; */
-				background-image: url(./img/loading.png);
-			}
-			h1::before{
-				content: "\a\a";
-				white-space: pre;
-			}
+			/* h1::before{
+				/* content: "\a\a";
+				white-space: pre; *//*
+				display: block;
+				height: 6.6vmax;
+			} */
 			h1::after{
 				content: "Copyright © 2020 by wzh";
 				white-space: pre;
@@ -124,13 +148,16 @@
 					0px 0.5px 0px #ddd, /*上*/
 					0px -0.5px 0px #aaa; /*下*/
 			}
-			b{
-				font-family: fzqtjt, serif;
-			}
-			span{
-				font-family: kt, serif;
-			}
 			
+			/* 进度条 */
+			#progress{
+				font-size: 3vmax;
+				padding-top: 6.6vmax;
+				/* animation-name: backgroundColor;
+				animation-duration: 1s;
+				animation-iteration-count: infinite; */
+				background-image: url(./img/loading.png);
+			}
 			/* @keyframes backgroundColor{
 				0%{
 					background-image: radial-gradient(#333, #112, #011);
@@ -148,15 +175,15 @@
 					background-image: radial-gradient(#999, #556, #455);
 				}
 			} */
-			progress{
+			#progress > progress{
 				background-color: red;
 				width: 63vw;
 			}
-			progress::-webkit-progress-bar{
+			#progress > progress::-webkit-progress-bar{
 				background-color: gray;
 				background-image: linear-gradient(45deg, black, gray, #aaa);
 			}
-			progress::-webkit-progress-value{
+			#progress > progress::-webkit-progress-value{
 				background-color: green;
 				background-image: repeating-linear-gradient(
 					135deg,
@@ -170,29 +197,92 @@
 				);
 			}
 			
+			/* 遮罩 */
+			#help{
+				opacity: 0.5;
+				font-size: 3vmax;
+				padding-top: 6.6vmax;
+			}
+			/* 指针 */
+			#pointer{
+				position: absolute;
+				width: 3.75vmax;
+				height: 3.75vmax;
+				left: 50%;
+				top: 50%;
+				transform: translate(-50%,-50%);
+				cursor: none;
+			}
+			#pointer > div{
+				position: absolute;
+				background-color: rgba(255, 255, 255, 0.666666);
+				left: 50%;
+				top: 50%;
+				transform: translate(-50%,-50%);
+			}
+			#pointer > div:first-child{
+				width: 0.25vmax;
+				height: 3.75vmax;
+			}
+			#pointer > div:last-child{
+				width: 3.75vmax;
+				height: 0.25vmax;
+			}
+			
+			/* 横竖屏提示 */
+			@media not screen and (orientation:portrait){ /* 电脑 */
+				#warning{
+					display: none;
+				}
+			}
+			#warning{
+				font-size: 6.6vmax;
+				padding-top: 12.6vmax;
+			}
 			#warning > button{
 				width: 80%;
 				/* height: 60px; */
 				position: relative;
-				top: 3vamx;
+				top: 3.6vmax;
+				font-size: 6vmax;
+			}
+			
+			/* 死亡 */
+			#die{
+				background-image: none;
+				background-color: rgba(200,0,0,0.392157);
+				font-size: 3.6vmax;
+				padding-top: 3.6vmax;
+			}
+			#die p{
+				font-size: 0.36em;
+				margin: 0;
+			}
+			#die > header{
+				font-size: 5.6vmax;
+			}
+			#die > button{
+				width: 50%;
 				font-size: 6vmax;
 				font-family: hwxk, serif;
 			}
-			*{
-				font-family: qq2, serif;
-				outline: none;
+			#die > .resaon{
+				font-family: zyyt, serif;
 			}
 			
+			
+			/* 信息框 */
 			dialog{
 				position: absolute;
 				top: 16vmax;
 				
 				max-width: 50vw;
-				border-radius: 6px;
+				border-radius: 1vmax;
 				
 				z-index: 5;
 			}
 			
+			/* 摇杆操纵 */
 			#control{
 				position: absolute;
 				bottom: 16%;
@@ -214,6 +304,7 @@
 				border-radius: 50%;
 			}
 			
+			/* 物品栏 */
 			#tools{
 				position: absolute;
 				bottom: -2px;
@@ -233,11 +324,6 @@
 			textarea{
 				resize: none;
 			}
-			
-			.cr.function > div > span.property-name{
-				width: 100%;
-			}
-			
 			/* 窗口 */
 			#bag, #command{
 				width: 80vw;
@@ -367,28 +453,6 @@
 				width: 100%;
 				height: 100%;
 			}
-			
-			/* 死亡 */
-			#die{
-				background-image: none;
-				background-color: rgba(200,0,0,0.392157);
-				font-size: 3.6vmax;
-			}
-			#die::before{
-				content: "\a";
-			}
-			#die button{
-				width: 50%;
-				font-size: 6vmax;
-				font-family: hwxk, serif;
-			}
-			#die span:first-child{
-				font-size: 5.6vmax;
-			}
-			#die p{
-				font-size: 0.3em;
-				margin: 0;
-			}
 		</style>
 		
 		<script src="./js/modules/jquery.min.js"></script>
@@ -398,8 +462,8 @@
 		</script>
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
-		<script>//eruda.init();</script>
-		<script>//new VConsole();</script>
+		<script>eruda.init();</script>
+		<script>new VConsole();</script>
 		<script src="./js/modules/three.min.js"></script>
 		<script src="./js/modules/OrbitControls.js"></script>
 		<script src="./js/modules/simplex-noise.js"></script>
@@ -472,7 +536,17 @@ deskgood.moveTo(0,10000*100);
 				<label onclick="state('bag');">关闭</label>
 			</nav>
 		</div>
-		<h1 id="schedule" style="z-index: 2;">
+		<div id="pointer" style="display: none;">
+			<div></div>
+			<div></div>
+		</div>
+		<h1 id="help" style="z-index: 1; display: none;">
+			WSAD/↑↓←→: 前后左右; 空格:跳跃; 连按W/ctrl+W:疾跑;<br/>
+			Esc: 退出锁定鼠标并保存游戏; F2: 截图;<br/>
+			Pause-Break: 暂停切换; F10: 打开/关闭dat.gui;<br/>
+			请先点击任意处锁定鼠标以开始游戏
+		</h1>
+		<h1 id="progress" style="z-index: 2;">
 			<header>贴图加载中……</header>
 			进度：<progress></progress>
 			<span>0</span>%<br/>
@@ -483,9 +557,9 @@ deskgood.moveTo(0,10000*100);
 			<button onclick="this.parentElement.remove();">继续竖屏</button>
 		</h1>
 		<h1 id="die" style="z-index: 4; display: none;">
-			<span>游戏结束！<p>GAME OVER</p></span>
-			角色deskgood死亡<br/>
-			死因：<span class="resaon"></span><br/>
+			<header>游戏结束！<p>GAME OVER</p></header>
+			角色deskgood死亡（正在播放：凉凉）<br/>
+			死因：<span class="resaon">未知</span><br/>
 			注：生命诚可贵，生命只有一次，请珍爱生命，deskgood无法重生，游戏即将关闭<br/>
 			<button onclick="exit();">结束<p>OVER</p></button>
 		</h1>
@@ -568,51 +642,9 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 	//new VConsole();
 }else{ //电脑
 	device = false;
-	let mouse = document.createElement("div");
-	let parts = [
-		document.createElement("div"),	//竖
-		document.createElement("div")	//横
-	];
-	parts[0].style.width = "2px";
-	parts[0].style.height = "30px";
-	parts[0].style.backgroundColor = "rgba(255, 255, 255, 0.666666)";
-	parts[0].style.position = "absolute";
-	parts[0].style.left = "50%";
-	parts[0].style.top = "50%";
-	parts[0].style.transform = "translate(-50%,-50%)";
 	
-	parts[1].style.width = "30px";
-	parts[1].style.height = "2px";
-	parts[1].style.backgroundColor = "rgba(255, 255, 255, 0.666666)";
-	parts[1].style.position = "absolute";
-	parts[1].style.left = "50%";
-	parts[1].style.top = "50%";
-	parts[1].style.transform = "translate(-50%,-50%)";
-	
-	mouse.appendChild(parts[0]);
-	mouse.appendChild(parts[1]);
-	mouse.style.width = "30px";
-	mouse.style.height = "30px";
-	mouse.style.position = "absolute";
-	mouse.style.left = "50%";
-	mouse.style.top = "50%";
-	mouse.style.transform = "translate(-50%,-50%)";
-	mouse.id = "mouse";
-	mouse.style.cursor = "none";
-	
-	document.body.appendChild(mouse);
-	
-	
-	let help = document.createElement("h1");
-	help.innerHTML = `
-		WSAD/↑↓←→: 前后左右; 空格:跳跃; 连按W/ctrl+W:疾跑;<br/>
-		Esc: 退出锁定鼠标并保存游戏; F2: 截图;<br/>
-		Pause-Break: 暂停切换; F10: 打开/关闭dat.gui;<br>
-		请先点击任意处锁定鼠标以开始游戏`
-	;
-	help.style.opacity = 0.5;
-	help.id = "help";
-	document.body.appendChild(help);
+	/* 遮罩，指针 */
+	$("#help, #pointer").css("display", "block");
 	
 	//请求指针锁定
 	document.body.requestPointerLock =
