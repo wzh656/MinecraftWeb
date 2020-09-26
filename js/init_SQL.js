@@ -101,30 +101,6 @@ function SQL_save(){
 	});
 	
 	console.log("存档+1中……");
-	// return;
-	/* localStorage.setItem("我的世界.存档.方块", map.save());
-	localStorage.setItem("我的世界.存档.玩家.位置", JSON.stringify(deskgood.pos));
-	localStorage.setItem("我的世界.存档.玩家.朝向", JSON.stringify(deskgood.lookAt));
-	localStorage.setItem("我的世界.存档.玩家.物品.工具栏", JSON.stringify({
-		hold: deskgood.hold,
-		choice: deskgood.choice
-	}));
-	console.log("备份成功"); */
 }
 setInterval(SQL_save, 10*1000); // 10s
 document.addEventListener("background", SQL_save, false);
-
-/* //读取
-if (localStorage.getItem("我的世界.存档.玩家.位置")){
-	deskgood.pos.x = JSON.parse(localStorage.getItem("我的世界.存档.玩家.位置")).x;
-	deskgood.pos.y = JSON.parse(localStorage.getItem("我的世界.存档.玩家.位置")).y;
-	deskgood.pos.z = JSON.parse(localStorage.getItem("我的世界.存档.玩家.位置")).z;
-}
-if (localStorage.getItem("我的世界.存档.玩家.朝向")){
-	deskgood.lookAt.left_right = JSON.parse(localStorage.getItem("我的世界.存档.玩家.朝向")).left_right;
-	deskgood.lookAt.top_bottom = JSON.parse(localStorage.getItem("我的世界.存档.玩家.朝向")).top_bottom;
-}
-if (localStorage.getItem("我的世界.存档.玩家.物品.工具栏")){
-	deskgood.hold = JSON.parse(localStorage.getItem("我的世界.存档.玩家.物品.工具栏")).hold;
-	deskgood.choice = Number(JSON.parse(localStorage.getItem("我的世界.存档.玩家.物品.工具栏")).choice);
-} */

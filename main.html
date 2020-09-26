@@ -24,11 +24,11 @@
 			}
 			@font-face{
 				font-family: st; /*宋体*/
-				src:url("./fonts/simsun.ttf");
+				src:url("./fonts/st.ttf");
 			}
 			@font-face{
 				font-family: xs; /*QQ*/
-				src:url("./fonts/huawei.ttf");
+				src:url("./fonts/qq2.ttf");
 			}
 			@font-face{
 				font-family: zyyt; /*资源圆体*/
@@ -69,6 +69,7 @@
 			}
 			button{
 				font-family: xs, serif;
+				font-weight: 666;
 			}
 			
 			/* 选择 */
@@ -462,8 +463,8 @@
 		</script>
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
-		<script>eruda.init();</script>
-		<script>new VConsole();</script>
+		<script>//eruda.init();</script>
+		<script>//new VConsole();</script>
 		<script src="./js/modules/three.min.js"></script>
 		<script src="./js/modules/OrbitControls.js"></script>
 		<script src="./js/modules/simplex-noise.js"></script>
@@ -676,7 +677,7 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 	}, false);
 	
 	//输入锁定改变事件
-	let pointerlockchange = function(){
+	let pointerLockChangeEvent = function(){
 		if (typeof stop == "string")
 			return;
 		
@@ -697,19 +698,19 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 	};
 	
 	//输入锁定改变错误
-	let pointerlockerror = function(){
+	let pointerLockErrorEvent = function(){
 		console.error("鼠标锁定错误");
 		alert("鼠标锁定错误\n请关闭重新打开 或 切换/升级浏览器");
 	};
 	
 	//添加锁定事件
-	document.addEventListener("pointerlockchange", pointerlockchange, false);
-	document.addEventListener("mozpointerlockchange", pointerlockchange, false);
-	document.addEventListener("webkitpointerlockchange", pointerlockchange, false);
+	document.addEventListener("pointerlockchange", pointerLockChangeEvent, false);
+	document.addEventListener("mozpointerlockchange", pointerLockChangeEvent, false);
+	document.addEventListener("webkitpointerlockchange", pointerLockChangeEvent, false);
 	
-	document.addEventListener("pointerlockerror", pointerlockerror, false);
-	document.addEventListener("mozpointerlockerror", pointerlockerror, false);
-	document.addEventListener("webkitpointerlockerror", pointerlockerror, false);
+	document.addEventListener("pointerlockerror", pointerLockErrorEvent, false);
+	document.addEventListener("mozpointerlockerror", pointerLockErrorEvent, false);
+	document.addEventListener("webkitpointerlockerror", pointerLockErrorEvent, false);
 }
 
 function ray2D(phone, x, y){

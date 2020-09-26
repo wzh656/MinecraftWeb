@@ -25,9 +25,8 @@ document.addEventListener("mousemove", function (e){
 	if (stop)
 		return;
 	
-	if (e.path[0] != document.getElementById("help") & e.path[0] != document.body){
+	if (e.path[0] != document.body)
 		return;
-	}
 	
 	let dx =
 		e.movementX ||
@@ -41,6 +40,10 @@ document.addEventListener("mousemove", function (e){
 		e.webkitMovementY ||
 		0
 	;
+	
+	let [x,y] = [dx/$("#game")[0].offsetWidth*360*deskgood.sensitivity, dy/$("#game")[0].offsetHeight*360*deskgood.sensitivity];
+	
+	console.warn(x, y, e, stop);
 	
 	deskgood.lookAt.left_right += dx/$("#game")[0].offsetWidth*360*deskgood.sensitivity;
 	deskgood.lookAt.top_bottom -= dy/$("#game")[0].offsetHeight*360*deskgood.sensitivity;

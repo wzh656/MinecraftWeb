@@ -46,15 +46,23 @@ var deskgood = {
 			return this._left_right;
 		},
 		set left_right(value){
+			console.log("left_right", this._left_right, value);
+			if (this._left_right-value > 66){
+				console.error("left_right!!!", this._left_right, value)
+			}
 			this._left_right = value;
-			deskgood.look_refresh();
+			// deskgood.look_refresh();
 		},
 		get top_bottom(){
 			return this._top_bottom;
 		},
 		set top_bottom(value){
+			console.log("top_bottom", this._top_bottom, value);
+			if (this._top_bottom-value > 66){
+				console.error("top_bottom!!!", this._top_bottom, value)
+			}
 			this._top_bottom = value;
-			deskgood.look_refresh();
+			// deskgood.look_refresh();
 		} */
 	},
 	look: {
@@ -64,7 +72,7 @@ var deskgood = {
 	},
 	hold: [null, null, null, null],
 	choice: 0,
-	sensitivity: 1, //灵敏度
+	sensitivity: 2, //灵敏度
 	die(reason="使用命令自杀"){
 		sql.deleteTable("file", undefined, function(){
 			localStorage.removeItem("我的世界_seed");

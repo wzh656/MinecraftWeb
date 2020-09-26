@@ -14,11 +14,33 @@ document.addEventListener("keydown", function (e){
 			return false;
 		}
 	}
-	if (e.keyCode == 27 && stop == "command"){ //ESC 退出界面
-		console.log("ESC:", keydown.key);
-		state("command");
+	if (e.keyCode == 27 && typeof stop == "string"){ //ESC 退出界面
+		console.log("ESC", stop, ":", keydown.key);
+		
+		//手动切换退出
+		$("#"+stop).css("display", "none");
+		console.log(stop, ":close");
+		stop = false;
+		document.exitPointerLock();
+		//手动更新锁定情况
+		if (
+			document.pointerLockElement === document.body ||
+			document.mozPointerLockElement === document.body ||
+			document.webkitPointerLockElement === document.body
+		){ //已锁定
+			console.log("pointerLock yes");
+			stop = false;
+			$("#help").css("display", "none");
+		}else{ //未锁定
+			console.log("pointerLock no");
+			stop = true;
+			$("#help").css("display", "inline-block");
+			SQL_save();
+		}
+		
 		return false;
 	}
+	
 	if (e.keyCode == 19){ //Pause-Break 切换
 		if (stop){ //暂停
 			if (typeof stop == "string"){ //打开窗口
