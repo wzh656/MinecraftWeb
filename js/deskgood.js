@@ -46,23 +46,15 @@ var deskgood = {
 			return this._left_right;
 		},
 		set left_right(value){
-			console.log("left_right", this._left_right, value);
-			if (this._left_right-value > 66){
-				console.error("left_right!!!", this._left_right, value)
-			}
 			this._left_right = value;
-			// deskgood.look_refresh();
+			deskgood.look_refresh();
 		},
 		get top_bottom(){
 			return this._top_bottom;
 		},
 		set top_bottom(value){
-			console.log("top_bottom", this._top_bottom, value);
-			if (this._top_bottom-value > 66){
-				console.error("top_bottom!!!", this._top_bottom, value)
-			}
 			this._top_bottom = value;
-			// deskgood.look_refresh();
+			deskgood.look_refresh();
 		} */
 	},
 	look: {
@@ -109,7 +101,7 @@ var deskgood = {
 			;
 	},
 	look_refresh(x,y,z){
-		if (x != undefined | y != undefined | z != undefined){
+		if (x !== undefined | y !== undefined | z !== undefined){
 			[x,y,z] = [x||deskgood.look.x, y||deskgood.look.y, z||deskgood.look.z];
 			let v = new THREE.Vector3(x,y,z).setLength(1); //单位向量（标准化）
 			camera.lookAt(deskgood.pos.x+v.x, deskgood.pos.y+v.y, deskgood.pos.z+v.z);

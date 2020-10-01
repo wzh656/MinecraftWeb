@@ -2,7 +2,7 @@ if (localStorage.getItem("我的世界_seed") === null){
 	location.href = "home.html";
 	message("无法读取数据！<br/>请重新创建游戏", 3);
 }
-let map = new BlockMap([
+let map = new ZoneMap([
 	{x: -8, y: 0, z: -8},
 	{x: 8, y: 256, z: 8}
 ],{

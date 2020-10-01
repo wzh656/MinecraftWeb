@@ -129,7 +129,7 @@ let WIDTH = window.innerWidth,
 
 var camera = new THREE.PerspectiveCamera(45, WIDTH/HEIGHT, 1, 1000*100);
 //								 view_angle, aspect, near, far(1km)
-camera.position.set(0, ( Math.floor(seed_height(map.seed.noise, map.seed.h, 0, 0))+2 )*100, 0); //设置相机位置
+camera.position.set(0, ( Math.floor(sNoise.height(map.seed.noise, map.seed.h, 0, 0))+2 )*100, 0); //设置相机位置
 camera.lookAt(scene.position); //设置相机方向(指向的场景对象)
 /*setTimeout(function(){
 	console.info(camera);

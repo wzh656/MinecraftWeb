@@ -1,7 +1,6 @@
 /**
 * 创建网格模型
 */
-// let block_geometry = new THREE.BoxGeometry(100, 100, 100);
 // TextureLoader创建一个纹理加载器对象，可以加载图片作为几何体纹理
 // let num = 0;
 let block_load = {
@@ -9,7 +8,7 @@ let block_load = {
 	key: Object.keys(template)[1],
 	id: null
 }
-$("#progress progress")[0].max = template.length;
+$("#progress progress")[0].max = Object.keys(template).length;
 block_load.id = setInterval(function(){
 	for (let j in template[block_load.key].block.face)
 		template[block_load.key].setTexture(
@@ -26,9 +25,16 @@ block_load.id = setInterval(function(){
 		clearInterval(block_load.id);
 		delete block_load;
 		$("#progress header").text("载入方块中……");
+		$("#progress span").text(0);
+		$("#progress progress")[0].max = 1;
+		$("#progress progress")[0].value = 0;
 		
 		map.initZone(0, 0); //初始化区块
 		map.loadZoneAsync(0, 0, {
+			progressCallback: function(value){
+				$("#progress span").text( value*100 );
+				$("#progress progress")[0].value = value;
+			},
 			finishCallback: function(){
 				map.updateZoneAsync(0, 0); //更新区块
 				if (++perload_condition >= 2){
