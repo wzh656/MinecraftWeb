@@ -59,7 +59,7 @@ class Thing{
 			if (opt.attr.block){
 				if (opt.attr.block.transparent) this.attr.block.transparent = opt.attr.block.transparent; //透明方块（其他方块必须显示）
 				if (opt.attr.block.noTransparent) this.attr.block.noTransparent = opt.attr.block.noTransparent; //必须显示本方块
-				if (opt.attr.block.through) this.attr.block.through = opt.attr.block.through; //运行穿过
+				if (opt.attr.block.through) this.attr.block.through = opt.attr.block.through; //允许穿过
 				
 				if (opt.attr.block.onLeftMouseDown) this.attr.block.onLeftMouseDown = opt.attr.block.onLeftMouseDown;
 				if (opt.attr.block.onLeftMouseUp) this.attr.block.onLeftMouseUp = opt.attr.block.onLeftMouseUp;
@@ -84,7 +84,7 @@ class Thing{
 	}
 	get(...attr){
 		let this_part = this,
-			template_part = template[this.id];
+			template_part = TEMPLATES[this.id];
 		//let type = !!this.template;
 		for (let i of attr){
 			try{
@@ -224,58 +224,62 @@ class Block extends Thing{
 		super(opt, template);
 		
 		this.block = {};
-		//face
-		if (opt.block.face){ //贴图 位置
-			this.block.face = [];
-			for (let i=0; i<opt.block.face.length; i++)
-				this.block.face[i] = opt.block.face[i];
-		}
-		if (opt.block.parent) this.block.parent = opt.block.parent;
-				
-		//texture
-		if (opt.block.texture){ //贴图 数据
-			this.block.texture = [];
-			for (let i=0; i<opt.block.texture.length; i++)
-				if (opt.block.texture[i])
-					this.block.texture[i] = opt.block.texture[i];
-		}
-		
-		this.block.addTo = false; //加入scene
-		//material
-		if (opt.block.material){ //材质
-			this.block.material = opt.block.material;
-		}
-		//geometry
-		if (opt.block.geometry){ //几何体
-			this.block.geometry = opt.block.geometry;
-		}
-		//mesh
-		if (opt.block.mesh){ //网格模型
-			this.block.mesh = opt.block.mesh;
+		if (opt.block){
+			//face
+			if (opt.block.face){ //贴图 位置
+				this.block.face = [];
+				for (let i=0; i<opt.block.face.length; i++)
+					this.block.face[i] = opt.block.face[i];
+			}
+			if (opt.block.parent) this.block.parent = opt.block.parent;
+					
+			//texture
+			if (opt.block.texture){ //贴图 数据
+				this.block.texture = [];
+				for (let i=0; i<opt.block.texture.length; i++)
+					if (opt.block.texture[i])
+						this.block.texture[i] = opt.block.texture[i];
+			}
+			
+			this.block.addTo = false; //加入scene
+			//material
+			if (opt.block.material){ //材质
+				this.block.material = opt.block.material;
+			}
+			//geometry
+			if (opt.block.geometry){ //几何体
+				this.block.geometry = opt.block.geometry;
+			}
+			//mesh
+			if (opt.block.mesh){ //网格模型
+				this.block.mesh = opt.block.mesh;
+			}
 		}
 		
 		this.attr.block = {};
-		if (opt.attr.block.transparent) this.attr.block.transparent = opt.attr.block.transparent; //透明方块（其他方块必须显示）
-		if (opt.attr.block.noTransparent) this.attr.block.noTransparent = opt.attr.block.noTransparent; //必须显示本方块
-		if (opt.attr.block.through) this.attr.block.through = opt.attr.block.through; //运行穿过
-		
-		if (opt.attr.block.onLeftMouseDown) this.attr.block.onLeftMouseDown = opt.attr.block.onLeftMouseDown;
-		if (opt.attr.block.onLeftMouseUp) this.attr.block.onLeftMouseUp = opt.attr.block.onLeftMouseUp;
-		if (opt.attr.block.onRightMouseDown) this.attr.block.onRightMouseDown = opt.attr.block.onRightMouseDown;
-		if (opt.attr.block.onRightMouseUp) this.attr.block.onRightMouseUp = opt.attr.block.onRightMouseUp;
-		
-		if (opt.attr.block.onShortTouch) this.attr.block.onShortTouch = opt.attr.block.onShortTouch;
-		if (opt.attr.block.onLongTouch) this.attr.block.onLongTouch = opt.attr.block.onLongTouch;
-		if (opt.attr.block.onTouchStart) this.attr.block.onTouchStart = opt.attr.block.onTouchStart;
-		if (opt.attr.block.onTouchMove) this.attr.block.onTouchMove = opt.attr.block.onTouchMove;
-		if (opt.attr.block.onTouchEnd) this.attr.block.onTouchEnd = opt.attr.block.onTouchEnd;
-		if (opt.attr.block.onTouchCancal) this.attr.block.onTouchCancal = opt.attr.block.onTouchCancal;
-		
-		if (opt.attr.block.onChangeTo) this.attr.block.onChangeTo = opt.attr.block.onChangeTo;
-		if (opt.attr.block.onChangeLeave) this.attr.block.onChangeLeave = opt.attr.block.onChangeLeave;
-		if (opt.attr.block.onPutToHead) this.attr.block.onPutToHead = opt.attr.block.onPutToHead;
-		if (opt.attr.block.onPutToBody) this.attr.block.onPutToBody = opt.attr.block.onPutToBody;
-		if (opt.attr.block.onPutToLeg) this.attr.block.onPutToLeg = opt.attr.block.onPutToHead;
-		if (opt.attr.block.onPutToFoot) this.attr.block.onPutToFoot = opt.attr.block.onPutToFoot;
+		if (opt.attr.block){
+			if (opt.attr.block.transparent) this.attr.block.transparent = opt.attr.block.transparent; //透明方块（其他方块必须显示）
+			if (opt.attr.block.noTransparent) this.attr.block.noTransparent = opt.attr.block.noTransparent; //必须显示本方块
+			if (opt.attr.block.through) this.attr.block.through = opt.attr.block.through; //运行穿过
+			
+			if (opt.attr.block.onLeftMouseDown) this.attr.block.onLeftMouseDown = opt.attr.block.onLeftMouseDown;
+			if (opt.attr.block.onLeftMouseUp) this.attr.block.onLeftMouseUp = opt.attr.block.onLeftMouseUp;
+			if (opt.attr.block.onRightMouseDown) this.attr.block.onRightMouseDown = opt.attr.block.onRightMouseDown;
+			if (opt.attr.block.onRightMouseUp) this.attr.block.onRightMouseUp = opt.attr.block.onRightMouseUp;
+			
+			if (opt.attr.block.onShortTouch) this.attr.block.onShortTouch = opt.attr.block.onShortTouch;
+			if (opt.attr.block.onLongTouch) this.attr.block.onLongTouch = opt.attr.block.onLongTouch;
+			if (opt.attr.block.onTouchStart) this.attr.block.onTouchStart = opt.attr.block.onTouchStart;
+			if (opt.attr.block.onTouchMove) this.attr.block.onTouchMove = opt.attr.block.onTouchMove;
+			if (opt.attr.block.onTouchEnd) this.attr.block.onTouchEnd = opt.attr.block.onTouchEnd;
+			if (opt.attr.block.onTouchCancal) this.attr.block.onTouchCancal = opt.attr.block.onTouchCancal;
+			
+			if (opt.attr.block.onChangeTo) this.attr.block.onChangeTo = opt.attr.block.onChangeTo;
+			if (opt.attr.block.onChangeLeave) this.attr.block.onChangeLeave = opt.attr.block.onChangeLeave;
+			if (opt.attr.block.onPutToHead) this.attr.block.onPutToHead = opt.attr.block.onPutToHead;
+			if (opt.attr.block.onPutToBody) this.attr.block.onPutToBody = opt.attr.block.onPutToBody;
+			if (opt.attr.block.onPutToLeg) this.attr.block.onPutToLeg = opt.attr.block.onPutToHead;
+			if (opt.attr.block.onPutToFoot) this.attr.block.onPutToFoot = opt.attr.block.onPutToFoot;
+		}
 	}
 }

@@ -64,7 +64,7 @@ var deskgood = {
 	},
 	hold: [null, null, null, null],
 	choice: 0,
-	sensitivity: 2, //灵敏度
+	sensitivity: device? 2: 1, //灵敏度：手机2，电脑1
 	die(reason="使用命令自杀"){
 		sql.deleteTable("file", undefined, function(){
 			localStorage.removeItem("我的世界_seed");

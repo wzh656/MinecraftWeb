@@ -2,12 +2,12 @@ const FACE_URL = [
 	["side.png", "side.png", "up.png", "down.png", "side.png", "side.png"],
 	["face.png", "face.png", "face.png", "face.png", "face.png", "face.png"]
 ];
-const template = []; //模板
-template.push(new Thing({
+const TEMPLATES = []; //模板
+TEMPLATES.push(new Thing({
 	id: 0,
 	name: "空气"
 }, false));
-template.push(new Thing({
+TEMPLATES.push(new Thing({
 	id: 1,
 	name: "命令方块",
 	block: {
@@ -20,7 +20,7 @@ template.push(new Thing({
 		}
 	}
 }, false));
-/*template.push(new Thing({
+/*TEMPLATES.push(new Thing({
 	id: 2,
 	name: "基岩",
 	block: {
@@ -28,7 +28,7 @@ template.push(new Thing({
 	},
 	attr: {}
 }, false));*/
-template.push(new Thing({
+TEMPLATES.push(new Thing({
 	id: 2,
 	name: "草方块",
 	block: {
@@ -36,7 +36,7 @@ template.push(new Thing({
 	},
 	attr: {}
 }, false));
-template.push(new Thing({
+TEMPLATES.push(new Thing({
 	id: 3,
 	name: "泥土",
 	block: {
@@ -44,7 +44,7 @@ template.push(new Thing({
 	},
 	attr: {}
 }, false));
-template.push(new Thing({
+TEMPLATES.push(new Thing({
 	id: 4,
 	name: "原石",
 	block: {
@@ -52,7 +52,7 @@ template.push(new Thing({
 	},
 	attr: {}
 }, false));
-template.push(new Thing({
+TEMPLATES.push(new Thing({
 	id: 5,
 	name: "石头",
 	block: {
@@ -60,7 +60,7 @@ template.push(new Thing({
 	},
 	attr: {}
 }, false));
-template.push(new Thing({
+TEMPLATES.push(new Thing({
 	id: 6,
 	name: "沙子",
 	block: {
@@ -68,7 +68,7 @@ template.push(new Thing({
 	},
 	attr: {}
 }, false));
-template.push(new Thing({
+TEMPLATES.push(new Thing({
 	id: 7,
 	name: "仙人掌",
 	block: {
@@ -76,7 +76,7 @@ template.push(new Thing({
 	},
 	attr: {}
 }, false));
-template[8.1] = new Thing({
+TEMPLATES[8.1] = new Thing({
 	id: 8.1,
 	name: "细橡木",
 	block: {
@@ -91,7 +91,7 @@ template[8.1] = new Thing({
 		}
 	}
 });
-template[8.2] = new Thing({
+TEMPLATES[8.2] = new Thing({
 	id: 8.2,
 	name: "粗橡木",
 	block: {
@@ -106,7 +106,7 @@ template[8.2] = new Thing({
 		}
 	}
 });
-template[9] = new Thing({
+TEMPLATES[9] = new Thing({
 	id: 9,
 	name: "树叶",
 	block: {
@@ -119,7 +119,7 @@ template[9] = new Thing({
 		}
 	}
 });
-template.push(new Thing({
+TEMPLATES.push(new Thing({
 	id: 10,
 	name: "木板",
 	block: {
@@ -127,7 +127,7 @@ template.push(new Thing({
 	},
 	attr: {}
 }, false));
-template.push(new Thing({
+TEMPLATES.push(new Thing({
 	id: 11,
 	name: "砖",
 	block: {

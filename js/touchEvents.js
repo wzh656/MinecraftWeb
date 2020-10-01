@@ -441,8 +441,8 @@ $("#game").on("touchend", function (e){
 							x: x/100,
 							y: y/100,
 							z: z/100
-						}, template);*/
-						/* map.add(new Thing(template[ deskgood.hold[deskgood.choice] ]).block.makeMaterial().block.deleteTexture().block.makeMesh(), {
+						}, TEMPLATES);*/
+						/* map.add(new Thing(TEMPLATES[ deskgood.hold[deskgood.choice] ]).block.makeMaterial().block.deleteTexture().block.makeMesh(), {
 							x: x/100,
 							y: y/100,
 							z: z/100

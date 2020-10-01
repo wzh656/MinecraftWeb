@@ -32,7 +32,7 @@ let map = new ZoneMap([
 		forest: 0.4,
 		grassland: 0.4,
 		desert: 0.2,
-		q: 166
+		q: 666
 	},
 	treeHeight: JSON.parse(localStorage.getItem("我的世界_treeHeight")) || {
 		plant: {

@@ -5,23 +5,23 @@
 // let num = 0;
 let block_load = {
 	i: 1,
-	key: Object.keys(template)[1],
+	key: Object.keys(TEMPLATES)[1],
 	id: null
 }
-$("#progress progress")[0].max = Object.keys(template).length;
+$("#progress progress")[0].max = Object.keys(TEMPLATES).length;
 block_load.id = setInterval(function(){
-	for (let j in template[block_load.key].block.face)
-		template[block_load.key].setTexture(
+	for (let j in TEMPLATES[block_load.key].block.face)
+		TEMPLATES[block_load.key].setTexture(
 			new THREE.TextureLoader()
-				.load( (template[block_load.key].block.parent||`./img/blocks/${template[block_load.key].id}/`) + template[block_load.key].block.face[j] ), j);
+				.load( (TEMPLATES[block_load.key].block.parent||`./img/blocks/${TEMPLATES[block_load.key].id}/`) + TEMPLATES[block_load.key].block.face[j] ), j);
 	
 	//单个block加载完毕
-	$("#progress span").text( Math.round( block_load.i++/(Object.keys(template).length-1)*100 *100)/100 );
+	$("#progress span").text( Math.round( block_load.i++/(Object.keys(TEMPLATES).length-1)*100 *100)/100 );
 	$("#progress progress")[0].value = block_load.i;
-	block_load.key = Object.keys(template)[block_load.i];
+	block_load.key = Object.keys(TEMPLATES)[block_load.i];
 	//console.log(block_load.key, block_load.i)
 	
-	if (block_load.i >= Object.keys(template).length){ //所有block加载完毕
+	if (block_load.i >= Object.keys(TEMPLATES).length){ //所有block加载完毕
 		clearInterval(block_load.id);
 		delete block_load;
 		$("#progress header").text("载入方块中……");
@@ -42,7 +42,7 @@ block_load.id = setInterval(function(){
 				}
 				console.log(perload_condition)
 				$("#progress span").text("100");
-				$("#progress progress")[0].value = Object.keys(template).length;
+				$("#progress progress")[0].value = Object.keys(TEMPLATES).length;
 				setTimeout(function(){
 					render(); //纹理贴图加载成功后，调用渲染函数执行渲染操作
 					$("#progress").remove();
@@ -53,24 +53,24 @@ block_load.id = setInterval(function(){
 },0);
 
 /* let textureLoader = new THREE.TextureLoader();
-for (let i=1; i<template.length; i++){
+for (let i=1; i<TEMPLATES.length; i++){
 	for (let j=0; j<6; j++){
-		textureLoader.load(`./img/blocks/${i}/${template[i].block.face[j]}`, function (texture){
-			template[i].block.setTexture(texture, j);
+		textureLoader.load(`./img/blocks/${i}/${TEMPLATES[i].block.face[j]}`, function (texture){
+			TEMPLATES[i].block.setTexture(texture, j);
 			
-			if (template[i].block.texture.length < 6)
+			if (TEMPLATES[i].block.texture.length < 6)
 				return;
-			for (let k=0; k<template[i].block.texture.length; k++)
-				if (!template[i].block.texture[k])
+			for (let k=0; k<TEMPLATES[i].block.texture.length; k++)
+				if (!TEMPLATES[i].block.texture[k])
 					return;
 			
 			//单个block加载完毕
-			//template[i].block.makeMaterial().block.deleteTexture();
-			//template[i].block.makeMesh().deleteMaterial();
-			$("#progress2").text( Math.round(i/template.length*100*100)/100 );
+			//TEMPLATES[i].block.makeMaterial().block.deleteTexture();
+			//TEMPLATES[i].block.makeMesh().deleteMaterial();
+			$("#progress2").text( Math.round(i/TEMPLATES.length*100*100)/100 );
 			
-			for (let k=1; k<template.length; k++)
-				if (!template[k].block.texture/*material*//*)
+			for (let k=1; k<TEMPLATES.length; k++)
+				if (!TEMPLATES[k].block.texture/*material*//*)
 					return;
 			
 			//所有block加载完毕
@@ -114,9 +114,9 @@ for (let i=1; i<template.length; i++){
 								id = 6;
 							}
 							if (id != 0)
-								map.add(new Thing(template[id]).block.makeMaterial().block.deleteTexture().block.makeMesh(), {x:load.x, y, z}); //以模板建立
+								map.add(new Thing(TEMPLATES[id]).block.makeMaterial().block.deleteTexture().block.makeMesh(), {x:load.x, y, z}); //以模板建立
 								//map.update(load.x ,y ,z); //刷新是否添加方块
-								// template[id].block.deleteMesh();
+								// TEMPLATES[id].block.deleteMesh();
 						}
 					}
 					
