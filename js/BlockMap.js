@@ -124,33 +124,39 @@ class ZoneMap{
 		[x, y, z] = [x, y, z].map(Math.round); //规范化
 		
 		try{
-			/*if (this.map[x][y][z] === undefined){
-				return undefined;
-			}else if (this.map[x][y][z] === null){
-				return null;
-			}else if (this.map[x][y][z] === false){
-				return false;
-			}else{*/
-				return this.map[x][y][z];
-			//}
+			return this.map[x][y][z];
 		}catch(err){ //超过范围
 			return undefined;
 		}
-	};
+	}
+	set(x, y, z, value){
+		[x, y, z] = [x, y, z].map(Math.round); //规范化
+		
+		if (!this.map[x])
+			this.map[x] = [];
+		if (!this.map[x][y])
+			this.map[x][y] = [];
+		this.map[x][y][z] = value;
+	}
 	
 	//添加方块
-	add(thing, pos, opt){
-		let {type=true, add=true} = opt;
+	add(thing, pos, type=true){
+		// let {type=true} = opt;
 		[pos.x, pos.y, pos.z] = [pos.x, pos.y, pos.z].map(Math.round); //规范化
 		
-		if (this.get(pos.x, pos.y, pos.z) === undefined) return;
+		// if (this.get(pos.x, pos.y, pos.z) === undefined) return;
 		if ( this.get(pos.x, pos.y, pos.z) ){ //有方块
 			if (type){ //替换
 				for (let i of this.map[pos.x][pos.y][pos.z].block.mesh.material)
 					i.dispose();
 				this.map[pos.x][pos.y][pos.z].block.mesh.geometry.dispose(); //清除内存
 				scene.remove(this.map[pos.x][pos.y][pos.z].block.mesh);
-				this.map[pos.x][pos.y][pos.z] = null;
+				// this.map[pos.x][pos.y][pos.z] = null;
+				delete this.map[pos.x][pos.y][pos.z];
+				if (this.map[pos.x][pos.y].every(v => !v))
+					delete this.map[pos.x][pos.y];
+				if (this.map[pos.x].every(v => !v))
+					delete this.map[pos.x];
 			}else{ //不替换
 				return;
 			}
@@ -160,13 +166,13 @@ class ZoneMap{
 		thing.block.mesh.position.y = pos.y*100;
 		thing.block.mesh.position.z = pos.z*100;
 		
-		if (add)
-			scene.add(thing.block.mesh); //网格模型添加到场景中
-		thing.block.addTo = add;
-	};
+		scene.add(thing.block.mesh); //网格模型添加到场景中
+		thing.block.addTo = true;
+	}
+	
 	//根据 模板和ID 添加方块
 	addID(id, pos, template, opt={}){
-		let {type=true, add=true, attr={}} = opt;
+		let {type=true, attr={}} = opt;
 		/* if (typeof type != "boolean"){
 			[type, attr] = [undefined, type];
 		} */
@@ -179,14 +185,20 @@ class ZoneMap{
 				this.map[pos.x][pos.y][pos.z].block.mesh.geometry.dispose(); //清除内存
 				scene.remove(this.map[pos.x][pos.y][pos.z].block.mesh);
 			}
-			this.map[pos.x][pos.y][pos.z] = null; //空气
+			// this.map[pos.x][pos.y][pos.z] = null; //空气
+			this.set(pos.x, pos.y, pos.z, null);
+			/* if (this.map[pos.x][pos.y].every(v => !v))
+				delete this.map[pos.x][pos.y];
+			if (this.map[pos.x].every(v => !v))
+				delete this.map[pos.x]; */
+			
 			return;
 		}
 		
 		let thing = new Thing({
 			id,
 			attr
-		}, template[id])
+		})
 			.makeMaterial()
 			.deleteTexture()
 			.makeMesh();
@@ -197,12 +209,9 @@ class ZoneMap{
 				y:pos.y,
 				z:pos.z,
 			},
-			{
-				type,
-				add
-			}
+			type
 		); //以模板建立
-	};
+	}
 	
 	//删除方块
 	delete(x, y, z){
@@ -215,8 +224,12 @@ class ZoneMap{
 			i.dispose();
 		this.map[x][y][z].block.mesh.geometry.dispose(); //清除内存
 		scene.remove(this.map[x][y][z].block.mesh);
-		this.map[x][y][z] = null;
-	};
+		delete this.map[x][y][z];
+		if (this.map[x][y].every(v => !v))
+			delete this.map[x][y];
+		if (this.map[x].every(v => !v))
+			delete this.map[x];
+	}
 	
 	
 	//更新方块
@@ -247,7 +260,7 @@ class ZoneMap{
 		if (this.map[x][y][z].get("attr", "block", "noTransparent")) //不可透明
 			for (let i of this.map[x][y][z].block.material)
 				i.visible = true;
-	};
+	}
 	
 	//更新方块及周围
 	updateRound(x,y,z){
@@ -258,14 +271,14 @@ class ZoneMap{
 		this.update(x, y-1, z);
 		this.update(x, y, z+1);
 		this.update(x, y, z-1);
-	};
+	}
 	
 	//更新列方块
 	updateColumn(x, z){
 		//console.log("updateColumn:",x,z,+get_date());
 		for (let dy=this.size[0].y; dy<=this.size[1].y; dy++)
 			this.update(x, dy, z);
-	};
+	}
 	
 	//更新区块内所有方块（同步）
 	updateZone(x, z){
@@ -279,7 +292,7 @@ class ZoneMap{
 				}
 			}
 		}
-	};
+	}
 	//更新区块内所有方块（异步）
 	updateZoneAsync(x, z, opt={}){
 		let {
@@ -387,10 +400,10 @@ class ZoneMap{
 				}
 			}
 		} */
-	};
+	}
 	
 	
-	//初始化区块
+	/* //初始化区块
 	initZone(x, z){
 		[x, z] = [x, z].map(Math.round); //规范化
 		let ox = x*this.size.x,
@@ -406,11 +419,11 @@ class ZoneMap{
 			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
 				this.map[ox+dx][dy] = this.map[ox+dx][dy] || [];
 				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-					this.map[ox+dx][dy][oz+dz] = false/* null */;
+					this.map[ox+dx][dy][oz+dz] = false/* null *//*;
 				}
 			}
 		}
-	};
+	} */
 	
 	perGetColumn(x, z, edit){
 		[x, z] = [x, z].map(Math.round); //规范化
@@ -572,7 +585,7 @@ class ZoneMap{
 			
 		}
 		
-		return column;
+		return column.reverse();
 		/* if (treeTop){ //非强制添加树叶(9)
 			setTimeout(()=>{
 				this.addID(9, {
@@ -618,55 +631,68 @@ class ZoneMap{
 		} */
 	}
 	
-	//加载列
-	loadColumn(x, z, edit){
-		let columns = [
-			this.perGetColumn(x, z, edit),
-			this.perGetColumn(x+1, z, edit),
-			this.perGetColumn(x-1, z, edit),
-			this.perGetColumn(x, z+1, edit),
-			this.perGetColumn(x, z-1, edit)
-		];
-		for (let y=this.size[0].y; y<=this.size[1].y; y++){
-			if (columns[0][y].id){ //有方块
-				try{
-					/* if (
-						y != this.size[0].y && //不在最底层
-						y != this.size[1].y && //不在最顶层
-						columns[0][y+1].id &&
-						columns[0][y-1].id &&
-						columns[1][y].id &&
-						columns[2][y].id &&
-						columns[3][y].id &&
-						columns[4][y].id
-					){ //都有方块
-						// console.warn("hide")
-						this.addID(columns[0][y].id, {
-							x,
-							y,
-							z
-						}, TEMPLATES, {
-							add: false
-						});
-					}else{ */
-						console.warn("No hide", {x,y,z})
-						this.addID(columns[0][y].id, {
-							x,
-							y,
-							z
-						}, TEMPLATES);
-					// }
-				}catch(e){
-					debugger
-				}
-				
-			}else{
-				this.addID(0, {
-					x,
-					y,
-					z
-				}, TEMPLATES);
+	perGetZone(x, z, edit){
+		[x, z] = [x, z].map(Math.round); //规范化
+		let ox = x*this.size.x,
+			oz = z*this.size.z; //区块中心坐标
+		
+		let result = [];
+		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
+			result[dx] = [];
+			for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+				result[dx][dz] = this.perGetColumn(ox+dx, oz+dz, edit);
+				for (let y in result[dx][dz])
+					result[dx][dz][y] = new Thing(result[dx][dz][y]);
 			}
+		}
+		return result;
+	}
+	
+	//加载列
+	loadColumn(x, z, xZone, zZone, columns, edit){
+		[x, z] = [x, z].map(Math.round); //规范化
+		
+		for (let y=this.size[0].y; y<=this.size[1].y; y++){
+			try{
+				if (columns[x][z][y].id){ //有方块
+					try{
+						if (
+							y != this.size[0].y && //不在最底层
+							y != this.size[1].y && //不在最顶层
+							columns[x][z][y+1].id &&
+							columns[x][z][y-1].id &&
+							columns[x+1][z][y].id &&
+							columns[x-1][z][y].id &&
+							columns[x][z+1][y].id &&
+							columns[x][z-1][y].id
+						){ //都有方块
+							console.warn("hide")
+						}else{
+							throw "";
+						}
+					}catch(e){
+						// console.warn("show")
+						this.add(
+							columns[x][z][y]
+								.makeMaterial()
+								.deleteTexture()
+								.makeMesh(),
+							{x, y, z}
+						);
+					}
+					
+				}else{
+					this.addID(0, {
+						x,
+						y,
+						z
+					}, TEMPLATES);
+				}
+			}catch(e){
+				//TODO handle the exception
+				debugger
+			}
+			
 		}
 	}
 	
@@ -675,18 +701,17 @@ class ZoneMap{
 		[x, z] = [x, z].map(Math.round); //规范化
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
-			
+		let columns = this.perGetZone(x, z, edit);
+		
 		if (this.activeZone.every(function(value, index, arr){
 			return value[0] != x || value[1] != z;
 		})) //每个都不一样（不存在）
 			this.activeZone.push([x,z]);
 		
-		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
-			for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
+			for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
 				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
-					this.loadColumn(ox+dx, oz+dz, edit);
-			}
-		}
+					this.loadColumn(ox+dx, oz+dz, x, z, columns, edit);
 	}
 	//加载区块（异步）
 	loadZoneAsync(x, z, opt={}){
@@ -696,7 +721,8 @@ class ZoneMap{
 			breakTime=66, // 最大执行时间/ms
 			mostSpeed=2, // 最大速度/次
 			dir="", //方向
-			breakPoint
+			breakPoint,
+			columns
 		} = opt;
 		
 		[x, z] = [x, z].map(Math.round); //规范化
@@ -704,111 +730,29 @@ class ZoneMap{
 			oz = z*this.size.z, //区块中心坐标
 			t = this.seed; //临时变量
 		
+		if (this.initedZone.every(function(value, index, arr){ //添加
+			return value[0] != x || value[1] != z;
+		})) //每个都不一样（不存在）
+			this.initedZone.push([x,z]);
+		
 		let func = (edit)=>{
-				switch (dir.substr(0,2)){
-					case "x-":
-						{
-							let t0 = +new Date(),
-								num = 0;
-							
-							let dx;
-							if (breakPoint){
-								dx = breakPoint.dx==undefined? this.size[1].x: breakPoint.dx;
-								delete breakPoint.dx;
-							}else{
-								dx = this.size[1].x;
-							}
-							for (; dx>=this.size[0].x; dx--){
-								
-								let dz;
-								if (breakPoint){
-									dz = breakPoint.dz==undefined? this.size[0].z: breakPoint.dz;
-									delete breakPoint.dz;
-								}else{
-									dz = this.size[0].z;
-								}
-								for (; dz<=this.size[1].z; dz++){
-									if (new Date-t0 > breakTime) //超时
-										return setTimeout(()=>{
-											this.loadZoneAsync(x, z, {
-												finishCallback,
-												progressCallback,
-												breakTime,
-												mostSpeed,
-												dir,
-												breakPoint: {dx, dz, edit}
-											});
-										},0);
-									this.loadColumn(ox+dx, oz+dz, edit);
-								}
-								
-								setTimeout(()=>{ //更新
-									this.updateColumn(ox+dx, oz+this.size[0].z-1);
-									this.updateColumn(ox+dx, oz+this.size[1].z+1);
-									for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
-										this.updateColumn(ox+dx+1, dz);
-								}, 0);
-								if (progressCallback)
-									progressCallback( (dx-this.size[1].x)/(this.size[0].x-this.size[1].x) );
-								if (++num >= mostSpeed) //超数
-									return setTimeout(()=>{
-										this.loadZoneAsync(x, z, {
-											finishCallback,
-											progressCallback,
-											breakTime,
-											mostSpeed,
-											dir,
-											breakPoint: {dx:dx-1, edit}
-										});
-									},0);
-							}
-							setTimeout(()=>{ //更新
-								for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-									this.updateColumn(ox+this.size[0].x, oz+dz);
-									this.updateColumn(ox+this.size[0].x-1, oz+dz);
-								}
-							},0);
-							
-							if (this.activeZone.every(function(value, index, arr){ //添加
-								return value[0] != x || value[1] != z;
-							})) //每个都不一样（不存在）
-								this.activeZone.push([x,z]);
-							
-							if (finishCallback) finishCallback();
-							
-							/* let dx = this.size[1].x;
-							let loadZone_id = setInterval(()=>{
-								if (dx < this.size[0].x){
-									setTimeout(()=>{
-										for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-											this.updateColumn(ox+dx+1, oz+dz);
-											this.updateColumn(ox+dx, oz+dz);
-										}
-									},0);
-									clearInterval(loadZone_id);
-									
-									if (this.activeZone.every(function(value, index, arr){
-										return value[0] != x || value[1] != z;
-									})) //每个都不一样（不存在）
-										this.activeZone.push([x,z]);
-									
-									if (finishCallback)
-										finishCallback();
-									return;
-								}
-								
-								//正常代码
-								
-								
-								dx--;
-							},0); */
-							break;
+			if (!columns)
+				columns = this.perGetZone(x, z, edit)
+			
+			switch (dir.substr(0,2)){
+				case "x-":
+					{
+						let t0 = +new Date(),
+							num = 0;
+						
+						let dx;
+						if (breakPoint){
+							dx = breakPoint.dx==undefined? this.size[1].x: breakPoint.dx;
+							delete breakPoint.dx;
+						}else{
+							dx = this.size[1].x;
 						}
-					
-					case "z+":
-						{
-							let t0 = +new Date(),
-								num = 0;
+						for (; dx>=this.size[0].x; dx--){
 							
 							let dz;
 							if (breakPoint){
@@ -818,38 +762,7 @@ class ZoneMap{
 								dz = this.size[0].z;
 							}
 							for (; dz<=this.size[1].z; dz++){
-								
-								let dx;
-								if (breakPoint){
-									dx = breakPoint.dx==undefined? this.size[0].x: breakPoint.dx;
-									delete breakPoint.dx;
-								}else{
-									dx = this.size[0].x;
-								}
-								for (; dx<=this.size[1].z; dx++){
-									if (new Date-t0 > breakTime) //超时
-										return setTimeout(()=>{
-											this.loadZoneAsync(x, z, {
-												finishCallback,
-												progressCallback,
-												breakTime,
-												mostSpeed,
-												dir,
-												breakPoint: {dx, dz, edit}
-											});
-										},0);
-									this.loadColumn(ox+dx, oz+dz, edit);
-								}
-								
-								setTimeout(()=>{ //更新
-									this.updateColumn(ox+this.size[0].x-1, oz+dz);
-									this.updateColumn(ox+this.size[1].x+1, oz+dz);
-									for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
-										this.updateColumn(dx, oz+dz-1);
-								}, 0);
-								if (progressCallback)
-									progressCallback( (dz-this.size[0].z)/(this.size[0].z-this.size[1].z) );
-								if (++num >= mostSpeed) //超数
+								if (new Date-t0 > breakTime) //超时
 									return setTimeout(()=>{
 										this.loadZoneAsync(x, z, {
 											finishCallback,
@@ -857,172 +770,89 @@ class ZoneMap{
 											breakTime,
 											mostSpeed,
 											dir,
-											breakPoint: {dz:dz+1, edit}
+											breakPoint: {dx, dz, edit},
+											columns
 										});
 									},0);
+								this.loadColumn(ox+dx, oz+dz, x, z, columns, edit);
 							}
+							
 							setTimeout(()=>{ //更新
-								for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
-									this.updateColumn(ox+dx, oz+this.size[1].z);
-									this.updateColumn(ox+dx, oz+this.size[1].z+1);
-								}
-							},0);
-							
-							if (this.activeZone.every(function(value, index, arr){ //添加
-								return value[0] != x || value[1] != z;
-							})) //每个都不一样（不存在）
-								this.activeZone.push([x,z]);
-							
-							if (finishCallback) finishCallback();
-							
-							/* let dz = this.size[0].z;
-							let loadZone_id = setInterval(()=>{
-								if (dz > this.size[1].z){
-									setTimeout(()=>{
-										for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
-											this.updateColumn(ox+dx, oz+dz-1);
-											this.updateColumn(ox+dx, oz+dz);
-										}
-									},0);
-									clearInterval(loadZone_id);
-									
-									if (this.activeZone.every(function(value, index, arr){
-										return value[0] != x || value[1] != z;
-									})) //每个都不一样（不存在）
-										this.activeZone.push([x,z]);
-									
-									if (finishCallback)
-										finishCallback();
-									return;
-								}
-								
-								//正常代码
-								for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
-									this.loadColumn(ox+dx, oz+dz, edit);
-								
-								setTimeout(()=>{
-									this.updateColumn(ox+this.size[0].x-1, oz+dz);
-									this.updateColumn(ox+this.size[1].x+1, oz+dz);
-									for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
-										this.updateColumn(dx, oz+dz-1);
-								}, 0);
-								
-								dz++;
-							},0); */
-							break;
+								this.updateColumn(ox+dx, oz+this.size[0].z-1);
+								this.updateColumn(ox+dx, oz+this.size[1].z+1);
+								for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
+									this.updateColumn(ox+dx+1, dz);
+							}, 0);
+							if (progressCallback)
+								progressCallback( (dx-this.size[1].x)/(this.size[0].x-this.size[1].x) );
+							if (++num >= mostSpeed) //超数
+								return setTimeout(()=>{
+									this.loadZoneAsync(x, z, {
+										finishCallback,
+										progressCallback,
+										breakTime,
+										mostSpeed,
+										dir,
+										breakPoint: {dx:dx-1, edit}
+									});
+								},0);
 						}
-					
-					case "z-":
-						{
-							let t0 = +new Date(),
-								num = 0;
-							
-							let dz;
-							if (breakPoint){
-								dz = breakPoint.dz==undefined? this.size[1].z: breakPoint.dz;
-								delete breakPoint.dz;
-							}else{
-								dz = this.size[1].z;
+						setTimeout(()=>{ //更新
+							for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+								this.updateColumn(ox+this.size[0].x, oz+dz);
+								this.updateColumn(ox+this.size[0].x-1, oz+dz);
 							}
-							for (; dz>=this.size[0].z; dz--){
-								
-								let dx;
-								if (breakPoint){
-									dx = breakPoint.dx==undefined? this.size[0].x: breakPoint.dx;
-									delete breakPoint.dx;
-								}else{
-									dx = this.size[0].x;
-								}
-								for (; dx<=this.size[1].z; dx++){
-									if (new Date-t0 > breakTime) //超时
-										return setTimeout(()=>{
-											return this.loadZoneAsync(x, z, {
-												finishCallback,
-												progressCallback,
-												breakTime,
-												mostSpeed,
-												dir,
-												breakPoint: {dx, dz, edit}
-											});
-										},0);
-									this.loadColumn(ox+dx, oz+dz, edit);
-								}
-								
-								setTimeout(()=>{ //更新
-									this.updateColumn(ox+this.size[0].x-1, oz+dz);
-									this.updateColumn(ox+this.size[1].x+1, oz+dz);
-									for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
-										this.updateColumn(dx, oz+dz-1);
-								}, 0);
-								if (progressCallback)
-									progressCallback( (dz-this.size[1].dz)/(this.size[0].z-this.size[1].z) );
-								if (++num >= mostSpeed) //超数
-									return setTimeout(()=>{
-										this.loadZoneAsync(x, z, {
-											finishCallback,
-											progressCallback,
-											breakTime,
-											mostSpeed,
-											dir,
-											breakPoint: {dz:dz-1, edit}
-										});
-									},0);
-							}
-							setTimeout(()=>{ //更新
-								for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
-									this.updateColumn(ox+dx, oz+this.size[1].z);
-									this.updateColumn(ox+dx, oz+this.size[1].z+1);
-								}
-							},0);
-							
-							if (this.activeZone.every(function(value, index, arr){ //添加
-								return value[0] != x || value[1] != z;
-							})) //每个都不一样（不存在）
-								this.activeZone.push([x,z]);
-							
-							if (finishCallback) finishCallback();
-							
-							/* let dz = this.size[1].z;
-							let loadZone_id = setInterval(()=>{
-								if (dz < this.size[0].z){
-									setTimeout(()=>{
-										for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
-											this.updateColumn(ox+dx, oz+dz+1);
-											this.updateColumn(ox+dx, oz+dz);
-										}
-									},0);
-									clearInterval(loadZone_id);
-									
-									if (this.activeZone.every(function(value, index, arr){
-										return value[0] != x || value[1] != z;
-									})) //每个都不一样（不存在）
-										this.activeZone.push([x,z]);
-									
-									if (finishCallback)
-										finishCallback();
-									return;
-								}
-								
-								//正常代码
-								for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
-									this.loadColumn(ox+dx, oz+dz, edit);
-								
+						},0);
+						
+						if (this.activeZone.every(function(value, index, arr){ //添加
+							return value[0] != x || value[1] != z;
+						})) //每个都不一样（不存在）
+							this.activeZone.push([x,z]);
+						
+						if (finishCallback) finishCallback();
+						
+						/* let dx = this.size[1].x;
+						let loadZone_id = setInterval(()=>{
+							if (dx < this.size[0].x){
 								setTimeout(()=>{
-									this.updateColumn(ox+this.size[0].x-1, oz+dz);
-									this.updateColumn(ox+this.size[1].x+1, oz+dz);
-									for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
-										this.updateColumn(dx, oz+dz+1);
-								}, 0);
+									for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+										this.updateColumn(ox+dx+1, oz+dz);
+										this.updateColumn(ox+dx, oz+dz);
+									}
+								},0);
+								clearInterval(loadZone_id);
 								
-								dz--;
-							},0); */
-							break;
+								if (this.activeZone.every(function(value, index, arr){
+									return value[0] != x || value[1] != z;
+								})) //每个都不一样（不存在）
+									this.activeZone.push([x,z]);
+								
+								if (finishCallback)
+									finishCallback();
+								return;
+							}
+							
+							//正常代码
+							
+							
+							dx--;
+						},0); */
+						break;
+					}
+				
+				case "z+":
+					{
+						let t0 = +new Date(),
+							num = 0;
+						
+						let dz;
+						if (breakPoint){
+							dz = breakPoint.dz==undefined? this.size[0].z: breakPoint.dz;
+							delete breakPoint.dz;
+						}else{
+							dz = this.size[0].z;
 						}
-					
-					default: // "x+" or else
-						{
-							let t0 = +new Date(),
-								num = 0;
+						for (; dz<=this.size[1].z; dz++){
 							
 							let dx;
 							if (breakPoint){
@@ -1031,39 +861,8 @@ class ZoneMap{
 							}else{
 								dx = this.size[0].x;
 							}
-							for (; dx<=this.size[1].x; dx++){
-								
-								let dz;
-								if (breakPoint){
-									dz = breakPoint.dz==undefined? this.size[0].z: breakPoint.dz;
-									delete breakPoint.dz;
-								}else{
-									dz = this.size[0].z;
-								}
-								for (; dz<=this.size[1].z; dz++){
-									if (new Date-t0 > breakTime) //超时
-										return setTimeout(()=>{
-											this.loadZoneAsync(x, z, {
-												finishCallback,
-												progressCallback,
-												breakTime,
-												mostSpeed,
-												dir,
-												breakPoint: {dx, dz, edit}
-											});
-										},0);
-									this.loadColumn(ox+dx, oz+dz, edit);
-								}
-								
-								setTimeout(()=>{ //更新
-									this.updateColumn(ox+dx, oz+this.size[0].z-1);
-									this.updateColumn(ox+dx, oz+this.size[1].z+1);
-									for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
-										this.updateColumn(ox+dx+1, dz);
-								}, 0);
-								if (progressCallback)
-									progressCallback( (dx-this.size[0].x)/(this.size[1].x-this.size[0].x) );
-								if (++num >= mostSpeed) //超数
+							for (; dx<=this.size[1].z; dx++){
+								if (new Date-t0 > breakTime) //超时
 									return setTimeout(()=>{
 										this.loadZoneAsync(x, z, {
 											finishCallback,
@@ -1071,62 +870,301 @@ class ZoneMap{
 											breakTime,
 											mostSpeed,
 											dir,
-											breakPoint: {dx:dx+1, edit}
+											breakPoint: {dx, dz, edit},
+											columns
 										});
 									},0);
+								this.loadColumn(ox+dx, oz+dz, x, z, columns, edit);
 							}
+							
 							setTimeout(()=>{ //更新
-								for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-									this.updateColumn(ox+this.size[0].x, oz+dz);
-									this.updateColumn(ox+this.size[0].x-1, oz+dz);
-								}
-							},0);
-							
-							if (this.activeZone.every(function(value, index, arr){ //添加
-								return value[0] != x || value[1] != z;
-							})) //每个都不一样（不存在）
-								this.activeZone.push([x,z]);
-							
-							if (finishCallback) finishCallback();
-							
-							/* let dx = this.size[0].x;
-							let loadZone_id = setInterval(()=>{
-								if (dx > this.size[1].x){
-									setTimeout(()=>{
-										for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-											this.updateColumn(ox+dx-1, oz+dz);
-											this.updateColumn(ox+dx, oz+dz);
-										}
-									},0);
-									clearInterval(loadZone_id);
-									
-									if (this.activeZone.every(function(value, index, arr){
-										return value[0] != x || value[1] != z;
-									})) //每个都不一样（不存在）
-										this.activeZone.push([x,z]);
-									
-									if (finishCallback)
-										finishCallback();
-									return;
-								}
-								
-								//正常代码
-								for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
-									this.loadColumn(ox+dx, oz+dz, edit);
-								
-								setTimeout(()=>{
-									this.updateColumn(ox+dx, oz+this.size[0].z-1);
-									this.updateColumn(ox+dx, oz+this.size[1].z+1);
-									for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
-										this.updateColumn(ox+dx-1, dz);
-								}, 0);
-								
-								dx++;
-							},0); */
-							break;
+								this.updateColumn(ox+this.size[0].x-1, oz+dz);
+								this.updateColumn(ox+this.size[1].x+1, oz+dz);
+								for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
+									this.updateColumn(dx, oz+dz-1);
+							}, 0);
+							if (progressCallback)
+								progressCallback( (dz-this.size[0].z)/(this.size[0].z-this.size[1].z) );
+							if (++num >= mostSpeed) //超数
+								return setTimeout(()=>{
+									this.loadZoneAsync(x, z, {
+										finishCallback,
+										progressCallback,
+										breakTime,
+										mostSpeed,
+										dir,
+										breakPoint: {dz:dz+1, edit}
+									});
+								},0);
 						}
-					
-				}
+						setTimeout(()=>{ //更新
+							for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
+								this.updateColumn(ox+dx, oz+this.size[1].z);
+								this.updateColumn(ox+dx, oz+this.size[1].z+1);
+							}
+						},0);
+						
+						if (this.activeZone.every(function(value, index, arr){ //添加
+							return value[0] != x || value[1] != z;
+						})) //每个都不一样（不存在）
+							this.activeZone.push([x,z]);
+						
+						if (finishCallback) finishCallback();
+						
+						/* let dz = this.size[0].z;
+						let loadZone_id = setInterval(()=>{
+							if (dz > this.size[1].z){
+								setTimeout(()=>{
+									for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
+										this.updateColumn(ox+dx, oz+dz-1);
+										this.updateColumn(ox+dx, oz+dz);
+									}
+								},0);
+								clearInterval(loadZone_id);
+								
+								if (this.activeZone.every(function(value, index, arr){
+									return value[0] != x || value[1] != z;
+								})) //每个都不一样（不存在）
+									this.activeZone.push([x,z]);
+								
+								if (finishCallback)
+									finishCallback();
+								return;
+							}
+							
+							//正常代码
+							for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
+								this.loadColumn(ox+dx, oz+dz, x, z, columns, edit);
+							
+							setTimeout(()=>{
+								this.updateColumn(ox+this.size[0].x-1, oz+dz);
+								this.updateColumn(ox+this.size[1].x+1, oz+dz);
+								for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
+									this.updateColumn(dx, oz+dz-1);
+							}, 0);
+							
+							dz++;
+						},0); */
+						break;
+					}
+				
+				case "z-":
+					{
+						let t0 = +new Date(),
+							num = 0;
+						
+						let dz;
+						if (breakPoint){
+							dz = breakPoint.dz==undefined? this.size[1].z: breakPoint.dz;
+							delete breakPoint.dz;
+						}else{
+							dz = this.size[1].z;
+						}
+						for (; dz>=this.size[0].z; dz--){
+							
+							let dx;
+							if (breakPoint){
+								dx = breakPoint.dx==undefined? this.size[0].x: breakPoint.dx;
+								delete breakPoint.dx;
+							}else{
+								dx = this.size[0].x;
+							}
+							for (; dx<=this.size[1].z; dx++){
+								if (new Date-t0 > breakTime) //超时
+									return setTimeout(()=>{
+										return this.loadZoneAsync(x, z, {
+											finishCallback,
+											progressCallback,
+											breakTime,
+											mostSpeed,
+											dir,
+											breakPoint: {dx, dz, edit},
+											columns
+										});
+									},0);
+								this.loadColumn(ox+dx, oz+dz, x, z, columns, edit);
+							}
+							
+							setTimeout(()=>{ //更新
+								this.updateColumn(ox+this.size[0].x-1, oz+dz);
+								this.updateColumn(ox+this.size[1].x+1, oz+dz);
+								for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
+									this.updateColumn(dx, oz+dz-1);
+							}, 0);
+							if (progressCallback)
+								progressCallback( (dz-this.size[1].dz)/(this.size[0].z-this.size[1].z) );
+							if (++num >= mostSpeed) //超数
+								return setTimeout(()=>{
+									this.loadZoneAsync(x, z, {
+										finishCallback,
+										progressCallback,
+										breakTime,
+										mostSpeed,
+										dir,
+										breakPoint: {dz:dz-1, edit}
+									});
+								},0);
+						}
+						setTimeout(()=>{ //更新
+							for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
+								this.updateColumn(ox+dx, oz+this.size[1].z);
+								this.updateColumn(ox+dx, oz+this.size[1].z+1);
+							}
+						},0);
+						
+						if (this.activeZone.every(function(value, index, arr){ //添加
+							return value[0] != x || value[1] != z;
+						})) //每个都不一样（不存在）
+							this.activeZone.push([x,z]);
+						
+						if (finishCallback) finishCallback();
+						
+						/* let dz = this.size[1].z;
+						let loadZone_id = setInterval(()=>{
+							if (dz < this.size[0].z){
+								setTimeout(()=>{
+									for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
+										this.updateColumn(ox+dx, oz+dz+1);
+										this.updateColumn(ox+dx, oz+dz);
+									}
+								},0);
+								clearInterval(loadZone_id);
+								
+								if (this.activeZone.every(function(value, index, arr){
+									return value[0] != x || value[1] != z;
+								})) //每个都不一样（不存在）
+									this.activeZone.push([x,z]);
+								
+								if (finishCallback)
+									finishCallback();
+								return;
+							}
+							
+							//正常代码
+							for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
+								this.loadColumn(ox+dx, oz+dz, x, z, columns, edit);
+							
+							setTimeout(()=>{
+								this.updateColumn(ox+this.size[0].x-1, oz+dz);
+								this.updateColumn(ox+this.size[1].x+1, oz+dz);
+								for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
+									this.updateColumn(dx, oz+dz+1);
+							}, 0);
+							
+							dz--;
+						},0); */
+						break;
+					}
+				
+				default: // "x+" or else
+					{
+						let t0 = +new Date(),
+							num = 0;
+						
+						let dx;
+						if (breakPoint){
+							dx = breakPoint.dx==undefined? this.size[0].x: breakPoint.dx;
+							delete breakPoint.dx;
+						}else{
+							dx = this.size[0].x;
+						}
+						for (; dx<=this.size[1].x; dx++){
+							
+							let dz;
+							if (breakPoint){
+								dz = breakPoint.dz==undefined? this.size[0].z: breakPoint.dz;
+								delete breakPoint.dz;
+							}else{
+								dz = this.size[0].z;
+							}
+							for (; dz<=this.size[1].z; dz++){
+								if (new Date-t0 > breakTime) //超时
+									return setTimeout(()=>{
+										this.loadZoneAsync(x, z, {
+											finishCallback,
+											progressCallback,
+											breakTime,
+											mostSpeed,
+											dir,
+											breakPoint: {dx, dz, edit},
+											columns
+										});
+									},0);
+								this.loadColumn(ox+dx, oz+dz, x, z, columns, edit);
+							}
+							
+							setTimeout(()=>{ //更新
+								this.updateColumn(ox+dx, oz+this.size[0].z-1);
+								this.updateColumn(ox+dx, oz+this.size[1].z+1);
+								for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
+									this.updateColumn(ox+dx+1, dz);
+							}, 0);
+							if (progressCallback)
+								progressCallback( (dx-this.size[0].x)/(this.size[1].x-this.size[0].x) );
+							if (++num >= mostSpeed) //超数
+								return setTimeout(()=>{
+									this.loadZoneAsync(x, z, {
+										finishCallback,
+										progressCallback,
+										breakTime,
+										mostSpeed,
+										dir,
+										breakPoint: {dx:dx+1, edit}
+									});
+								},0);
+						}
+						setTimeout(()=>{ //更新
+							for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+								this.updateColumn(ox+this.size[0].x, oz+dz);
+								this.updateColumn(ox+this.size[0].x-1, oz+dz);
+							}
+						},0);
+						
+						if (this.activeZone.every(function(value, index, arr){ //添加
+							return value[0] != x || value[1] != z;
+						})) //每个都不一样（不存在）
+							this.activeZone.push([x,z]);
+						
+						if (finishCallback) finishCallback();
+						
+						/* let dx = this.size[0].x;
+						let loadZone_id = setInterval(()=>{
+							if (dx > this.size[1].x){
+								setTimeout(()=>{
+									for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+										this.updateColumn(ox+dx-1, oz+dz);
+										this.updateColumn(ox+dx, oz+dz);
+									}
+								},0);
+								clearInterval(loadZone_id);
+								
+								if (this.activeZone.every(function(value, index, arr){
+									return value[0] != x || value[1] != z;
+								})) //每个都不一样（不存在）
+									this.activeZone.push([x,z]);
+								
+								if (finishCallback)
+									finishCallback();
+								return;
+							}
+							
+							//正常代码
+							for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
+								this.loadColumn(ox+dx, oz+dz, x, z, columns, edit);
+							
+							setTimeout(()=>{
+								this.updateColumn(ox+dx, oz+this.size[0].z-1);
+								this.updateColumn(ox+dx, oz+this.size[1].z+1);
+								for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
+									this.updateColumn(ox+dx-1, dz);
+							}, 0);
+							
+							dx++;
+						},0); */
+						break;
+					}
+				
+			}
 		};
 		if (breakPoint && breakPoint.edit){
 			func(breakPoint.edit);
@@ -1141,7 +1179,7 @@ class ZoneMap{
 				}
 			);
 		}
-	};
+	}
 	
 	//卸载区块（同步）
 	unloadZone(x, z){
@@ -1169,7 +1207,7 @@ class ZoneMap{
 				}
 			}
 		}
-	};
+	}
 	//卸载区块（异步）
 	unloadZoneAsync(x, z, opt={}){
 		let {
@@ -1233,13 +1271,13 @@ class ZoneMap{
 							});
 						},0);
 					
-					if (this.map[ox+dx][dy][oz+dz]){ //非空气 & 非未加载
+					if (this.get(ox+dx, dy, oz+dz)){ //非空气 & 非未加载
 						for (let i of this.map[ox+dx][dy][oz+dz].block.mesh.material)
 							i.dispose();
 						this.map[ox+dx][dy][oz+dz].block.mesh.geometry.dispose(); //清除内存
 						scene.remove(this.map[ox+dx][dy][oz+dz].block.mesh);
 					}
-					delete this.map[ox+dx][dy][oz+dz];
+					this.set(ox+dx, dy, oz+dz, null);
 				}
 			}
 			
@@ -1310,7 +1348,7 @@ class ZoneMap{
 				},0);
 			}
 		} */
-	};
+	}
 	
 	//预加载区块
 	perloadZone(length = this.perloadLength){
@@ -1363,7 +1401,7 @@ class ZoneMap{
 			if (this.initedZone.every(function(value, index, arr){
 				return value[0] != block[i][0] || value[1] != block[i][1];
 			})){ //每个都不一样（不存在 & 不在加载中）
-				this.initZone(block[i][0], block[i][1]);
+				// this.initZone(block[i][0], block[i][1]);
 				this.loadZoneAsync(block[i][0], block[i][1], {
 					dir: block[i][2],
 					finishCallback: ()=>{
@@ -1383,6 +1421,6 @@ class ZoneMap{
 				}) //不与任何block相等
 			)
 				this.unloadZoneAsync(...i); //卸载区块
-	};
+	}
 	
 }

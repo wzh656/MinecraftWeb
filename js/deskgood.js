@@ -127,7 +127,7 @@ var deskgood = {
 		
 		try{
 			if (
-				map.get(x/100, y/100, z/100) !== false && //不能移动到未加载的方块
+				map.get(x/100, y/100, z/100) !== undefined && //不能移动到未加载的方块
 				map.initedZone.some((item, index, value)=>{
 					return item[0] == Math.round(x/100/map.size.x) &&
 						item[1] == Math.round(z/100/map.size.z);

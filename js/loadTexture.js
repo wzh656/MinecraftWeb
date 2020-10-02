@@ -29,7 +29,7 @@ block_load.id = setInterval(function(){
 		$("#progress progress")[0].max = 1;
 		$("#progress progress")[0].value = 0;
 		
-		map.initZone(0, 0); //初始化区块
+		// map.initZone(0, 0); //初始化区块
 		map.loadZoneAsync(0, 0, {
 			progressCallback: function(value){
 				$("#progress span").text( value*100 );
