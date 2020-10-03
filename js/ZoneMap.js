@@ -38,16 +38,16 @@ class ZoneMap{
 						q: seed.height.error.q
 					}
 				},
-				s: {
-					max: seed.scale.max,
-					min: seed.scale.min,
-					/*ave: seed.scale.ave,
-					de: seed.scale.de,*/
-					q: seed.scale.q,
+				d: {
+					max: seed.dirt.max,
+					min: seed.dirt.min,
+					/*ave: seed.dirt.ave,
+					de: seed.dirt.de,*/
+					q: seed.dirt.q,
 					e: {
-						max: seed.scale.error.max,
-						min: seed.scale.error.min,
-						q: seed.scale.error.q
+						max: seed.dirt.error.max,
+						min: seed.dirt.error.min,
+						q: seed.dirt.error.q
 					}
 				},
 				t: {
@@ -98,10 +98,10 @@ class ZoneMap{
 			this.seed.h.e.k = (this.seed.h.e.max - this.seed.h.e.min)/2;
 			this.seed.h.e.b = (this.seed.h.e.max + this.seed.h.e.min)/2;
 			
-			this.seed.s.k = (this.seed.s.max - this.seed.s.min)/2;
-			this.seed.s.b = (this.seed.s.max + this.seed.s.min)/2;
-			this.seed.s.e.k = (this.seed.s.e.max - this.seed.s.e.min)/2;
-			this.seed.s.e.b = (this.seed.s.e.max + this.seed.s.e.min)/2;
+			this.seed.d.k = (this.seed.d.max - this.seed.d.min)/2;
+			this.seed.d.b = (this.seed.d.max + this.seed.d.min)/2;
+			this.seed.d.e.k = (this.seed.d.e.max - this.seed.d.e.min)/2;
+			this.seed.d.e.b = (this.seed.d.e.max + this.seed.d.e.min)/2;
 			
 			this.seed.tH.k = (this.seed.tH.max - this.seed.tH.min)/2;
 			this.seed.tH.b = (this.seed.tH.max + this.seed.tH.min)/2;
@@ -179,7 +179,7 @@ class ZoneMap{
 		// if (!attr.block) attr.block = {};
 		if (id == 0){
 			[pos.x, pos.y, pos.z] = [pos.x, pos.y, pos.z].map(Math.round); //规范化
-			if ( this.get(pos.x, pos.y, pos.z) ){ //有方块
+			if (this.get(pos.x, pos.y, pos.z)){ //有方块
 				for (let i of this.map[pos.x][pos.y][pos.z].block.mesh.material)
 					i.dispose();
 				this.map[pos.x][pos.y][pos.z].block.mesh.geometry.dispose(); //清除内存
@@ -425,8 +425,162 @@ class ZoneMap{
 		}
 	} */
 	
+	perGet(x, y, z, edit){
+		// [x, y, z] = [x, y, z].map(Math.round); //规范化
+		// console.warn("load", x, z)
+		
+		let height = sNoise.height(this.seed.noise, this.seed.h, x, z);
+		if (height < this.size[0].y){
+			height = this.size[0].y;
+		}else if (height > this.size[1].y){
+			height = this.size[1].y;
+		}
+		/* let sNoise = ( t.noise.more3D(0.6, x/t.h.q, z/t.h.q, 3)+
+		t.noise.more3D(-3.1415926, x/t.h.q, z/t.h.q, 3)+
+		t.noise.more3D(54.782, x/t.h.q, z/t.h.q, 3) )/3;
+		noise = 1-Math.sin( (1-noise)*90/180*Math.PI );
+		let height = noise *t.h.k +t.h.b+
+		t.noise.more3D(-1428.57, x/t.h.e.q, z/t.h.e.q, 3) *t.h.e.k +t.h.e.b; */
+		
+		/*let noise = Math.abs(t.noise.more3D(0.6, x/t.h.q/2, z/t.h.q/2, 5));
+		let height = noise*noise*noise*(noise*(noise*6-15)+10) //*t.h.k +t.h.b;
+		height = Math.pow(t.h.k, height) + t.h.b;*/
+		// debugger
+		// let a = 1/(1+Math.pow(Math.E, 3)), // 1/(1+e^3)
+		// 	b = 1/(1+Math.pow(Math.E, -3)), // 1/(1+e^(-3))
+		// 	noise = (1+Math.pow(Math.E, -3*noise)-a)/(b-a); // (1+e^(-3x)-a)/(b-a)
+		// let height = (t.h.max -t.h.min)/(t.h.ave -1) *Math.pow(t.h.ave, noise) *(t.h.min *t.h.ave -t.h.max)/(t.h.ave -1);
+		// let height = Math.pow(1000, 0.5+0.5*noise, 3), 10);
+		// let height = t.noise.noise3D(0.6, x/t.h.q, z/t.h.q) *t.h.de + t.h.ave;
+		
+		// let grass = false;
+		let type = sNoise.type(this.seed.noise, this.seed.t, x, z);
+		// 90%+ 高原（草木不生，积雪覆盖）
+		// 70%+ 高山（无树，有草）
+		// 26+ 丘陵（树）
+		let treeTop = null; //保留最高树干坐标
+		let earth = height - sNoise.dirt(this.seed.noise, this.seed.d, x, z);
+		let treeHeight = height + sNoise.treeHeight(this.seed.noise, this.seed.tH, x, z);
+		
+		for (let value of edit){
+			if (
+				value.x == x &&
+				value.y == y &&
+				value.z == z
+			){ //被编辑
+				return {
+					id: value.id,
+					attr: value.attr
+				};
+			}
+		}
+		//未编辑
+		
+		/* let earth = height - height * (t.noise.more3D(6.6, x/t.s.q, z/t.s.q, 6) *t.s.k +t.s.b)+
+		t.noise.more3D(-52.6338, x/t.s.e.q, z/t.s.e.q, 3) *t.s.e.k +t.s.e.b; */
+		let id = 0;
+		switch (type){
+			case 0: //森林
+				
+				/* if (height > 0.9*this.size[1].y){ // 90%+ 高原（草木不生，积雪覆盖）
+					grass = true;
+				}else */if (height > 0.7*this.size[1].y){ // 70%+ 高山（无树，有草）
+					treeHeight = height;
+				}
+				
+				if (y > treeHeight){
+					id = 0; // 空气/真空 (null)
+				}else if (y > height){
+					if (!treeTop) treeTop = y;
+					id = 8.1; //橡木
+				}else if (y == Math.floor(height) && !(height > 0.9*this.size[1].y)){ // 90%+ 高原（草木不生，积雪覆盖）
+					if (sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
+						id = 5; //草方块
+					}else{
+						id = 2; //草方块
+					}
+				}else if (y > earth){
+					// if (grass){
+						id = 3; //泥土
+					/* }else{
+						id = 2; //草方块
+						// grass = true;
+					} */
+				}/*else if (y == 0){
+					id = 2; //基岩
+				}*/else{
+					/* if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
+						id = 2; //草方块
+						grass = true;
+					}else{ */
+						id = 5; //石头
+					// }
+				}
+				break;
+				
+			case 1: //草原
+				
+				/* if (height > 0.9*this.size[1].y){ // 90%+ 高原（草木不生，积雪覆盖）
+					grass = true;
+				} */
+				
+				if (y > height){
+					id = 0; // 空气/真空 (null)
+				}/* else if (y > height){
+					if (!treeTop) treeTop = y;
+					id = 8.1; //橡木
+				} */else if (y == Math.floor(height) && !(height > 0.9*this.size[1].y)){ // 90%+ 高原（草木不生，积雪覆盖）
+					if (sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
+						id = 5; //草方块
+					}else{
+						id = 2; //草方块
+					}
+				}else if (y > earth){
+					// if (grass){
+						id = 3; //泥土
+					/* }else{
+						id = 2; //草方块
+						// grass = true;
+					} */
+				}/*else if (y == 0){
+					id = 2; //基岩
+				}*/else{
+					/* if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
+						id = 2; //草方块
+						// grass = true;
+					}else{ */
+						id = 5; //石头
+					// }
+				}
+				break;
+				
+			case 2: //沙漠
+				
+				if (y > height){
+					id = 0; // 空气/真空 (null)
+				}else if (y > earth){
+					id = 6; //沙子
+				}/*else if (y == 0){
+					id = 2; //基岩
+				}*/else{
+					/* if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
+						id = 6; //沙子
+						grass = true;
+					}else{ */
+						id = 5; //石头
+					// }
+				}
+				break;
+			
+			default:
+				id = 0;
+		}
+		
+		return id;
+	}
+	
 	perGetColumn(x, z, edit){
-		[x, z] = [x, z].map(Math.round); //规范化
+		// [x, z] = [x, z].map(Math.round); //规范化
 		// console.warn("load", x, z)
 		
 		let column = [];
@@ -454,15 +608,30 @@ class ZoneMap{
 		// let height = Math.pow(1000, 0.5+0.5*noise, 3), 10);
 		// let height = t.noise.noise3D(0.6, x/t.h.q, z/t.h.q) *t.h.de + t.h.ave;
 		
-		let grass = false;
+		// let grass = false;
 		let type = sNoise.type(this.seed.noise, this.seed.t, x, z);
 		// 90%+ 高原（草木不生，积雪覆盖）
 		// 70%+ 高山（无树，有草）
 		// 26+ 丘陵（树）
 		let treeTop = null; //保留最高树干坐标
-		let earth = height - height * sNoise.scale(this.seed.noise, this.seed.s, x, z);
+		let earth = height - sNoise.dirt(this.seed.noise, this.seed.d, x, z);
 		let treeHeight = height + sNoise.treeHeight(this.seed.noise, this.seed.tH, x, z);
 		for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
+			
+			for (let value of edit){
+				if (
+					value.x == x &&
+					value.y == dy &&
+					value.z == z
+				){ //被编辑
+					column.push({
+						id: value.id,
+						attr: value.attr
+					});
+					continue;
+				}
+			}
+			//未编辑
 			
 			/* let earth = height - height * (t.noise.more3D(6.6, x/t.s.q, z/t.s.q, 6) *t.s.k +t.s.b)+
 			t.noise.more3D(-52.6338, x/t.s.e.q, z/t.s.e.q, 3) *t.s.e.k +t.s.e.b; */
@@ -470,9 +639,9 @@ class ZoneMap{
 			switch (type){
 				case 0: //森林
 					
-					if (height > 0.9*this.size[1].y){ // 90%+ 高原（草木不生，积雪覆盖）
+					/* if (height > 0.9*this.size[1].y){ // 90%+ 高原（草木不生，积雪覆盖）
 						grass = true;
-					}else if (height > 0.7*this.size[1].y){ // 70%+ 高山（无树，有草）
+					}else */if (height > 0.7*this.size[1].y){ // 70%+ 高山（无树，有草）
 						treeHeight = height;
 					}
 					
@@ -481,54 +650,64 @@ class ZoneMap{
 					}else if (dy > height){
 						if (!treeTop) treeTop = dy;
 						id = 8.1; //橡木
-					}else if (dy > earth){
-						if (grass){
-							id = 3; //泥土
+					}else if (dy == Math.floor(height) && !(height > 0.9*this.size[1].y)){ // 90%+ 高原（草木不生，积雪覆盖）
+						if (sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
+							id = 5; //草方块
 						}else{
 							id = 2; //草方块
-							grass = true;
 						}
+					}else if (dy > earth){
+						// if (grass){
+							id = 3; //泥土
+						/* }else{
+							id = 2; //草方块
+							// grass = true;
+						} */
 					}/*else if (dy == 0){
 						id = 2; //基岩
 					}*/else{
-						if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
+						/* if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
 							id = 2; //草方块
 							grass = true;
-						}else{
+						}else{ */
 							id = 5; //石头
-						}
+						// }
 					}
 					break;
 					
 				case 1: //草原
 					
-					if (height > 0.9*this.size[1].y){ // 90%+ 高原（草木不生，积雪覆盖）
+					/* if (height > 0.9*this.size[1].y){ // 90%+ 高原（草木不生，积雪覆盖）
 						grass = true;
-					}/* else if (height > 0.7*this.size[1].y){ // 70%+ 高山（无树，有草）
-						treeHeight = height;
 					} */
 					
-					if (dy > treeHeight){
+					if (dy > height){
 						id = 0; // 空气/真空 (null)
 					}/* else if (dy > height){
 						if (!treeTop) treeTop = dy;
 						id = 8.1; //橡木
-					} */else if (dy > earth){
-						if (grass){
-							id = 3; //泥土
+					} */else if (dy == Math.floor(height) && !(height > 0.9*this.size[1].y)){ // 90%+ 高原（草木不生，积雪覆盖）
+						if (sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
+							id = 5; //草方块
 						}else{
 							id = 2; //草方块
-							grass = true;
 						}
+					}else if (dy > earth){
+						// if (grass){
+							id = 3; //泥土
+						/* }else{
+							id = 2; //草方块
+							// grass = true;
+						} */
 					}/*else if (dy == 0){
 						id = 2; //基岩
 					}*/else{
-						if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
+						/* if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
 							id = 2; //草方块
-							grass = true;
-						}else{
+							// grass = true;
+						}else{ */
 							id = 5; //石头
-						}
+						// }
 					}
 					break;
 					
@@ -541,12 +720,12 @@ class ZoneMap{
 					}/*else if (dy == 0){
 						id = 2; //基岩
 					}*/else{
-						if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
+						/* if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
 							id = 6; //沙子
 							grass = true;
-						}else{
+						}else{ */
 							id = 5; //石头
-						}
+						// }
 					}
 					break;
 				
@@ -554,35 +733,7 @@ class ZoneMap{
 					id = 0;
 			}
 			
-			if (!new Array(...edit).some((value, index, arr) => {
-				if (
-					value.x == x &&
-					value.y == dy &&
-					value.z == z
-				){ //被编辑
-					column.push({
-						id: value.id,
-						attr: value.attr
-					});
-					/* this.addID(value.id, {
-						x: x,
-						y: dy,
-						z: z
-					}, template, {
-						attr: value.attr? JSON.parse("{"+value.attr+"}"): {}
-					}); */
-					return true;
-				}
-				return false;
-			})){ //未编辑
-				column.push({id});
-				/* this.addID(id, {
-					x: x,
-					y: dy,
-					z: z
-				}, template); */
-			}
-			
+			column.push({ id });
 		}
 		
 		return column.reverse();
@@ -630,6 +781,14 @@ class ZoneMap{
 			
 		} */
 	}
+	perGetColumn_worker(x, z, edit, finishCallback){
+		let worker = new Worker("./perGetColumn_worker.js");
+		worker.postMessage({x, z, edit, t:this.seed});
+		worker.onmessage = function (event) {
+			console.log("Received message from", "perGetColumn_worker.js", event.data);
+			finishCallback(event.data);
+		}
+	}
 	
 	perGetZone(x, z, edit){
 		[x, z] = [x, z].map(Math.round); //规范化
@@ -647,33 +806,57 @@ class ZoneMap{
 		}
 		return result;
 	}
+	perGetZone_worker(x, z, edit, opt){
+		let {
+			finishCallback,
+			progressCallback
+		} = opt;
+		
+		let worker = new Worker("./perGetZone_worker.js");
+		worker.postMessage({x, z, edit, t:this.seed});
+		worker.onmessage = function (event) {
+			console.log("Received message from", "perGetZone_worker.js", event.data);
+			switch (event.data.type){
+				case "progressCallback":
+					progressCallback(event.data.value);
+					break;
+				case "finishCallback":
+					finishCallback(event.data.value);
+					worker.terminate(); //关闭线程
+					break;
+			}
+		}
+	}
 	
 	//加载列
-	loadColumn(x, z, xZone, zZone, columns, edit){
+	loadColumn(x, z, columns, edit){
 		[x, z] = [x, z].map(Math.round); //规范化
+		let ox = Math.round(x/map.size.x)*map.size.x,
+			oz = Math.round(z/map.size.z)*map.size.z;
+		let [dx, dz] = [x-ox, z-oz];
 		
 		for (let y=this.size[0].y; y<=this.size[1].y; y++){
 			try{
-				if (columns[x][z][y].id){ //有方块
+				if (columns[dx][dz][y].id){ //有方块
 					try{
 						if (
 							y != this.size[0].y && //不在最底层
 							y != this.size[1].y && //不在最顶层
-							columns[x][z][y+1].id &&
-							columns[x][z][y-1].id &&
-							columns[x+1][z][y].id &&
-							columns[x-1][z][y].id &&
-							columns[x][z+1][y].id &&
-							columns[x][z-1][y].id
+							columns[dx][dz][y+1].id &&
+							columns[dx][dz][y-1].id &&
+							columns[dx+1][dz][y].id &&
+							columns[dx-1][dz][y].id &&
+							columns[dx][dz+1][y].id &&
+							columns[dx][dz-1][y].id
 						){ //都有方块
-							console.warn("hide")
+							// console.warn("hide")
 						}else{
 							throw "";
 						}
 					}catch(e){
 						// console.warn("show")
 						this.add(
-							columns[x][z][y]
+							columns[dx][dz][y]
 								.makeMaterial()
 								.deleteTexture()
 								.makeMesh(),
@@ -690,7 +873,10 @@ class ZoneMap{
 				}
 			}catch(e){
 				//TODO handle the exception
+				console.error(e);
+				console.log(x, z, dx, dz, columns)
 				debugger
+				return;
 			}
 			
 		}
@@ -701,17 +887,27 @@ class ZoneMap{
 		[x, z] = [x, z].map(Math.round); //规范化
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
-		let columns = this.perGetZone(x, z, edit);
-		
-		if (this.activeZone.every(function(value, index, arr){
-			return value[0] != x || value[1] != z;
-		})) //每个都不一样（不存在）
-			this.activeZone.push([x,z]);
-		
-		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
-			for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
-				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
-					this.loadColumn(ox+dx, oz+dz, x, z, columns, edit);
+			
+		sql.selectData("file", ["x", "y", "z", "id", "attr"],
+			`type=0 AND`+
+			` (x BETWEEN ${ ox+this.size[0].x } AND ${ ox+this.size[1].x }) AND`+
+			` (z BETWEEN ${ oz+this.size[0].z } AND ${ oz+this.size[1].z })`,
+			(edit)=>{
+				console.log("edit(sql):", edit);
+				
+				let columns = this.perGetZone(x, z, edit);
+				
+				if (this.activeZone.every(function(value, index, arr){
+					return value[0] != x || value[1] != z;
+				})) //每个都不一样（不存在）
+					this.activeZone.push([x,z]);
+				
+				for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
+					for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
+						for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
+							this.loadColumn(ox+dx, oz+dz, columns, edit);
+			}
+		);
 	}
 	//加载区块（异步）
 	loadZoneAsync(x, z, opt={}){
@@ -774,7 +970,7 @@ class ZoneMap{
 											columns
 										});
 									},0);
-								this.loadColumn(ox+dx, oz+dz, x, z, columns, edit);
+								this.loadColumn(ox+dx, oz+dz, columns, edit);
 							}
 							
 							setTimeout(()=>{ //更新
@@ -874,7 +1070,7 @@ class ZoneMap{
 											columns
 										});
 									},0);
-								this.loadColumn(ox+dx, oz+dz, x, z, columns, edit);
+								this.loadColumn(ox+dx, oz+dz, columns, edit);
 							}
 							
 							setTimeout(()=>{ //更新
@@ -934,7 +1130,7 @@ class ZoneMap{
 							
 							//正常代码
 							for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
-								this.loadColumn(ox+dx, oz+dz, x, z, columns, edit);
+								this.loadColumn(ox+dx, oz+dz, columns, edit);
 							
 							setTimeout(()=>{
 								this.updateColumn(ox+this.size[0].x-1, oz+dz);
@@ -982,7 +1178,7 @@ class ZoneMap{
 											columns
 										});
 									},0);
-								this.loadColumn(ox+dx, oz+dz, x, z, columns, edit);
+								this.loadColumn(ox+dx, oz+dz, columns, edit);
 							}
 							
 							setTimeout(()=>{ //更新
@@ -1042,7 +1238,7 @@ class ZoneMap{
 							
 							//正常代码
 							for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
-								this.loadColumn(ox+dx, oz+dz, x, z, columns, edit);
+								this.loadColumn(ox+dx, oz+dz, columns, edit);
 							
 							setTimeout(()=>{
 								this.updateColumn(ox+this.size[0].x-1, oz+dz);
@@ -1090,7 +1286,7 @@ class ZoneMap{
 											columns
 										});
 									},0);
-								this.loadColumn(ox+dx, oz+dz, x, z, columns, edit);
+								this.loadColumn(ox+dx, oz+dz, columns, edit);
 							}
 							
 							setTimeout(()=>{ //更新
@@ -1150,7 +1346,7 @@ class ZoneMap{
 							
 							//正常代码
 							for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
-								this.loadColumn(ox+dx, oz+dz, x, z, columns, edit);
+								this.loadColumn(ox+dx, oz+dz, columns, edit);
 							
 							setTimeout(()=>{
 								this.updateColumn(ox+dx, oz+this.size[0].z-1);
@@ -1175,7 +1371,7 @@ class ZoneMap{
 				` (z BETWEEN ${ oz+this.size[0].z } AND ${ oz+this.size[1].z })`,
 				(edit)=>{
 					console.log("edit(sql):", edit);
-					func(edit);
+					func(new Array(...edit));
 				}
 			);
 		}
@@ -1186,6 +1382,7 @@ class ZoneMap{
 		[x, z] = [x, z].map(Math.round); //规范化
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
+		console.info("unload", x, z)
 		
 		for (let i in this.activeZone)
 			if (this.activeZone[i][0] == x && this.activeZone[i][1] == z)
@@ -1194,19 +1391,17 @@ class ZoneMap{
 			if (this.initedZone[i][0] == x && this.initedZone[i][1] == z)
 				this.initedZone.splice(i,1); //从i开始删除一个元素
 		
-		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
-			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
-				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-					if (this.map[ox+dx][dy][oz+dz] != null){
+		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
+			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++)
+				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
+					if (this.get(ox+dx, dy, oz+dz)){
+						console.log("delete")
 						for (let i of this.map[ox+dx][dy][oz+dz].block.mesh.material)
 							i.dispose();
 						this.map[ox+dx][dy][oz+dz].block.mesh.geometry.dispose(); //清除内存
 						scene.remove(this.map[ox+dx][dy][oz+dz].block.mesh);
+						delete this.map[ox+dx][dy][oz+dz];
 					}
-					delete this.map[ox+dx][dy][oz+dz];
-				}
-			}
-		}
 	}
 	//卸载区块（异步）
 	unloadZoneAsync(x, z, opt={}){
@@ -1276,8 +1471,8 @@ class ZoneMap{
 							i.dispose();
 						this.map[ox+dx][dy][oz+dz].block.mesh.geometry.dispose(); //清除内存
 						scene.remove(this.map[ox+dx][dy][oz+dz].block.mesh);
+						delete this.map[ox+dx][dy][oz+dz];
 					}
-					this.set(ox+dx, dy, oz+dz, null);
 				}
 			}
 			
@@ -1420,7 +1615,7 @@ class ZoneMap{
 					return i[0] != value[0] || i[1] != value[1];
 				}) //不与任何block相等
 			)
-				this.unloadZoneAsync(...i); //卸载区块
+				this.unloadZone(...i); //卸载区块
 	}
 	
 }

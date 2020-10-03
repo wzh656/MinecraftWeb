@@ -5,6 +5,7 @@ SimplexNoise.prototype.more3D = function(xin, yin, zin, more){
 	}
 	return sum;
 };
+// 种子随机常数
 const SEED_RANDOM_CONSTANT = [
 	0.6,
 	-3.1415926,
@@ -42,10 +43,10 @@ const sNoise = {
 		let value = Math.abs( noise.noise3D(SEED_RANDOM_CONSTANT[4], x/t.q, z/t.q) );
 		return value < t.desert?2: value < t.desert+t.grassland?1: 0;
 	},
-	scale(noise, t, x, z){
+	dirt(noise, t, x, z){
 		let value = noise.more3D(SEED_RANDOM_CONSTANT[5], x/t.q, z/t.q, 6) *t.k +t.b+
 			sNoise.error(noise, t.e, SEED_RANDOM_CONSTANT[6], x, z);
-		return value<0?0: value>1?1: value;
+		return value<0?0: value;
 	},
 	treeHeight(noise, t, x, z){
 		let result = [0];
@@ -89,3 +90,4 @@ const sNoise = {
 		return value<0?0: value>1?1: value;
 	}
 };
+export sNoise;
