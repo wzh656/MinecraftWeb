@@ -188,20 +188,16 @@ $("#jump").on("touchstart", function(){
 	
 	console.log("try jump");
 	
-	try{
-		if (
-			map.get(deskgood.pos.x/100,
-				deskgood.pos.y/100-2,
-				deskgood.pos.z/100)
-			!=
-				null
-		){ //脚下有方块
-			if (Number(get_date())-last_jump >= 1000){
-				deskgood.v.y += deskgood.jump_v*rnd_error();
-				last_jump = Number(get_date());
-			}
+	if (
+		map.get(deskgood.pos.x/100,
+			deskgood.pos.y/100-2,
+			deskgood.pos.z/100)
+	){ //脚下有方块
+		if (Number(get_date())-last_jump >= 1000){
+			deskgood.v.y += deskgood.jump_v*rnd_error();
+			last_jump = Number(get_date());
 		}
-	}catch(err){}
+	}
 	
 	return false;
 });

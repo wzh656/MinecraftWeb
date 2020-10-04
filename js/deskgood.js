@@ -125,7 +125,7 @@ var deskgood = {
 			value => value+(0.1*Math.random()-0.05)
 		); //随机化*/
 		
-		try{
+		// try{
 			if (
 				map.get(x/100, y/100, z/100) !== undefined && //不能移动到未加载的方块
 				map.initedZone.some((item, index, value)=>{
@@ -150,13 +150,14 @@ var deskgood = {
 					throw "";
 				} */
 			}else{
-				throw "block";
+				// throw "block";
+				message(`<font style="font-size: 16px;">区块暂未加载完成，禁止进入<br/>（想加载快可以调节区块预加载范围，只要不卡死就行）</font>`, 1);
 			}
-		}catch(err){
+		/* }catch(err){
 			if (err == "block"){ // 未加载区块，禁止进入
 				message(`<font style="font-size: 16px;">区块暂未加载完成，禁止进入<br/>（想加载快可以调节区块预加载范围，只要不卡死就行）</font>`, 1);
 			}
-		}
+		} */
 	},
 	go (x=0, y=0, z=0){
 		[x, y, z] = [x, y, z].map(

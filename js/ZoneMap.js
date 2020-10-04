@@ -123,11 +123,17 @@ class ZoneMap{
 	get(x, y, z){  // 没有方块:null,不在范围:undefined,加载中:false
 		[x, y, z] = [x, y, z].map(Math.round); //规范化
 		
-		try{
+		if (this.map[x] && this.map[x][y]){
+			return this.map[x][y][z];
+		}else{
+			return undefined;
+		}
+		
+		/*try{
 			return this.map[x][y][z];
 		}catch(err){ //超过范围
 			return undefined;
-		}
+		}*/
 	}
 	set(x, y, z, value){
 		[x, y, z] = [x, y, z].map(Math.round); //规范化
@@ -236,30 +242,33 @@ class ZoneMap{
 	update(x, y, z){
 		[x, y, z] = [x, y, z].map(Math.round); //规范化
 		
-		if (!this.get(x,y,z)) // 没有方块(null)/不在范围(undefined)/加载中(false)
+		let thisBlock = this.get(x,y,z);
+		if (!thisBlock) // 没有方块(null)/不在范围(undefined) //加载中(false)
 			return;
 		
-		this.map[x][y][z].block.material[0].visible = !( this.get(x+1, y, z) && !this.get(x+1, y, z).get("attr", "block", "transparent"));
-		this.map[x][y][z].block.material[1].visible = !( this.get(x-1, y, z) && !this.get(x-1, y, z).get("attr", "block", "transparent"));
-		this.map[x][y][z].block.material[2].visible = !( this.get(x, y+1, z) && !this.get(x, y+1, z).get("attr", "block", "transparent"));
-		this.map[x][y][z].block.material[3].visible = !( this.get(x, y-1, z) && !this.get(x, y-1, z).get("attr", "block", "transparent"));
-		this.map[x][y][z].block.material[4].visible = !( this.get(x, y, z+1) && !this.get(x, y, z+1).get("attr", "block", "transparent"));
-		this.map[x][y][z].block.material[5].visible = !( this.get(x, y, z-1) && !this.get(x, y, z-1).get("attr", "block", "transparent"));
+		let visibleValue = [
+			!( this.get(x+1, y, z) && !this.get(x+1, y, z).get("attr", "block", "transparent")) || thisBlock.get("attr", "block", "noTransparent"),
+			!( this.get(x-1, y, z) && !this.get(x-1, y, z).get("attr", "block", "transparent")) || thisBlock.get("attr", "block", "noTransparent"),
+			!( this.get(x, y+1, z) && !this.get(x, y+1, z).get("attr", "block", "transparent")) || thisBlock.get("attr", "block", "noTransparent"),
+			!( this.get(x, y-1, z) && !this.get(x, y-1, z).get("attr", "block", "transparent")) || thisBlock.get("attr", "block", "noTransparent"),
+			!( this.get(x, y, z+1) && !this.get(x, y, z+1).get("attr", "block", "transparent")) || thisBlock.get("attr", "block", "noTransparent"),
+			!( this.get(x, y, z-1) && !this.get(x, y, z-1).get("attr", "block", "transparent")) || thisBlock.get("attr", "block", "noTransparent")
+		];
+		let material = thisBlock.block.material;
+		for (let i in material)
+			if (material[i].visible != visibleValue[i])
+				material[i].visible = visibleValue[i];
 		
-		if (this.map[x][y][z].block.addTo == true && this.map[x][y][z].block.material.every(value => !value.visible)){ //已加入 且 可隐藏
-			scene.remove(this.map[x][y][z].block.mesh);
-			this.map[x][y][z].block.addTo = false;
+		if (thisBlock.block.addTo == true && visibleValue.every(value => !value)){ //已加入 且 可隐藏（每面都false）
+			scene.remove(thisBlock.block.mesh);
+			thisBlock.block.addTo = false;
 			// console.log("隐藏", this.map[x][y][z])
 		}
-		if (this.map[x][y][z].block.addTo == false && !this.map[x][y][z].block.material.every(value => !value.visible)){ //未加入 且 不可隐藏
-			scene.add(this.map[x][y][z].block.mesh);
-			this.map[x][y][z].block.addTo = true;
+		if (thisBlock.block.addTo == false && visibleValue.some(value => value)){ //未加入 且 不可隐藏（有面true）
+			scene.add(thisBlock.block.mesh);
+			thisBlockblock.addTo = true;
 			// console.log("显示", this.map[x][y][z])
 		}
-		
-		if (this.map[x][y][z].get("attr", "block", "noTransparent")) //不可透明
-			for (let i of this.map[x][y][z].block.material)
-				i.visible = true;
 	}
 	
 	//更新方块及周围
@@ -781,14 +790,14 @@ class ZoneMap{
 			
 		} */
 	}
-	perGetColumn_worker(x, z, edit, finishCallback){
+	/*perGetColumn_worker(x, z, edit, finishCallback){
 		let worker = new Worker("./perGetColumn_worker.js");
 		worker.postMessage({x, z, edit, t:this.seed});
 		worker.onmessage = function (event) {
 			console.log("Received message from", "perGetColumn_worker.js", event.data);
 			finishCallback(event.data);
 		}
-	}
+	}*/
 	
 	perGetZone(x, z, edit){
 		[x, z] = [x, z].map(Math.round); //规范化
@@ -806,7 +815,7 @@ class ZoneMap{
 		}
 		return result;
 	}
-	perGetZone_worker(x, z, edit, opt){
+	/*perGetZone_worker(x, z, edit, opt){
 		let {
 			finishCallback,
 			progressCallback
@@ -826,7 +835,7 @@ class ZoneMap{
 					break;
 			}
 		}
-	}
+	}*/
 	
 	//加载列
 	loadColumn(x, z, columns, edit){
@@ -836,25 +845,21 @@ class ZoneMap{
 		let [dx, dz] = [x-ox, z-oz];
 		
 		for (let y=this.size[0].y; y<=this.size[1].y; y++){
-			try{
-				if (columns[dx][dz][y].id){ //有方块
-					try{
-						if (
-							y != this.size[0].y && //不在最底层
-							y != this.size[1].y && //不在最顶层
-							columns[dx][dz][y+1].id &&
-							columns[dx][dz][y-1].id &&
-							columns[dx+1][dz][y].id &&
-							columns[dx-1][dz][y].id &&
-							columns[dx][dz+1][y].id &&
-							columns[dx][dz-1][y].id
-						){ //都有方块
-							// console.warn("hide")
-						}else{
-							throw "";
-						}
-					}catch(e){
-						// console.warn("show")
+			if (columns[dx][dz][y].id){ //有方块
+				// try{
+					if (
+						y != this.size[0].y && //不在最底层
+						y != this.size[1].y && //不在最顶层
+						columns[dx][dz][y+1].id &&
+						columns[dx][dz][y-1].id &&
+						columns[dx+1] && columns[dx+1][dz] && columns[dx+1][dz][y].id &&
+						columns[dx-1] && columns[dx-1][dz] && columns[dx-1][dz][y].id &&
+						columns[dx][dz+1] && columns[dx][dz+1][y].id &&
+						columns[dx][dz-1] && columns[dx][dz-1][y].id
+					){ //都有方块
+						// console.warn("hide")
+					}else{
+						// throw "";
 						this.add(
 							columns[dx][dz][y]
 								.makeMaterial()
@@ -863,22 +868,23 @@ class ZoneMap{
 							{x, y, z}
 						);
 					}
-					
-				}else{
-					this.addID(0, {
-						x,
-						y,
-						z
-					}, TEMPLATES);
-				}
-			}catch(e){
-				//TODO handle the exception
-				console.error(e);
-				console.log(x, z, dx, dz, columns)
-				debugger
-				return;
+				/* }catch(e){
+					// console.warn("show")
+					this.add(
+						columns[dx][dz][y]
+							.makeMaterial()
+							.deleteTexture()
+							.makeMesh(),
+						{x, y, z}
+					);
+				} */
+			}else{ //无方块
+				this.addID(0, {
+					x,
+					y,
+					z
+				}, TEMPLATES);
 			}
-			
 		}
 	}
 	
@@ -1382,7 +1388,8 @@ class ZoneMap{
 		[x, z] = [x, z].map(Math.round); //规范化
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
-		console.info("unload", x, z)
+		
+		console.warn("unloadZone", x, z)
 		
 		for (let i in this.activeZone)
 			if (this.activeZone[i][0] == x && this.activeZone[i][1] == z)
@@ -1416,6 +1423,8 @@ class ZoneMap{
 		[x, z] = [x, z].map(Math.round); //规范化
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
+		
+		console.warn("unloadZoneAsync", x, z, opt)
 		
 		for (let i in this.activeZone)
 			if (this.activeZone[i][0] == x && this.activeZone[i][1] == z)

@@ -36,7 +36,7 @@ block_load.id = setInterval(function(){
 				$("#progress progress")[0].value = value;
 			},
 			finishCallback: function(){
-				map.updateZoneAsync(0, 0); //更新区块
+				// map.updateZoneAsync(0, 0); //更新区块
 				if (++perload_condition >= 2){
 					map.perloadZone();
 				}
