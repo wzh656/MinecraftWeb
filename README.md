@@ -59,7 +59,7 @@
 
 
 ## ㈡关于角(jiǎo)色
-1. 本游戏的角色是一个名为`deskgood`（桌子好）的“桌子”~~以纪念同桌桌子好之死和他的ugly~~
+1. 本游戏的角色是一个名为`deskgood`（桌子好）的“桌子”~~以纪念同桌桌子好之死和他的ugly（handsome个鬼）~~
 2. 事实上，在场景(scene)中，并没有加入(add)角色，而是通过控制透视相机(`PerspectiveCamera`)的移动(封装命令方法`deskgood.move`=`deskgood.moveTo`,`deskgood.go`…)，并记录只读变量：朝向(`deskgood.lookAt`)、位置矢量(`deskgood.pos`)、速度矢量(`deskgood.v`)来实现对角色`deskgood`的控制
 3. 在程序中，定义了一个全局变量`deskgood`以封装控制角色的方法  
 
@@ -105,9 +105,9 @@
 5. ### 关于命令方块及教程：
     可使用dat.gui.js(control)设置角色`deskgood`的工具栏(tools)物品id得到，点击后将打开命令方块界面，将可在里面输入JavaScript命令  
     一些命令：
-    1. `deskgood.move(x,y,z);`（请在x,y,z处填上对应的值，单位：px或cm）可让角色`deskgood`移动到指定笛卡尔坐标。 e.g. `deskgood.move(0,0,10000*100);`可使角色`deskgood`到达坐标(0,0,1000000) ~~，即坐标原点的万米高空~~
+    1. `deskgood.move(x,y,z);`（请在x,y,z处填上对应的值，单位：px或cm）可让角色`deskgood`移动到指定笛卡尔坐标。 e.g. `deskgood.move(0,10000*100,0);`可使角色`deskgood`到达坐标(0,1000000,0) ~~，即坐标原点的万米高空~~
     2. `deskgood.moveTo(x,y,z);` 同①(`deskgood.move(x,y,z)`)，只是不同名称。
-    3. `deskgood.go(x,y,z);` （请在x,y,z处填上对应的值，单位：px或cm）将角色`deskgood`的坐标向量与向量(x,y,z)相加。 e.g. `deskgood.go(0,0,10000*100);`可使角色`deskgood`往上移动10000m=10000*100cm=1000000px ~~还是万米高空（但前提是不碰头），只是以当前坐标为基础再+10000m~~
+    3. `deskgood.go(x,y,z);` （请在x,y,z处填上对应的值，单位：px或cm）将角色`deskgood`的坐标向量与向量(x,y,z)相加。 e.g. `deskgood.go(0,10000*100,0);`可使角色`deskgood`往上移动10000m=10000*100cm=1000000px ~~还是万米高空（但前提是不碰头），只是以当前坐标为基础再+10000m~~
     4. `deskgood.die();`或`deskgood.die("原因");` （请在原因处填上适当的死亡原因，也可缺省）使角色`deskgood`死亡。 e.g. `deskgood.die("Too LAZY and Too自恋");`
     5. 其他封装命令暂请期待……
     6. 由于是直接运行JavaScript代码，所以可以直接输入原生JavaScript代码。
