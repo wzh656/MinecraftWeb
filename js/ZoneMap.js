@@ -243,7 +243,7 @@ class ZoneMap{
 		[x, y, z] = [x, y, z].map(Math.round); //规范化
 		
 		let thisBlock = this.get(x,y,z);
-		if (!thisBlock) // 没有方块(null)/不在范围(undefined) //加载中(false)
+		if (thisBlock === null) //空气 // 没有方块(null)/不在范围(undefined) //加载中(false)
 			return;
 		
 		let visibleValue = [
@@ -254,10 +254,28 @@ class ZoneMap{
 			!( this.get(x, y, z+1) && !this.get(x, y, z+1).get("attr", "block", "transparent")) || thisBlock.get("attr", "block", "noTransparent"),
 			!( this.get(x, y, z-1) && !this.get(x, y, z-1).get("attr", "block", "transparent")) || thisBlock.get("attr", "block", "noTransparent")
 		];
+		if (thisBlock === undefined && visibleValue.some(value => value)){ //未加载 且 不可隐藏（有面true）
+			return
+			sql.selectData("file", ["x", "y", "z", "id", "attr"],
+				`type=0 AND`+
+				` (x = ${x} AND`+
+				` z = ${z})`,
+				(edit)=>{
+					let get = this.perGet(x, y, z, edit);
+					this.addID(get.id, {
+						x,
+						y,
+						z,
+					}, TEMPLATES, {
+						attr: get.attr
+					});
+				}
+			);
+			return;
+		}
 		let material = thisBlock.block.material;
 		for (let i in material)
-			if (material[i].visible != visibleValue[i])
-				material[i].visible = visibleValue[i];
+			material[i].visible = visibleValue[i];
 		
 		if (thisBlock.block.addTo == true && visibleValue.every(value => !value)){ //已加入 且 可隐藏（每面都false）
 			scene.remove(thisBlock.block.mesh);
@@ -585,7 +603,7 @@ class ZoneMap{
 				id = 0;
 		}
 		
-		return id;
+		return {id};
 	}
 	
 	perGetColumn(x, z, edit){
@@ -1328,7 +1346,7 @@ class ZoneMap{
 							this.activeZone.push([x,z]);
 						
 						if (finishCallback) finishCallback();
-						
+						debugger
 						/* let dx = this.size[0].x;
 						let loadZone_id = setInterval(()=>{
 							if (dx > this.size[1].x){
