@@ -87,9 +87,13 @@ class Thing{
 			template_part = TEMPLATES[this.id];
 		//let type = !!this.template;
 		for (let i of attr){
-			try{
+			// try{
+			if (this_part && this_part[i]){ //不为undefined 且 可获取下一个属性
 				this_part = this_part[i];
-			}catch(err){}
+			}else{
+				this_part = undefined;
+			}
+			// }catch(err){}
 			template_part = template_part[i];
 			//if (this_part === undefined) type=true;
 		}

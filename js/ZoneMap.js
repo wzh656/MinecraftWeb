@@ -20,6 +20,8 @@ class ZoneMap{
 		this.initedZone = [];
 		//活动区块（加载完毕）
 		this.activeZone = [];
+		//区块编辑情况
+		this.edit = [];
 		//区块预加载范围
 		this.perloadLength = perloadLength;
 		//种子设置
@@ -159,10 +161,10 @@ class ZoneMap{
 				scene.remove(this.map[pos.x][pos.y][pos.z].block.mesh);
 				// this.map[pos.x][pos.y][pos.z] = null;
 				delete this.map[pos.x][pos.y][pos.z];
-				if (this.map[pos.x][pos.y].every(v => !v))
+				/*if (this.map[pos.x][pos.y].every(v => !v))
 					delete this.map[pos.x][pos.y];
 				if (this.map[pos.x].every(v => !v))
-					delete this.map[pos.x];
+					delete this.map[pos.x];*/
 			}else{ //不替换
 				return;
 			}
@@ -172,6 +174,7 @@ class ZoneMap{
 		thing.block.mesh.position.y = pos.y*100;
 		thing.block.mesh.position.z = pos.z*100;
 		
+		this.set(pos.x, pos.y, pos.z, thing);
 		scene.add(thing.block.mesh); //网格模型添加到场景中
 		thing.block.addTo = true;
 	}
@@ -247,46 +250,49 @@ class ZoneMap{
 			return;
 		
 		let visibleValue = [
-			!( this.get(x+1, y, z) && !this.get(x+1, y, z).get("attr", "block", "transparent")) || thisBlock.get("attr", "block", "noTransparent"),
-			!( this.get(x-1, y, z) && !this.get(x-1, y, z).get("attr", "block", "transparent")) || thisBlock.get("attr", "block", "noTransparent"),
-			!( this.get(x, y+1, z) && !this.get(x, y+1, z).get("attr", "block", "transparent")) || thisBlock.get("attr", "block", "noTransparent"),
-			!( this.get(x, y-1, z) && !this.get(x, y-1, z).get("attr", "block", "transparent")) || thisBlock.get("attr", "block", "noTransparent"),
-			!( this.get(x, y, z+1) && !this.get(x, y, z+1).get("attr", "block", "transparent")) || thisBlock.get("attr", "block", "noTransparent"),
-			!( this.get(x, y, z-1) && !this.get(x, y, z-1).get("attr", "block", "transparent")) || thisBlock.get("attr", "block", "noTransparent")
+			!( this.get(x+1, y, z) && !this.get(x+1, y, z).get("attr", "block", "transparent")) || (thisBlock && thisBlock.get("attr", "block", "noTransparent")),
+			!( this.get(x-1, y, z) && !this.get(x-1, y, z).get("attr", "block", "transparent")) || (thisBlock && thisBlock.get("attr", "block", "noTransparent")),
+			!( this.get(x, y+1, z) && !this.get(x, y+1, z).get("attr", "block", "transparent")) || (thisBlock && thisBlock.get("attr", "block", "noTransparent")),
+			!( this.get(x, y-1, z) && !this.get(x, y-1, z).get("attr", "block", "transparent")) || (thisBlock && thisBlock.get("attr", "block", "noTransparent")),
+			!( this.get(x, y, z+1) && !this.get(x, y, z+1).get("attr", "block", "transparent")) || (thisBlock && thisBlock.get("attr", "block", "noTransparent")),
+			!( this.get(x, y, z-1) && !this.get(x, y, z-1).get("attr", "block", "transparent")) || (thisBlock && thisBlock.get("attr", "block", "noTransparent"))
 		];
-		if (thisBlock === undefined && visibleValue.some(value => value)){ //未加载 且 不可隐藏（有面true）
-			return
-			sql.selectData("file", ["x", "y", "z", "id", "attr"],
-				`type=0 AND`+
-				` (x = ${x} AND`+
-				` z = ${z})`,
-				(edit)=>{
-					let get = this.perGet(x, y, z, edit);
-					this.addID(get.id, {
-						x,
-						y,
-						z,
-					}, TEMPLATES, {
-						attr: get.attr
-					});
-				}
-			);
-			return;
-		}
-		let material = thisBlock.block.material;
-		for (let i in material)
-			material[i].visible = visibleValue[i];
 		
-		if (thisBlock.block.addTo == true && visibleValue.every(value => !value)){ //已加入 且 可隐藏（每面都false）
-			scene.remove(thisBlock.block.mesh);
-			thisBlock.block.addTo = false;
-			// console.log("隐藏", this.map[x][y][z])
+		try{
+			if (thisBlock === undefined && visibleValue.some(value => value)){ //未加载 且 不可隐藏（有面true）
+				let edit = this.edit[Math.round(x/map.size.x)] && this.edit[Math.round(x/map.size.x)][Math.round(z/map.size.z)];
+				let get = this.perGet(x, y, z, edit||[]);
+				this.addID(get.id, {
+					x,
+					y,
+					z,
+				}, TEMPLATES, {
+					attr: get.attr
+				});
+				console.log(this.get(x,y,z), thisBlock)
+				thisBlock = this.get(x,y,z);
+				if (thisBlock === null) //空气
+					return;
+			}
+			console.log(this.get(x,y,z), thisBlock)
+			let material = thisBlock.block.material;
+			for (let i in material)
+				material[i].visible = visibleValue[i];
+			
+			if (thisBlock.block.addTo == true && visibleValue.every(value => !value)){ //已加入 且 可隐藏（每面都false）
+				scene.remove(thisBlock.block.mesh);
+				thisBlock.block.addTo = false;
+				// console.log("隐藏", this.map[x][y][z])
+			}
+			if (thisBlock.block.addTo == false && visibleValue.some(value => value)){ //未加入 且 不可隐藏（有面true）
+				scene.add(thisBlock.block.mesh);
+				thisBlockblock.addTo = true;
+				// console.log("显示", this.map[x][y][z])
+			}
+		}catch(e){
+			debugger
 		}
-		if (thisBlock.block.addTo == false && visibleValue.some(value => value)){ //未加入 且 不可隐藏（有面true）
-			scene.add(thisBlock.block.mesh);
-			thisBlockblock.addTo = true;
-			// console.log("显示", this.map[x][y][z])
-		}
+		
 	}
 	
 	//更新方块及周围
@@ -864,30 +870,16 @@ class ZoneMap{
 		
 		for (let y=this.size[0].y; y<=this.size[1].y; y++){
 			if (columns[dx][dz][y].id){ //有方块
-				// try{
-					if (
-						y != this.size[0].y && //不在最底层
-						y != this.size[1].y && //不在最顶层
-						columns[dx][dz][y+1].id &&
-						columns[dx][dz][y-1].id &&
-						columns[dx+1] && columns[dx+1][dz] && columns[dx+1][dz][y].id &&
-						columns[dx-1] && columns[dx-1][dz] && columns[dx-1][dz][y].id &&
-						columns[dx][dz+1] && columns[dx][dz+1][y].id &&
-						columns[dx][dz-1] && columns[dx][dz-1][y].id
-					){ //都有方块
-						// console.warn("hide")
-					}else{
-						// throw "";
-						this.add(
-							columns[dx][dz][y]
-								.makeMaterial()
-								.deleteTexture()
-								.makeMesh(),
-							{x, y, z}
-						);
-					}
-				/* }catch(e){
-					// console.warn("show")
+				if (!(
+					y != this.size[0].y && //不在最底层
+					y != this.size[1].y && //不在最顶层
+					columns[dx][dz][y+1].id &&
+					columns[dx][dz][y-1].id &&
+					columns[dx+1] && columns[dx+1][dz] && columns[dx+1][dz][y].id &&
+					columns[dx-1] && columns[dx-1][dz] && columns[dx-1][dz][y].id &&
+					columns[dx][dz+1] && columns[dx][dz+1][y].id &&
+					columns[dx][dz-1] && columns[dx][dz-1][y].id
+				)){ //都没有方块
 					this.add(
 						columns[dx][dz][y]
 							.makeMaterial()
@@ -895,8 +887,8 @@ class ZoneMap{
 							.makeMesh(),
 						{x, y, z}
 					);
-				} */
-			}else{ //无方块
+				}
+			}else{ //空气
 				this.addID(0, {
 					x,
 					y,
@@ -918,6 +910,11 @@ class ZoneMap{
 			` (z BETWEEN ${ oz+this.size[0].z } AND ${ oz+this.size[1].z })`,
 			(edit)=>{
 				console.log("edit(sql):", edit);
+				
+				//保存edit
+				if (!this.edit[x])
+					this.edit[x] = [];
+				this.edit[x][z] = edit;
 				
 				let columns = this.perGetZone(x, z, edit);
 				
@@ -956,6 +953,12 @@ class ZoneMap{
 			this.initedZone.push([x,z]);
 		
 		let func = (edit)=>{
+			//保存edit
+			if (!this.edit[x])
+				this.edit[x] = [];
+			this.edit[x][z] = edit;
+			// console.log("save edit", x, z, edit)
+			
 			if (!columns)
 				columns = this.perGetZone(x, z, edit)
 			
@@ -1346,7 +1349,6 @@ class ZoneMap{
 							this.activeZone.push([x,z]);
 						
 						if (finishCallback) finishCallback();
-						debugger
 						/* let dx = this.size[0].x;
 						let loadZone_id = setInterval(()=>{
 							if (dx > this.size[1].x){
@@ -1407,8 +1409,6 @@ class ZoneMap{
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
-		console.warn("unloadZone", x, z)
-		
 		for (let i in this.activeZone)
 			if (this.activeZone[i][0] == x && this.activeZone[i][1] == z)
 				this.activeZone.splice(i,1); //从i开始删除一个元素
@@ -1441,8 +1441,6 @@ class ZoneMap{
 		[x, z] = [x, z].map(Math.round); //规范化
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
-		
-		console.warn("unloadZoneAsync", x, z, opt)
 		
 		for (let i in this.activeZone)
 			if (this.activeZone[i][0] == x && this.activeZone[i][1] == z)
@@ -1573,7 +1571,12 @@ class ZoneMap{
 	}
 	
 	//预加载区块
-	perloadZone(length = this.perloadLength){
+	perloadZone(opt={}){
+		let {
+			length=map.perloadLength, //加载范围（视野）
+			progressCallback,
+			finishCallback
+		} = opt;
 		let block = [];
 		for (let x of [-1,1,0]){
 			for (let z of [-1,1,0]){
@@ -1619,14 +1622,22 @@ class ZoneMap{
 			}
 		}
 		
+		let loading=0, total=0;
+		
 		for (let i in block){
 			if (this.initedZone.every(function(value, index, arr){
 				return value[0] != block[i][0] || value[1] != block[i][1];
 			})){ //每个都不一样（不存在 & 不在加载中）
 				// this.initZone(block[i][0], block[i][1]);
+				loading++;
 				this.loadZoneAsync(block[i][0], block[i][1], {
 					dir: block[i][2],
 					finishCallback: ()=>{
+						if (--loading == 0 && finishCallback){ //完成所有
+							finishCallback();
+						}else if (progressCallback){ //反馈进度
+							progressCallback((total-loading) / total);
+						}
 						this.updateZoneAsync(block[i][0], block[i][1], {
 							breakTime: 36
 						}); //更新区块
@@ -1641,8 +1652,21 @@ class ZoneMap{
 				block.every((value, index, arr)=>{
 					return i[0] != value[0] || i[1] != value[1];
 				}) //不与任何block相等
-			)
-				this.unloadZone(...i); //卸载区块
+			){
+				loading++;
+				this.unloadZoneAsync(...i, {
+					breakTime: 36,
+					finishCallback: ()=>{
+						if (--loading == 0 && finishCallback){ //完成所有
+							finishCallback();
+						}else if (progressCallback){ //反馈进度
+							progressCallback((total-loading) / total);
+						}
+					}
+				}); //卸载区块
+			}
+		
+		total = loading;
 	}
 	
 }

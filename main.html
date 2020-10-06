@@ -372,7 +372,7 @@
 				flex-direction: column-reverse;
 				overflow-y: auto;
 				top: 45%;
-				height: 75vh;
+				/* height: 75vh; */
 				padding: 0;
 			}
 			#bag > input[type="radio"][name="bag-nav"]{ /* 隐藏input */
@@ -605,10 +605,10 @@ function run(code){
 	}
 }
 
-var stop = true;
-var device;
-var perload_condition = 0;
-var TimeSpeed = 1;
+var stop = true,
+	device, //设备：true手机，false电脑
+	perload_condition = 0,
+	TimeSpeed = 1;
 function get_date(){ //获取时间
 	return new Date( (+new Date)*TimeSpeed );
 	//return new Date();

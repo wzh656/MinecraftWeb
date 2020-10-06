@@ -24,9 +24,22 @@ function SQL_read(){
 			[deskgood.lookAt.left_right, deskgood.lookAt.top_bottom] = result[0].attr.split(" ").map(Number);
 			deskgood.look_refresh();
 			if (++perload_condition >= 2){
-				map.perloadZone();
+				console.log(perload_condition)
+				map.perloadZone({
+					progressCallback: (value)=>{
+						$("#progress span").text( (value*100).changeDecimalBuZero(2, 2) );
+						$("#progress progress")[0].value = value;
+					},
+					finishCallback: ()=>{
+						$("#progress span").text("100");
+						$("#progress progress")[0].value = 1;
+						setTimeout(function(){
+							render(); //纹理贴图加载成功后，调用渲染函数执行渲染操作
+							$("#progress").remove();
+						},0);
+					}
+				});
 			}
-			console.log(perload_condition)
 		}
 	});
 	sql.selectData("file", ["x", "y", "z"], "type=2", function(result){

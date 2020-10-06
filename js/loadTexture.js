@@ -1,3 +1,22 @@
+// 小数点后补位
+Number.prototype.changeDecimalBuZero = function(padEnd, padStart){
+	var f_x = parseFloat(this);
+	if (isNaN(f_x)) {
+		return 0;
+	}
+	var s_x = this.toString();
+	var pos_decimal = s_x.indexOf('.');
+	if (pos_decimal < 0) {
+		pos_decimal = s_x.length;
+		s_x += '.';
+	}
+	while (s_x.length <= pos_decimal + padEnd){
+		s_x += '0';
+	}
+	return s_x.padStart(padStart, "0");
+}
+
+
 /**
 * 创建网格模型
 */
@@ -29,7 +48,24 @@ block_load.id = setInterval(function(){
 		$("#progress progress")[0].max = 1;
 		$("#progress progress")[0].value = 0;
 		
-		// map.initZone(0, 0); //初始化区块
+		if (++perload_condition >= 2){
+			console.log(perload_condition)
+			map.perloadZone({
+				progressCallback: (value)=>{
+					$("#progress span").text( (value*100).changeDecimalBuZero(2, 2) );
+					$("#progress progress")[0].value = value;
+				},
+				finishCallback: ()=>{
+					$("#progress span").text("100");
+					$("#progress progress")[0].value = 1;
+					setTimeout(function(){
+						render(); //纹理贴图加载成功后，调用渲染函数执行渲染操作
+						$("#progress").remove();
+					},0);
+				}
+			});
+		}
+		/* // map.initZone(0, 0); //初始化区块
 		map.loadZoneAsync(0, 0, {
 			progressCallback: function(value){
 				$("#progress span").text( value*100 );
@@ -48,7 +84,7 @@ block_load.id = setInterval(function(){
 					$("#progress").remove();
 				},0);
 			}
-		}); //用噪声填充区块
+		}); //用噪声填充区块 */
 	}
 },0);
 

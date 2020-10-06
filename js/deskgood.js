@@ -517,9 +517,19 @@ deskgood_folder.open();
 	deskgood_folder.add(deskgood, "jump_v", 1, 36).name("跳跃速度");
 	let deskgood_position_folder = deskgood_folder.addFolder("位置/px");
 	deskgood_position_folder.open();
-		deskgood_position_folder.add(deskgood.pos, "x", -1000, 1000, 0.01).listen();
-		deskgood_position_folder.add(deskgood.pos, "y", -1000, 128*100, 0.01).listen();
-		deskgood_position_folder.add(deskgood.pos, "z", -1000, 1000, 0.01).listen();
+		deskgood_position_folder.add(deskgood.pos, "x", map.size[0].x*100, map.size[1].x*100, 0.01).listen();
+		deskgood_position_folder.add(deskgood.pos, "y", map.size[0].y*100, map.size[1].y*100, 0.01).listen();
+		deskgood_position_folder.add(deskgood.pos, "z", map.size[0].z*100, map.size[1].z*100, 0.01).listen();
+		let deskgood_position_zone_folder = deskgood_position_folder.addFolder("区块(zone)");
+		deskgood_position_zone_folder.open();
+			deskgood_position_folder.add({
+				get x(){ return Math.round(deskgood.pos.x/100/map.size.x) },
+				set x(v){ deskgood.pos.x = v*100*map.size.x }
+			}, "x", -100, 100, 1).listen();
+			deskgood_position_folder.add({
+				get z(){ return Math.round(deskgood.pos.z/100/map.size.z) },
+				set z(v){ deskgood.pos.z = v*100*map.size.z }
+			}, "z", -100, 100, 1).listen();
 	let deskgood_v_folder = deskgood_folder.addFolder("速度/(m/s)");
 		deskgood_v_folder.add(deskgood.v, "x", -10, 10, 1e-3).listen();
 		deskgood_v_folder.add(deskgood.v, "y", -100, 100, 1e-3).listen().onChange((value) => {
