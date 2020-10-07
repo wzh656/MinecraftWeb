@@ -204,15 +204,15 @@
 						平滑程度：1<input type="range" min="1" max="1000" value="166" name="q" />1000 <input value="166"/>
 					</div>
 				</div>
-				<div class="scale">
-					<h3>泥土与石头之比(scale)</h3>
-					最小：0.01<input type="range" min="0.01" max="0.99" value="0.1" step="0.01" name="min" />0.99 <input value="0.1"/><br/>
-					最大：0.01<input type="range" min="0.01" max="0.99" value="0.4" step="0.01" name="max" />0.99 <input value="0.4"/><br/>
+				<div class="dirt">
+					<h3>泥土层厚度(dirt)</h3>
+					最小：0<input type="range" min="0" max="5" value="1" step="0.1" name="min" />5 <input value="1"/><br/>
+					最大：0<input type="range" min="0" max="5" value="4" step="0.1" name="max" />5 <input value="4"/><br/>
 					平滑程度：1<input type="range" min="1" max="1000" step="1" value="166" name="q" />1000 <input value="166"/>
 					<div class="error">
 						<h4>误差(error)</h4>
-						最小：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="-0.1" name="min" />0.5 <input value="-0.1"/><br/>
-						最大：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="0.1" name="max" />0.5 <input value="0.1"/><br/>
+						最小：-2<input type="range" min="-2" max="2" step="0.1" value="-1" name="min" />2 <input value="-1"/><br/>
+						最大：-2<input type="range" min="-2" max="2" step="0.1" value="1" name="max" />2 <input value="1"/><br/>
 						平滑程度：1<input type="range" min="1" max="1000" value="166" name="q" />1000 <input value="166"/>
 					</div>
 				</div>
@@ -227,7 +227,7 @@
 					生成森林(forest)的概率：0<input type="range" min="0" max="1" step="0.01" value="0.4" name="forest" />1 <input name="forest" value="0.4"/><br/>
 					生成草原(grassland)的概率：0<input type="range" min="0" max="1" step="0.01" value="0.4" name="grassland" />1 <input name="grassland" value="0.4"/><br/>
 					生成沙漠(desert)的概率：0<input type="range" min="0" max="1" step="0.01" value="0.2" name="desert" />1 <input name="desert" value="0.2"/><br/>
-					平滑程度：1<input type="range" min="1" max="1000" step="1" value="166" name="q" />1000 <input value="166"/>
+					平滑程度：1<input type="range" min="1" max="1000" step="1" value="666" name="q" />1000 <input value="666"/>
 				</div>
 				<div class="treeHeight">
 					<h3>树高(treeHeight)</h3>
@@ -370,14 +370,14 @@ $(".new_world > button:eq(1)").click(function(){
 				q: Number( $(".more > .height > .error > [name='q']").val() )
 			}
 		},
-		scale={
-			min: Number( $(".more > .scale > [name='min']").val() ),
-			max: Number( $(".more > .scale > [name='max']").val() ),
-			q: Number( $(".more > .scale > [name='q']").val() ),
+		dirt={
+			min: Number( $(".more > .dirt > [name='min']").val() ),
+			max: Number( $(".more > .dirt > [name='max']").val() ),
+			q: Number( $(".more > .dirt > [name='q']").val() ),
 			error:{
-				min: Number( $(".more > .scale > .error > [name='min']").val() ),
-				max: Number( $(".more > .scale > .error > [name='max']").val() ),
-				q: Number( $(".more > .scale > .error > [name='q']").val() )
+				min: Number( $(".more > .dirt > .error > [name='min']").val() ),
+				max: Number( $(".more > .dirt > .error > [name='max']").val() ),
+				q: Number( $(".more > .dirt > .error > [name='q']").val() )
 			}
 		},
 		type={
@@ -422,7 +422,7 @@ $(".new_world > button:eq(1)").click(function(){
 	}
 	localStorage.setItem("我的世界_seed", seed);
 	localStorage.setItem("我的世界_height", JSON.stringify(height));
-	localStorage.setItem("我的世界_scale", JSON.stringify(scale));
+	localStorage.setItem("我的世界_dirt", JSON.stringify(dirt));
 	localStorage.setItem("我的世界_type", JSON.stringify(type));
 	localStorage.setItem("我的世界_treeHeight", JSON.stringify(treeHeight));
 	localStorage.setItem("我的世界_leavesScale", JSON.stringify(leavesScale));

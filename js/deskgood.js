@@ -64,7 +64,7 @@ var deskgood = {
 	},
 	hold: [null, null, null, null],
 	choice: 0,
-	sensitivity: 2, //灵敏度
+	sensitivity: device? 2.6: 1, //灵敏度：手机2，电脑1
 	die(reason="使用命令自杀"){
 		sql.deleteTable("file", undefined, function(){
 			localStorage.removeItem("我的世界_seed");
@@ -125,9 +125,9 @@ var deskgood = {
 			value => value+(0.1*Math.random()-0.05)
 		); //随机化*/
 		
-		try{
+		// try{
 			if (
-				map.get(x/100, y/100, z/100) !== false && //不能移动到未加载的方块
+				map.get(x/100, y/100, z/100) !== undefined && //不能移动到未加载的方块
 				map.initedZone.some((item, index, value)=>{
 					return item[0] == Math.round(x/100/map.size.x) &&
 						item[1] == Math.round(z/100/map.size.z);
@@ -150,13 +150,14 @@ var deskgood = {
 					throw "";
 				} */
 			}else{
-				throw "block";
+				// throw "block";
+				message(`<font style="font-size: 16px;">区块暂未加载完成，禁止进入<br/>（想加载快可以调节区块预加载范围，只要不卡死就行）</font>`, 1);
 			}
-		}catch(err){
+		/* }catch(err){
 			if (err == "block"){ // 未加载区块，禁止进入
 				message(`<font style="font-size: 16px;">区块暂未加载完成，禁止进入<br/>（想加载快可以调节区块预加载范围，只要不卡死就行）</font>`, 1);
 			}
-		}
+		} */
 	},
 	go (x=0, y=0, z=0){
 		[x, y, z] = [x, y, z].map(
@@ -516,9 +517,19 @@ deskgood_folder.open();
 	deskgood_folder.add(deskgood, "jump_v", 1, 36).name("跳跃速度");
 	let deskgood_position_folder = deskgood_folder.addFolder("位置/px");
 	deskgood_position_folder.open();
-		deskgood_position_folder.add(deskgood.pos, "x", -1000, 1000, 0.01).listen();
-		deskgood_position_folder.add(deskgood.pos, "y", -1000, 128*100, 0.01).listen();
-		deskgood_position_folder.add(deskgood.pos, "z", -1000, 1000, 0.01).listen();
+		deskgood_position_folder.add(deskgood.pos, "x", map.size[0].x*100, map.size[1].x*100, 0.01).listen();
+		deskgood_position_folder.add(deskgood.pos, "y", map.size[0].y*100, map.size[1].y*100, 0.01).listen();
+		deskgood_position_folder.add(deskgood.pos, "z", map.size[0].z*100, map.size[1].z*100, 0.01).listen();
+		let deskgood_position_zone_folder = deskgood_position_folder.addFolder("区块(zone)");
+		deskgood_position_zone_folder.open();
+			deskgood_position_folder.add({
+				get x(){ return Math.round(deskgood.pos.x/100/map.size.x) },
+				set x(v){ deskgood.pos.x = v*100*map.size.x }
+			}, "x", -100, 100, 1).listen();
+			deskgood_position_folder.add({
+				get z(){ return Math.round(deskgood.pos.z/100/map.size.z) },
+				set z(v){ deskgood.pos.z = v*100*map.size.z }
+			}, "z", -100, 100, 1).listen();
 	let deskgood_v_folder = deskgood_folder.addFolder("速度/(m/s)");
 		deskgood_v_folder.add(deskgood.v, "x", -10, 10, 1e-3).listen();
 		deskgood_v_folder.add(deskgood.v, "y", -100, 100, 1e-3).listen().onChange((value) => {

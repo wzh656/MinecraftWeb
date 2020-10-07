@@ -372,7 +372,7 @@
 				flex-direction: column-reverse;
 				overflow-y: auto;
 				top: 45%;
-				height: 75vh;
+				/* height: 75vh; */
 				padding: 0;
 			}
 			#bag > input[type="radio"][name="bag-nav"]{ /* 隐藏input */
@@ -605,10 +605,10 @@ function run(code){
 	}
 }
 
-var stop = true;
-var device;
-var perload_condition = 0;
-var TimeSpeed = 1;
+var stop = true,
+	device, //设备：true手机，false电脑
+	perload_condition = 0,
+	TimeSpeed = 1;
 function get_date(){ //获取时间
 	return new Date( (+new Date)*TimeSpeed );
 	//return new Date();
@@ -792,17 +792,17 @@ function rnd_error(){
 		<script src="./js/sendMessage.js"></script>
 		<script src="./js/playBGM.js"></script>
 		
-		<script src="./js/init_SQL.js"></script>
+		<script src="./js/SQL_init.js"></script>
 		<script src="./js/dat.gui.js"></script>
 		<script src="./js/stats.js"></script>
 		
 		<script src="./js/Thing.js"></script>
 		
 		<script src="./js/SimplexNoise.js"></script>
-		<script src="./js/BlockMap.js"></script>
+		<script src="./js/ZoneMap.js"></script>
 		
 		<script src="./js/template.js"></script>
-		<script src="./js/init_Map.js"></script>
+		<script src="./js/ZoneMap_init.js"></script>
 		
 		<script src="./js/loadTexture.js"></script>
 		

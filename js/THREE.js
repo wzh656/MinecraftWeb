@@ -12,8 +12,8 @@ let scene_folder = gui.addFolder("场景(scene)");
 		scene_fog_folder.add(scene.fog, "far", 15*100, 1000*100, 100);
 		scene_fog_folder.add(scene.fog, "near", 0.001, 10);
 		scene_fog_folder.addColor(scene.fog, "color");
-	let scene_block_folder = scene_folder.addFolder("区块(block)");
-		scene_block_folder.add(map, "perloadLength", 1, 1000, 1).name("预加载范围/px");
+	let scene_zone_folder = scene_folder.addFolder("区块(zone)");
+		scene_zone_folder.add(map, "perloadLength", 100, 10000, 100).name("预加载范围/px");
 
 
 /* let floor_geometry = new THREE.PlaneGeometry(1000, 1000, 6, 6);
@@ -26,10 +26,10 @@ floor_mesh.position.y = -10;
 scene.add(floor_mesh); */
 
 
-// 改变AxesHelper构造函数的参数，可以改变三维坐标轴的大小
+/* // 改变AxesHelper构造函数的参数，可以改变三维坐标轴的大小
 // 参数设置坐标轴大小:1000
 var axesHelper = new THREE.AxesHelper(1666);
-scene.add(axesHelper);
+scene.add(axesHelper); */
 
 
 /**

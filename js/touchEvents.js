@@ -188,20 +188,16 @@ $("#jump").on("touchstart", function(){
 	
 	console.log("try jump");
 	
-	try{
-		if (
-			map.get(deskgood.pos.x/100,
-				deskgood.pos.y/100-2,
-				deskgood.pos.z/100)
-			!=
-				null
-		){ //脚下有方块
-			if (Number(get_date())-last_jump >= 1000){
-				deskgood.v.y += deskgood.jump_v*rnd_error();
-				last_jump = Number(get_date());
-			}
+	if (
+		map.get(deskgood.pos.x/100,
+			deskgood.pos.y/100-2,
+			deskgood.pos.z/100)
+	){ //脚下有方块
+		if (Number(get_date())-last_jump >= 1000){
+			deskgood.v.y += deskgood.jump_v*rnd_error();
+			last_jump = Number(get_date());
 		}
-	}catch(err){}
+	}
 	
 	return false;
 });
@@ -441,8 +437,8 @@ $("#game").on("touchend", function (e){
 							x: x/100,
 							y: y/100,
 							z: z/100
-						}, template);*/
-						/* map.add(new Thing(template[ deskgood.hold[deskgood.choice] ]).block.makeMaterial().block.deleteTexture().block.makeMesh(), {
+						}, TEMPLATES);*/
+						/* map.add(new Thing(TEMPLATES[ deskgood.hold[deskgood.choice] ]).block.makeMaterial().block.deleteTexture().block.makeMesh(), {
 							x: x/100,
 							y: y/100,
 							z: z/100

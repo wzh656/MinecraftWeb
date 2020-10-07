@@ -235,18 +235,14 @@ setInterval(function(){
 	if (x || y || z)
 		deskgood.go(x*t*0.1, 0, z*t*0.1); // 1m/s = 100px/s = 0.1px/ms
 	
-	try{
-		if (map.get(deskgood.pos.x/100,
-				deskgood.pos.y/100-1.6,
-				deskgood.pos.z/100)
-			!=
-				null
-		){ //脚下有方块
-			if (+get_date()-last_jump >= 1000 & y != 0){
-				console.log("jump");
-				deskgood.v.y += y * deskgood.jump_v*rnd_error();
-				last_jump = +get_date();
-			}
+	if (map.get(deskgood.pos.x/100,
+			deskgood.pos.y/100-1.6,
+			deskgood.pos.z/100)
+	){ //脚下有方块
+		if (+get_date()-last_jump >= 1000 & y != 0){
+			console.log("jump");
+			deskgood.v.y += y * deskgood.jump_v*rnd_error();
+			last_jump = +get_date();
 		}
-	}catch(err){}
+	}
 }, 16.667);
