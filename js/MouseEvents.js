@@ -147,24 +147,40 @@ $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind�
 	if (event.originalEvent.wheelDelta){ //判断浏览器IE,谷歌滚轮事件
 		if (wheel > 0) { //当滑轮向上滚动时
 			console.log("上滚轮");
-			up();
-			deskgood.hold_choice_refresh();
+			if (keydown.key.has(16)){ //shift
+				TimeSpeed *= 1.5;
+			}else{
+				up();
+				deskgood.hold_choice_refresh();
+			}
 		}  
 		if (wheel < 0) { //当滑轮向下滚动时
 			console.log("下滚轮");
-			down();
-			deskgood.hold_choice_refresh();
+			if (keydown.key.has(16)){ //shift
+				TimeSpeed /= 1.5;
+			}else{
+				down();
+				deskgood.hold_choice_refresh();
+			}
 		}  
 	}else if (event.originalEvent.detail){ //Firefox滚轮事件
 		if (detal > 0) { //当滑轮向下滚动时
 			console.log("下滚轮");
-			down();
-			deskgood.hold_choice_refresh();
+			if (keydown.key.has(16)){ //shift
+				TimeSpeed /= 1.5;
+			}else{
+				down();
+				deskgood.hold_choice_refresh();
+			}
 		}
 		if (detal < 0) { //当滑轮向上滚动时
 			console.log("上滚轮");
-			up();
-			deskgood.hold_choice_refresh();
+			if (keydown.key.has(16)){ //shift
+				TimeSpeed *= 1.5;
+			}else{
+				up();
+				deskgood.hold_choice_refresh();
+			}
 		}
 	}  
 });

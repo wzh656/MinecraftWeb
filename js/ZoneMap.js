@@ -258,7 +258,39 @@ class ZoneMap{
 			!( this.get(x, y, z-1) && !this.get(x, y, z-1).get("attr", "block", "transparent")) || (thisBlock && thisBlock.get("attr", "block", "noTransparent"))
 		];
 		
-		try{
+		if (thisBlock === undefined){ //未加载
+			let [xZ, zZ] = [x/map.size.x, z/map.size.z].map(Math.round); //所属区块(Zone)
+			if (visibleValue.some(value => value) && this.initedZone.some(v => v[0]==xZ && v[1]==zZ)){ //可隐藏（有面true） and 在加载区块内
+				let edit = this.edit[xZ] && this.edit[xZ][zZ];
+				let get = this.perGet(x, y, z, edit||[]);
+				this.addID(get.id, {
+					x,
+					y,
+					z,
+				}, TEMPLATES, {
+					attr: get.attr
+				});
+				thisBlock = this.get(x,y,z);
+			}
+			if (!thisBlock) //undefined（仍未加载） or null（加载为空气）
+				return;
+		}
+		let material = thisBlock.block.material;
+		for (let i in material)
+			material[i].visible = visibleValue[i];
+		
+		if (thisBlock.block.addTo == true && visibleValue.every(value => !value)){ //已加入 and 可隐藏（每面都false）
+			scene.remove(thisBlock.block.mesh);
+			thisBlock.block.addTo = false;
+			// console.log("隐藏", this.map[x][y][z])
+		}
+		if (thisBlock.block.addTo == false && visibleValue.some(value => value)){ //未加入 and 不可隐藏（有面true）
+			scene.add(thisBlock.block.mesh);
+			thisBlockblock.addTo = true;
+			// console.log("显示", this.map[x][y][z])
+		}
+		
+		/* try{
 			if (thisBlock === undefined && visibleValue.some(value => value)){ //未加载 且 不可隐藏（有面true）
 				let edit = this.edit[Math.round(x/map.size.x)] && this.edit[Math.round(x/map.size.x)][Math.round(z/map.size.z)];
 				let get = this.perGet(x, y, z, edit||[]);
@@ -291,7 +323,7 @@ class ZoneMap{
 			}
 		}catch(e){
 			debugger
-		}
+		} */
 		
 	}
 	
@@ -1578,6 +1610,37 @@ class ZoneMap{
 			finishCallback
 		} = opt;
 		let block = [];
+		for (let x=-length; x<=length; x+=map.size.x){
+			for (let z=-length; z<=length; z+=map.size.z){
+				let push = [
+					Math.round((deskgood.pos.x+x)/100/map.size.x),
+					Math.round((deskgood.pos.z+z)/100/map.size.z),
+					(
+						(x>=0 && z>=0)? (
+							Math.abs(x)>=Math.abs(z)?
+								"x+"
+							:
+								"z+"
+						):(x>=0 && z<0)? (
+							Math.abs(x)>=Math.abs(z)?
+								"x+"
+							:
+								"z-"
+						):(x<0 && z>=0)? (
+							Math.abs(x)>=Math.abs(z)?
+								"x-"
+							:
+								"z+"
+						): (
+							Math.abs(x)>=Math.abs(z)?
+								"x-"
+							:
+								"z-"
+						)
+					)
+				];
+			}
+		}
 		for (let x of [-1,1,0]){
 			for (let z of [-1,1,0]){
 				let push = [

@@ -9,7 +9,7 @@ let gui = new dat.GUI({
 gui.close();
 gui.add(window, "TimeSpeed", 1, 3600, 1).name("时间流逝速度").onChange((value) => {
 	TimeSpeed = ((value-1)/(3600-1))**6 *(3600-1)+1;
-});
+}).listen();
 gui.add({f:function(){
 	run(prompt("请输入命令：","deskgood.goY(3000*100);"))
 }}, "f").name("运行(run)命令");
