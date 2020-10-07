@@ -1,4 +1,4 @@
-class ZoneMap{
+class ChunkMap{
 	constructor (size, seed, perloadLength){
 		//一区块大小
 		this.size = {};
@@ -17,9 +17,9 @@ class ZoneMap{
 		//所有方块
 		this.map = [];
 		//已初始化的区块
-		this.initedZone = [];
+		this.initedChunk = [];
 		//活动区块（加载完毕）
-		this.activeZone = [];
+		this.activeChunk = [];
 		//区块编辑情况
 		this.edit = [];
 		//区块预加载范围
@@ -259,8 +259,8 @@ class ZoneMap{
 		];
 		
 		if (thisBlock === undefined){ //未加载
-			let [xZ, zZ] = [x/map.size.x, z/map.size.z].map(Math.round); //所属区块(Zone)
-			if (visibleValue.some(value => value) && this.initedZone.some(v => v[0]==xZ && v[1]==zZ)){ //可隐藏（有面true） and 在加载区块内
+			let [xZ, zZ] = [x/map.size.x, z/map.size.z].map(Math.round); //所属区块(Chunk)
+			if (visibleValue.some(value => value) && this.initedChunk.some(v => v[0]==xZ && v[1]==zZ)){ //可隐藏（有面true） and 在加载区块内
 				let edit = this.edit[xZ] && this.edit[xZ][zZ];
 				let get = this.perGet(x, y, z, edit||[]);
 				this.addID(get.id, {
@@ -286,7 +286,7 @@ class ZoneMap{
 		}
 		if (thisBlock.block.addTo == false && visibleValue.some(value => value)){ //未加入 and 不可隐藏（有面true）
 			scene.add(thisBlock.block.mesh);
-			thisBlockblock.addTo = true;
+			thisBlock.block.addTo = true;
 			// console.log("显示", this.map[x][y][z])
 		}
 		
@@ -346,7 +346,7 @@ class ZoneMap{
 	}
 	
 	//更新区块内所有方块（同步）
-	updateZone(x, z){
+	updateChunk(x, z){
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
@@ -359,7 +359,7 @@ class ZoneMap{
 		}
 	}
 	//更新区块内所有方块（异步）
-	updateZoneAsync(x, z, opt={}){
+	updateChunkAsync(x, z, opt={}){
 		let {
 			finishCallback,
 			progressCallback,
@@ -398,7 +398,7 @@ class ZoneMap{
 					
 					if (new Date()-t0 > breakTime) //超时
 						return setTimeout(()=>{
-							this.updateZoneAsync(x, z, {
+							this.updateChunkAsync(x, z, {
 								finishCallback,
 								progressCallback,
 								breakTime,
@@ -414,7 +414,7 @@ class ZoneMap{
 					progressCallback((dx-this.size[0].x)/(this.size[1].x-this.size[0].x));
 				if (++num >= mostSpeed) //超数
 					return setTimeout(()=>{
-						this.updateZoneAsync(x, z, {
+						this.updateChunkAsync(x, z, {
 							finishCallback,
 							progressCallback,
 							breakTime,
@@ -424,9 +424,9 @@ class ZoneMap{
 			}
 			if (finishCallback) finishCallback();
 			/* let dx = this.size[0].x;
-			let updateZone_id = setInterval(()=>{
+			let updateChunk_id = setInterval(()=>{
 				if (dx > this.size[1].x){
-					clearInterval(updateZone_id);
+					clearInterval(updateChunk_id);
 					finishCallback();
 					return;
 				}
@@ -469,15 +469,15 @@ class ZoneMap{
 	
 	
 	/* //初始化区块
-	initZone(x, z){
+	initChunk(x, z){
 		[x, z] = [x, z].map(Math.round); //规范化
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
-		if (this.initedZone.every(function(value, index, arr){
+		if (this.initedChunk.every(function(value, index, arr){
 			return value[0] != x || value[1] != z;
 		})) //每个都不一样（不存在）
-			this.initedZone.push([x,z]);
+			this.initedChunk.push([x,z]);
 		
 		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
 			this.map[ox+dx] = this.map[ox+dx] || [];
@@ -855,7 +855,7 @@ class ZoneMap{
 		}
 	}*/
 	
-	perGetZone(x, z, edit){
+	perGetChunk(x, z, edit){
 		[x, z] = [x, z].map(Math.round); //规范化
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
@@ -871,16 +871,16 @@ class ZoneMap{
 		}
 		return result;
 	}
-	/*perGetZone_worker(x, z, edit, opt){
+	/*perGetChunk_worker(x, z, edit, opt){
 		let {
 			finishCallback,
 			progressCallback
 		} = opt;
 		
-		let worker = new Worker("./perGetZone_worker.js");
+		let worker = new Worker("./perGetChunk_worker.js");
 		worker.postMessage({x, z, edit, t:this.seed});
 		worker.onmessage = function (event) {
-			console.log("Received message from", "perGetZone_worker.js", event.data);
+			console.log("Received message from", "perGetChunk_worker.js", event.data);
 			switch (event.data.type){
 				case "progressCallback":
 					progressCallback(event.data.value);
@@ -931,7 +931,7 @@ class ZoneMap{
 	}
 	
 	//加载区块（同步）
-	loadZone(x, z){
+	loadChunk(x, z){
 		[x, z] = [x, z].map(Math.round); //规范化
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
@@ -948,12 +948,12 @@ class ZoneMap{
 					this.edit[x] = [];
 				this.edit[x][z] = edit;
 				
-				let columns = this.perGetZone(x, z, edit);
+				let columns = this.perGetChunk(x, z, edit);
 				
-				if (this.activeZone.every(function(value, index, arr){
+				if (this.activeChunk.every(function(value, index, arr){
 					return value[0] != x || value[1] != z;
 				})) //每个都不一样（不存在）
-					this.activeZone.push([x,z]);
+					this.activeChunk.push([x,z]);
 				
 				for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
 					for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
@@ -963,7 +963,7 @@ class ZoneMap{
 		);
 	}
 	//加载区块（异步）
-	loadZoneAsync(x, z, opt={}){
+	loadChunkAsync(x, z, opt={}){
 		let {
 			finishCallback,
 			progressCallback,
@@ -979,10 +979,10 @@ class ZoneMap{
 			oz = z*this.size.z, //区块中心坐标
 			t = this.seed; //临时变量
 		
-		if (this.initedZone.every(function(value, index, arr){ //添加
+		if (this.initedChunk.every(function(value, index, arr){ //添加
 			return value[0] != x || value[1] != z;
 		})) //每个都不一样（不存在）
-			this.initedZone.push([x,z]);
+			this.initedChunk.push([x,z]);
 		
 		let func = (edit)=>{
 			//保存edit
@@ -992,7 +992,7 @@ class ZoneMap{
 			// console.log("save edit", x, z, edit)
 			
 			if (!columns)
-				columns = this.perGetZone(x, z, edit)
+				columns = this.perGetChunk(x, z, edit)
 			
 			switch (dir.substr(0,2)){
 				case "x-":
@@ -1019,7 +1019,7 @@ class ZoneMap{
 							for (; dz<=this.size[1].z; dz++){
 								if (new Date-t0 > breakTime) //超时
 									return setTimeout(()=>{
-										this.loadZoneAsync(x, z, {
+										this.loadChunkAsync(x, z, {
 											finishCallback,
 											progressCallback,
 											breakTime,
@@ -1042,7 +1042,7 @@ class ZoneMap{
 								progressCallback( (dx-this.size[1].x)/(this.size[0].x-this.size[1].x) );
 							if (++num >= mostSpeed) //超数
 								return setTimeout(()=>{
-									this.loadZoneAsync(x, z, {
+									this.loadChunkAsync(x, z, {
 										finishCallback,
 										progressCallback,
 										breakTime,
@@ -1059,15 +1059,15 @@ class ZoneMap{
 							}
 						},0);
 						
-						if (this.activeZone.every(function(value, index, arr){ //添加
+						if (this.activeChunk.every(function(value, index, arr){ //添加
 							return value[0] != x || value[1] != z;
 						})) //每个都不一样（不存在）
-							this.activeZone.push([x,z]);
+							this.activeChunk.push([x,z]);
 						
 						if (finishCallback) finishCallback();
 						
 						/* let dx = this.size[1].x;
-						let loadZone_id = setInterval(()=>{
+						let loadChunk_id = setInterval(()=>{
 							if (dx < this.size[0].x){
 								setTimeout(()=>{
 									for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
@@ -1075,12 +1075,12 @@ class ZoneMap{
 										this.updateColumn(ox+dx, oz+dz);
 									}
 								},0);
-								clearInterval(loadZone_id);
+								clearInterval(loadChunk_id);
 								
-								if (this.activeZone.every(function(value, index, arr){
+								if (this.activeChunk.every(function(value, index, arr){
 									return value[0] != x || value[1] != z;
 								})) //每个都不一样（不存在）
-									this.activeZone.push([x,z]);
+									this.activeChunk.push([x,z]);
 								
 								if (finishCallback)
 									finishCallback();
@@ -1119,7 +1119,7 @@ class ZoneMap{
 							for (; dx<=this.size[1].z; dx++){
 								if (new Date-t0 > breakTime) //超时
 									return setTimeout(()=>{
-										this.loadZoneAsync(x, z, {
+										this.loadChunkAsync(x, z, {
 											finishCallback,
 											progressCallback,
 											breakTime,
@@ -1142,7 +1142,7 @@ class ZoneMap{
 								progressCallback( (dz-this.size[0].z)/(this.size[0].z-this.size[1].z) );
 							if (++num >= mostSpeed) //超数
 								return setTimeout(()=>{
-									this.loadZoneAsync(x, z, {
+									this.loadChunkAsync(x, z, {
 										finishCallback,
 										progressCallback,
 										breakTime,
@@ -1159,15 +1159,15 @@ class ZoneMap{
 							}
 						},0);
 						
-						if (this.activeZone.every(function(value, index, arr){ //添加
+						if (this.activeChunk.every(function(value, index, arr){ //添加
 							return value[0] != x || value[1] != z;
 						})) //每个都不一样（不存在）
-							this.activeZone.push([x,z]);
+							this.activeChunk.push([x,z]);
 						
 						if (finishCallback) finishCallback();
 						
 						/* let dz = this.size[0].z;
-						let loadZone_id = setInterval(()=>{
+						let loadChunk_id = setInterval(()=>{
 							if (dz > this.size[1].z){
 								setTimeout(()=>{
 									for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
@@ -1175,12 +1175,12 @@ class ZoneMap{
 										this.updateColumn(ox+dx, oz+dz);
 									}
 								},0);
-								clearInterval(loadZone_id);
+								clearInterval(loadChunk_id);
 								
-								if (this.activeZone.every(function(value, index, arr){
+								if (this.activeChunk.every(function(value, index, arr){
 									return value[0] != x || value[1] != z;
 								})) //每个都不一样（不存在）
-									this.activeZone.push([x,z]);
+									this.activeChunk.push([x,z]);
 								
 								if (finishCallback)
 									finishCallback();
@@ -1227,7 +1227,7 @@ class ZoneMap{
 							for (; dx<=this.size[1].z; dx++){
 								if (new Date-t0 > breakTime) //超时
 									return setTimeout(()=>{
-										return this.loadZoneAsync(x, z, {
+										return this.loadChunkAsync(x, z, {
 											finishCallback,
 											progressCallback,
 											breakTime,
@@ -1250,7 +1250,7 @@ class ZoneMap{
 								progressCallback( (dz-this.size[1].dz)/(this.size[0].z-this.size[1].z) );
 							if (++num >= mostSpeed) //超数
 								return setTimeout(()=>{
-									this.loadZoneAsync(x, z, {
+									this.loadChunkAsync(x, z, {
 										finishCallback,
 										progressCallback,
 										breakTime,
@@ -1267,15 +1267,15 @@ class ZoneMap{
 							}
 						},0);
 						
-						if (this.activeZone.every(function(value, index, arr){ //添加
+						if (this.activeChunk.every(function(value, index, arr){ //添加
 							return value[0] != x || value[1] != z;
 						})) //每个都不一样（不存在）
-							this.activeZone.push([x,z]);
+							this.activeChunk.push([x,z]);
 						
 						if (finishCallback) finishCallback();
 						
 						/* let dz = this.size[1].z;
-						let loadZone_id = setInterval(()=>{
+						let loadChunk_id = setInterval(()=>{
 							if (dz < this.size[0].z){
 								setTimeout(()=>{
 									for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
@@ -1283,12 +1283,12 @@ class ZoneMap{
 										this.updateColumn(ox+dx, oz+dz);
 									}
 								},0);
-								clearInterval(loadZone_id);
+								clearInterval(loadChunk_id);
 								
-								if (this.activeZone.every(function(value, index, arr){
+								if (this.activeChunk.every(function(value, index, arr){
 									return value[0] != x || value[1] != z;
 								})) //每个都不一样（不存在）
-									this.activeZone.push([x,z]);
+									this.activeChunk.push([x,z]);
 								
 								if (finishCallback)
 									finishCallback();
@@ -1335,7 +1335,7 @@ class ZoneMap{
 							for (; dz<=this.size[1].z; dz++){
 								if (new Date-t0 > breakTime) //超时
 									return setTimeout(()=>{
-										this.loadZoneAsync(x, z, {
+										this.loadChunkAsync(x, z, {
 											finishCallback,
 											progressCallback,
 											breakTime,
@@ -1358,7 +1358,7 @@ class ZoneMap{
 								progressCallback( (dx-this.size[0].x)/(this.size[1].x-this.size[0].x) );
 							if (++num >= mostSpeed) //超数
 								return setTimeout(()=>{
-									this.loadZoneAsync(x, z, {
+									this.loadChunkAsync(x, z, {
 										finishCallback,
 										progressCallback,
 										breakTime,
@@ -1375,14 +1375,14 @@ class ZoneMap{
 							}
 						},0);
 						
-						if (this.activeZone.every(function(value, index, arr){ //添加
+						if (this.activeChunk.every(function(value, index, arr){ //添加
 							return value[0] != x || value[1] != z;
 						})) //每个都不一样（不存在）
-							this.activeZone.push([x,z]);
+							this.activeChunk.push([x,z]);
 						
 						if (finishCallback) finishCallback();
 						/* let dx = this.size[0].x;
-						let loadZone_id = setInterval(()=>{
+						let loadChunk_id = setInterval(()=>{
 							if (dx > this.size[1].x){
 								setTimeout(()=>{
 									for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
@@ -1390,12 +1390,12 @@ class ZoneMap{
 										this.updateColumn(ox+dx, oz+dz);
 									}
 								},0);
-								clearInterval(loadZone_id);
+								clearInterval(loadChunk_id);
 								
-								if (this.activeZone.every(function(value, index, arr){
+								if (this.activeChunk.every(function(value, index, arr){
 									return value[0] != x || value[1] != z;
 								})) //每个都不一样（不存在）
-									this.activeZone.push([x,z]);
+									this.activeChunk.push([x,z]);
 								
 								if (finishCallback)
 									finishCallback();
@@ -1436,17 +1436,17 @@ class ZoneMap{
 	}
 	
 	//卸载区块（同步）
-	unloadZone(x, z){
+	unloadChunk(x, z){
 		[x, z] = [x, z].map(Math.round); //规范化
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
-		for (let i in this.activeZone)
-			if (this.activeZone[i][0] == x && this.activeZone[i][1] == z)
-				this.activeZone.splice(i,1); //从i开始删除一个元素
-		for (let i in this.initedZone)
-			if (this.initedZone[i][0] == x && this.initedZone[i][1] == z)
-				this.initedZone.splice(i,1); //从i开始删除一个元素
+		for (let i in this.activeChunk)
+			if (this.activeChunk[i][0] == x && this.activeChunk[i][1] == z)
+				this.activeChunk.splice(i,1); //从i开始删除一个元素
+		for (let i in this.initedChunk)
+			if (this.initedChunk[i][0] == x && this.initedChunk[i][1] == z)
+				this.initedChunk.splice(i,1); //从i开始删除一个元素
 		
 		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
 			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++)
@@ -1461,7 +1461,7 @@ class ZoneMap{
 					}
 	}
 	//卸载区块（异步）
-	unloadZoneAsync(x, z, opt={}){
+	unloadChunkAsync(x, z, opt={}){
 		let {
 			finishCallback,
 			progressCallback,
@@ -1474,12 +1474,12 @@ class ZoneMap{
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
-		for (let i in this.activeZone)
-			if (this.activeZone[i][0] == x && this.activeZone[i][1] == z)
-				this.activeZone.splice(i,1); //从i开始删除一个元素
-		for (let i in this.initedZone)
-			if (this.initedZone[i][0] == x && this.initedZone[i][1] == z)
-				this.initedZone.splice(i,1); //从i开始删除一个元素
+		for (let i in this.activeChunk)
+			if (this.activeChunk[i][0] == x && this.activeChunk[i][1] == z)
+				this.activeChunk.splice(i,1); //从i开始删除一个元素
+		for (let i in this.initedChunk)
+			if (this.initedChunk[i][0] == x && this.initedChunk[i][1] == z)
+				this.initedChunk.splice(i,1); //从i开始删除一个元素
 		
 		//if (finishCallback){ //有回调（必须setInterval）
 		
@@ -1514,7 +1514,7 @@ class ZoneMap{
 				for (; dz<=this.size[1].z; dz++){
 					if (new Date-t0 > breakTime) //超时
 						return setTimeout(()=>{
-							this.unloadZoneAsync(x, z, {
+							this.unloadChunkAsync(x, z, {
 								finishCallback,
 								progressCallback,
 								breakTime,
@@ -1537,7 +1537,7 @@ class ZoneMap{
 				progressCallback( (dx-this.size[0].x)/(this.size[1].x-this.size[0].x) )
 			if (++num >= mostSpeed) //超数
 				return setTimeout(()=>{
-					this.unloadZoneAsync(x, z, {
+					this.unloadChunkAsync(x, z, {
 						finishCallback,
 						progressCallback,
 						breakTime,
@@ -1547,7 +1547,7 @@ class ZoneMap{
 				},0);
 		}
 			/* let dx = this.size[0].x;
-			let unloadZone_id = setInterval(()=>{
+			let unloadChunk_id = setInterval(()=>{
 				if (dx > this.size[1].x){
 					setTimeout(()=>{
 						for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
@@ -1559,7 +1559,7 @@ class ZoneMap{
 							this.updateColumn(ox+this.size[1].x+1, oz+dz);
 						}
 					}, 0);
-					clearInterval(unloadZone_id);
+					clearInterval(unloadChunk_id);
 					if (finishCallback)
 						finishCallback();
 					return;
@@ -1603,7 +1603,7 @@ class ZoneMap{
 	}
 	
 	//预加载区块
-	perloadZone(opt={}){
+	perloadChunk(opt={}){
 		let {
 			length=map.perloadLength, //加载范围（视野）
 			progressCallback,
@@ -1688,12 +1688,12 @@ class ZoneMap{
 		let loading=0, total=0;
 		
 		for (let i in block){
-			if (this.initedZone.every(function(value, index, arr){
+			if (this.initedChunk.every(function(value, index, arr){
 				return value[0] != block[i][0] || value[1] != block[i][1];
 			})){ //每个都不一样（不存在 & 不在加载中）
-				// this.initZone(block[i][0], block[i][1]);
+				// this.initChunk(block[i][0], block[i][1]);
 				loading++;
-				this.loadZoneAsync(block[i][0], block[i][1], {
+				this.loadChunkAsync(block[i][0], block[i][1], {
 					dir: block[i][2],
 					finishCallback: ()=>{
 						if (--loading == 0 && finishCallback){ //完成所有
@@ -1701,7 +1701,7 @@ class ZoneMap{
 						}else if (progressCallback){ //反馈进度
 							progressCallback((total-loading) / total);
 						}
-						this.updateZoneAsync(block[i][0], block[i][1], {
+						this.updateChunkAsync(block[i][0], block[i][1], {
 							breakTime: 36
 						}); //更新区块
 					}
@@ -1709,7 +1709,7 @@ class ZoneMap{
 			}
 		}
 		
-		for (let i of this.activeZone)
+		for (let i of this.activeChunk)
 			if (
 				// (i[0] != 0 || i[1] != 0)&& //不是出生区块
 				block.every((value, index, arr)=>{
@@ -1717,7 +1717,7 @@ class ZoneMap{
 				}) //不与任何block相等
 			){
 				loading++;
-				this.unloadZoneAsync(...i, {
+				this.unloadChunkAsync(...i, {
 					breakTime: 36,
 					finishCallback: ()=>{
 						if (--loading == 0 && finishCallback){ //完成所有

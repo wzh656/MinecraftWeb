@@ -12,8 +12,8 @@ let scene_folder = gui.addFolder("场景(scene)");
 		scene_fog_folder.add(scene.fog, "far", 15*100, 1000*100, 100);
 		scene_fog_folder.add(scene.fog, "near", 0.001, 10);
 		scene_fog_folder.addColor(scene.fog, "color");
-	let scene_zone_folder = scene_folder.addFolder("区块(zone)");
-		scene_zone_folder.add(map, "perloadLength", 100, 10000, 100).name("预加载范围/px");
+	let scene_chunk_folder = scene_folder.addFolder("区块(chunk)");
+		scene_chunk_folder.add(map, "perloadLength", 100, 10000, 100).name("预加载范围/px");
 
 
 /* let floor_geometry = new THREE.PlaneGeometry(1000, 1000, 6, 6);

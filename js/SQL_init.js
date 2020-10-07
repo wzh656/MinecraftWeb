@@ -25,7 +25,7 @@ function SQL_read(){
 			deskgood.look_refresh();
 			if (++perload_condition >= 2){
 				console.log(perload_condition)
-				map.perloadZone({
+				map.perloadChunk({
 					progressCallback: (value)=>{
 						$("#progress span").text( (value*100).changeDecimalBuZero(2, 2) );
 						$("#progress progress")[0].value = value;

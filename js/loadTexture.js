@@ -50,7 +50,7 @@ block_load.id = setInterval(function(){
 		
 		if (++perload_condition >= 2){
 			console.log(perload_condition)
-			map.perloadZone({
+			map.perloadChunk({
 				progressCallback: (value)=>{
 					$("#progress span").text( (value*100).changeDecimalBuZero(2, 2) );
 					$("#progress progress")[0].value = value;
@@ -65,16 +65,16 @@ block_load.id = setInterval(function(){
 				}
 			});
 		}
-		/* // map.initZone(0, 0); //初始化区块
-		map.loadZoneAsync(0, 0, {
+		/* // map.initChunk(0, 0); //初始化区块
+		map.loadChunkAsync(0, 0, {
 			progressCallback: function(value){
 				$("#progress span").text( value*100 );
 				$("#progress progress")[0].value = value;
 			},
 			finishCallback: function(){
-				// map.updateZoneAsync(0, 0); //更新区块
+				// map.updateChunkAsync(0, 0); //更新区块
 				if (++perload_condition >= 2){
-					map.perloadZone();
+					map.perloadChunk();
 				}
 				console.log(perload_condition)
 				$("#progress span").text("100");
@@ -120,8 +120,8 @@ for (let i=1; i<TEMPLATES.length; i++){
 				render();
 				$("#progress").remove();
 			}else{ //初始化地形
-				map.loadZone(0, 0);
-				map.initZone(0, 0);
+				map.loadChunk(0, 0);
+				map.initChunk(0, 0);
 				
 				$("#progress1").text("100");
 				//纹理贴图加载成功后，调用渲染函数执行渲染操作

@@ -198,12 +198,12 @@ document.addEventListener("mousedown", function (e){
 			if (click[i].faceIndex){
 				if (click[i].object instanceof THREE.Mesh){
 					let {x, y, z} = click[i].object.position; // 单位 px=cm
-					[x, y, z] = [x, y, z].map(v => v/100); // 单位 m
 					if (Math.sqrt(
 						(x - deskgood.pos.x) **2+
 						(y - deskgood.pos.y) **2+
 						(z - deskgood.pos.z) **2
-					) < 500){ //距离小于500
+					) < 500){ //距离小于500px=500cm
+						[x, y, z] = [x, y, z].map(v => v/100); // 单位 m
 						if (
 							map.get(x, y, z).get("attr", "block", "onLeftMouseDown") &&
 							eval(map.get(x, y, z).get("attr", "block", "onLeftMouseDown")) === false
@@ -329,14 +329,14 @@ document.addEventListener("mousedown", function (e){
 					sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
 						sql.insertData("file", ["type", "x", "y", "z", "id"], [
 							0,
-							x,
-							y,
-							z,
+							click[i].object.position.x/100,
+							click[i].object.position.y/100,
+							click[i].object.position.z/100,
 							thing.id //,
 							// `'${JSON.stringify(thing.attr).slice(1,-1)}'` //删除方块无需attr
 						])
 					});
-					deskgood.hold[deskgood.choice] = 0; //删除手里的方块
+					deskgood.hold[deskgood.choice] = null; //删除手里的方块
 					deskgood.hold_things_refresh(); //刷新方块
 					break; //跳出 寻找有效放置的 循环
 				}
