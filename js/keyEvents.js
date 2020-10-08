@@ -121,7 +121,7 @@ document.addEventListener("keyup", function (e){
 	}
 	return false;
 });
-let last_jump = +get_date()-1000;
+let last_jump = get_date()-1000;
 setInterval(function(){
 	if (stop){
 		keydown.key = new Set();
@@ -171,10 +171,10 @@ setInterval(function(){
 		console.log("up:", keydown.key);
 		y += 1*rnd_error();
 	}
-	if (keydown.key.has(16)){ //下
+	/* if (keydown.key.has(16)){ //下
 		console.log("down:", keydown.key);
 		y += -1*rnd_error();
-	}
+	} */
 	
 	/* x = x*10 + (x>0? 10: x<0? -10: 0);
 	z = z*10 + (z>0? 10: z<0? -10: 0);
@@ -236,10 +236,10 @@ setInterval(function(){
 		deskgood.go(x*t*0.1, 0, z*t*0.1); // 1m/s = 100px/s = 0.1px/ms
 	
 	if (map.get(deskgood.pos.x/100,
-			deskgood.pos.y/100-1.6,
+			deskgood.pos.y/100-2,
 			deskgood.pos.z/100)
 	){ //脚下有方块
-		if (+get_date()-last_jump >= 1000 & y != 0){
+		if (get_date()-last_jump >= 1000 & y != 0){
 			console.log("jump");
 			deskgood.v.y += y * deskgood.jump_v*rnd_error();
 			last_jump = +get_date();

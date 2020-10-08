@@ -227,19 +227,16 @@ $("#game").on("touchstart", function (e){
 			for (let i in click){
 				if (click[i].faceIndex){
 					if (click[i].object instanceof THREE.Mesh){
-						let x = click[i].object.position.x,
-							y = click[i].object.position.y,
-							z = click[i].object.position.z;
+						let {x, y, z} = click[i].object.position; // 单位 px=cm
 						if (Math.sqrt(
 							(x - deskgood.pos.x) **2+
 							(y - deskgood.pos.y) **2+
 							(z - deskgood.pos.z) **2
 						) < 500){ //距离小于500
+							[x, y, z] = [x, y, z].map(v => v/100); // 单位 m
 							if (
-								map.get(x/100, y/100, z/100) &&
-								map.get(x/100, y/100, z/100).attr.block &&
-								map.get(x/100, y/100, z/100).attr.block.onLongTouch &&
-								eval(map.get(x/100, y/100, z/100).attr.block.onLongTouch) === false
+								map.get(x, y, z).get("attr","block","onLongTouch") &&
+								eval(map.get(x, y, z).get("attr","block","onLongTouch")) === false
 							) return;
 							/*let free = -1;
 							if (deskgood.hold[deskgood.choice] == 0){
@@ -269,12 +266,12 @@ $("#game").on("touchstart", function (e){
 								}catch(err){} */
 							}else{
 								console.log("delete:", click[i].object.position);
-								deskgood.hold[free] = new Thing(map.get(x/100, y/100, z/100)); //放在手中
+								deskgood.hold[free] = new Thing(map.get(x, y, z)); //放在手中
 								deskgood.hold_things_refresh(); //刷新方块
-								map.delete(x/100, y/100, z/100); //删除方块
-								map.updateRound(x/100, y/100, z/100); //更新方块
+								map.delete(x, y, z); //删除方块
+								map.updateRound(x, y, z); //更新方块
 								//SQL
-								[x, y, z] = [x, y, z].map(v => Math.round(v/100));
+								[x, y, z] = [x, y, z].map(Math.round);
 								sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
 									sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
 										0,
@@ -288,10 +285,10 @@ $("#game").on("touchstart", function (e){
 								//scene.remove(click[i].object);
 								//every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = 0;
 								try{
-									plus.device.vibrate(16); //挖掘震动
+									plus.device.vibrate(36); //挖掘震动
 								}catch(e){ //原生震动
 									if("vibrate" in navigator){
-										navigator.vibrate(16);
+										navigator.vibrate(36);
 									}
 								}
 								/* if (
@@ -361,9 +358,8 @@ $("#game").on("touchend", function (e){
 			let click = ray2D(true, x, y);
 			for (let i in click){
 				if (click[i].object instanceof THREE.Mesh){
-					let x = click[i].object.position.x,
-						y = click[i].object.position.y,
-						z = click[i].object.position.z;
+					let {x,y,z} = click[i].object.position; // 单位px=cm
+					[x, y, z] = [x, y, z].map(v => v/100); // 单位m
 					/* if (
 						Math.sqrt(
 							(click[i].object.position.x - deskgood.pos.x) **2+
@@ -386,67 +382,65 @@ $("#game").on("touchend", function (e){
 						}
 					} */
 					if (
-						map.get(x/100, y/100, z/100) &&
-						map.get(x/100, y/100, z/100).attr.block &&
-						map.get(x/100, y/100, z/100).attr.block.onShortTouch &&
-						eval(map.get(x/100, y/100, z/100).attr.block.onShortTouch) === false
+						map.get(x, y, z).get("attr","block","onShortTouch") &&
+						eval(map.get(x, y, z).get("attr","block","onShortTouch")) === false
 					) return;
 					if (!deskgood.hold[deskgood.choice]) //空气
 						return;
 					switch (click[i].faceIndex){
 						case 0:
 						case 1:
-							x += 100;
+							x++;
 							break;
 						case 2:
 						case 3:
-							x -= 100;
+							x--;
 							break;
 						case 4:
 						case 5:
-							y += 100;
+							y++;
 							break;
 						case 6:
 						case 7:
-							y -= 100;
+							y--;
 							break;
 						case 8:
 						case 9:
-							z += 100;
+							z++;
 							break;
 						case 10:
 						case 11:
-							z -= 100;
+							z--;
 							break;
 						default:
 							return console.error("faceIndex wrong:", click[i].faceIndex);
 					}
 					if (Math.sqrt(
-						(x-deskgood.pos.x) **2+
-						(y-deskgood.pos.y) **2+
-						(z-deskgood.pos.z) **2
+						(x*100-deskgood.pos.x) **2+
+						(y*100-deskgood.pos.y) **2+
+						(z*100-deskgood.pos.z) **2
 					) < 500){ //距离<5m
-						map.add(
-							new Thing(deskgood.hold[deskgood.choice]), {
-								x: x/100,
-								y: y/100,
-								z: z/100
-							}
-						);
+						map.addID(deskgood.hold[deskgood.choice].id, {
+							x,
+							y,
+							z
+						}, TEMPLATES, {
+							attr: deskgood.hold[deskgood.choice].attr
+						});
 						/*map.addID(deskgood.hold[deskgood.choice], {
-							x: x/100,
-							y: y/100,
-							z: z/100
+							x,
+							y,
+							z
 						}, TEMPLATES);*/
 						/* map.add(new Thing(TEMPLATES[ deskgood.hold[deskgood.choice] ]).block.makeMaterial().block.deleteTexture().block.makeMesh(), {
-							x: x/100,
-							y: y/100,
-							z: z/100
+							x,
+							y,
+							z
 						}); */
-						map.updateRound(x/100, y/100, z/100); //更新方块及周围方块
+						map.updateRound(x, y, z); //更新方块及周围方块
 						let thing_id = deskgood.hold[deskgood.choice].id;
 						//SQL
-						[x, y, z] = [x, y, z].map(v => Math.round(v/100));
+						[x, y, z] = [x, y, z].map(Math.round);
 						sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
 							sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
 								0,

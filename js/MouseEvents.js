@@ -329,9 +329,9 @@ document.addEventListener("mousedown", function (e){
 					sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
 						sql.insertData("file", ["type", "x", "y", "z", "id"], [
 							0,
-							click[i].object.position.x/100,
-							click[i].object.position.y/100,
-							click[i].object.position.z/100,
+							x,
+							y,
+							z,
 							thing.id //,
 							// `'${JSON.stringify(thing.attr).slice(1,-1)}'` //删除方块无需attr
 						])
