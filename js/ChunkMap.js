@@ -246,7 +246,7 @@ class ChunkMap{
 		[x, y, z] = [x, y, z].map(Math.round); //规范化
 		
 		let thisBlock = this.get(x,y,z);
-		if (thisBlock === null) //空气 // 没有方块(null)/不在范围(undefined) //加载中(false)
+		if (thisBlock === null) //空气    //没有方块(null)/不在范围(undefined) //加载中(false)
 			return;
 		
 		let visibleValue = [
@@ -260,7 +260,7 @@ class ChunkMap{
 		
 		if (thisBlock === undefined){ //未加载
 			let [xZ, zZ] = [x/map.size.x, z/map.size.z].map(Math.round); //所属区块(Chunk)
-			if (visibleValue.some(value => value) && this.initedChunk.some(v => v[0]==xZ && v[1]==zZ)){ //可隐藏（有面true） and 在加载区块内
+			if (visibleValue.some(v => v) && this.initedChunk.some(v => v[0]==xZ && v[1]==zZ)){ //不可隐藏（有面true） and 在加载区块内
 				let edit = this.edit[xZ] && this.edit[xZ][zZ];
 				let get = this.perGet(x, y, z, edit||[]);
 				this.addID(get.id, {
@@ -329,7 +329,7 @@ class ChunkMap{
 	
 	//更新方块及周围
 	updateRound(x,y,z){
-		this.update(x, y, z);
+		// this.update(x, y, z);
 		this.update(x+1, y, z);
 		this.update(x-1, y, z);
 		this.update(x, y+1, z);
@@ -683,6 +683,7 @@ class ChunkMap{
 		let treeHeight = height + sNoise.treeHeight(this.seed.noise, this.seed.tH, x, z);
 		for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
 			
+			let edited = false;
 			for (let value of edit){
 				if (
 					value.x == x &&
@@ -693,9 +694,10 @@ class ChunkMap{
 						id: value.id,
 						attr: value.attr
 					});
-					continue;
+					edited = true;
 				}
 			}
+			if (edited) continue;
 			//未编辑
 			
 			/* let earth = height - height * (t.noise.more3D(6.6, x/t.s.q, z/t.s.q, 6) *t.s.k +t.s.b)+

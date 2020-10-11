@@ -19,7 +19,7 @@ let deskgood_choice_folder = deskgood_folder.addFolder("选择物体");
 	deskgood_choice_folder.add(mouse_choice, "id", 0, 9, 1).listen();
 
 $(document).on("click", function (e){
-	console.log( ray3D({},deskgood.look)[0] );
+	// console.log( ray3D({},deskgood.look)[0] );
 });
 document.addEventListener("mousemove", function (e){
 	if (stop)
@@ -70,7 +70,7 @@ document.addEventListener("mousemove", function (e){
 	}
 	
 	try{
-		let get = ray({},deskgood.look)[0];
+		let get = ray3D({},deskgood.look)[0];
 		mouse_choice.x = get.object.position.x;
 		mouse_choice.y = get.object.position.y;
 		mouse_choice.z = get.object.position.z;
@@ -228,20 +228,18 @@ document.addEventListener("mousedown", function (e){
 							
 							deskgood.hold[free] = new Thing(map.get(x, y, z)); //放在手中
 							deskgood.hold_things_refresh(); //刷新方块
-							let attr = `'${JSON.stringify(map.get(x, y, z).attr).slice(1,-1)}'`;
 							map.delete(x, y, z); //删除方块
 							map.updateRound(x, y, z); //刷新方块及周围
 							
 							[x, y, z] = [x, y, z].map(Math.round); //存储必须整数
 							//SQL
 							sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
-								sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
+								sql.insertData("file", ["type", "x", "y", "z", "id"], [
 									0,
 									x,
 									y,
 									z,
-									0,
-									attr
+									0
 								])
 							});
 							/*scene.remove(click[i].object);
@@ -306,7 +304,7 @@ document.addEventListener("mousedown", function (e){
 						z--;
 						break;
 					default:
-						return console.error("faceIndex wrong:", click[i].faceIndex);
+						throw ["faceIndex wrong:", click[i].faceIndex];
 				}
 				if (Math.sqrt(
 					(x*100 - deskgood.pos.x) **2+
@@ -324,16 +322,17 @@ document.addEventListener("mousedown", function (e){
 					map.updateRound(x, y, z); //刷新方块及周围
 					
 					[x, y, z] = [x, y, z].map(Math.round); //存储必须整数
+					let attr = `'${JSON.stringify(map.get(x, y, z).attr).slice(1,-1)}'`;
 					//SQL
 					let thing = deskgood.hold[deskgood.choice];
-					sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
-						sql.insertData("file", ["type", "x", "y", "z", "id"], [
+					sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, ()=>{
+						sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
 							0,
 							x,
 							y,
 							z,
-							thing.id //,
-							// `'${JSON.stringify(thing.attr).slice(1,-1)}'` //删除方块无需attr
+							thing.id,
+							attr
 						])
 					});
 					deskgood.hold[deskgood.choice] = null; //删除手里的方块
