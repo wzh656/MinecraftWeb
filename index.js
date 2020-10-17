@@ -22,7 +22,7 @@ function createWindow () {
 	win.loadURL("file://"+__dirname+"/main.html")
 
 	// 打开开发工具
-	// win.webContents.openDevTools()
+	win.webContents.openDevTools()
 
 	win.on('closed', () => {
 		// 取消引用窗口对象, 如果你的应用程序支持多窗口，通常你会储存windows在数组中，这是删除相应元素的时候。
@@ -154,11 +154,11 @@ function getCookie(success, error){
 	request({
 		url: 'https://wzh656.github.io/notice/Talking_cookie.txt',
 		method: 'GET'
-	}, function (error, response, body) {
-		if (!error && response.statusCode == 200){
+	}, function (err, response, body) {
+		if (!err && response.statusCode == 200){
 			success( body );
 		}else{
-			error( [response.statusCode, error] );
+			error( [response.statusCode, err] );
 		}
 	});
 }

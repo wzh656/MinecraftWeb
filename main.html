@@ -1,5 +1,14 @@
 <!DOCTYPE html>
-<!-- Copyright © 2020 by wzh -->
+<!--
+　┐ ├┬─┐ ┌──┼┼┐
+　│ ││　 ┌──┼┼┐
+│╯├─┐ ╭──┴╯			W
+└╯│   ┌────┐			Z
+　│　├─┐ ├────┤	H
+　╰┘└　 └────╯
+Copyright © 2020 by wzh
+保留一切权利
+-->
 <html lang="zh">
 	<head>
 		<meta charset="UTF-8" />
@@ -568,6 +577,7 @@ deskgood.moveTo(0,10000*100);
 		<!--<audio id="bgm" autoplay perload loop style="display: none;" src="https://vdse.bdstatic.com/876934f28995e8042230ec598237c67e.mp4?authorization=bce-auth-v1/fb297a5cc0fb434c971b8fa103e8dd7b/2017-05-11T09:02:31Z/-1//ab5b458a478fae53b754e194ab270b96f23aa23ba71c2e63b06fc06d0543040c"></audio>-->
 		<noscript><h1 style="z-index: 6;">你的浏览器不支持JavaScript，无法运行！</h1></noscript>
 
+<script src="./js/GameTime.js"></script>
 <script>
 //退出
 function exit(){
@@ -608,11 +618,7 @@ function run(code){
 var stop = true,
 	device, //设备：true手机，false电脑
 	perload_condition = 0,
-	TimeSpeed = 1;
-function get_date(){ //获取时间
-	return new Date( (+new Date)*TimeSpeed );
-	//return new Date();
-}
+	time = new GameTime(1);
 /**
 * 判断手机电脑
 */
@@ -686,12 +692,14 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 			document.mozPointerLockElement === document.body ||
 			document.webkitPointerLockElement === document.body
 		){ //已锁定
-			console.log("pointerLock yes");
+			console.warn("pointerLock yes");
 			stop = false;
+			time.stopTime();
 			$("#help").css("display", "none");
 		}else{ //未锁定
-			console.log("pointerLock no");
+			console.warn("pointerLock no");
 			stop = true;
+			time.stopTime();
 			$("#help").css("display", "inline-block");
 			SQL_save();
 		}
@@ -806,6 +814,7 @@ function rnd_error(){
 		
 		<script src="./js/loadTexture.js"></script>
 		
+		<script src="./js/ColorUpdater.js"></script>
 		<script src="./js/THREE.js"></script>
 		<script src="./js/weather.js"></script>
 		<script src="./js/deskgood.js"></script>

@@ -17,7 +17,7 @@ $("#control").on("touchstart", function(e){
 		y = e.originalEvent.targetTouches[0].clientY;
 	console.log("touchstart(control):", x, y);
 	
-	[touch_control.x0, touch_control.y0, touch_control.t0] = [x, y, +get_date()];
+	[touch_control.x0, touch_control.y0, touch_control.t0] = [x, y, +time.getTime()];
 	
 	touch_control.loop = setInterval(function(){
 		if (touch_control.x0 !== null &
@@ -25,8 +25,8 @@ $("#control").on("touchstart", function(e){
 			touch_control.x !== null &
 			touch_control.y !== null
 		){
-			let t = +get_date()-touch_control.t0;
-			touch_control.t0 = +get_date();
+			let t = +time.getTime()-touch_control.t0;
+			touch_control.t0 = +time.getTime();
 			let dx = touch_control.x-touch_control.x0,
 				dy = touch_control.y-touch_control.y0;
 			let r = (
@@ -193,9 +193,9 @@ $("#jump").on("touchstart", function(){
 			deskgood.pos.y/100-2,
 			deskgood.pos.z/100)
 	){ //脚下有方块
-		if (Number(get_date())-last_jump >= 1000){
+		if (Number(time.getTime())-last_jump >= 1000){
 			deskgood.v.y += deskgood.jump_v*rnd_error();
-			last_jump = Number(get_date());
+			last_jump = Number(time.getTime());
 		}
 	}
 	
@@ -214,11 +214,11 @@ $("#game").on("touchstart", function (e){
 	
 	let x = e.originalEvent.targetTouches[0].pageX;
 	let y = e.originalEvent.targetTouches[0].pageY
-	//console.log("touchstart(screen):", x, y, +get_date());
+	//console.log("touchstart(screen):", x, y, +time.getTime());
 	
 	//[x0,y0] = [x, y];
 	
-	touch_screen.t = get_date();
+	touch_screen.t = time.getTime();
 	touch_screen.pos = {x,y};
 	touch_screen.loop = setTimeout(()=>{ //长按1000ms（删除）
 		touch_screen.loop = null;
@@ -349,7 +349,7 @@ $("#game").on("touchend", function (e){
 	
 	let x = e.originalEvent.changedTouches[0].pageX;
 	let y = e.originalEvent.changedTouches[0].pageY;
-	//console.log("touchend:", x, y, Number(get_date()));
+	//console.log("touchend:", x, y, Number(time.getTime()));
 	
 	if (touch_screen.loop !== null){ //短按（放置）
 		clearTimeout(touch_screen.loop);
@@ -469,7 +469,7 @@ $("#game").on("touchcancel", function (e){
 	
 	let x = e.originalEvent.changedTouches[0].pageX;
 	let y = e.originalEvent.changedTouches[0].pageY;
-	console.log("touchcancel:", x, y, Number(get_date()));
+	console.log("touchcancel:", x, y, Number(time.getTime()));
 	
 	touch_screen.pos = {x: null, y:null};
 	//x0 = null, y0 = null;

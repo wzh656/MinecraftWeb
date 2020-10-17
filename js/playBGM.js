@@ -6,12 +6,12 @@ function playBGM(){
 			bgm.volume = 1;
 			bgm.src = "./music/1.m4a";
 			bgm.play();
-			console.info("bgm(BackGround Music)", "begin(1.m4a)", "time:"+get_date());
+			console.info("bgm(BackGround Music)", "begin(1.m4a)", "time:"+time.getTime());
 		}else{
 			bgm.volume = 1;
 			bgm.src = "./music/2.m4a";
 			bgm.play();
-			console.info("bgm(BackGround Music)", "begin(2.m4a)", "time:"+get_date());
+			console.info("bgm(BackGround Music)", "begin(2.m4a)", "time:"+time.getTime());
 		}
 		setTimeout(function(){
 			let bgm_folder = gui.addFolder("背景音乐(bgm)")
