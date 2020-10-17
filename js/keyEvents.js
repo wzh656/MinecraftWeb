@@ -98,8 +98,8 @@ document.addEventListener("keydown", function (e){
 	}
 	if (e.keyCode == 87 | e.keyCode == 38){
 		if (keydown.double_run.length == 0){
-			keydown.double_run[0] = +get_date();
-		}else if (keydown.double_run.length == 2 && +get_date()-keydown.double_run[1] < 500){ //连按
+			keydown.double_run[0] = +time.getTime();
+		}else if (keydown.double_run.length == 2 && +time.getTime()-keydown.double_run[1] < 500){ //连按
 			keydown.double_run = true;
 			console.log("run");
 		}
@@ -113,15 +113,15 @@ document.addEventListener("keyup", function (e){
 	keydown.key.delete(e.keyCode);
 	
 	if (e.keyCode == 87 | e.keyCode == 38){
-		if (keydown.double_run.length == 1 && +get_date()-keydown.double_run[0] < 500){
-			keydown.double_run[1] = +get_date();
+		if (keydown.double_run.length == 1 && +time.getTime()-keydown.double_run[0] < 500){
+			keydown.double_run[1] = +time.getTime();
 		}else{
 			keydown.double_run = [];
 		}
 	}
 	return false;
 });
-let last_jump = get_date()-1000;
+let last_jump = time.getTime()-1000;
 setInterval(function(){
 	if (stop){
 		keydown.key = new Set();
@@ -130,10 +130,10 @@ setInterval(function(){
 	}
 	let t;
 	if (keydown.t0){
-		t = +get_date()-keydown.t0;
-		keydown.t0 = +get_date();
+		t = +time.getTime()-keydown.t0;
+		keydown.t0 = +time.getTime();
 	}else{
-		keydown.t0 = +get_date();
+		keydown.t0 = +time.getTime();
 		return;
 	}
 	
@@ -239,10 +239,10 @@ setInterval(function(){
 			deskgood.pos.y/100-2,
 			deskgood.pos.z/100)
 	){ //脚下有方块
-		if (get_date()-last_jump >= 1000 & y != 0){
+		if (time.getTime()-last_jump >= 1000 & y != 0){
 			console.log("jump");
 			deskgood.v.y += y * deskgood.jump_v*rnd_error();
-			last_jump = +get_date();
+			last_jump = +time.getTime();
 		}
 	}
 }, 16.667);

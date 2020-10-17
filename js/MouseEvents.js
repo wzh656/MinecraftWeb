@@ -18,9 +18,9 @@ let deskgood_choice_folder = deskgood_folder.addFolder("选择物体");
 	deskgood_choice_folder.add(mouse_choice, "faceIndex", 0, 12, 1).listen();
 	deskgood_choice_folder.add(mouse_choice, "id", 0, 9, 1).listen();
 
-$(document).on("click", function (e){
+/* $(document).on("click", function (e){
 	console.log( ray3D({},deskgood.look)[0] );
-});
+}); */
 document.addEventListener("mousemove", function (e){
 	if (stop)
 		return;
@@ -43,7 +43,7 @@ document.addEventListener("mousemove", function (e){
 	
 	let [x,y] = [dx/$("#game")[0].offsetWidth*360*deskgood.sensitivity, dy/$("#game")[0].offsetHeight*360*deskgood.sensitivity];
 	
-	// console.warn(x, y, e, stop);
+	if (x**2 + y**2 > 200) return; //消除取消锁定前自动移动
 	
 	deskgood.lookAt.left_right += dx/$("#game")[0].offsetWidth*360*deskgood.sensitivity;
 	deskgood.lookAt.top_bottom -= dy/$("#game")[0].offsetHeight*360*deskgood.sensitivity;

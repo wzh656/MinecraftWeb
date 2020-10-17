@@ -340,7 +340,7 @@ class ChunkMap{
 	
 	//更新列方块
 	updateColumn(x, z){
-		//console.log("updateColumn:",x,z,+get_date());
+		//console.log("updateColumn:",x,z,+time.getTime());
 		for (let dy=this.size[0].y; dy<=this.size[1].y; dy++)
 			this.update(x, dy, z);
 	}

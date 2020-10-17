@@ -181,13 +181,112 @@ window.onresize = function(){
 /**
 * 背景
 */
-function dateToNumber(h=0, m=0, s=0){
+let backgroundColor = new ColorUpdater({
+	//Red红色
+	R:[{ //日出
+		t: {s: ColorUpdater.dateToNumber(6), d: 0.5}, //时间time
+		v: {s: 10, i: 230} //取值范围
+	},{ //日落
+		t: {s: ColorUpdater.dateToNumber(18,10), d: 0.5},
+		v: {s: 240, i: -230}
+	}],
+	//Green绿色
+	G:[{ //日出
+		t: {s: ColorUpdater.dateToNumber(6,10), d: 0.5},
+		v: {s: 10, i: 230}
+	},{ //日落
+		t: {s: ColorUpdater.dateToNumber(18), d: 0.5},
+		v: {s: 240, i: -230}
+	}],
+	//Blue蓝色
+	B:[{ //日出
+		t: {s: ColorUpdater.dateToNumber(6,10), d: 0.5},
+		v: {s: 20, i: 230}
+	},{ //日落
+		t: {s: ColorUpdater.dateToNumber(18), d: 0.5},
+		v: {s: 250, i: -230}
+	}]
+}, renderer.setClearColor).update().autoUpdate(time, 20*1000);
+let ambientColor = new ColorUpdater({
+	//Red红色
+	R:[{ //日出
+		t: {s: ColorUpdater.dateToNumber(6), d: 0.5}, //时间time
+		v: {s: 20, i: 100} //取值范围
+	},{ //日落
+		t: {s: ColorUpdater.dateToNumber(18,10), d: 0.5},
+		v: {s: 120, i: -100}
+	}],
+	//Green绿色
+	G:[{ //日出
+		t: {s: ColorUpdater.dateToNumber(6,10), d: 0.5},
+		v: {s: 20, i: 100}
+	},{ //日落
+		t: {s: ColorUpdater.dateToNumber(18), d: 0.5},
+		v: {s: 120, i: -100}
+	}],
+	//Blue蓝色
+	B:[{ //日出
+		t: {s: ColorUpdater.dateToNumber(6,10), d: 0.5},
+		v: {s: 36, i: 100}
+	},{ //日落
+		t: {s: ColorUpdater.dateToNumber(18), d: 0.5},
+		v: {s: 136, i: -100}
+	}]
+}, (v)=>{
+	ambient.color = new THREE.Color(v);
+}).update().autoUpdate(time, 20*1000);
+/*function dateToNumber(h=0, m=0, s=0){
 	return (s/60+m)/60+h;
 }
+let bgcConfig = {
+	//Red红色
+	R:[{ //日出
+		t: {s: dateToNumber(6), c: 0.5}, //时间time
+		v: {s: 10, i: 230} //范围range（起始）
+	},{
+		t: {s: dateToNumber(18,10), c: 0.5},
+		v: {s: 240, i: -230}
+	}],
+	//Green绿色
+	G:[{ //日出
+		t: {s: dateToNumber(6,10), c: 0.5},
+		v: {s: 10, i: 230}
+	},{
+		t: {s: dateToNumber(18), c: 0.5},
+		v: {s: 240, i: -230}
+	}],
+	//Blue蓝色
+	B:[{ //日出
+		t: {s: dateToNumber(6,10), c: 0.5},
+		v: {s: 20, i: 230}
+	},{
+		t: {s: dateToNumber(18), c: 0.5},
+		v: {s: 250, i: -230}
+	}],
+	//更新函数
+	update(){
+		let h = time.getTime(), colors={};
+		h = h.getHours() + h.getMinutes()/60 + h.getSeconds()/3600;
+		//h = (h.getSeconds()+h.getMilliseconds()/1000)/60*24
+		
+		let pow = Math.pow, E = Math.E;
+		for (let i of ["R", "G", "B"]){
+			let t = bgcConfig[i];
+			colors[i] = Math.round(Math.min(
+				t[0].v.i / ( 1+pow( E,-(E/t[0].t.c)*(h-t[0].t.s) ) ) + t[0].v.s,
+				t[1].v.i / ( 1+pow( E,-(E/t[1].t.c)*(h-t[1].t.s) ) ) + t[1].v.s
+			));
+		}
+		console.log(colors, h);
+		renderer.setClearColor(`rgb(${colors.R},${colors.G},${colors.B})`);
+	}
+};
+setInterval(bgcConfig.update, 66);*/
 //0~5:45	5:45	6:15		6:45~18:25	18:55		19:25		19:25~24
 //天黑		日出(R)	日出(G,B)	白天		日落(G,B)	日落(R)		天黑
+/*
 setTimeout(function(){
-	let h = get_date();
+	let h = time.getTime();
 	//h = (h.getSeconds()+h.getMilliseconds()/1000)/60*24
 	h = h.getHours() + h.getMinutes()/60 + h.getSeconds()/3600;
 	if (h > dateToNumber(19,25) | h < dateToNumber(5,45)){ // 天黑
@@ -209,7 +308,7 @@ setTimeout(function(){
 	);
 }, 0);
 setInterval(function(){
-	let h = get_date();
+	let h = time.getTime();
 	// h = (h.getSeconds()+h.getMilliseconds()/1000)/60*24
 	h = h.getHours() + h.getMinutes()/60 + h.getSeconds()/3600;
 	if (h > dateToNumber(19,25) | h < dateToNumber(5,45)){ // 天黑
@@ -243,15 +342,15 @@ setInterval(function(){
 			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+10, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(18,55) ))))+10 ))+","+
 			Math.round(Math.min( 230/(1+Math.pow(6,-36/30*(h- dateToNumber(6,15) )))+20, 230-(230/(1+Math.pow(6,-36/30*(h- dateToNumber(18,55) ))))+20 ))+
 		")"
-	);*/
-}, 5*1000); // 5s/次
+	);*//*
+}, 5*1000); // 5s/次*/
 
 
 let body_block = [];
-let T0 = get_date(); //上次时间
+let T0 = time.getTime(); //上次时间
 function render(){
-	let t = get_date()-T0;//时间差
-	T0 = get_date(); //把本次时间赋值给上次时间
+	let t = time.getTime()-T0;//时间差
+	T0 = time.getTime(); //把本次时间赋值给上次时间
 	requestAnimationFrame(render);
 	renderer.render(scene, camera); //执行渲染操作
 	stats.update();
@@ -303,9 +402,9 @@ function render(){
 			deskgood.pos.y/100+1,
 			deskgood.pos.z/100
 		) &&
-		+get_date()-last_jump >= 1000
+		+time.getTime()-last_jump >= 1000
 		){
-			last_jump = +get_date();
+			last_jump = +time.getTime();
 			deskgood.v.y += deskgood.jump_v*rnd_error(); //自动跳跃
 		}
 		
