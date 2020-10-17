@@ -249,13 +249,15 @@ class ChunkMap{
 		if (thisBlock === null) //空气    //没有方块(null)/不在范围(undefined) //加载中(false)
 			return;
 		
+		let noTransparent = thisBlock && thisBlock.get("attr", "block", "noTransparent");
 		let visibleValue = [
-			!( this.get(x+1, y, z) && !this.get(x+1, y, z).get("attr", "block", "transparent")) || (thisBlock && thisBlock.get("attr", "block", "noTransparent")),
-			!( this.get(x-1, y, z) && !this.get(x-1, y, z).get("attr", "block", "transparent")) || (thisBlock && thisBlock.get("attr", "block", "noTransparent")),
-			!( this.get(x, y+1, z) && !this.get(x, y+1, z).get("attr", "block", "transparent")) || (thisBlock && thisBlock.get("attr", "block", "noTransparent")),
-			!( this.get(x, y-1, z) && !this.get(x, y-1, z).get("attr", "block", "transparent")) || (thisBlock && thisBlock.get("attr", "block", "noTransparent")),
-			!( this.get(x, y, z+1) && !this.get(x, y, z+1).get("attr", "block", "transparent")) || (thisBlock && thisBlock.get("attr", "block", "noTransparent")),
-			!( this.get(x, y, z-1) && !this.get(x, y, z-1).get("attr", "block", "transparent")) || (thisBlock && thisBlock.get("attr", "block", "noTransparent"))
+			!( this.get(x+1, y, z) && !this.get(x+1, y, z).get("attr", "block", "transparent")) || noTransparent,
+			!( this.get(x-1, y, z) && !this.get(x-1, y, z).get("attr", "block", "transparent")) || noTransparent,
+			!( this.get(x, y+1, z) && !this.get(x, y+1, z).get("attr", "block", "transparent")) || noTransparent,
+			!( this.get(x, y-1, z) && !this.get(x, y-1, z).get("attr", "block", "transparent")) || noTransparent,
+			!( this.get(x, y, z+1) && !this.get(x, y, z+1).get("attr", "block", "transparent")) || noTransparent,
+			!( this.get(x, y, z-1) && !this.get(x, y, z-1).get("attr", "block", "transparent")) || noTransparent
+			// 没有方块 或 有方块非透明 则显示  或  自身透明 也显示
 		];
 		
 		if (thisBlock === undefined){ //未加载
@@ -329,7 +331,7 @@ class ChunkMap{
 	
 	//更新方块及周围
 	updateRound(x,y,z){
-		// this.update(x, y, z);
+		this.update(x, y, z);
 		this.update(x+1, y, z);
 		this.update(x-1, y, z);
 		this.update(x, y+1, z);
@@ -684,7 +686,8 @@ class ChunkMap{
 		for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
 			
 			let edited = false;
-			for (let value of edit){
+			for (let i = edit.length-1; i>=0; i--){
+				let value = edit[i];
 				if (
 					value.x == x &&
 					value.y == dy &&

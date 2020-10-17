@@ -229,6 +229,12 @@ document.addEventListener("mousedown", function (e){
 							deskgood.hold[free] = new Thing(map.get(x, y, z)); //放在手中
 							deskgood.hold_things_refresh(); //刷新方块
 							map.delete(x, y, z); //删除方块
+							map.edit[Math.round(x/map.size.x)][Math.round(z/map.size.z)].push({
+								x,
+								y,
+								z,
+								id: 0
+							})
 							map.updateRound(x, y, z); //刷新方块及周围
 							
 							[x, y, z] = [x, y, z].map(Math.round); //存储必须整数
@@ -319,12 +325,19 @@ document.addEventListener("mousedown", function (e){
 					}, TEMPLATES, {
 						attr: deskgood.hold[deskgood.choice].attr
 					});
+					let thing = deskgood.hold[deskgood.choice];
+					let attr = `'${JSON.stringify(map.get(x, y, z).attr).slice(1,-1)}'`;
+					map.edit[Math.round(x/map.size.x)][Math.round(z/map.size.z)].push({
+						x,
+						y,
+						z,
+						id: thing.id,
+						attr
+					});
 					map.updateRound(x, y, z); //刷新方块及周围
 					
 					[x, y, z] = [x, y, z].map(Math.round); //存储必须整数
-					let attr = `'${JSON.stringify(map.get(x, y, z).attr).slice(1,-1)}'`;
 					//SQL
-					let thing = deskgood.hold[deskgood.choice];
 					sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, ()=>{
 						sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
 							0,
