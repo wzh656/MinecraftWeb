@@ -11,7 +11,7 @@ let scene_folder = gui.addFolder("场景(scene)");
 	let scene_fog_folder = scene_folder.addFolder("雾(fog)");
 		scene_fog_folder.add(scene.fog, "far", 15*100, 1000*100, 100);
 		scene_fog_folder.add(scene.fog, "near", 0.001, 10);
-		scene_fog_folder.addColor(scene.fog, "color");
+		scene_fog_folder.addColor(scene.fog, "color").listen();
 	let scene_chunk_folder = scene_folder.addFolder("区块(chunk)");
 		scene_chunk_folder.add(map, "perloadLength", 100, 10000, 100).name("预加载范围/px");
 
@@ -110,7 +110,7 @@ let ambient = new THREE.AmbientLight(0x444444);
 scene.add(ambient);
 
 let scene_light_ambient_folder = scene_light_folder.addFolder("环境光(ambient)");
-	scene_light_ambient_folder.addColor(ambient, "color");
+	scene_light_ambient_folder.addColor(ambient, "color").listen();
 
 /**
 * 相机设置
@@ -167,7 +167,7 @@ renderer.color = {
 	}
 };
 let renderer_folder = gui.addFolder("渲染器(renderer)");
-	renderer_folder.addColor(renderer.color, "clearColor");
+	renderer_folder.addColor(renderer.color, "clearColor").listen();
 
 window.onresize = function(){
 	WIDTH = window.innerWidth;

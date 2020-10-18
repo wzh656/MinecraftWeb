@@ -51,7 +51,7 @@ let time_folder = gui.addFolder("时光(Time)");
 	time_folder.add({
 		get t(){ return time.speed; },
 		set t(v){ time.setSpeed(v); }
-	}, "t", 1, 3600).name("时间流速(speed)").onChange(v => time.setSpeed(((v-1)/3599)**2*3599+1)).listen();
+	}, "t", 1, 3600).name("时间流速(speed)").onChange(v => time.setSpeed(((v-1)/3599)**6*3599+1)).listen();
 	time_folder.add({
 		get t(){ return time.stop; }
 	}, "t").name("是否暂停(stop)").listen();

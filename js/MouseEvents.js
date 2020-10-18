@@ -148,7 +148,7 @@ $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind�
 		if (wheel > 0) { //当滑轮向上滚动时
 			console.log("上滚轮");
 			if (keydown.key.has(16)){ //shift
-				TimeSpeed *= 1.5;
+				time.setSpeed(time.speed *= 1.5);
 			}else{
 				up();
 				deskgood.hold_choice_refresh();
@@ -157,7 +157,7 @@ $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind�
 		if (wheel < 0) { //当滑轮向下滚动时
 			console.log("下滚轮");
 			if (keydown.key.has(16)){ //shift
-				TimeSpeed /= 1.5;
+				time.setSpeed(time.speed /= 1.5);
 			}else{
 				down();
 				deskgood.hold_choice_refresh();
@@ -167,7 +167,7 @@ $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind�
 		if (detal > 0) { //当滑轮向下滚动时
 			console.log("下滚轮");
 			if (keydown.key.has(16)){ //shift
-				TimeSpeed /= 1.5;
+				time.setSpeed(time.speed /= 1.5);
 			}else{
 				down();
 				deskgood.hold_choice_refresh();
@@ -176,7 +176,7 @@ $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind�
 		if (detal < 0) { //当滑轮向上滚动时
 			console.log("上滚轮");
 			if (keydown.key.has(16)){ //shift
-				TimeSpeed *= 1.5;
+				time.setSpeed(time.speed *= 1.5);
 			}else{
 				up();
 				deskgood.hold_choice_refresh();
