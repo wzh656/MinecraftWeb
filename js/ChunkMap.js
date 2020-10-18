@@ -242,7 +242,7 @@ class ChunkMap{
 	
 	
 	//更新方块
-	update(x, y, z){
+	update(x, y, z, b){
 		[x, y, z] = [x, y, z].map(Math.round); //规范化
 		
 		let thisBlock = this.get(x,y,z);
@@ -259,6 +259,7 @@ class ChunkMap{
 			!( this.get(x, y, z-1) && !this.get(x, y, z-1).get("attr", "block", "transparent")) || noTransparent
 			// 没有方块 或 有方块非透明 则显示  或  自身透明 也显示
 		];
+		if (b) console.info(visibleValue, thisBlock)
 		
 		if (thisBlock === undefined){ //未加载
 			let [xZ, zZ] = [x/map.size.x, z/map.size.z].map(Math.round); //所属区块(Chunk)
@@ -529,7 +530,8 @@ class ChunkMap{
 		let earth = height - sNoise.dirt(this.seed.noise, this.seed.d, x, z);
 		let treeHeight = height + sNoise.treeHeight(this.seed.noise, this.seed.tH, x, z);
 		
-		for (let value of edit){
+		for (let i=edit.length-1; i>=0; i--){
+			let value = edit[i];
 			if (
 				value.x == x &&
 				value.y == y &&

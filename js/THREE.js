@@ -497,13 +497,17 @@ function render(){
 	}); //右下
 	
 	for (let i of body_block){
+		//[i.x, i.y, i.z] = [i.x, i.y, i.z].map(Math.round)
 		let block = map.get(i.x, i.y, i.z);
+		//if (i.x == 9 && i.y == 0 && i.z == 26) console.warn(block);
 		if (block){
 			block.block.material.forEach((item, index, arr) => {
 				arr[index].visible = true;
 			}); //显示所有
+			//if (i.x == 9 && i.y == 0 && i.z == 26) console.warn(block.block.material.map(v => v.visible));
 			// console.info("显示面", i, [i.x,i.y,i.z].map(Math.round), block);
 			if (!block.block.addTo){
+				//if (i.x == 9 && i.y == 0 && i.z == 26) console.warn("add", block.block.addTo);
 				scene.add(block.block.mesh);
 				block.block.addTo = true;
 				// console.info("显示体", i, [i.x,i.y,i.z].map(Math.round), block);

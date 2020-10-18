@@ -520,7 +520,7 @@ deskgood_folder.open();
 		deskgood_position_folder.add(deskgood.pos, "x", map.size[0].x*100, map.size[1].x*100, 0.01).listen();
 		deskgood_position_folder.add(deskgood.pos, "y", map.size[0].y*100, map.size[1].y*100, 0.01).listen();
 		deskgood_position_folder.add(deskgood.pos, "z", map.size[0].z*100, map.size[1].z*100, 0.01).listen();
-		let deskgood_position_zone_folder = deskgood_position_folder.addFolder("区块(zone)");
+		let deskgood_position_zone_folder = deskgood_position_folder.addFolder("区块(Chunk)");
 		deskgood_position_zone_folder.open();
 			deskgood_position_folder.add({
 				get x(){ return Math.round(deskgood.pos.x/100/map.size.x) },

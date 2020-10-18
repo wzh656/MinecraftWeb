@@ -175,4 +175,4 @@ getCookie(function(data){
 	})
 },function(err){
 	console.log("err:", err);
-})
+});

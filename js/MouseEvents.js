@@ -229,12 +229,20 @@ document.addEventListener("mousedown", function (e){
 							deskgood.hold[free] = new Thing(map.get(x, y, z)); //放在手中
 							deskgood.hold_things_refresh(); //刷新方块
 							map.delete(x, y, z); //删除方块
+							let xZ=Math.round(x/map.size.x),
+								zZ=Math.round(z/map.size.z);
+							for (let i in map.edit[xZ][zZ])
+								if (
+									map.edit[xZ][zZ].x == x &&
+									map.edit[xZ][zZ].y == y &&
+									map.edit[xZ][zZ].z == z
+								) map.edit[xZ][zZ].splice(i,1); //删除重复
 							map.edit[Math.round(x/map.size.x)][Math.round(z/map.size.z)].push({
 								x,
 								y,
 								z,
 								id: 0
-							})
+							});
 							map.updateRound(x, y, z); //刷新方块及周围
 							
 							[x, y, z] = [x, y, z].map(Math.round); //存储必须整数
@@ -246,7 +254,7 @@ document.addEventListener("mousedown", function (e){
 									y,
 									z,
 									0
-								])
+								]);
 							});
 							/*scene.remove(click[i].object);
 							every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = 0;*/
@@ -325,8 +333,16 @@ document.addEventListener("mousedown", function (e){
 					}, TEMPLATES, {
 						attr: deskgood.hold[deskgood.choice].attr
 					});
-					let thing = deskgood.hold[deskgood.choice];
-					let attr = `'${JSON.stringify(map.get(x, y, z).attr).slice(1,-1)}'`;
+					let thing = deskgood.hold[deskgood.choice],
+						attr = `'${JSON.stringify(map.get(x, y, z).attr).slice(1,-1)}'`;
+					let xZ=Math.round(x/map.size.x),
+						zZ=Math.round(z/map.size.z);
+					for (let i in map.edit[xZ][zZ])
+						if (
+							map.edit[xZ][zZ].x == x &&
+							map.edit[xZ][zZ].y == y &&
+							map.edit[xZ][zZ].z == z
+						) map.edit[xZ][zZ].splice(i,1); //删除重复
 					map.edit[Math.round(x/map.size.x)][Math.round(z/map.size.z)].push({
 						x,
 						y,
