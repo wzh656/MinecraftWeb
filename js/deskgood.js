@@ -62,8 +62,15 @@ var deskgood = {
 		y: 0,
 		z: 0
 	},
-	hold: [null, null, null, null],
 	choice: 0,
+	hold: new ThingGroup($("#tools")[0], {
+		fixedLength: 4,
+		updateCallback(children){
+			for (let i in children)
+				$(children[i]).css("borderColor", (i==deskgood.choice)?"#fff":"#aaa")
+					.css("borderWidth", (i==deskgood.choice)?"6px":"3px");
+		}
+	}),
 	sensitivity: device? 2.6: 1, //灵敏度：手机2，电脑1
 	die(reason="使用命令自杀"){
 		sql.deleteTable("file", undefined, function(){
@@ -85,20 +92,20 @@ var deskgood = {
 		});
 	},
 	hold_choice_refresh(){
-		for (let i in deskgood.hold){
+		/* for (let i in deskgood.hold){
 			$("#tools > img:eq("+i+")")
 				.css("borderColor", (i==deskgood.choice)?"#fff":"#aaa")
 				.css("borderWidth", (i==deskgood.choice)?"6px":"3px");
-		}
+		} */
 	},
 	hold_things_refresh(){
-		for (let i in deskgood.hold)
+		/* for (let i in deskgood.hold)
 			$("#tools > img")[i].src =
 				deskgood.hold[i]?
 					(deskgood.hold[i].get("block", "parent")||`./img/blocks/${deskgood.hold[i].id}/`) + deskgood.hold[i].get("block", "face")[0]
 				:
 					"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP4//8/AwAI/AL+eMSysAAAAABJRU5ErkJggg==" //透明图片
-			;
+			; */
 	},
 	look_refresh(x,y,z){
 		if (x !== undefined | y !== undefined | z !== undefined){
@@ -501,10 +508,10 @@ for (let i in deskgood.hold){
 	/* if (deskgood.hold[i] != 0){
 		$("#tools > img")[i].src = "./img/blocks/"+deskgood.hold[i]+"/"+template[deskgood.hold[i]].face[0];
 	} */
-	$("#tools > img")[i].onclick = ()=>{
+	/* $("#tools > img")[i].onclick = ()=>{
 		deskgood.choice = i;
 		deskgood.hold_choice_refresh();
-	};
+	}; */
 }
 
 

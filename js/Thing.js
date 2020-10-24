@@ -287,3 +287,58 @@ class Block extends Thing{
 		}
 	}
 }
+
+
+class ThingGroup extends Array{
+	constructor(element, opt, ...array) {
+		super(...array);
+		this.e = element;
+		if (opt.fixedLength){
+			this.fixedLength = +opt.fixedLength;
+			for (let i=this.fixedLength; i>=0; i--)
+				if (!this[i]) this[i] = null;
+		}
+		if (opt.maxLength) this.maxLength = +opt.maxLength;
+		if (opt.updateCallback) this.updateCallback = opt.updateCallback;
+		
+		setTimeout( ()=>this.update(), 0 )
+	}
+	
+	add(...items){
+		for (let i of items)
+			if (this.length+1 <= this.maxLength){
+				this.push(...items);
+			}else{
+				console.warn("ThingGroup added more than maxLength:", this.maxLength);
+				break;
+			}
+		return this.update();
+	}
+	
+	delete(num=1){
+		for (let i=num; i>=0; i--)
+			if (this.fixedLength)
+				this[this.length-1] = null;
+			else
+				this.pop();
+		
+		return this.update();
+	}
+	
+	update(){
+		let children = [];
+		for (let i=0; i<(this.fixedLength||this.length); i++)
+			children.push(
+				$("<img/>").attr("src", (
+					this[i]?
+						(this[i].get("block", "parent")||`./img/blocks/${this[i].id}/`) + this[i].get("block", "face")[0]
+					:
+						"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP4//8/AwAI/AL+eMSysAAAAABJRU5ErkJggg==" //透明图片
+				))[0]
+			);
+		$(this.e).empty().append(...children);
+		if (typeof this.updateCallback == "function") this.updateCallback(children);
+		debugger
+		return this;
+	}
+}
