@@ -61,13 +61,13 @@ function SQL_read(){
 					});
 				}
 			}
-			deskgood.hold_things_refresh();
+			deskgood.hold.update();
 		}
 	});
 	sql.selectData("file", ["id"], "type=3 AND x=1", function(result){ //选择物品
 		if (result.length){
 			deskgood.choice = result[0].id;
-			deskgood.hold_choice_refresh();
+			deskgood.hold.update();
 		}
 	});
 }

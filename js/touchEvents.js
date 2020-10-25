@@ -268,7 +268,7 @@ $("#game").on("touchstart", function (e){
 								console.log("delete", click[i].object.position, map.get(x, y, z).id)
 								
 								deskgood.hold[free] = new Thing(map.get(x, y, z)); //放在手中
-								deskgood.hold_things_refresh(); //刷新方块
+								deskgood.hold.update(); //刷新方块
 								map.delete(x, y, z); //删除方块
 								let xZ=Math.round(x/map.size.x),
 									zZ=Math.round(z/map.size.z);
@@ -468,7 +468,7 @@ $("#game").on("touchend", function (e){
 							]);
 						});
 						deskgood.hold[deskgood.choice] = null; //删除手里的方块
-						deskgood.hold_things_refresh(); //刷新方块
+						deskgood.hold.update(); //刷新方块
 						break; //跳出 寻找有效放置的 循环
 					}
 				}

@@ -151,7 +151,7 @@ $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind�
 				time.setSpeed(time.speed *= 1.5);
 			}else{
 				up();
-				deskgood.hold_choice_refresh();
+				deskgood.hold.update();
 			}
 		}  
 		if (wheel < 0) { //当滑轮向下滚动时
@@ -160,7 +160,7 @@ $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind�
 				time.setSpeed(time.speed /= 1.5);
 			}else{
 				down();
-				deskgood.hold_choice_refresh();
+				deskgood.hold.update();
 			}
 		}  
 	}else if (event.originalEvent.detail){ //Firefox滚轮事件
@@ -170,7 +170,7 @@ $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind�
 				time.setSpeed(time.speed /= 1.5);
 			}else{
 				down();
-				deskgood.hold_choice_refresh();
+				deskgood.hold.update();
 			}
 		}
 		if (detal < 0) { //当滑轮向上滚动时
@@ -179,7 +179,7 @@ $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind�
 				time.setSpeed(time.speed *= 1.5);
 			}else{
 				up();
-				deskgood.hold_choice_refresh();
+				deskgood.hold.update();
 			}
 		}
 	}  
@@ -227,7 +227,7 @@ document.addEventListener("mousedown", function (e){
 							console.log("delete", click[i].object.position, map.get(x, y, z).id)
 							
 							deskgood.hold[free] = new Thing(map.get(x, y, z)); //放在手中
-							deskgood.hold_things_refresh(); //刷新方块
+							deskgood.hold.update(); //刷新方块
 							map.delete(x, y, z); //删除方块
 							let xZ=Math.round(x/map.size.x),
 								zZ=Math.round(z/map.size.z);
@@ -365,7 +365,7 @@ document.addEventListener("mousedown", function (e){
 						])
 					});
 					deskgood.hold[deskgood.choice] = null; //删除手里的方块
-					deskgood.hold_things_refresh(); //刷新方块
+					deskgood.hold.update(); //刷新方块
 					break; //跳出 寻找有效放置的 循环
 				}
 				/*if (click[i].faceIndex == 0 | click[i].faceIndex == 1){
@@ -388,7 +388,7 @@ document.addEventListener("mousedown", function (e){
 						scene.add(mesh); //网格模型添加到场景中
 						every[ click[i].object.position.x/100+1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = deskgood.hold[deskgood.choice];
 						deskgood.hold[deskgood.choice] = 0; //删除手里的方块
-						deskgood.hold_things_refresh(); //刷新方块
+						deskgood.hold.update(); //刷新方块
 						break;
 					}
 				}else if (click[i].faceIndex == 2 | click[i].faceIndex == 3){
@@ -409,7 +409,7 @@ document.addEventListener("mousedown", function (e){
 						scene.add(mesh); //网格模型添加到场景中
 						every[ click[i].object.position.x/100-1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = deskgood.hold[deskgood.choice];
 						deskgood.hold[deskgood.choice] = 0; //删除手里的方块
-						deskgood.hold_things_refresh(); //刷新方块
+						deskgood.hold.update(); //刷新方块
 						break;
 					}
 				}else if (click[i].faceIndex == 4 | click[i].faceIndex == 5){
@@ -429,7 +429,7 @@ document.addEventListener("mousedown", function (e){
 						scene.add(mesh); //网格模型添加到场景中
 						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100+1 ][ click[i].object.position.z/100 ] = deskgood.hold[deskgood.choice];
 						deskgood.hold[deskgood.choice] = 0; //删除手里的方块
-						deskgood.hold_things_refresh(); //刷新方块
+						deskgood.hold.update(); //刷新方块
 						break;
 					}
 				}else if (click[i].faceIndex == 6 | click[i].faceIndex == 7){
@@ -449,7 +449,7 @@ document.addEventListener("mousedown", function (e){
 						scene.add(mesh); //网格模型添加到场景中
 						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100-1 ][ click[i].object.position.z/100 ] = deskgood.hold[deskgood.choice];
 						deskgood.hold[deskgood.choice] = 0; //删除手里的方块
-						deskgood.hold_things_refresh(); //刷新方块
+						deskgood.hold.update(); //刷新方块
 						break;
 					}
 				}else if (click[i].faceIndex == 8 | click[i].faceIndex == 9){
@@ -469,7 +469,7 @@ document.addEventListener("mousedown", function (e){
 						scene.add(mesh); //网格模型添加到场景中
 						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100+1 ] = deskgood.hold[deskgood.choice];
 						deskgood.hold[deskgood.choice] = 0; //删除手里的方块
-						deskgood.hold_things_refresh(); //刷新方块
+						deskgood.hold.update(); //刷新方块
 						break;
 					}
 				}else if (click[i].faceIndex == 10 | click[i].faceIndex == 11){
@@ -489,7 +489,7 @@ document.addEventListener("mousedown", function (e){
 						scene.add(mesh); //网格模型添加到场景中
 						every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100-1 ] = deskgood.hold[deskgood.choice];
 						deskgood.hold[deskgood.choice] = 0; //删除手里的方块
-						deskgood.hold_things_refresh(); //刷新方块
+						deskgood.hold.update(); //刷新方块
 						break;
 					}
 				}*/

@@ -338,7 +338,6 @@ class ThingGroup extends Array{
 			);
 		$(this.e).empty().append(...children);
 		if (typeof this.updateCallback == "function") this.updateCallback(children);
-		debugger
 		return this;
 	}
 }
