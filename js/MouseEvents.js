@@ -226,11 +226,10 @@ document.addEventListener("mousedown", function (e){
 						}else{
 							console.log("delete", click[i].object.position, map.get(x, y, z).id)
 							
-							deskgood.hold[free] = new Thing(map.get(x, y, z)); //放在手中
-							deskgood.hold.update(); //刷新方块
+							deskgood.hold.addOne(new Thing(map.get(x, y, z)), free); //放在手中
 							map.delete(x, y, z); //删除方块
-							let xZ=Math.round(x/map.size.x),
-								zZ=Math.round(z/map.size.z);
+							let xZ = Math.round(x/map.size.x),
+								zZ = Math.round(z/map.size.z);
 							for (let i in map.edit[xZ][zZ])
 								if (
 									map.edit[xZ][zZ].x == x &&
@@ -335,8 +334,8 @@ document.addEventListener("mousedown", function (e){
 					});
 					let thing = deskgood.hold[deskgood.choice],
 						attr = `'${JSON.stringify(map.get(x, y, z).attr).slice(1,-1)}'`;
-					let xZ=Math.round(x/map.size.x),
-						zZ=Math.round(z/map.size.z);
+					let xZ = Math.round(x/map.size.x),
+						zZ = Math.round(z/map.size.z);
 					for (let i in map.edit[xZ][zZ])
 						if (
 							map.edit[xZ][zZ].x == x &&
@@ -364,8 +363,7 @@ document.addEventListener("mousedown", function (e){
 							attr
 						])
 					});
-					deskgood.hold[deskgood.choice] = null; //删除手里的方块
-					deskgood.hold.update(); //刷新方块
+					deskgood.hold.delete(1, deskgood.choice); //删除手里的方块
 					break; //跳出 寻找有效放置的 循环
 				}
 				/*if (click[i].faceIndex == 0 | click[i].faceIndex == 1){

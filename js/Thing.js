@@ -293,38 +293,69 @@ class ThingGroup extends Array{
 	constructor(element, opt, ...array) {
 		super(...array);
 		this.e = element;
-		if (opt.fixedLength){
+		if (opt.fixedLength){ //固定长度
 			this.fixedLength = +opt.fixedLength;
-			for (let i=this.fixedLength; i>=0; i--)
+			for (let i=0; i<this.fixedLength; i++)
 				if (!this[i]) this[i] = null;
 		}
-		if (opt.maxLength) this.maxLength = +opt.maxLength;
-		if (opt.updateCallback) this.updateCallback = opt.updateCallback;
+		if (opt.maxLength) this.maxLength = +opt.maxLength; //最大长度
+		if (opt.updateCallback) this.updateCallback = opt.updateCallback; //更新完回调
 		
-		setTimeout( ()=>this.update(), 0 )
+		setTimeout( ()=>this.update(), 0 ); //自动更新
 	}
 	
+	//添加
 	add(...items){
 		for (let i of items)
-			if (this.length+1 <= this.maxLength){
-				this.push(...items);
+			this.addOne(i);
+		return this;
+	}
+	
+	//添加一个
+	addOne(item, where){
+		if (this.fixedLength){ //固定长度
+			if (!this[where]){
+				this[where] = item;
+				return this.update();
 			}else{
-				console.warn("ThingGroup added more than maxLength:", this.maxLength);
-				break;
+				for (let i=0; i<this.length; i++)
+					if (!this[i]){
+						this[i] = item;
+						return this.update();
+					}
 			}
+			console.warn(`ThingGroup is full to add:`, item);
+			return this.update();
+		}else{ //无固定
+			for (let i of items)
+				if (this.length+1 <= this.maxLength){
+					this.push(i);
+				}else{
+					console.warn(`ThingGroup added more than maxLength(${this.maxLength}):`, item);
+					break;
+				}
+		}
 		return this.update();
 	}
 	
-	delete(num=1){
-		for (let i=num; i>=0; i--)
-			if (this.fixedLength)
-				this[this.length-1] = null;
+	//删除
+	delete(num=1, where){
+		if (where != undefined)
+			if (this.fixedLength) //固定长度
+				for (let i=0; i<num; i++)
+					this[where+i] = null;
 			else
-				this.pop();
-		
+				this.splice(where, num);
+		else
+			for (let i=0; i<num; i++)
+				if (this.fixedLength) //固定长度
+					this[this.length-1] = null;
+				else
+					this.pop();
 		return this.update();
 	}
 	
+	//更新
 	update(){
 		let children = [];
 		for (let i=0; i<(this.fixedLength||this.length); i++)

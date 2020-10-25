@@ -68,7 +68,8 @@ var deskgood = {
 		updateCallback(children){
 			for (let i in children)
 				$(children[i]).css("borderColor", (i==deskgood.choice)?"#fff":"#aaa")
-					.css("borderWidth", (i==deskgood.choice)?"6px":"3px");
+					.css("borderWidth", (i==deskgood.choice)?"6px":"3px")
+					.css("margin", "0 0");
 		}
 	}),
 	sensitivity: device? 2.6: 1, //灵敏度：手机2，电脑1

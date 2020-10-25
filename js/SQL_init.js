@@ -51,7 +51,9 @@ function SQL_read(){
 	});
 	sql.selectData("file", ["id", "attr"], "type=3 AND x=0", function(result){ //物品栏
 		if (result.length){
-			for (let i in deskgood.hold){
+			console.log(result)
+			for (let i=0; i<deskgood.hold.length; i++){
+				console.log(i, result[i])
 				if (result[i].id == 0){
 					deskgood.hold[i] = null;
 				}else{
