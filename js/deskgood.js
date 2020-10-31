@@ -60,21 +60,29 @@ var deskgood = {
 		}
 	}),
 	head: new ThingGroup($("#bag .head")[0], {
+		fixedLength: 1,
+		maxLength: Infinity,
 		updateCallback(children){
 			
 		}
 	}),
 	body: new ThingGroup($("#bag .body")[0], {
+		fixedLength: 1,
+		maxLength: Infinity,
 		updateCallback(children){
 			
 		}
 	}),
 	leg: new ThingGroup($("#bag .leg")[0], {
+		fixedLength: 1,
+		maxLength: Infinity,
 		updateCallback(children){
 			
 		}
 	}),
 	foot: new ThingGroup($("#bag .foot")[0], {
+		fixedLength: 1,
+		maxLength: Infinity,
 		updateCallback(children){
 			
 		}

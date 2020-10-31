@@ -292,6 +292,7 @@ class Block extends Thing{
 class ThingGroup extends Array{
 	constructor(element, opt, ...array) {
 		super(...array);
+		
 		this.e = element;
 		if (opt.fixedLength){ //固定长度
 			this.fixedLength = +opt.fixedLength;
@@ -314,19 +315,23 @@ class ThingGroup extends Array{
 	//添加一个
 	addOne(item, where, needUpdate=true){
 		if (this.fixedLength){ //固定长度
-			if (!this[where]){ //位置未满
-				this[where] = item;
-				return needUpdate? this.update(): this;
-			}else{ //位置满了
-				for (let i=0; i<this.length; i++)
-					if (!this[i]){
-						this[i] = item;
-						return needUpdate? this.update(): this;
-					}
+			if (this.maxLength){ //有最大长度
+				
+			}else{
+				if (!this[where]){ //位置未满
+					this[where] = item;
+					return needUpdate? this.update(): this;
+				}else{ //位置满了（从0开始找空位）
+					for (let i=0; i<this.length; i++)
+						if (!this[i]){
+							this[i] = item;
+							return needUpdate? this.update(): this;
+						}
+				}
+				//没有找到空位
+				console.warn(`ThingGroup is full to add:`, item);
+				return needUpdate? this.update(): this;back;
 			}
-			//没有找到空位
-			console.warn(`ThingGroup is full to add:`, item);
-			return needUpdate? this.update(): this;back;
 		}else{ //无固定
 			for (let i of items)
 				if (this.length+1 <= this.maxLength){
