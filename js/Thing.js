@@ -361,12 +361,12 @@ class ThingGroup extends Array{
 		let children = [];
 		for (let i=0; i<(this.fixedLength||this.length); i++)
 			children.push(
-				$("<img/>").attr("src", (
+				$("<li></li>").append($("<img/>").attr("src", (
 					this[i]?
 						(this[i].get("block", "parent")||`./img/blocks/${this[i].id}/`) + this[i].get("block", "face")[0]
 					:
 						"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP4//8/AwAI/AL+eMSysAAAAABJRU5ErkJggg==" //透明图片
-				))[0]
+				)))[0]
 			);
 		$(this.e).empty().append(...children);
 		if (typeof this.updateCallback == "function") this.updateCallback(children);

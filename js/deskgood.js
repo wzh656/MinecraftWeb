@@ -50,6 +50,7 @@ var deskgood = {
 			for (let i in children){
 				$(children[i]).css("borderColor", (i==deskgood.choice)?"#fff":"#aaa")
 					.css("borderWidth", (i==deskgood.choice)?"6px":"3px")
+					.css("transform", (i==deskgood.choice)?"translateY(-3px)":"")
 					.css("margin", "0 0");
 				children[i].onclick = ()=>{
 					deskgood.choice = i;
