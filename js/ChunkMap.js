@@ -248,20 +248,49 @@ class ChunkMap{
 		let thisBlock = this.get(x,y,z);
 		if (thisBlock === null) //空气    //没有方块(null)/不在范围(undefined) //加载中(false)
 			return;
-		
-		let noTransparent = thisBlock && thisBlock.get("attr", "block", "noTransparent");
-		let visibleValue = [
-			!( this.get(x+1, y, z) && !this.get(x+1, y, z).get("attr", "block", "transparent")) || noTransparent,
-			!( this.get(x-1, y, z) && !this.get(x-1, y, z).get("attr", "block", "transparent")) || noTransparent,
-			!( this.get(x, y+1, z) && !this.get(x, y+1, z).get("attr", "block", "transparent")) || noTransparent,
-			!( this.get(x, y-1, z) && !this.get(x, y-1, z).get("attr", "block", "transparent")) || noTransparent,
-			!( this.get(x, y, z+1) && !this.get(x, y, z+1).get("attr", "block", "transparent")) || noTransparent,
-			!( this.get(x, y, z-1) && !this.get(x, y, z-1).get("attr", "block", "transparent")) || noTransparent
-			// 没有方块 或 有方块非透明 则显示  或  自身透明 也显示
-		];
-		if (b) console.info(visibleValue, thisBlock)
-		
+		let visibleValue;
 		if (thisBlock === undefined){ //未加载
+			let [xZ, zZ] = [x/map.size.x, z/map.size.z].map(Math.round); //所属区块(Chunk)
+			let edit = this.edit[xZ] && this.edit[xZ][zZ];
+			let get = new Thing( this.perGet(x, y, z, edit||[]) );
+			let noTransparent = get.id && get.get("attr", "block", "noTransparent");
+			visibleValue = [
+				!( this.get(x+1, y, z) && !this.get(x+1, y, z).get("attr", "block", "transparent")) || noTransparent,
+				!( this.get(x-1, y, z) && !this.get(x-1, y, z).get("attr", "block", "transparent")) || noTransparent,
+				!( this.get(x, y+1, z) && !this.get(x, y+1, z).get("attr", "block", "transparent")) || noTransparent,
+				!( this.get(x, y-1, z) && !this.get(x, y-1, z).get("attr", "block", "transparent")) || noTransparent,
+				!( this.get(x, y, z+1) && !this.get(x, y, z+1).get("attr", "block", "transparent")) || noTransparent,
+				!( this.get(x, y, z-1) && !this.get(x, y, z-1).get("attr", "block", "transparent")) || noTransparent
+				// 没有方块 或 有方块非透明 则显示  或  自身透明 也显示
+			];
+			if (b) console.warn(thisBlock,visibleValue)
+			if (visibleValue.some(v => v) && this.initedChunk.some(v => v[0]==xZ && v[1]==zZ)){ //不可隐藏（有面true） and 在加载区块内
+				this.addID(get.id, {
+					x,
+					y,
+					z,
+				}, TEMPLATES, {
+					attr: get.attr
+				});
+				thisBlock = this.get(x,y,z);
+			}
+			if (!thisBlock) //undefined（无需加载） or null（加载为空气）
+				return;
+		}else{
+			let noTransparent =  thisBlock.get("attr", "block", "noTransparent");
+			visibleValue = [
+				!( this.get(x+1, y, z) && !this.get(x+1, y, z).get("attr", "block", "transparent")) || noTransparent,
+				!( this.get(x-1, y, z) && !this.get(x-1, y, z).get("attr", "block", "transparent")) || noTransparent,
+				!( this.get(x, y+1, z) && !this.get(x, y+1, z).get("attr", "block", "transparent")) || noTransparent,
+				!( this.get(x, y-1, z) && !this.get(x, y-1, z).get("attr", "block", "transparent")) || noTransparent,
+				!( this.get(x, y, z+1) && !this.get(x, y, z+1).get("attr", "block", "transparent")) || noTransparent,
+				!( this.get(x, y, z-1) && !this.get(x, y, z-1).get("attr", "block", "transparent")) || noTransparent
+				// 没有方块 或 有方块非透明 则显示  或  自身透明 也显示
+			];
+			if (b) console.warn(thisBlock,visibleValue)
+		}
+		
+		/*if (thisBlock === undefined){ //未加载
 			let [xZ, zZ] = [x/map.size.x, z/map.size.z].map(Math.round); //所属区块(Chunk)
 			if (visibleValue.some(v => v) && this.initedChunk.some(v => v[0]==xZ && v[1]==zZ)){ //不可隐藏（有面true） and 在加载区块内
 				let edit = this.edit[xZ] && this.edit[xZ][zZ];
@@ -277,7 +306,7 @@ class ChunkMap{
 			}
 			if (!thisBlock) //undefined（仍未加载） or null（加载为空气）
 				return;
-		}
+		}*/
 		let material = thisBlock.block.material;
 		for (let i in material)
 			material[i].visible = visibleValue[i];
@@ -556,6 +585,8 @@ class ChunkMap{
 				}else */if (height > 0.7*this.size[1].y){ // 70%+ 高山（无树，有草）
 					treeHeight = height;
 				}
+				if (sNoise.openStone(this.seed.noise, this.seed.oS, x, z)) //石头上不长树
+					treeHeight = height;
 				
 				if (y > treeHeight){
 					id = 0; // 空气/真空 (null)
@@ -716,6 +747,8 @@ class ChunkMap{
 					}else */if (height > 0.7*this.size[1].y){ // 70%+ 高山（无树，有草）
 						treeHeight = height;
 					}
+					if (sNoise.openStone(this.seed.noise, this.seed.oS, x, z)) //石头上不长树
+						treeHeight = height;
 					
 					if (dy > treeHeight){
 						id = 0; // 空气/真空 (null)
@@ -1692,7 +1725,7 @@ class ChunkMap{
 			}
 		}
 		
-		let loading=0, total=0;
+		let loading=0, total=0; //当前正在加载 和 需加载总数
 		
 		for (let i in block){
 			if (this.initedChunk.every(function(value, index, arr){
@@ -1702,11 +1735,16 @@ class ChunkMap{
 				loading++;
 				this.loadChunkAsync(block[i][0], block[i][1], {
 					dir: block[i][2],
+					progressCallback: (v)=>{
+						loading -= 1/(map.size.x);
+						if (progressCallback)
+							progressCallback((total-loading) / total); //反馈进度
+					},
 					finishCallback: ()=>{
-						if (--loading == 0 && finishCallback){ //完成所有
+						if (loading < 1e-6 && finishCallback){ //完成所有
 							finishCallback();
-						}else if (progressCallback){ //反馈进度
-							progressCallback((total-loading) / total);
+						}else if (progressCallback){
+							progressCallback((total-loading) / total); //反馈进度
 						}
 						this.updateChunkAsync(block[i][0], block[i][1], {
 							breakTime: 36
@@ -1726,11 +1764,16 @@ class ChunkMap{
 				loading++;
 				this.unloadChunkAsync(...i, {
 					breakTime: 36,
+					progressCallback: (v)=>{
+						loading -= 1/(map.size.x);
+						if (progressCallback)
+							progressCallback((total-loading) / total); //反馈进度
+					},
 					finishCallback: ()=>{
-						if (--loading == 0 && finishCallback){ //完成所有
+						if (loading < 1e-6 && finishCallback){ //完成所有
 							finishCallback();
-						}else if (progressCallback){ //反馈进度
-							progressCallback((total-loading) / total);
+						}else if (progressCallback){
+							progressCallback((total-loading) / total); //反馈进度
 						}
 					}
 				}); //卸载区块

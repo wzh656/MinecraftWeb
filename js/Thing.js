@@ -307,25 +307,26 @@ class ThingGroup extends Array{
 	//添加
 	add(...items){
 		for (let i of items)
-			this.addOne(i);
-		return this;
+			this.addOne(i, undefined, false);
+		return this.update();
 	}
 	
 	//添加一个
-	addOne(item, where){
+	addOne(item, where, needUpdate=true){
 		if (this.fixedLength){ //固定长度
-			if (!this[where]){
+			if (!this[where]){ //位置未满
 				this[where] = item;
-				return this.update();
-			}else{
+				return needUpdate? this.update(): this;
+			}else{ //位置满了
 				for (let i=0; i<this.length; i++)
 					if (!this[i]){
 						this[i] = item;
-						return this.update();
+						return needUpdate? this.update(): this;
 					}
 			}
+			//没有找到空位
 			console.warn(`ThingGroup is full to add:`, item);
-			return this.update();
+			return needUpdate? this.update(): this;back;
 		}else{ //无固定
 			for (let i of items)
 				if (this.length+1 <= this.maxLength){
@@ -335,22 +336,22 @@ class ThingGroup extends Array{
 					break;
 				}
 		}
-		return this.update();
+		return needUpdate? this.update(): this;
 	}
 	
 	//删除
 	delete(num=1, where){
-		if (where != undefined)
+		if (where != undefined) //有位置
 			if (this.fixedLength) //固定长度
 				for (let i=0; i<num; i++)
-					this[where+i] = null;
-			else
+					this[+where+(+i)] = null;
+			else //不固定长度
 				this.splice(where, num);
-		else
+		else //无位置
 			for (let i=0; i<num; i++)
 				if (this.fixedLength) //固定长度
 					this[this.length-1] = null;
-				else
+				else //不固定长度
 					this.pop();
 		return this.update();
 	}

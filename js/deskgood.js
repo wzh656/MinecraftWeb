@@ -1,25 +1,6 @@
 /**
 * 玩家(deskgood)
 */
-function ray3D(start, end, near, far){
-	if (start.x === undefined) start.x = deskgood.pos.x;
-	if (start.y === undefined) start.y = deskgood.pos.y;
-	if (start.z === undefined) start.z = deskgood.pos.z;
-	if (end.x === undefined) end.x = 0;
-	if (end.y === undefined) end.y = 0;
-	if (end.z === undefined) end.z = 0;
-	
-	let ray = new THREE.Raycaster(
-		new THREE.Vector3(start.x, start.y, start.z),
-		new THREE.Vector3(end.x, end.y, end.z),
-		near,
-		far
-	);
-	ray.camera = camera;
-	let objs = ray.intersectObjects(scene.children);
-	return objs.filter(obj => obj.faceIndex !== null); //过滤
-}
-
 var deskgood = {
 	v: {
 		x: 0,
@@ -66,10 +47,35 @@ var deskgood = {
 	hold: new ThingGroup($("#tools")[0], {
 		fixedLength: 4,
 		updateCallback(children){
-			for (let i in children)
+			for (let i in children){
 				$(children[i]).css("borderColor", (i==deskgood.choice)?"#fff":"#aaa")
 					.css("borderWidth", (i==deskgood.choice)?"6px":"3px")
 					.css("margin", "0 0");
+				children[i].onclick = ()=>{
+					deskgood.choice = i;
+					deskgood.hold.update();
+				};
+			}
+		}
+	}),
+	head: new ThingGroup($("#bag .head")[0], {
+		updateCallback(children){
+			
+		}
+	}),
+	body: new ThingGroup($("#bag .body")[0], {
+		updateCallback(children){
+			
+		}
+	}),
+	leg: new ThingGroup($("#bag .leg")[0], {
+		updateCallback(children){
+			
+		}
+	}),
+	foot: new ThingGroup($("#bag .foot")[0], {
+		updateCallback(children){
+			
 		}
 	}),
 	sensitivity: device? 2.6: 1, //灵敏度：手机2，电脑1
@@ -134,9 +140,9 @@ var deskgood = {
 						)
 					) || !map.get(deskgood.pos.x/100, deskgood.pos.y/100, deskgood.pos.z/100) //没有方块在头上
 				){ */
-					let t = deskgood.pos.x != x || deskgood.pos.z != z; //改变了x|z坐标
+					let changed = deskgood.pos.x != x || deskgood.pos.z != z; //改变了x|z坐标
 					[deskgood.pos.x, deskgood.pos.y, deskgood.pos.z] = [x,y,z];
-					if (t) map.perloadChunk();
+					if (changed) map.perloadChunk();
 				/* }else{
 					deskgood.v.y = 0;
 					throw "";
@@ -487,16 +493,6 @@ SQL_read();
 //初始化
 deskgood.hold.update();
 deskgood.look_refresh();
-
-for (let i in deskgood.hold){
-	/* if (deskgood.hold[i] != 0){
-		$("#tools > img")[i].src = "./img/blocks/"+deskgood.hold[i]+"/"+template[deskgood.hold[i]].face[0];
-	} */
-	/* $("#tools > img")[i].onclick = ()=>{
-		deskgood.choice = i;
-		deskgood.hold.update();
-	}; */
-}
 
 
 //gui

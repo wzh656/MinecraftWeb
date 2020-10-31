@@ -466,7 +466,6 @@ $("#game").on("touchend", function (e){
 								attr
 							]);
 						});
-						
 						deskgood.hold.delete(1, deskgood.choice); //删除手里的方块
 						break; //跳出 寻找有效放置的 循环
 					}
