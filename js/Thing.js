@@ -316,9 +316,12 @@ class ThingGroup extends Array{
 	addOne(item, where, needUpdate=true){
 		if (this.fixedLength){ //固定长度
 			if (this.maxLength){ //有最大长度
-				
+				for (let i=this.length-1; i>=0; i--){
+					this[i+1] = this[i];
+				}
+				this[0] = item;
 			}else{
-				if (!this[where]){ //位置未满
+				if (where && !this[where]){ //位置未满
 					this[where] = item;
 					return needUpdate? this.update(): this;
 				}else{ //位置满了（从0开始找空位）
@@ -364,7 +367,13 @@ class ThingGroup extends Array{
 	//更新
 	update(){
 		let children = [];
-		for (let i=0; i<(this.fixedLength||this.length); i++)
+		let max;
+		if (this.fixedLength && !this.maxLength){
+			max = this.fixedLength;
+		}else{
+			max = this.length;
+		}
+		for (let i=0; i<max; i++)
 			children.push(
 				$("<li></li>").append($("<img/>").attr("src", (
 					this[i]?
