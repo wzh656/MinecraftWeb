@@ -507,25 +507,25 @@ deskgood.moveTo(0,10000*100);
 				<ul>
 					<li>
 						头(Head)：
-						<ol>
+						<ol class="head">
 							<li><img/></li>
 						</ol>
 					</li>
 					<li>
 						身(Body)：
-						<ol>
+						<ol class="body">
 							<li><img/></li>
 						</ol>
 					</li>
 					<li>
 						腿(leg)：
-						<ol>
+						<ol class="leg">
 							<li><img/></li>
 						</ol>
 					</li>
 					<li>
 						脚(foot)：
-						<ol>
+						<ol class="foot">
 							<li><img/></li>
 						</ol>
 					</li>
@@ -738,6 +738,24 @@ function ray2D(phone, x, y){
 		return intersects;
 	}
 	return null;
+}
+function ray3D(start, end, near, far){
+	if (start.x === undefined) start.x = deskgood.pos.x;
+	if (start.y === undefined) start.y = deskgood.pos.y;
+	if (start.z === undefined) start.z = deskgood.pos.z;
+	if (end.x === undefined) end.x = 0;
+	if (end.y === undefined) end.y = 0;
+	if (end.z === undefined) end.z = 0;
+	
+	let ray = new THREE.Raycaster(
+		new THREE.Vector3(start.x, start.y, start.z),
+		new THREE.Vector3(end.x, end.y, end.z),
+		near,
+		far
+	);
+	ray.camera = camera;
+	let objs = ray.intersectObjects(scene.children);
+	return objs.filter(obj => obj.faceIndex !== null); //过滤
 }
 //屏蔽鼠标右键
 document.oncontextmenu = function (e){

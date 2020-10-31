@@ -52,7 +52,7 @@ block_load.id = setInterval(function(){
 			console.log(perload_condition)
 			map.perloadChunk({
 				progressCallback: (value)=>{
-					$("#progress span").text( (value*100).changeDecimalBuZero(2, 2) );
+					$("#progress span").text( (Math.round(value*100*100)/100 ).changeDecimalBuZero(2, 2) );
 					$("#progress progress")[0].value = value;
 				},
 				finishCallback: ()=>{

@@ -287,3 +287,89 @@ class Block extends Thing{
 		}
 	}
 }
+
+
+class ThingGroup extends Array{
+	constructor(element, opt, ...array) {
+		super(...array);
+		this.e = element;
+		if (opt.fixedLength){ //固定长度
+			this.fixedLength = +opt.fixedLength;
+			for (let i=0; i<this.fixedLength; i++)
+				if (!this[i]) this[i] = null;
+		}
+		if (opt.maxLength) this.maxLength = +opt.maxLength; //最大长度
+		if (opt.updateCallback) this.updateCallback = opt.updateCallback; //更新完回调
+		
+		setTimeout( ()=>this.update(), 0 ); //自动更新
+	}
+	
+	//添加
+	add(...items){
+		for (let i of items)
+			this.addOne(i, undefined, false);
+		return this.update();
+	}
+	
+	//添加一个
+	addOne(item, where, needUpdate=true){
+		if (this.fixedLength){ //固定长度
+			if (!this[where]){ //位置未满
+				this[where] = item;
+				return needUpdate? this.update(): this;
+			}else{ //位置满了
+				for (let i=0; i<this.length; i++)
+					if (!this[i]){
+						this[i] = item;
+						return needUpdate? this.update(): this;
+					}
+			}
+			//没有找到空位
+			console.warn(`ThingGroup is full to add:`, item);
+			return needUpdate? this.update(): this;back;
+		}else{ //无固定
+			for (let i of items)
+				if (this.length+1 <= this.maxLength){
+					this.push(i);
+				}else{
+					console.warn(`ThingGroup added more than maxLength(${this.maxLength}):`, item);
+					break;
+				}
+		}
+		return needUpdate? this.update(): this;
+	}
+	
+	//删除
+	delete(num=1, where){
+		if (where != undefined) //有位置
+			if (this.fixedLength) //固定长度
+				for (let i=0; i<num; i++)
+					this[+where+(+i)] = null;
+			else //不固定长度
+				this.splice(where, num);
+		else //无位置
+			for (let i=0; i<num; i++)
+				if (this.fixedLength) //固定长度
+					this[this.length-1] = null;
+				else //不固定长度
+					this.pop();
+		return this.update();
+	}
+	
+	//更新
+	update(){
+		let children = [];
+		for (let i=0; i<(this.fixedLength||this.length); i++)
+			children.push(
+				$("<img/>").attr("src", (
+					this[i]?
+						(this[i].get("block", "parent")||`./img/blocks/${this[i].id}/`) + this[i].get("block", "face")[0]
+					:
+						"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP4//8/AwAI/AL+eMSysAAAAABJRU5ErkJggg==" //透明图片
+				))[0]
+			);
+		$(this.e).empty().append(...children);
+		if (typeof this.updateCallback == "function") this.updateCallback(children);
+		return this;
+	}
+}

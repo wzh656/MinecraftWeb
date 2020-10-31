@@ -1,25 +1,6 @@
 /**
 * 玩家(deskgood)
 */
-function ray3D(start, end, near, far){
-	if (start.x === undefined) start.x = deskgood.pos.x;
-	if (start.y === undefined) start.y = deskgood.pos.y;
-	if (start.z === undefined) start.z = deskgood.pos.z;
-	if (end.x === undefined) end.x = 0;
-	if (end.y === undefined) end.y = 0;
-	if (end.z === undefined) end.z = 0;
-	
-	let ray = new THREE.Raycaster(
-		new THREE.Vector3(start.x, start.y, start.z),
-		new THREE.Vector3(end.x, end.y, end.z),
-		near,
-		far
-	);
-	ray.camera = camera;
-	let objs = ray.intersectObjects(scene.children);
-	return objs.filter(obj => obj.faceIndex !== null); //过滤
-}
-
 var deskgood = {
 	v: {
 		x: 0,
@@ -62,8 +43,41 @@ var deskgood = {
 		y: 0,
 		z: 0
 	},
-	hold: [null, null, null, null],
 	choice: 0,
+	hold: new ThingGroup($("#tools")[0], {
+		fixedLength: 4,
+		updateCallback(children){
+			for (let i in children){
+				$(children[i]).css("borderColor", (i==deskgood.choice)?"#fff":"#aaa")
+					.css("borderWidth", (i==deskgood.choice)?"6px":"3px")
+					.css("margin", "0 0");
+				children[i].onclick = ()=>{
+					deskgood.choice = i;
+					deskgood.hold.update();
+				};
+			}
+		}
+	}),
+	head: new ThingGroup($("#bag .head")[0], {
+		updateCallback(children){
+			
+		}
+	}),
+	body: new ThingGroup($("#bag .body")[0], {
+		updateCallback(children){
+			
+		}
+	}),
+	leg: new ThingGroup($("#bag .leg")[0], {
+		updateCallback(children){
+			
+		}
+	}),
+	foot: new ThingGroup($("#bag .foot")[0], {
+		updateCallback(children){
+			
+		}
+	}),
 	sensitivity: device? 2.6: 1, //灵敏度：手机2，电脑1
 	die(reason="使用命令自杀"){
 		sql.deleteTable("file", undefined, function(){
@@ -83,22 +97,6 @@ var deskgood = {
 			
 			console.warn("deskgood死亡");
 		});
-	},
-	hold_choice_refresh(){
-		for (let i in deskgood.hold){
-			$("#tools > img:eq("+i+")")
-				.css("borderColor", (i==deskgood.choice)?"#fff":"#aaa")
-				.css("borderWidth", (i==deskgood.choice)?"6px":"3px");
-		}
-	},
-	hold_things_refresh(){
-		for (let i in deskgood.hold)
-			$("#tools > img")[i].src =
-				deskgood.hold[i]?
-					(deskgood.hold[i].get("block", "parent")||`./img/blocks/${deskgood.hold[i].id}/`) + deskgood.hold[i].get("block", "face")[0]
-				:
-					"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP4//8/AwAI/AL+eMSysAAAAABJRU5ErkJggg==" //透明图片
-			;
 	},
 	look_refresh(x,y,z){
 		if (x !== undefined | y !== undefined | z !== undefined){
@@ -142,9 +140,9 @@ var deskgood = {
 						)
 					) || !map.get(deskgood.pos.x/100, deskgood.pos.y/100, deskgood.pos.z/100) //没有方块在头上
 				){ */
-					let t = deskgood.pos.x != x || deskgood.pos.z != z; //改变了x|z坐标
+					let changed = deskgood.pos.x != x || deskgood.pos.z != z; //改变了x|z坐标
 					[deskgood.pos.x, deskgood.pos.y, deskgood.pos.z] = [x,y,z];
-					if (t) map.perloadChunk();
+					if (changed) map.perloadChunk();
 				/* }else{
 					deskgood.v.y = 0;
 					throw "";
@@ -493,19 +491,8 @@ deskgood.goZ = z=>deskgood.go(0,0,z);
 SQL_read();
 
 //初始化
-deskgood.hold_choice_refresh();
-deskgood.hold_things_refresh();
+deskgood.hold.update();
 deskgood.look_refresh();
-
-for (let i in deskgood.hold){
-	/* if (deskgood.hold[i] != 0){
-		$("#tools > img")[i].src = "./img/blocks/"+deskgood.hold[i]+"/"+template[deskgood.hold[i]].face[0];
-	} */
-	$("#tools > img")[i].onclick = ()=>{
-		deskgood.choice = i;
-		deskgood.hold_choice_refresh();
-	};
-}
 
 
 //gui
@@ -520,7 +507,7 @@ deskgood_folder.open();
 		deskgood_position_folder.add(deskgood.pos, "x", map.size[0].x*100, map.size[1].x*100, 0.01).listen();
 		deskgood_position_folder.add(deskgood.pos, "y", map.size[0].y*100, map.size[1].y*100, 0.01).listen();
 		deskgood_position_folder.add(deskgood.pos, "z", map.size[0].z*100, map.size[1].z*100, 0.01).listen();
-		let deskgood_position_zone_folder = deskgood_position_folder.addFolder("区块(zone)");
+		let deskgood_position_zone_folder = deskgood_position_folder.addFolder("区块(Chunk)");
 		deskgood_position_zone_folder.open();
 			deskgood_position_folder.add({
 				get x(){ return Math.round(deskgood.pos.x/100/map.size.x) },
@@ -579,13 +566,13 @@ deskgood_folder.open();
 			});
 	let deskgood_hold_folder = deskgood_folder.addFolder("工具栏(tools)");
 	deskgood_hold_folder.open();
-		deskgood_hold_folder.add(deskgood, "choice", 0, 3, 1).listen().name("选择工具").onChange(deskgood.hold_choice_refresh);
+		deskgood_hold_folder.add(deskgood, "choice", 0, 3, 1).listen().name("选择工具").onChange(deskgood.hold.update);
 		let deskgood_hold_things_folder = deskgood_hold_folder.addFolder("物品(只读勿编辑)");
 		deskgood_hold_things_folder.open();
-			deskgood_hold_things_folder.add(deskgood.hold[0] || {id:0}, "id").name("0").listen().onChange(deskgood.hold_things_refresh);
-			deskgood_hold_things_folder.add(deskgood.hold[1] || {id:0}, "id").name("1").listen().onChange(deskgood.hold_things_refresh);
-			deskgood_hold_things_folder.add(deskgood.hold[2] || {id:0}, "id").name("2").listen().onChange(deskgood.hold_things_refresh);
-			deskgood_hold_things_folder.add(deskgood.hold[3] || {id:0}, "id").name("3").listen().onChange(deskgood.hold_things_refresh);
+			deskgood_hold_things_folder.add(deskgood.hold[0] || {id:0}, "id").name("0").listen().onChange(deskgood.hold.update);
+			deskgood_hold_things_folder.add(deskgood.hold[1] || {id:0}, "id").name("1").listen().onChange(deskgood.hold.update);
+			deskgood_hold_things_folder.add(deskgood.hold[2] || {id:0}, "id").name("2").listen().onChange(deskgood.hold.update);
+			deskgood_hold_things_folder.add(deskgood.hold[3] || {id:0}, "id").name("3").listen().onChange(deskgood.hold.update);
 
 /*
 * 天堂、地狱
