@@ -135,14 +135,36 @@ $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind�
 	let wheel = event.originalEvent.wheelDelta;
 	let detal = event.originalEvent.detail;
 	let up = function(){
+		let before = deskgood.choice;
+		if (
+			deskgood.hold[before] &&
+			eval(deskgood.hold[before].get("attr", "block", "onChangeLeave")) === false
+		) return;
+		
 		deskgood.choice--;
 		if (deskgood.choice < 0)
 			deskgood.choice = 3;
+		
+		if (
+			deskgood.hold[deskgood.choice] &&
+			eval(deskgood.hold[deskgood.choice].get("attr", "onChangeTo")) === false
+		) return (deskgood.choice = before);
 	};
 	let down = function(){
+		let before = deskgood.choice;
+		if (
+			deskgood.hold[before] &&
+			eval(deskgood.hold[before].get("attr", "onChangeLeave")) === false
+		) return;
+		
 		deskgood.choice++;
 		if (deskgood.choice > 3)
 			deskgood.choice = 0;
+		
+		if (
+			deskgood.hold[deskgood.choice] &&
+			eval(deskgood.hold[deskgood.choice].get("attr", "onChangeTo")) === false
+		) return (deskgood.choice = before);
 	};
 	if (event.originalEvent.wheelDelta){ //判断浏览器IE,谷歌滚轮事件
 		if (wheel > 0) { //当滑轮向上滚动时

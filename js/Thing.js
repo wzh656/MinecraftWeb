@@ -261,29 +261,28 @@ class Block extends Thing{
 		}
 		
 		this.attr.block = {};
+		if (opt.attr.onChangeTo) this.attr.onChangeTo = opt.attr.onChangeTo; //choice切换到
+		if (opt.attr.onChangeLeave) this.attr.onChangeLeave = opt.attr.onChangeLeave; //choice切换离开
+		if (opt.attr.onPutToHead) this.attr.onPutToHead = opt.attr.onPutToHead;
+		if (opt.attr.onPutToBody) this.attr.onPutToBody = opt.attr.onPutToBody;
+		if (opt.attr.onPutToLeg) this.attr.onPutToLeg = opt.attr.onPutToHead;
+		if (opt.attr.onPutToFoot) this.attr.onPutToFoot = opt.attr.onPutToFoot;
 		if (opt.attr.block){
 			if (opt.attr.block.transparent) this.attr.block.transparent = opt.attr.block.transparent; //透明方块（其他方块必须显示）
 			if (opt.attr.block.noTransparent) this.attr.block.noTransparent = opt.attr.block.noTransparent; //必须显示本方块
 			if (opt.attr.block.through) this.attr.block.through = opt.attr.block.through; //运行穿过
 			
-			if (opt.attr.block.onLeftMouseDown) this.attr.block.onLeftMouseDown = opt.attr.block.onLeftMouseDown;
+			if (opt.attr.block.onLeftMouseDown) this.attr.block.onLeftMouseDown = opt.attr.block.onLeftMouseDown; //鼠标左键按下
 			if (opt.attr.block.onLeftMouseUp) this.attr.block.onLeftMouseUp = opt.attr.block.onLeftMouseUp;
-			if (opt.attr.block.onRightMouseDown) this.attr.block.onRightMouseDown = opt.attr.block.onRightMouseDown;
+			if (opt.attr.block.onRightMouseDown) this.attr.block.onRightMouseDown = opt.attr.block.onRightMouseDown; //鼠标右键按下
 			if (opt.attr.block.onRightMouseUp) this.attr.block.onRightMouseUp = opt.attr.block.onRightMouseUp;
 			
-			if (opt.attr.block.onShortTouch) this.attr.block.onShortTouch = opt.attr.block.onShortTouch;
-			if (opt.attr.block.onLongTouch) this.attr.block.onLongTouch = opt.attr.block.onLongTouch;
+			if (opt.attr.block.onShortTouch) this.attr.block.onShortTouch = opt.attr.block.onShortTouch; //短按
+			if (opt.attr.block.onLongTouch) this.attr.block.onLongTouch = opt.attr.block.onLongTouch; //长按
 			if (opt.attr.block.onTouchStart) this.attr.block.onTouchStart = opt.attr.block.onTouchStart;
 			if (opt.attr.block.onTouchMove) this.attr.block.onTouchMove = opt.attr.block.onTouchMove;
 			if (opt.attr.block.onTouchEnd) this.attr.block.onTouchEnd = opt.attr.block.onTouchEnd;
 			if (opt.attr.block.onTouchCancal) this.attr.block.onTouchCancal = opt.attr.block.onTouchCancal;
-			
-			if (opt.attr.block.onChangeTo) this.attr.block.onChangeTo = opt.attr.block.onChangeTo;
-			if (opt.attr.block.onChangeLeave) this.attr.block.onChangeLeave = opt.attr.block.onChangeLeave;
-			if (opt.attr.block.onPutToHead) this.attr.block.onPutToHead = opt.attr.block.onPutToHead;
-			if (opt.attr.block.onPutToBody) this.attr.block.onPutToBody = opt.attr.block.onPutToBody;
-			if (opt.attr.block.onPutToLeg) this.attr.block.onPutToLeg = opt.attr.block.onPutToHead;
-			if (opt.attr.block.onPutToFoot) this.attr.block.onPutToFoot = opt.attr.block.onPutToFoot;
 		}
 	}
 }
@@ -296,8 +295,9 @@ class ThingGroup extends Array{
 		this.e = element;
 		if (opt.fixedLength){ //固定长度
 			this.fixedLength = +opt.fixedLength;
-			for (let i=0; i<this.fixedLength; i++)
-				if (!this[i]) this[i] = null;
+			if (!opt.maxLength) //无最大长度
+				for (let i=0; i<this.fixedLength; i++)
+					if (!this[i]) this[i] = null;
 		}
 		if (opt.maxLength) this.maxLength = +opt.maxLength; //最大长度
 		if (opt.updateCallback) this.updateCallback = opt.updateCallback; //更新完回调
@@ -307,67 +307,64 @@ class ThingGroup extends Array{
 	
 	//添加
 	add(...items){
-		for (let i of items)
-			this.addOne(i, undefined, false);
+		let [where] = items.splice(-1);
+		for (let i in items)
+			this.addOne(item[i], where[i], false);
 		return this.update();
 	}
 	
 	//添加一个
 	addOne(item, where, needUpdate=true){
-		if (this.fixedLength){ //固定长度
-			if (this.maxLength){ //有最大长度
-				for (let i=this.length-1; i>=0; i--){
-					this[i+1] = this[i];
-				}
-				this[0] = item;
-			}else{
-				if (where && !this[where]){ //位置未满
-					this[where] = item;
-					return needUpdate? this.update(): this;
-				}else{ //位置满了（从0开始找空位）
-					for (let i=0; i<this.length; i++)
-						if (!this[i]){
-							this[i] = item;
-							return needUpdate? this.update(): this;
-						}
-				}
-				//没有找到空位
-				console.warn(`ThingGroup is full to add:`, item);
-				return needUpdate? this.update(): this;back;
+		if (this.fixedLength && !this.maxLength){ //有固定长度，无最大长度
+			if (this[where]){ //已满
+				for (let i=0; i<this.length; i++)
+					if (!this[i]){
+						this[i] = item;
+						return needUpdate? this.update(): this;
+					}
+			}else{ //未满
+				this[where] = item;
+				return needUpdate? this.update(): this;
 			}
-		}else{ //无固定
-			for (let i of items)
-				if (this.length+1 <= this.maxLength){
-					this.push(i);
-				}else{
-					console.warn(`ThingGroup added more than maxLength(${this.maxLength}):`, item);
-					break;
-				}
+			console.warn(`ThingGroup is full to add:`, item, where);
+			return needUpdate? this.update(): this;
+		}else{
+			if (this.length+1 > this.maxLength){
+				console.warn(`ThingGroup is full(maxLength:${this.maxLength}) to add:`, item, where);
+				return needUpdate? this.update(): this;
+			}
+			if (where === undefined){ //无where
+				this.push(item);
+			}else{ //有where
+				this.splice(where, 0, item);
+			}
+			return needUpdate? this.update(): this;
 		}
-		return needUpdate? this.update(): this;
 	}
 	
 	//删除
 	delete(num=1, where){
-		if (where != undefined) //有位置
-			if (this.fixedLength) //固定长度
+		if (this.fixedLength && !this.maxLength){ //有固定长度，无最大长度
+			for (let i=where; i<this.length; i++){
+				if (--num < 0)
+					return this.update();
+				this[i] = null;
+			}
+		}else{
+			if (where === undefined){ //无位置
 				for (let i=0; i<num; i++)
-					this[+where+(+i)] = null;
-			else //不固定长度
-				this.splice(where, num);
-		else //无位置
-			for (let i=0; i<num; i++)
-				if (this.fixedLength) //固定长度
-					this[this.length-1] = null;
-				else //不固定长度
 					this.pop();
+			}else{
+				this.splice(where, num);
+			}
+		}
 		return this.update();
 	}
 	
 	//更新
 	update(){
 		let children = [];
-		let max;
+		let max = 0;
 		if (this.fixedLength && !this.maxLength){
 			max = this.fixedLength;
 		}else{
@@ -375,15 +372,28 @@ class ThingGroup extends Array{
 		}
 		for (let i=0; i<max; i++)
 			children.push(
-				$("<li></li>").append($("<img/>").attr("src", (
-					this[i]?
-						(this[i].get("block", "parent")||`./img/blocks/${this[i].id}/`) + this[i].get("block", "face")[0]
-					:
-						"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP4//8/AwAI/AL+eMSysAAAAABJRU5ErkJggg==" //透明图片
-				)))[0]
+				$("<li></li>")
+					.append(
+						$("<img/>")
+							.attr("src", (
+								this[i]?
+									(this[i].get("block", "parent")||`./img/blocks/${this[i].id}/`) + this[i].get("block", "face")[0]
+								:
+									"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP4//8/AwAI/AL+eMSysAAAAABJRU5ErkJggg==" //透明图片
+							))
+					)[0]
 			);
-		$(this.e).empty().append(...children);
+		if (this.fixedLength && this.maxLength)
+			for (let i=0; i<this.fixedLength; i++)
+				children.push(
+					$("<li></li>")
+					.append(
+						$("<img/>")
+							.attr("src", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP4//8/AwAI/AL+eMSysAAAAABJRU5ErkJggg==") //透明图片
+					)[0]
+				);
 		if (typeof this.updateCallback == "function") this.updateCallback(children);
+		$(this.e).empty().append(...children);
 		return this;
 	}
 }

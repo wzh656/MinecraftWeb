@@ -57,34 +57,98 @@ var deskgood = {
 					deskgood.hold.update();
 				};
 			}
+			children.push(
+				$("<li></li>").append( $("<img/>").attr("src", "./img/more.png") )
+				.click(()=>state("bag"))[0]
+			);
 		}
 	}),
 	head: new ThingGroup($("#bag .head")[0], {
 		fixedLength: 1,
 		maxLength: Infinity,
 		updateCallback(children){
-			
+			for (let i in children){
+				$(children[i]).css("borderColor", (i==children.length-1)?"#aaa":"rgb(116,116,116)")
+					.css("borderWidth", (i==children.length-1)?"3px":"2px")
+					.css("margin", "0 0");
+				children[i].onclick = ()=>{
+					if (deskgood.head[i]){ //有方块（放到手上）
+						deskgood.hold.addOne(deskgood.head[i], deskgood.choice);
+						deskgood.head.delete();
+					}else{ //无方块
+						if (deskgood.hold[deskgood.choice]){
+							deskgood.head.addOne(deskgood.hold[deskgood.choice]);
+							deskgood.hold.delete(1, deskgood.choice);
+						}
+					}
+				};
+			}
 		}
 	}),
 	body: new ThingGroup($("#bag .body")[0], {
 		fixedLength: 1,
 		maxLength: Infinity,
 		updateCallback(children){
-			
+			for (let i in children){
+				$(children[i]).css("borderColor", (i==children.length-1)?"#aaa":"rgb(116,116,116)")
+					.css("borderWidth", (i==children.length-1)?"3px":"2px")
+					.css("margin", "0 0");
+				children[i].onclick = ()=>{
+					if (deskgood.body[i]){ //有方块（放到手上）
+						deskgood.hold.addOne(deskgood.body[i], deskgood.choice);
+						deskgood.body.delete();
+					}else{ //无方块
+						if (deskgood.hold[deskgood.choice]){
+							deskgood.body.addOne(deskgood.hold[deskgood.choice]);
+							deskgood.hold.delete(1, deskgood.choice);
+						}
+					}
+				};
+			}
 		}
 	}),
 	leg: new ThingGroup($("#bag .leg")[0], {
 		fixedLength: 1,
 		maxLength: Infinity,
 		updateCallback(children){
-			
+			for (let i in children){
+				$(children[i]).css("borderColor", (i==children.length-1)?"#aaa":"rgb(116,116,116)")
+					.css("borderWidth", (i==children.length-1)?"3px":"2px")
+					.css("margin", "0 0");
+				children[i].onclick = ()=>{
+					if (deskgood.leg[i]){ //有方块（放到手上）
+						deskgood.hold.addOne(deskgood.leg[i], deskgood.choice);
+						deskgood.leg.delete();
+					}else{ //无方块
+						if (deskgood.hold[deskgood.choice]){
+							deskgood.leg.addOne(deskgood.hold[deskgood.choice]);
+							deskgood.hold.delete(1, deskgood.choice);
+						}
+					}
+				};
+			}
 		}
 	}),
 	foot: new ThingGroup($("#bag .foot")[0], {
 		fixedLength: 1,
 		maxLength: Infinity,
 		updateCallback(children){
-			
+			for (let i in children){
+				$(children[i]).css("borderColor", (i==children.length-1)?"#aaa":"rgb(116,116,116)")
+					.css("borderWidth", (i==children.length-1)?"3px":"2px")
+					.css("margin", "0 0");
+				children[i].onclick = ()=>{
+					if (deskgood.foot[i]){ //有方块（放到手上）
+						deskgood.hold.addOne(deskgood.foot[i], deskgood.choice);
+						deskgood.foot.delete();
+					}else{ //无方块
+						if (deskgood.hold[deskgood.choice]){
+							deskgood.foot.addOne(deskgood.hold[deskgood.choice]);
+							deskgood.hold.delete(1, deskgood.choice);
+						}
+					}
+				};
+			}
 		}
 	}),
 	sensitivity: device? 2.6: 1, //灵敏度：手机2，电脑1

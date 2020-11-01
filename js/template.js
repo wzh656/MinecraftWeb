@@ -34,7 +34,11 @@ TEMPLATES.push(new Thing({
 	block: {
 		face: FACE_URL[0]
 	},
-	attr: {}
+	attr: {
+		block: {
+			onChangeTo: "alert();"
+		}
+	}
 }, false));
 TEMPLATES.push(new Thing({
 	id: 3,
