@@ -56,7 +56,7 @@ document.addEventListener("keydown", function (e){
 		}else{ //未暂停
 			let stop0 = stop;
 			stop = true;
-			$("#game,#mouse").css("cursor", "default");
+			// $("#game,#mouse").css("cursor", "default");
 			SQL_save();
 			document.exitPointerLock();
 			console.log("Pause-Break", stop0, "changeTo", stop);
@@ -72,13 +72,23 @@ document.addEventListener("keydown", function (e){
 		}
 		return false;
 	}
-	if (e.keyCode == 113){ //截图
+	if (e.keyCode == 113){ //F2 截图
+		console.log("F2:", keydown.key);
 		var oA = document.createElement("a");
 		oA.download = "截图";
 		oA.href = $("#game")[0].toDataURL();
 		document.body.appendChild(oA);
 		oA.click();
 		oA.remove(); // 下载之后把创建的元素删除
+	}
+	if (e.keyCode == 114){ //F3 切换调试
+		console.log("F3:", keydown.key);
+		if (localStorage.getItem("debug") == "false"){ //false
+			localStorage.setItem("debug", true);
+		}else{ //true 或 null
+			localStorage.setItem("debug", false);
+		}
+		location.reload();
 	}
 	
 	if (stop){
@@ -90,7 +100,7 @@ document.addEventListener("keydown", function (e){
 		console.log("ESC:", keydown.key);
 		
 		stop = true;
-		$("#game,#mouse").css("cursor", "default");
+		// $("#game,#mouse").css("cursor", "default");
 		SQL_save();
 		document.exitPointerLock();
 		

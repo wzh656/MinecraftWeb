@@ -569,54 +569,44 @@ deskgood.look_refresh();
 
 
 //gui
-let deskgood_folder = gui.addFolder("玩家/观察者(deskgood)");
-deskgood_folder.open();
-	deskgood_folder.add(window, "stop").listen();
-	deskgood_folder.add(deskgood, "die").name("Game Over(自杀)");
-	deskgood_folder.add(deskgood, "sensitivity", 0.1, 10).name("灵敏度");
-	deskgood_folder.add(deskgood, "jump_v", 1, 36).name("跳跃速度");
-	let deskgood_position_folder = deskgood_folder.addFolder("位置/px");
-	deskgood_position_folder.open();
-		deskgood_position_folder.add(deskgood.pos, "x", map.size[0].x*100, map.size[1].x*100, 0.01).listen();
-		deskgood_position_folder.add(deskgood.pos, "y", map.size[0].y*100, map.size[1].y*100, 0.01).listen();
-		deskgood_position_folder.add(deskgood.pos, "z", map.size[0].z*100, map.size[1].z*100, 0.01).listen();
-		let deskgood_position_zone_folder = deskgood_position_folder.addFolder("区块(Chunk)");
-		deskgood_position_zone_folder.open();
-			deskgood_position_folder.add({
-				get x(){ return Math.round(deskgood.pos.x/100/map.size.x) },
-				set x(v){ deskgood.pos.x = v*100*map.size.x }
-			}, "x", -100, 100, 1).listen();
-			deskgood_position_folder.add({
-				get z(){ return Math.round(deskgood.pos.z/100/map.size.z) },
-				set z(v){ deskgood.pos.z = v*100*map.size.z }
-			}, "z", -100, 100, 1).listen();
-	let deskgood_v_folder = deskgood_folder.addFolder("速度/(m/s)");
-		deskgood_v_folder.add(deskgood.v, "x", -10, 10, 1e-3).listen();
-		deskgood_v_folder.add(deskgood.v, "y", -100, 100, 1e-3).listen().onChange((value) => {
-			deskgood.v.y = (value/100)**3 *100;
-		});
-		deskgood_v_folder.add(deskgood.v, "z", -10, 10, 1e-3).listen();
-	let deskgood_lookAt_folder = deskgood_folder.addFolder("朝向（球坐标系）");
-		deskgood_lookAt_folder.add(deskgood.lookAt, "left_right", 0, 360).listen().name("左右（水平）");
-		deskgood_lookAt_folder.add(deskgood.lookAt, "top_bottom", -90, 90).listen().name("上下（竖直）");
-	let deskgood_look_folder = deskgood_folder.addFolder("朝向（笛卡尔坐标系）");
-		deskgood_look_folder.add(deskgood.look, "x", -1, 1, 0.01).listen().onChange(x => deskgood.look_refresh(x));
-		deskgood_look_folder.add(deskgood.look, "y", -1, 1, 0.01).listen().onChange(y => deskgood.look_refresh(undefined, y));
-		deskgood_look_folder.add(deskgood.look, "z", -1, 1, 0.01).listen().onChange(z => deskgood.look_refresh(undefined, undefined, z));
-	let deskgood_up_folder = deskgood_folder.addFolder("天旋地转（小心头晕）");
-		deskgood_up_folder.add(deskgood.up, "x", -1, 1, 0.01).onChange(function(){
-			message("<font style='font-size: 16px;'>头晕别怪我</font>", 3);
-			/* plus.nativeUI.toast(
-				"<font size=\"16\">头晕别怪我</font>",
-				{
-					type: "richtext",
-					verticalAlign: "top",
-					richTextStyle: {align:"center"}
-				}
-			); }catch(err){} */
-		});
-		deskgood_up_folder.add(deskgood.up, "y", -1, 1, 0.01).onChange(function(){
-			message("<font style='font-size: 16px;'>头晕别怪我</font>", 3);
+if (ALLOW_GUI){
+	let deskgood_folder = gui.addFolder("玩家/观察者(deskgood)");
+	deskgood_folder.open();
+		deskgood_folder.add(window, "stop").listen();
+		deskgood_folder.add(deskgood, "die").name("Game Over(自杀)");
+		deskgood_folder.add(deskgood, "sensitivity", 0.1, 10).name("灵敏度");
+		deskgood_folder.add(deskgood, "jump_v", 1, 36).name("跳跃速度");
+		let deskgood_position_folder = deskgood_folder.addFolder("位置/px");
+		deskgood_position_folder.open();
+			deskgood_position_folder.add(deskgood.pos, "x", map.size[0].x*100, map.size[1].x*100, 0.01).listen();
+			deskgood_position_folder.add(deskgood.pos, "y", map.size[0].y*100, map.size[1].y*100, 0.01).listen();
+			deskgood_position_folder.add(deskgood.pos, "z", map.size[0].z*100, map.size[1].z*100, 0.01).listen();
+			let deskgood_position_zone_folder = deskgood_position_folder.addFolder("区块(Chunk)");
+			deskgood_position_zone_folder.open();
+				deskgood_position_folder.add({
+					get x(){ return Math.round(deskgood.pos.x/100/map.size.x) },
+					set x(v){ deskgood.pos.x = v*100*map.size.x }
+				}, "x", -100, 100, 1).listen();
+				deskgood_position_folder.add({
+					get z(){ return Math.round(deskgood.pos.z/100/map.size.z) },
+					set z(v){ deskgood.pos.z = v*100*map.size.z }
+				}, "z", -100, 100, 1).listen();
+		let deskgood_v_folder = deskgood_folder.addFolder("速度/(m/s)");
+			deskgood_v_folder.add(deskgood.v, "x", -10, 10, 1e-3).listen();
+			deskgood_v_folder.add(deskgood.v, "y", -100, 100, 1e-3).listen().onChange((value) => {
+				deskgood.v.y = (value/100)**3 *100;
+			});
+			deskgood_v_folder.add(deskgood.v, "z", -10, 10, 1e-3).listen();
+		let deskgood_lookAt_folder = deskgood_folder.addFolder("朝向（球坐标系）");
+			deskgood_lookAt_folder.add(deskgood.lookAt, "left_right", 0, 360).listen().name("左右（水平）");
+			deskgood_lookAt_folder.add(deskgood.lookAt, "top_bottom", -90, 90).listen().name("上下（竖直）");
+		let deskgood_look_folder = deskgood_folder.addFolder("朝向（笛卡尔坐标系）");
+			deskgood_look_folder.add(deskgood.look, "x", -1, 1, 0.01).listen().onChange(x => deskgood.look_refresh(x));
+			deskgood_look_folder.add(deskgood.look, "y", -1, 1, 0.01).listen().onChange(y => deskgood.look_refresh(undefined, y));
+			deskgood_look_folder.add(deskgood.look, "z", -1, 1, 0.01).listen().onChange(z => deskgood.look_refresh(undefined, undefined, z));
+		let deskgood_up_folder = deskgood_folder.addFolder("天旋地转（小心头晕）");
+			deskgood_up_folder.add(deskgood.up, "x", -1, 1, 0.01).onChange(function(){
+				message("<font style='font-size: 16px;'>头晕别怪我</font>", 3);
 				/* plus.nativeUI.toast(
 					"<font size=\"16\">头晕别怪我</font>",
 					{
@@ -626,26 +616,38 @@ deskgood_folder.open();
 					}
 				); }catch(err){} */
 			});
-		deskgood_up_folder.add(deskgood.up, "z", -1, 1, 0.01).onChange(function(){
-			message("<font style='font-size: 16px;'>头晕别怪我</font>", 3);
-				/* plus.nativeUI.toast(
-					"<font size=\"16\">头晕别怪我</font>",
-					{
-						type: "richtext",
-						verticalAlign: "top",
-						richTextStyle: {align:"center"}
-					}
-				); }catch(err){} */
-			});
-	let deskgood_hold_folder = deskgood_folder.addFolder("工具栏(tools)");
-	deskgood_hold_folder.open();
-		deskgood_hold_folder.add(deskgood, "choice", 0, 3, 1).listen().name("选择工具").onChange(deskgood.hold.update);
-		let deskgood_hold_things_folder = deskgood_hold_folder.addFolder("物品(只读勿编辑)");
-		deskgood_hold_things_folder.open();
-			deskgood_hold_things_folder.add(deskgood.hold[0] || {id:0}, "id").name("0").listen().onChange(deskgood.hold.update);
-			deskgood_hold_things_folder.add(deskgood.hold[1] || {id:0}, "id").name("1").listen().onChange(deskgood.hold.update);
-			deskgood_hold_things_folder.add(deskgood.hold[2] || {id:0}, "id").name("2").listen().onChange(deskgood.hold.update);
-			deskgood_hold_things_folder.add(deskgood.hold[3] || {id:0}, "id").name("3").listen().onChange(deskgood.hold.update);
+			deskgood_up_folder.add(deskgood.up, "y", -1, 1, 0.01).onChange(function(){
+				message("<font style='font-size: 16px;'>头晕别怪我</font>", 3);
+					/* plus.nativeUI.toast(
+						"<font size=\"16\">头晕别怪我</font>",
+						{
+							type: "richtext",
+							verticalAlign: "top",
+							richTextStyle: {align:"center"}
+						}
+					); }catch(err){} */
+				});
+			deskgood_up_folder.add(deskgood.up, "z", -1, 1, 0.01).onChange(function(){
+				message("<font style='font-size: 16px;'>头晕别怪我</font>", 3);
+					/* plus.nativeUI.toast(
+						"<font size=\"16\">头晕别怪我</font>",
+						{
+							type: "richtext",
+							verticalAlign: "top",
+							richTextStyle: {align:"center"}
+						}
+					); }catch(err){} */
+				});
+		let deskgood_hold_folder = deskgood_folder.addFolder("工具栏(tools)");
+		deskgood_hold_folder.open();
+			deskgood_hold_folder.add(deskgood, "choice", 0, 3, 1).listen().name("选择工具").onChange(deskgood.hold.update);
+			let deskgood_hold_things_folder = deskgood_hold_folder.addFolder("物品(只读勿编辑)");
+			deskgood_hold_things_folder.open();
+				deskgood_hold_things_folder.add(deskgood.hold[0] || {id:0}, "id").name("0").listen().onChange(deskgood.hold.update);
+				deskgood_hold_things_folder.add(deskgood.hold[1] || {id:0}, "id").name("1").listen().onChange(deskgood.hold.update);
+				deskgood_hold_things_folder.add(deskgood.hold[2] || {id:0}, "id").name("2").listen().onChange(deskgood.hold.update);
+				deskgood_hold_things_folder.add(deskgood.hold[3] || {id:0}, "id").name("3").listen().onChange(deskgood.hold.update);
+}
 
 /*
 * 天堂、地狱

@@ -52,13 +52,14 @@ setInterval(function(){
 	}
 }, 0);
 
-
-let weather_folder = gui.addFolder("天气(weather)");
-	weather_folder.add(window, "weather", 0, 1/300*1000, 1e-3).name("降水系数").onChange((value)=>{weather = (value*300/1000)**3/300*1000});
-	weather_folder.add(sprite_system, "length", 0, 1000, 1).name("雨滴(sprite)个数").listen();
-	weather_folder.add({clean: function(){
-		for (let i in sprite_system){
-			scene.remove(sprite_system[i]);
-		}
-		sprite_system.splice(0, sprite_system.length);
-	}},"clean").name("清空(clean)");
+if (ALLOW_GUI){
+	let weather_folder = gui.addFolder("天气(weather)");
+		weather_folder.add(window, "weather", 0, 1/300*1000, 1e-3).name("降水系数").onChange((value)=>{weather = (value*300/1000)**3/300*1000});
+		weather_folder.add(sprite_system, "length", 0, 1000, 1).name("雨滴(sprite)个数").listen();
+		weather_folder.add({clean: function(){
+			for (let i in sprite_system){
+				scene.remove(sprite_system[i]);
+			}
+			sprite_system.splice(0, sprite_system.length);
+		}},"clean").name("清空(clean)");
+}

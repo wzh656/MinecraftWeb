@@ -556,7 +556,7 @@ class ChunkMap{
 		// 70%+ 高山（无树，有草）
 		// 26+ 丘陵（树）
 		let treeTop = null; //保留最高树干坐标
-		let earth = height - sNoise.dirt(this.seed.noise, this.seed.d, x, z);
+		let earth = height - height * sNoise.dirt(this.seed.noise, this.seed.d, x, z);
 		let treeHeight = height + sNoise.treeHeight(this.seed.noise, this.seed.tH, x, z);
 		
 		for (let i=edit.length-1; i>=0; i--){
@@ -714,7 +714,7 @@ class ChunkMap{
 		// 70%+ 高山（无树，有草）
 		// 26+ 丘陵（树）
 		let treeTop = null; //保留最高树干坐标
-		let earth = height - sNoise.dirt(this.seed.noise, this.seed.d, x, z);
+		let earth = height - height * sNoise.dirt(this.seed.noise, this.seed.d, x, z);
 		let treeHeight = height + sNoise.treeHeight(this.seed.noise, this.seed.tH, x, z);
 		for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
 			

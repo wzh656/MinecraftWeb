@@ -10,13 +10,15 @@ let mouse_choice = {
 	faceIndex: -1,
 	id: -1
 };
-let deskgood_choice_folder = deskgood_folder.addFolder("选择物体");
-	deskgood_choice_folder.add(mouse_choice, "view").name("选择模式").listen();
-	deskgood_choice_folder.add(mouse_choice, "x", -1000, 1000, 100).listen();
-	deskgood_choice_folder.add(mouse_choice, "y", -1000, 1000, 100).listen();
-	deskgood_choice_folder.add(mouse_choice, "z", -1000, 1000, 100).listen();
-	deskgood_choice_folder.add(mouse_choice, "faceIndex", 0, 12, 1).listen();
-	deskgood_choice_folder.add(mouse_choice, "id", 0, 9, 1).listen();
+if (ALLOW_GUI){
+	let deskgood_choice_folder = gui.__folders["玩家/观察者(deskgood)"].addFolder("选择物体");
+		deskgood_choice_folder.add(mouse_choice, "view").name("选择模式").listen();
+		deskgood_choice_folder.add(mouse_choice, "x", -1000, 1000, 100).listen();
+		deskgood_choice_folder.add(mouse_choice, "y", -1000, 1000, 100).listen();
+		deskgood_choice_folder.add(mouse_choice, "z", -1000, 1000, 100).listen();
+		deskgood_choice_folder.add(mouse_choice, "faceIndex", 0, 12, 1).listen();
+		deskgood_choice_folder.add(mouse_choice, "id", 0, 9, 1).listen();
+}
 
 /* $(document).on("click", function (e){
 	console.log( ray3D({},deskgood.look)[0] );
@@ -129,7 +131,7 @@ document.addEventListener("mousemove", function (e){
 });
 
 $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind监听
-	if (stop)
+	if (stop && stop != "bag")
 		return;
 	//Chorme
 	let wheel = event.originalEvent.wheelDelta;

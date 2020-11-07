@@ -228,7 +228,7 @@ Copyright © 2020 by wzh
 				left: 50%;
 				top: 50%;
 				transform: translate(-50%,-50%);
-				cursor: none;
+				/* cursor: none; */
 			}
 			#pointer > div{
 				position: absolute;
@@ -733,7 +733,9 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 	//输入锁定改变错误
 	let pointerLockErrorEvent = function(){
 		console.error("鼠标锁定错误");
-		alert("鼠标锁定错误\n请关闭重新打开 或 切换/升级浏览器");
+		// alert("鼠标锁定错误\n请重试 或 关闭重新打开 或 切换/升级浏览器");
+		message("<font color='red'>鼠标锁定错误\n请重试 或 关闭重新打开 或 切换/升级浏览器</font>", 3);
+		document.body.requestPointerLock();
 	};
 	
 	//添加锁定事件

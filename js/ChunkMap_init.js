@@ -19,13 +19,13 @@ let map = new ChunkMap([
 		}
 	},
 	dirt: JSON.parse(localStorage.getItem("我的世界_dirt")) || {
-		min: 1,
-		max: 4,
+		min: 0.1,
+		max: 0.4,
 		q: 66,
 		error:{
-			min: -1,
-			max: 1,
-			q: 36
+			min: -0.1,
+			max: 0.1,
+			q: 6
 		}
 	},
 	type: JSON.parse(localStorage.getItem("我的世界_type")) || {

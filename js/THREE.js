@@ -5,16 +5,17 @@ let scene = new THREE.Scene();
 scene.fog = new THREE.Fog("#fff", 0.01, 300*100);
 //						 雾气颜色，近处的距离，远处的距离(66m)
 
-let scene_folder = gui.addFolder("场景(scene)");
-	scene_folder.add(scene.children, "length", 0, 10000).name("物体(object)个数").listen();
-	scene_folder.add(localStorage, "我的世界_seed").name("地图种子");
-	let scene_fog_folder = scene_folder.addFolder("雾(fog)");
-		scene_fog_folder.add(scene.fog, "far", 15*100, 1000*100, 100);
-		scene_fog_folder.add(scene.fog, "near", 0.001, 10);
-		scene_fog_folder.addColor(scene.fog, "color").listen();
-	let scene_chunk_folder = scene_folder.addFolder("区块(chunk)");
-		scene_chunk_folder.add(map, "perloadLength", 100, 10000, 100).name("预加载范围/px");
-
+if (ALLOW_GUI){
+	let scene_folder = gui.addFolder("场景(scene)");
+		scene_folder.add(scene.children, "length", 0, 10000).name("物体(object)个数").listen();
+		scene_folder.add(localStorage, "我的世界_seed").name("地图种子");
+		let scene_fog_folder = scene_folder.addFolder("雾(fog)");
+			scene_fog_folder.add(scene.fog, "far", 15*100, 1000*100, 100);
+			scene_fog_folder.add(scene.fog, "near", 0.001, 10);
+			scene_fog_folder.addColor(scene.fog, "color").listen();
+		let scene_chunk_folder = scene_folder.addFolder("区块(chunk)");
+			scene_chunk_folder.add(map, "perloadLength", 100, 10000, 100).name("预加载范围/px");
+}
 
 /* let floor_geometry = new THREE.PlaneGeometry(1000, 1000, 6, 6);
 let floor_material = new THREE.MeshBasicMaterial({ color:"#fff"});
@@ -40,7 +41,9 @@ scene.add(axesHelper); */
 let point = new THREE.PointLight(0xffffff);
 point.position.set(0, 10*100, 0); //点光源位置
 scene.add(point); //点光源添加到场景中*/
-let scene_light_folder = scene_folder.addFolder("光源(light)");
+if (ALLOW_GUI){
+	let scene_light_folder = gui.__folders["场景(scene)"].addFolder("光源(light)");
+}
 
 //平行光
 var directionalLight = new THREE.DirectionalLight("#fff", 1);
@@ -80,15 +83,17 @@ setTimeout(function(){
 }); */
 scene.add(directionalLight);
 
-let scene_light_directionalLight_folder = scene_light_folder.addFolder("平行光(directionalLight)");
-	scene_light_directionalLight_folder.add(directionalLight, "castShadow").name("阴影").listen();
-	let scene_light_directionalLight_mapSize_folder = scene_light_directionalLight_folder.addFolder("阴影贴图大小(mapSize)");
-		scene_light_directionalLight_mapSize_folder.add(directionalLight.shadow.mapSize, "width", 2**9, 2**12, 2**9);
-		scene_light_directionalLight_mapSize_folder.add(directionalLight.shadow.mapSize, "height", 2**9, 2**12, 2**9);
-	let scene_light_directionalLight_position_folder = scene_light_directionalLight_folder.addFolder("位置(position)");
-		scene_light_directionalLight_position_folder.add(directionalLight.position, "x", -3, 3, 0.1);
-		scene_light_directionalLight_position_folder.add(directionalLight.position, "y", -3, 3, 0.1);
-		scene_light_directionalLight_position_folder.add(directionalLight.position, "z", -3, 3, 0.1);
+if (ALLOW_GUI){
+	let scene_light_directionalLight_folder = gui.__folders["场景(scene)"].__folders["光源(light)"].addFolder("平行光(directionalLight)");
+		scene_light_directionalLight_folder.add(directionalLight, "castShadow").name("阴影").listen();
+		let scene_light_directionalLight_mapSize_folder = scene_light_directionalLight_folder.addFolder("阴影贴图大小(mapSize)");
+			scene_light_directionalLight_mapSize_folder.add(directionalLight.shadow.mapSize, "width", 2**9, 2**12, 2**9);
+			scene_light_directionalLight_mapSize_folder.add(directionalLight.shadow.mapSize, "height", 2**9, 2**12, 2**9);
+		let scene_light_directionalLight_position_folder = scene_light_directionalLight_folder.addFolder("位置(position)");
+			scene_light_directionalLight_position_folder.add(directionalLight.position, "x", -3, 3, 0.1);
+			scene_light_directionalLight_position_folder.add(directionalLight.position, "y", -3, 3, 0.1);
+			scene_light_directionalLight_position_folder.add(directionalLight.position, "z", -3, 3, 0.1);
+}
 
 //辅助线
 //var directionalLight_CameraHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
@@ -99,18 +104,22 @@ var hemiLight = new THREE.HemisphereLight("#87ceeb", "#f5deb3", 0.4/*"#aaf", "#8
 hemiLight.position.set(0,500,0);
 scene.add(hemiLight);
 
-let scene_light_hemiLight_folder = scene_light_folder.addFolder("户外光源(hemiLight)");
-	let scene_light_hemiLight_position_folder = scene_light_hemiLight_folder.addFolder("位置(position)");
-		scene_light_hemiLight_position_folder.add(hemiLight.position, "x", -3, 3, 0.1);
-		scene_light_hemiLight_position_folder.add(hemiLight.position, "y", -3, 3, 0.1);
-		scene_light_hemiLight_position_folder.add(hemiLight.position, "z", -3, 3, 0.1);
+if (ALLOW_GUI){
+	let scene_light_hemiLight_folder = gui.__folders["场景(scene)"].__folders["光源(light)"].addFolder("户外光源(hemiLight)");
+		let scene_light_hemiLight_position_folder = scene_light_hemiLight_folder.addFolder("位置(position)");
+			scene_light_hemiLight_position_folder.add(hemiLight.position, "x", -3, 3, 0.1);
+			scene_light_hemiLight_position_folder.add(hemiLight.position, "y", -3, 3, 0.1);
+			scene_light_hemiLight_position_folder.add(hemiLight.position, "z", -3, 3, 0.1);
+}
 
 //环境光
 let ambient = new THREE.AmbientLight(0x444444);
 scene.add(ambient);
 
-let scene_light_ambient_folder = scene_light_folder.addFolder("环境光(ambient)");
-	scene_light_ambient_folder.addColor(ambient, "color").listen();
+if (ALLOW_GUI){
+	let scene_light_ambient_folder = gui.__folders["场景(scene)"].__folders["光源(light)"].addFolder("环境光(ambient)");
+		scene_light_ambient_folder.addColor(ambient, "color").listen();
+}
 
 /**
 * 相机设置
@@ -145,7 +154,7 @@ renderer.setSize(WIDTH, HEIGHT);//设置渲染区域尺寸
 renderer.setClearColor("#eef", 1); //设置背景颜色
 renderer.domElement.style.margin = "0";
 document.body.appendChild(renderer.domElement); //body元素中插入canvas对象
-renderer.domElement.style.cursor = "none";
+// renderer.domElement.style.cursor = "none";
 renderer.domElement.id = "game";
 renderer.shadowMapEnabled = true; //阴影
 //执行渲染操作   指定场景、相机作为参数
@@ -166,8 +175,10 @@ renderer.color = {
 		, 1);
 	}
 };
-let renderer_folder = gui.addFolder("渲染器(renderer)");
-	renderer_folder.addColor(renderer.color, "clearColor").listen();
+if (ALLOW_GUI){
+	let renderer_folder = gui.addFolder("渲染器(renderer)");
+		renderer_folder.addColor(renderer.color, "clearColor").listen();
+}
 
 window.onresize = function(){
 	WIDTH = window.innerWidth;

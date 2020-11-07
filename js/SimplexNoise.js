@@ -46,7 +46,7 @@ const sNoise = {
 	dirt(noise, t, x, z){
 		let value = noise.more3D(SEED_RANDOM_CONSTANT[5], x/t.q, z/t.q, 6) *t.k +t.b+
 			sNoise.error(noise, t.e, SEED_RANDOM_CONSTANT[6], x, z);
-		return value<0?0: value;
+		return value<0?0: value>1? 1: value;
 	},
 	treeHeight(noise, t, x, z){
 		let result = [0];
