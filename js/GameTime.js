@@ -10,7 +10,7 @@ class GameTime{
 		if (isNaN(time.game)) deskgood.die("穿越时空，到达时间之尾");
 		return new Date(this.game+(new Date()-this.date)*(stop? 0: this.speed));
 	}
-	setSpeed(speed=0){
+	setSpeed(speed=1){
 		this.game = +this.getTime();
 		this.date = +new Date();
 		this.speed = +speed;
