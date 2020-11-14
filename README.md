@@ -1,6 +1,10 @@
 # 我的世界（仿）
 
 [![Join the chat at https://gitter.im/wzh656/Minecraft](https://badges.gitter.im/wzh656/Minecraft.svg)](https://gitter.im/wzh656/Minecraft?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![repo-size](https://img.shields.io/github/repo-size/wzh656/MinecraftWeb?style=plastic)](https://github.com/wzh656/MinecraftWeb)
+[![code-size](https://img.shields.io/github/languages/code-size/wzh656/MinecraftWeb?style=plastic&color=Green)](https://github.com/wzh656/MinecraftWeb)
+[![latest-release](https://img.shields.io/github/v/release/wzh656/MinecraftWeb?include_prereleases&style=plastic)](https://github.com/wzh656/MinecraftWeb/releases/download/v1.1.0-alpha/Minecraft.apk)
+[![downloads](https://img.shields.io/github/downloads/wzh656/MinecraftWeb/total?style=plastic)](https://github.com/wzh656/MinecraftWeb/zipball/master)
 
 修改日期:2020.11.14
 
