@@ -488,8 +488,15 @@ Copyright © 2020 by wzh
 		</script>
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
-		<script>//eruda.init();</script>
-		<script>//new VConsole();</script>
+		<script>
+			if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
+					navigator.userAgent.toLowerCase()
+				)
+			){ //手机
+				eruda.init();
+				new VConsole();
+			}
+		</script>
 		<script src="./js/modules/three.min.js"></script>
 		<script src="./js/modules/OrbitControls.js"></script>
 		<script src="./js/modules/simplex-noise.js"></script>
@@ -600,6 +607,9 @@ deskgood.moveTo(0,10000*100);
 		<audio id="bgm" perload loop style="display: none;" src="./music/1.m4a" ></audio>
 		<!--<audio id="bgm" autoplay perload loop style="display: none;" src="https://vdse.bdstatic.com/876934f28995e8042230ec598237c67e.mp4?authorization=bce-auth-v1/fb297a5cc0fb434c971b8fa103e8dd7b/2017-05-11T09:02:31Z/-1//ab5b458a478fae53b754e194ab270b96f23aa23ba71c2e63b06fc06d0543040c"></audio>-->
 		<!-- 5:不支持js -->
+		<!-- <div style="display: none;">
+			<script language="javascript" src="http://count24.51yes.com/click.aspx?id=248466766&logo=12" charset="gb2312"></script>
+		</div> -->
 		<noscript><h1 style="z-index: 5;">你的浏览器不支持JavaScript，无法运行！</h1></noscript>
 
 <script src="./js/GameTime.js"></script>
