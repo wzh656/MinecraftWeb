@@ -175,7 +175,6 @@ class Block extends Thing{
 	makeMaterial(){
 		let textures = this.get("block", "texture"),
 			transparent = this.get("attr", "block", "transparent") || false;
-		console.log(this, TEMPLATES, textures, transparent)
 		this.set("block", "material", [
 			new THREE.MeshLambertMaterial({ map:textures[0], transparent }),
 			new THREE.MeshLambertMaterial({ map:textures[1], transparent }),

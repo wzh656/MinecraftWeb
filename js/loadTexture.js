@@ -3,8 +3,7 @@
 */
 // TextureLoader创建一个纹理加载器对象，可以加载图片作为几何体纹理
 // let num = 0;
-let texture_load = {
-	i: 1,
+/*let texture_load = {
 	keys: Object.keys(TEMPLATES),
 	id: null,
 	try_load(){
@@ -27,10 +26,10 @@ let texture_load = {
 		}
 	} 
 };
-$("#progress progress")[0].max = texture_load.keys.length; //进度条最大进度（贴图加载）
 texture_load.id = setInterval(async function(){
 	let block = TEMPLATES[ texture_load.keys[texture_load.i] ];
 	for (let j in block.block.face){
+		block = TEMPLATES[ texture_load.keys[texture_load.i] ];
 		let img = await Img.imageScale( // 缩放图片至64*64
 			await Img.getImage( //获取图片
 				(block.block.parent || `./img/blocks/${block.id}/`) +
@@ -42,7 +41,7 @@ texture_load.id = setInterval(async function(){
 				img.toDataURL("image/png")
 			),
 		j );
-		console.log(texture_load.i, block, j)
+		console.log(texture_loadi, block, TEMPLATES[ texture_load.keys[texture_load.i] ], j)
 	}
 	
 	//单个block加载完毕
@@ -60,7 +59,23 @@ texture_load.id = setInterval(async function(){
 		clearInterval(texture_load.id);
 		texture_load.id = null;
 		
-		texture_load.try_load();
+		console.log("load_condition", perload_condition+1)
+		if (++perload_condition == 2){
+			map.perloadChunk({
+				progressCallback: (value)=>{
+					$("#progress span").text( Math.round(value*100, 2).changeDecimalBuZero(2, 2) );
+					$("#progress progress").val( value );
+				},
+				finishCallback: ()=>{
+					$("#progress span").text("100");
+					$("#progress progress").val("1");
+					setTimeout(function(){
+						render(); //纹理贴图加载成功后，调用渲染函数执行渲染操作
+						$("#progress").remove();
+					},0);
+				}
+			});
+		}
 		
 		/* // map.initChunk(0, 0); //初始化区块
 		map.loadChunkAsync(0, 0, {
@@ -81,73 +96,57 @@ texture_load.id = setInterval(async function(){
 					$("#progress").remove();
 				},0);
 			}
-		}); //用噪声填充区块 */
+		}); //用噪声填充区块 *//*
 	}
 }, 0);
-/*for (i=1; i<keys.length; i++){
-	(async function (){
+*/
+(async function(){
+	let keys = Object.keys(TEMPLATES);
+	$("#progress progress")[0].max = keys.length; //进度条最大进度（贴图加载）
+	for (let i=1; i<keys.length; i++){
 		let block = TEMPLATES[ keys[i] ];
-		for (let j in block.block.face){
-			let url = await Img.imageScale(
-				await Img.getImage(
-					(block.block.parent || `./img/blocks/${block.id}/`) +
-					block.block.face[j]
-				), 64, 64
-			).toDataURL("image/png");
-			block.setTexture( new THREE.TextureLoader().load(url), j );
-		}
+		for (let j in block.block.face)
+			block.setTexture(
+				new THREE.TextureLoader().load( // 转换为texture
+					(await Img.imageScale( // 缩放图片至64*64
+							await Img.getImage( // 获取图片
+								(block.block.parent || `./img/blocks/${block.id}/`) +
+								block.block.face[j]
+							), 64, 64
+						)
+					).toDataURL("image/png") //保存为url:base64
+				),
+			j );
 		
-		//单个block加载完毕
+		//单个block贴图加载完毕
 		$("#progress span").text( Math.round(i/(keys.length-1)*100, 2) );
 		$("#progress progress")[0].value = i;
 		//console.log(key, i)
-		
-		if (i >= keys.length){ //所有block加载完毕
-			$("#progress header").text("载入方块中……");
-			$("#progress span").text(0);
-			$("#progress progress")[0].max = 1;
-			$("#progress progress")[0].value = 0;
-			
-			if (++perload_condition >= 2){
-				console.log(perload_condition)
-				map.perloadChunk({
-					progressCallback: (value)=>{
-						$("#progress span").text( (Math.round(value*100, 2) ).changeDecimalBuZero(2, 2) );
-						$("#progress progress")[0].value = value;
-					},
-					finishCallback: ()=>{
-						$("#progress span").text("100");
-						$("#progress progress")[0].value = 1;
-						setTimeout(function(){
-							render(); //纹理贴图加载成功后，调用渲染函数执行渲染操作
-							$("#progress").remove();
-						},0);
-					}
-				});
+	}
+	// 所有block贴图加载完毕
+	$("#progress header").text("载入方块中……");
+	$("#progress span").text(0);
+	$("#progress progress")[0].max = 1;
+	$("#progress progress")[0].value = 0;
+	
+	console.log("load_condition(load_texture)", perload_condition+1)
+	if (++perload_condition == 2){
+		map.perloadChunk({
+			progressCallback: (value)=>{
+				$("#progress span").text( Math.round(value*100, 2).changeDecimalBuZero(2, 2) );
+				$("#progress progress").val( value );
+			},
+			finishCallback: ()=>{
+				$("#progress span").text("100");
+				$("#progress progress").val("1");
+				setTimeout(function(){
+					render(); //纹理贴图加载成功后，调用渲染函数执行渲染操作
+					$("#progress").remove();
+				},0);
 			}
-			/* // map.initChunk(0, 0); //初始化区块
-			map.loadChunkAsync(0, 0, {
-				progressCallback: function(value){
-					$("#progress span").text( value*100 );
-					$("#progress progress")[0].value = value;
-				},
-				finishCallback: function(){
-					// map.updateChunkAsync(0, 0); //更新区块
-					if (++perload_condition >= 2){
-						map.perloadChunk();
-					}
-					console.log(perload_condition)
-					$("#progress span").text("100");
-					$("#progress progress")[0].value = keys.length;
-					setTimeout(function(){
-						render(); //纹理贴图加载成功后，调用渲染函数执行渲染操作
-						$("#progress").remove();
-					},0);
-				}
-			}); //用噪声填充区块 *//*
-		}
-	})();
-}*/
+		});
+	}
+})();
 
 /* let textureLoader = new THREE.TextureLoader();
 for (let i=1; i<TEMPLATES.length; i++){

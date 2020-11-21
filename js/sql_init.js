@@ -23,7 +23,24 @@ function SQL_read(){
 			deskgood.sensitivity = result[0].id;
 			[deskgood.lookAt.left_right, deskgood.lookAt.top_bottom] = result[0].attr.split(" ").map(Number);
 			deskgood.look_refresh();
-			texture_load.try_load(); //符合条件则加载
+			
+			console.log("load_condition(sql)", perload_condition+1)
+			if (++perload_condition == 2){
+				map.perloadChunk({
+					progressCallback: (value)=>{
+						$("#progress span").text( Math.round(value*100, 2).changeDecimalBuZero(2, 2) );
+						$("#progress progress").val( value );
+					},
+					finishCallback: ()=>{
+						$("#progress span").text("100");
+						$("#progress progress").val("1");
+						setTimeout(function(){
+							render(); //纹理贴图加载成功后，调用渲染函数执行渲染操作
+							$("#progress").remove();
+						},0);
+					}
+				});
+			}
 		}
 	});
 	sql.selectData("file", ["x", "y", "z"], "type=2", function(result){
