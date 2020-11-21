@@ -1,7 +1,7 @@
 SimplexNoise.prototype.more3D = function(xin, yin, zin, more){
-	let sum = 0;
-	for (let i=1; i<more; i*=2){
-		sum += this.noise3D(xin*i, yin*i, zin*i)/i;
+	let sum = 0, s = 1;
+	for (let i=0; i<more; i++){
+		sum += this.noise3D(xin*i, yin*i, zin*s++)/s;
 	}
 	return sum;
 };

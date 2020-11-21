@@ -57,7 +57,7 @@ function SQL_read(){
 				if (result[i].id == 0){
 					deskgood.hold[i] = null;
 				}else{
-					deskgood.hold[i] = new Thing({
+					deskgood.hold[i] = new Block({
 						id: result[i].id,
 						attr: JSON.parse("{"+result[i].attr+"}")
 					});
