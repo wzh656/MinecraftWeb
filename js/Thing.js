@@ -34,24 +34,22 @@ class Thing{
 			template_part = TEMPLATES[this.id];
 		//let type = !!this.template;
 		for (let i of attr){
-			// try{
 			if (this_part && this_part[i]){ //不为undefined 且 可获取下一个属性
 				this_part = this_part[i];
 			}else{
 				this_part = undefined;
 			}
-			// }catch(err){}
 			template_part = template_part[i];
 			//if (this_part === undefined) type=true;
 		}
 		return this_part===undefined? template_part: this_part;
 	};
 	set(...attr){
-		let this_part = this;
-		let value = attr.pop();
-		for (let i of attr.slice(0,-1)){
-			if (this_part[i] === undefined)
-				this_part[i] = {};
+		let this_part = this,
+			value = attr.pop(); // 最后一位为要赋的值
+		for (let i of attr.slice(0,-1)){ // 保留对象
+			if (this_part[i] === undefined) // 未定义属性
+				this_part[i] = {}; // 创建对象
 			this_part = this_part[i];
 		}
 		this_part[attr.pop()] = value;
@@ -127,19 +125,19 @@ class Block extends Thing{
 	}
 	//face
 	setFace(value, index){
-		if (index != undefined){ //有索引（单个）
-			this.set("block", "face", index, value);
-		}else{ //无索引（所有）
+		if (index === undefined){ //无索引（所有）
 			for (let i=0; i<value.length; i++)
 				this.set("block", "face", i, value[i]);
+		}else{ //有索引（单个）
+			this.set("block", "face", index, value);
 		}
 		return this;
 	};
 	deleteFace(index){
-		if (index != undefined){ //有索引
-			this.set("block", "face", index, null); //半保留
-		}else{ //无索引
+		if (index === undefined){ //无索引（所有）
 			this.set("block", "face", []); //半保留
+		}else{ //有索引（单个）
+			this.set("block", "face", index, null); //半保留
 		}
 		return this;
 	};
@@ -152,24 +150,24 @@ class Block extends Thing{
 		/*if (!this.block.texture){ //不存在texture
 			this.block.texture = [];
 		}*/
-		if (index != undefined){ //有索引
-			this.set("block", "texture", index, texture);
-		}else{ //无索引
+		if (index === undefined){ //无索引（单个）
 			for (let i=0; i<texture.length; i++)
 				this.set("block", "texture", i, texture[i]);
+		}else{ //有索引（所有）
+			this.set("block", "texture", index, texture);
 		}
 		return this;
 	};
 	deleteTexture(index){
-		if (index != undefined){ //有索引
-			if (this.have("block", "texture", index))
-				this.block.texture[index].dispose(); //清除内存
-			this.set("block", "texture", index, null); //半保留
-		}else{ //无索引
+		if (index === undefined){ //无索引（单个）
 			if (this.have("block", "texture"))
 				for (let i of this.get("block", "texture"))
 					i.dispose(); //清除内存
 			this.set("block", "texture", []); //半保留
+		}else{ //有索引（所有）
+			if (this.have("block", "texture", index))
+				this.block.texture[index].dispose(); //清除内存
+			this.set("block", "texture", index, null); //半保留
 		}
 		return this;
 	};
@@ -177,6 +175,7 @@ class Block extends Thing{
 	makeMaterial(){
 		let textures = this.get("block", "texture"),
 			transparent = this.get("attr", "block", "transparent") || false;
+		console.log(this, TEMPLATES, textures, transparent)
 		this.set("block", "material", [
 			new THREE.MeshLambertMaterial({ map:textures[0], transparent }),
 			new THREE.MeshLambertMaterial({ map:textures[1], transparent }),
@@ -206,7 +205,7 @@ class Block extends Thing{
 		return this;
 	};
 	//mesh
-	makeMesh(geometry=this.get("block", "geometry")){
+	makeMesh( geometry=this.get("block", "geometry") ){
 		if (geometry){
 			this.set("block", "mesh", new THREE.Mesh(geometry, this.block.material)); //网格模型对象Mesh
 		}else{ //使用默认

@@ -148,6 +148,7 @@ camera.lookAt(scene.position); //设置相机方向(指向的场景对象)
 * 创建渲染器对象
 */
 let renderer = new THREE.WebGLRenderer({
+	antialias: true, //抗锯齿
 	preserveDrawingBuffer: true // required to support .toDataURL()
 });
 renderer.setSize(WIDTH, HEIGHT);//设置渲染区域尺寸
