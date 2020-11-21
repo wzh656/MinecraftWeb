@@ -123,7 +123,7 @@ class ChunkMap{
 	
 	//获取方块（不可编辑）
 	get(x, y, z){  // 没有方块:null,不在范围:undefined,加载中:false
-		[x, y, z] = [x, y, z].map(Math.round); //规范化
+		[x, y, z] = [Math.round(x), Math.round(y), Math.round(z)]; //规范化
 		
 		if (this.map[x] && this.map[x][y]){
 			return this.map[x][y][z];
@@ -138,7 +138,7 @@ class ChunkMap{
 		}*/
 	}
 	set(x, y, z, value){
-		[x, y, z] = [x, y, z].map(Math.round); //规范化
+		[x, y, z] = [Math.round(x), Math.round(y), Math.round(z)]; //规范化
 		
 		if (!this.map[x])
 			this.map[x] = [];
@@ -150,7 +150,7 @@ class ChunkMap{
 	//添加方块
 	add(thing, pos, type=true){
 		// let {type=true} = opt;
-		[pos.x, pos.y, pos.z] = [pos.x, pos.y, pos.z].map(Math.round); //规范化
+		[pos.x, pos.y, pos.z] = [Math.round(pos.x), Math.round(pos.y), Math.round(pos.z)]; //规范化
 		
 		// if (this.get(pos.x, pos.y, pos.z) === undefined) return;
 		if ( this.get(pos.x, pos.y, pos.z) ){ //有方块
@@ -187,7 +187,7 @@ class ChunkMap{
 		} */
 		// if (!attr.block) attr.block = {};
 		if (id == 0){
-			[pos.x, pos.y, pos.z] = [pos.x, pos.y, pos.z].map(Math.round); //规范化
+			[pos.x, pos.y, pos.z] = [Math.round(pos.x), Math.round(pos.y), Math.round(pos.z)]; //规范化
 			if (this.get(pos.x, pos.y, pos.z)){ //有方块
 				for (let i of this.map[pos.x][pos.y][pos.z].block.mesh.material)
 					i.dispose();
@@ -204,7 +204,7 @@ class ChunkMap{
 			return;
 		}
 		
-		let thing = new Thing({
+		let thing = new Block({
 			id,
 			attr
 		})
@@ -224,7 +224,7 @@ class ChunkMap{
 	
 	//删除方块
 	delete(x, y, z){
-		[x, y, z] = [x, y, z].map(Math.round); //规范化
+		[pos.x, pos.y, pos.z] = [Math.round(pos.x), Math.round(pos.y), Math.round(pos.z)]; //规范化
 		
 		if (!this.get(x,y,z)) // 没有方块(null)/不在范围(undefined)/加载中(false)
 			return;
@@ -243,17 +243,17 @@ class ChunkMap{
 	
 	//更新方块
 	update(x, y, z, b){
-		[x, y, z] = [x, y, z].map(Math.round); //规范化
+		[x, y, z] = [Math.round(x), Math.round(y), Math.round(z)]; //规范化
 		
 		let thisBlock = this.get(x,y,z);
 		if (thisBlock === null) //空气    //没有方块(null)/不在范围(undefined) //加载中(false)
 			return;
 		let visibleValue;
 		if (thisBlock === undefined){ //未加载
-			let [xZ, zZ] = [x/map.size.x, z/map.size.z].map(Math.round); //所属区块(Chunk)
-			let edit = this.edit[xZ] && this.edit[xZ][zZ];
-			let get = new Thing( this.perGet(x, y, z, edit||[]) );
-			let noTransparent = get.id && get.get("attr", "block", "noTransparent");
+			let [xZ, zZ] = [Math.round(x/map.size.x), Math.round(z/map.size.z)], //所属区块(Chunk)
+				edit = this.edit[xZ] && this.edit[xZ][zZ],
+				get = new Block( this.perGet(x, y, z, edit||[]) ),
+				noTransparent = get.id && get.get("attr", "block", "noTransparent");
 			visibleValue = [
 				!( this.get(x+1, y, z) && !this.get(x+1, y, z).get("attr", "block", "transparent")) || noTransparent,
 				!( this.get(x-1, y, z) && !this.get(x-1, y, z).get("attr", "block", "transparent")) || noTransparent,
@@ -502,7 +502,7 @@ class ChunkMap{
 	
 	/* //初始化区块
 	initChunk(x, z){
-		[x, z] = [x, z].map(Math.round); //规范化
+		[x, z] = [Math.round(pos.x), Math.round(pos.z)]; //规范化
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
@@ -523,7 +523,7 @@ class ChunkMap{
 	} */
 	
 	perGet(x, y, z, edit){
-		// [x, y, z] = [x, y, z].map(Math.round); //规范化
+		// [x, y, z] = [Math.round(x), Math.round(y), Math.round(z)]; //规范化
 		// console.warn("load", x, z)
 		
 		let height = sNoise.height(this.seed.noise, this.seed.h, x, z);
@@ -680,7 +680,7 @@ class ChunkMap{
 	}
 	
 	perGetColumn(x, z, edit){
-		// [x, z] = [x, z].map(Math.round); //规范化
+		// [x, z] = [Math.round(x), Math.round(z)]; //规范化
 		// console.warn("load", x, z)
 		
 		let column = [];
@@ -896,7 +896,7 @@ class ChunkMap{
 	}*/
 	
 	perGetChunk(x, z, edit){
-		[x, z] = [x, z].map(Math.round); //规范化
+		[x, z] = [Math.round(x), Math.round(z)]; //规范化
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
@@ -906,7 +906,7 @@ class ChunkMap{
 			for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
 				result[dx][dz] = this.perGetColumn(ox+dx, oz+dz, edit);
 				for (let y in result[dx][dz])
-					result[dx][dz][y] = new Thing(result[dx][dz][y]);
+					result[dx][dz][y] = new Block(result[dx][dz][y]);
 			}
 		}
 		return result;
@@ -935,7 +935,7 @@ class ChunkMap{
 	
 	//加载列
 	loadColumn(x, z, columns, edit){
-		[x, z] = [x, z].map(Math.round); //规范化
+		[x, z] = [Math.round(x), Math.round(z)]; //规范化
 		let ox = Math.round(x/map.size.x)*map.size.x,
 			oz = Math.round(z/map.size.z)*map.size.z;
 		let [dx, dz] = [x-ox, z-oz];
@@ -972,7 +972,7 @@ class ChunkMap{
 	
 	//加载区块（同步）
 	loadChunk(x, z){
-		[x, z] = [x, z].map(Math.round); //规范化
+		[x, z] = [Math.round(x), Math.round(z)]; //规范化
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 			
@@ -1014,7 +1014,7 @@ class ChunkMap{
 			columns
 		} = opt;
 		
-		[x, z] = [x, z].map(Math.round); //规范化
+		[x, z] = [Math.round(x), Math.round(z)]; //规范化
 		let ox = x*this.size.x,
 			oz = z*this.size.z, //区块中心坐标
 			t = this.seed; //临时变量
@@ -1477,7 +1477,7 @@ class ChunkMap{
 	
 	//卸载区块（同步）
 	unloadChunk(x, z){
-		[x, z] = [x, z].map(Math.round); //规范化
+		[x, z] = [Math.round(x), Math.round(z)]; //规范化
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
@@ -1510,7 +1510,7 @@ class ChunkMap{
 			breakPoint
 		} = opt;
 		
-		[x, z] = [x, z].map(Math.round); //规范化
+		[x, z] = [Math.round(x), Math.round(z)]; //规范化
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		

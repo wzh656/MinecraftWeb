@@ -3,11 +3,11 @@ const FACE_URL = [
 	["face.png", "face.png", "face.png", "face.png", "face.png", "face.png"]
 ];
 const TEMPLATES = []; //模板
-TEMPLATES.push(new Thing({
+TEMPLATES.push(new Block({
 	id: 0,
 	name: "空气"
 }, false));
-TEMPLATES.push(new Thing({
+TEMPLATES.push(new Block({
 	id: 1,
 	name: "命令方块",
 	block: {
@@ -20,7 +20,7 @@ TEMPLATES.push(new Thing({
 		}
 	}
 }, false));
-/*TEMPLATES.push(new Thing({
+/*TEMPLATES.push(new Block({
 	id: 2,
 	name: "基岩",
 	block: {
@@ -28,7 +28,7 @@ TEMPLATES.push(new Thing({
 	},
 	attr: {}
 }, false));*/
-TEMPLATES.push(new Thing({
+TEMPLATES.push(new Block({
 	id: 2,
 	name: "草方块",
 	block: {
@@ -40,7 +40,7 @@ TEMPLATES.push(new Thing({
 		}
 	}
 }, false));
-TEMPLATES.push(new Thing({
+TEMPLATES.push(new Block({
 	id: 3,
 	name: "泥土",
 	block: {
@@ -48,7 +48,7 @@ TEMPLATES.push(new Thing({
 	},
 	attr: {}
 }, false));
-TEMPLATES.push(new Thing({
+TEMPLATES.push(new Block({
 	id: 4,
 	name: "原石",
 	block: {
@@ -56,7 +56,7 @@ TEMPLATES.push(new Thing({
 	},
 	attr: {}
 }, false));
-TEMPLATES.push(new Thing({
+TEMPLATES.push(new Block({
 	id: 5,
 	name: "石头",
 	block: {
@@ -64,7 +64,7 @@ TEMPLATES.push(new Thing({
 	},
 	attr: {}
 }, false));
-TEMPLATES.push(new Thing({
+TEMPLATES.push(new Block({
 	id: 6,
 	name: "沙子",
 	block: {
@@ -72,7 +72,7 @@ TEMPLATES.push(new Thing({
 	},
 	attr: {}
 }, false));
-TEMPLATES.push(new Thing({
+TEMPLATES.push(new Block({
 	id: 7,
 	name: "仙人掌",
 	block: {
@@ -80,7 +80,7 @@ TEMPLATES.push(new Thing({
 	},
 	attr: {}
 }, false));
-TEMPLATES[8.1] = new Thing({
+TEMPLATES[8.1] = new Block({
 	id: 8.1,
 	name: "细橡木",
 	block: {
@@ -95,7 +95,7 @@ TEMPLATES[8.1] = new Thing({
 		}
 	}
 });
-TEMPLATES[8.2] = new Thing({
+TEMPLATES[8.2] = new Block({
 	id: 8.2,
 	name: "粗橡木",
 	block: {
@@ -110,7 +110,7 @@ TEMPLATES[8.2] = new Thing({
 		}
 	}
 });
-TEMPLATES[9] = new Thing({
+TEMPLATES[9] = new Block({
 	id: 9,
 	name: "树叶",
 	block: {
@@ -123,7 +123,7 @@ TEMPLATES[9] = new Thing({
 		}
 	}
 });
-TEMPLATES.push(new Thing({
+TEMPLATES.push(new Block({
 	id: 10,
 	name: "木板",
 	block: {
@@ -131,7 +131,7 @@ TEMPLATES.push(new Thing({
 	},
 	attr: {}
 }, false));
-TEMPLATES.push(new Thing({
+TEMPLATES.push(new Block({
 	id: 11,
 	name: "砖",
 	block: {

@@ -250,7 +250,7 @@ document.addEventListener("mousedown", function (e){
 						}else{
 							console.log("delete", click[i].object.position, map.get(x, y, z).id)
 							
-							deskgood.hold.addOne(new Thing(map.get(x, y, z)), free); //放在手中
+							deskgood.hold.addOne(new Block(map.get(x, y, z)), free); //放在手中
 							map.delete(x, y, z); //删除方块
 							let xZ = Math.round(x/map.size.x),
 								zZ = Math.round(z/map.size.z);
@@ -397,7 +397,7 @@ document.addEventListener("mousedown", function (e){
 						Math.pow(click[i].object.position.y - deskgood.pos.y, 2)+
 						Math.pow(click[i].object.position.z - deskgood.pos.z, 2)
 					) < 500){ //距离<500
-						let thing = new Thing(TEMPLATES[ deskgood.hold[deskgood.choice] ]);
+						let thing = new Block(TEMPLATES[ deskgood.hold[deskgood.choice] ]);
 						thing.block.makeMesh();
 						let mesh = new THREE.Mesh(block_geometry, TEMPLATES[ deskgood.hold[deskgood.choice] ].material);
 						mesh.position.x = click[i].object.position.x+100;

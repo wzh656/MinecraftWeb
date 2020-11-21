@@ -53,23 +53,23 @@ function getImage(src){
 }
 async function getImageBase64(src, width, height){
 	let canvas1 = $("<canvas></canvas>").attr("width", "16").attr("height", "16")[0],
-		canvas2 = $("<canvas></canvas>").attr("width", width).attr("height", height)[0];
-	let ctx1 = canvas1.getContext("2d"),
-		ctx2 = canvas2.getContext("2d");
-	let img = await getImage(src);
+		canvas2 = $("<canvas></canvas>").attr("width", width).attr("height", height)[0],
+		ctx1 = canvas1.getContext("2d"),
+		ctx2 = canvas2.getContext("2d"),
+		img = await getImage(src);
 	ctx1.drawImage(img, 0, 0, 16, 16);
-	let imgData = ctx1.getImageData(0, 0, 16, 16);
-	let x_scale = width/16,
-		y_scale = height/16;
-	let x=0, y=0;
+	let imgData = ctx1.getImageData(0, 0, 16, 16),
+		x_scale = width/16,
+		y_scale = height/16,
+		x = y=0;
 	for (let i=0; i<imgData.data.length; i+=4){
-		let r = imgData.data[i+0];
-		let g = imgData.data[i+1];
-		let b = imgData.data[i+2];
-		let a = imgData.data[i+3];
+		let r = imgData.data[i+0],
+			g = imgData.data[i+1],
+			b = imgData.data[i+2],
+			a = imgData.data[i+3];
 		ctx2.fillStyle = `rgba(${r},${g},${b},${a})`;
 		ctx2.fillRect(x*x_scale, y*y_scale, x_scale, y_scale);
-		if (++x >= WIDTH){
+		if (++x >= 16){
 			y++;
 			x = 0;
 		}
@@ -85,8 +85,8 @@ for (i=1; i<Object.keys(TEMPLATES).length; i++){
 		for (let j in block.block.face){
 			let url = await getImageBase64(
 				(block.block.parent || `./img/blocks/${block.id}/`)+
-				block.block.face[j]
-			);
+				block.block.face[j],
+			64, 64);
 			block.setTexture( new THREE.TextureLoader().load(url), j );
 		}
 		
@@ -204,7 +204,7 @@ for (let i=1; i<TEMPLATES.length; i++){
 								id = 6;
 							}
 							if (id != 0)
-								map.add(new Thing(TEMPLATES[id]).block.makeMaterial().block.deleteTexture().block.makeMesh(), {x:load.x, y, z}); //以模板建立
+								map.add(new Block(TEMPLATES[id]).block.makeMaterial().block.deleteTexture().block.makeMesh(), {x:load.x, y, z}); //以模板建立
 								//map.update(load.x ,y ,z); //刷新是否添加方块
 								// TEMPLATES[id].block.deleteMesh();
 						}
