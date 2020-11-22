@@ -224,7 +224,7 @@ class ChunkMap{
 	
 	//删除方块
 	delete(x, y, z){
-		[pos.x, pos.y, pos.z] = [Math.round(pos.x), Math.round(pos.y), Math.round(pos.z)]; //规范化
+		[x, y, z] = [Math.round(x), Math.round(y), Math.round(z)]; //规范化
 		
 		if (!this.get(x,y,z)) // 没有方块(null)/不在范围(undefined)/加载中(false)
 			return;
