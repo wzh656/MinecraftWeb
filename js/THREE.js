@@ -358,10 +358,10 @@ setInterval(function(){
 }, 5*1000); // 5s/次*/
 
 
-let body_block = [];
-let T0 = time.getTime(); //上次时间
+let body_block = [],
+	T0 = time.getTime() //上次时间
 function render(){
-	let t = time.getTime()-T0;//时间差
+	let t = time.getTime()-T0; //时间差
 	T0 = time.getTime(); //把本次时间赋值给上次时间
 	requestAnimationFrame(render);
 	renderer.render(scene, camera); //执行渲染操作
@@ -380,7 +380,7 @@ function render(){
 			!map.get(deskgood.pos.x/100,
 				deskgood.pos.y/100,
 				deskgood.pos.z/100).get("attr", "block", "transparent") //不透明
-		) message("<font style='font-size: 16px;'>想窒息吗？还往头上放方块，看你怎么出来！</font>", 1);
+		) message("想窒息吗？还往头上放方块，看你怎么出来！", 1);
 		/* try{
 			plus.nativeUI.toast(
 				"<font size=\"16\">想窒息吗？还往头上放方块，看你怎么出来！</font>",

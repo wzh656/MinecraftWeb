@@ -222,7 +222,7 @@ var deskgood = {
 				} */
 			}else{
 				// throw "block";
-				message(`<font style="font-size: 16px;">区块暂未加载完成，禁止进入<br/>（想加载快可以调节区块预加载范围，只要不卡死就行）</font>`, 1);
+				message("区块暂未加载完成，禁止进入<br/>（想加载快可以调节区块预加载范围，只要不卡死就行）", 1);
 			}
 		/* }catch(err){
 			if (err == "block"){ // 未加载区块，禁止进入

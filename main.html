@@ -289,14 +289,58 @@ Copyright © 2020 by wzh
 			
 			
 			/* 信息框 */
-			dialog{
+			@keyframes messageIn{
+				from {
+					right: 0;
+					transform: translateX(100%);
+					opacity: 0;
+				}
+				to {
+					right: 1vw;
+					transform: translateX(0);
+					opacity: 1;
+				}
+			}
+			@keyframes messageOut{
+				from {
+					bottom: 16vh;
+					right: 1vw;
+					transform: translateX(0%) translateY(0%);
+					opacity: 1;				
+				}
+				to {
+					bottom: 0;
+					right: 0;
+					transform: translateX(100%) translateY(100%);
+					opacity: 0;
+				}
+			}
+			message{
+				display: block;
 				position: absolute;
-				top: 16.6vh;
+				bottom: 16vh;
+				max-width: 36vw;
 				
-				max-width: 50vw;
+				background-color: #fffae8;
+				
+				padding: 1vmax;
+				border: 0.6vmax double #ede0d3;
 				border-radius: 1vmax;
 				
 				z-index: 5;
+			}
+			message[open]{
+				right: 1vw;
+				
+				animation: 3s messageIn;
+			}
+			message:not([open]){
+				bottom: 0;
+				right: 0;
+				transform: translateX(100%) translateY(100%);
+				opacity: 0;
+				
+				animation: 3s messageOut;
 			}
 			
 			/* 摇杆操纵 */
@@ -606,11 +650,12 @@ deskgood.moveTo(0,10000*100);
 		</h1>
 		<audio id="bgm" perload loop style="display: none;" src="./music/1.m4a" ></audio>
 		<!--<audio id="bgm" autoplay perload loop style="display: none;" src="https://vdse.bdstatic.com/876934f28995e8042230ec598237c67e.mp4?authorization=bce-auth-v1/fb297a5cc0fb434c971b8fa103e8dd7b/2017-05-11T09:02:31Z/-1//ab5b458a478fae53b754e194ab270b96f23aa23ba71c2e63b06fc06d0543040c"></audio>-->
-		<!-- 5:不支持js -->
 		<!-- <div style="display: none;">
 			<script language="javascript" src="http://count24.51yes.com/click.aspx?id=248466766&logo=12" charset="gb2312"></script>
 		</div> -->
-		<noscript><h1 style="z-index: 5;">你的浏览器不支持JavaScript，无法运行！</h1></noscript>
+		<!-- 5:message -->
+		<!-- 6:不支持js -->
+		<noscript><h1 style="z-index: 6;">你的浏览器不支持JavaScript，无法运行！</h1></noscript>
 
 <script src="./js/GameTime.js"></script>
 <script>
@@ -837,15 +882,13 @@ function message(text, time=5){
 			});
 		}
 	}else{*/
-		let msg = $(`<dialog>${text}</dialog>`);
-		$(document.body).append(
-			msg.attr("open", "true").hide()
-		);
-		msg.fadeIn("slow");
+		let msg = $(`<message>${text}</message>`)
+			.attr("open", "true");
+		$( document.body ).append( msg );
 		setTimeout(()=>{
-			msg.fadeOut("slow");
+			msg.removeAttr("open")
+			setTimeout(msg.remove, 3000);
 		}, time*1000);
-	//}
 }
 
 function rnd_error(){
