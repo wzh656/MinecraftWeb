@@ -64,7 +64,7 @@ class Thing{
 		return true;
 	};
 }
-Thing.geometry = new THREE.BoxGeometry(100, 100, 100);
+Thing.geometry = new THREE.BoxBufferGeometry(100, 100, 100);
 
 
 class Block extends Thing{
@@ -194,7 +194,7 @@ class Block extends Thing{
 	};
 	//geometry
 	makeGeometry(x, y, z){
-		this.set("block", "geometry", new THREE.BoxGeometry(x, y, z));
+		this.set("block", "geometry", new THREE.BoxBufferGeometry(x, y, z));
 		return this;
 	};
 	deleteGeometry(){

@@ -53,7 +53,7 @@ function SQL_read(){
 	sql.selectData("file", ["id", "attr"], "type=3 AND x=0", function(result){ //物品栏
 		if (result.length){
 			console.log(result)
-			for (let i=0; i<deskgood.hold.length; i++){
+			for (let i=0; i<result.length; i++){
 				console.log(i, result[i])
 				if (result[i].id == 0){
 					deskgood.hold[i] = null;

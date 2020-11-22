@@ -1,7 +1,3 @@
-const FACE_URL = [
-	["side.png", "side.png", "up.png", "down.png", "side.png", "side.png"],
-	["face.png", "face.png", "face.png", "face.png", "face.png", "face.png"]
-];
 const TEMPLATES = []; //模板
 TEMPLATES.push(new Block({
 	id: 0,
@@ -11,7 +7,9 @@ TEMPLATES.push(new Block({
 	id: 1,
 	name: "命令方块",
 	block: {
-		face: FACE_URL[0]
+		face: [
+			[1,0], [1,0], [0,0], [2,0], [1,0], [1,0]
+		]
 	},
 	attr: {
 		block: {
@@ -32,7 +30,9 @@ TEMPLATES.push(new Block({
 	id: 2,
 	name: "草方块",
 	block: {
-		face: FACE_URL[0]
+		face: [
+			[4,0], [4,0], [3,0], [5,0], [4,0], [4,0]
+		]
 	},
 	attr: {
 		block: {
@@ -44,7 +44,9 @@ TEMPLATES.push(new Block({
 	id: 3,
 	name: "泥土",
 	block: {
-		face: FACE_URL[1]
+		face: [
+			[5,0], [5,0], [5,0], [5,0], [5,0], [5,0]
+		]
 	},
 	attr: {}
 }, false));
@@ -52,7 +54,9 @@ TEMPLATES.push(new Block({
 	id: 4,
 	name: "原石",
 	block: {
-		face: FACE_URL[1]
+		face: [
+			[6,0], [6,0], [6,0], [6,0], [6,0], [6,0]
+		]
 	},
 	attr: {}
 }, false));
@@ -60,7 +64,9 @@ TEMPLATES.push(new Block({
 	id: 5,
 	name: "石头",
 	block: {
-		face: FACE_URL[1]
+		face: [
+			[7,0], [7,0], [7,0], [7,0], [7,0], [7,0]
+		]
 	},
 	attr: {}
 }, false));
@@ -68,25 +74,21 @@ TEMPLATES.push(new Block({
 	id: 6,
 	name: "沙子",
 	block: {
-		face: FACE_URL[1]
+		face: [
+			[0,1], [0,1], [0,1], [0,1], [0,1], [0,1]
+		]
 	},
 	attr: {}
 }, false));
-TEMPLATES.push(new Block({
-	id: 7,
-	name: "仙人掌",
-	block: {
-		face: FACE_URL[0]
-	},
-	attr: {}
-}, false));
-TEMPLATES[8.1] = new Block({
-	id: 8.1,
+TEMPLATES[7.1] = new Block({
+	id: 7.1,
 	name: "细橡木",
 	block: {
 		parent: "./img/blocks/8/",
-		face: ["side.png", "side.png", "up_down.png", "up_down.png", "side.png", "side.png"],
-		geometry: new THREE.BoxGeometry(40, 100, 40)
+		face: [
+			[2,1], [2,1], [1,1], [1,1], [2,1], [2,1]
+		],
+		geometry: new THREE.BoxBufferGeometry(40, 100, 40)
 	},
 	attr: {
 		block: {
@@ -95,13 +97,15 @@ TEMPLATES[8.1] = new Block({
 		}
 	}
 });
-TEMPLATES[8.2] = new Block({
-	id: 8.2,
+TEMPLATES[7.2] = new Block({
+	id: 7.2,
 	name: "粗橡木",
 	block: {
 		parent: "./img/blocks/8/",
-		face: ["side.png", "side.png", "up_down.png", "up_down.png", "side.png", "side.png"],
-		geometry: new THREE.BoxGeometry(70, 100, 70)
+		face: [
+			[2,1], [2,1], [1,1], [1,1], [2,1], [2,1]
+		],
+		geometry: new THREE.BoxBufferGeometry(70, 100, 70)
 	},
 	attr: {
 		block: {
@@ -110,11 +114,13 @@ TEMPLATES[8.2] = new Block({
 		}
 	}
 });
-TEMPLATES[9] = new Block({
-	id: 9,
+TEMPLATES[8] = new Block({
+	id: 8,
 	name: "树叶",
 	block: {
-		face: FACE_URL[1]
+		face: [
+			[3,1], [3,1], [3,1], [3,1], [3,1], [3,1]
+		]
 	},
 	attr: {
 		block: {
@@ -124,18 +130,32 @@ TEMPLATES[9] = new Block({
 	}
 });
 TEMPLATES.push(new Block({
-	id: 10,
+	id: 9,
 	name: "木板",
 	block: {
-		face: FACE_URL[1]
+		face: [
+			[4,1], [4,1], [4,1], [4,1], [4,1], [4,1]
+		]
+	},
+	attr: {}
+}, false));
+TEMPLATES.push(new Block({
+	id: 10,
+	name: "砖",
+	block: {
+		face: [
+			[5,1], [5,1], [5,1], [5,1], [5,1], [5,1]
+		]
 	},
 	attr: {}
 }, false));
 TEMPLATES.push(new Block({
 	id: 11,
-	name: "砖",
+	name: "仙人掌",
 	block: {
-		face: FACE_URL[1]
+		face: [
+			[7,1], [7,1], [6,1], [0,2], [7,1], [7,1]
+		]
 	},
 	attr: {}
 }, false));

@@ -1,6 +1,6 @@
 const Img = {
 	// 获取图片对象
-	getImage(src){
+	get(src){
 		return new Promise((resolve,reject)=>{
 			let img = new Image();
 			img.src = src;
@@ -9,9 +9,19 @@ const Img = {
 			};
 		});
 	},
-	
-	//图片大小缩放
-	async imageScale(img, width, height){
+	// 图片裁剪
+	clip(img, [x, y], [width, height]){
+		let canvas1 = $("<canvas></canvas>").attr("width", img.width).attr("height", img.height)[0],
+			canvas2 = $("<canvas></canvas>").attr("width", width).attr("height", height)[0],
+			ctx1 = canvas1.getContext("2d"),
+			ctx2 = canvas2.getContext("2d");
+		ctx1.drawImage(img, 0, 0, img.width, img.height);
+		let imgData = ctx1.getImageData(x, y, width, height);
+		ctx2.putImageData(imgData, 0, 0);
+		return canvas2;
+	},
+	// 图片大小缩放
+	scale(img, width, height){
 		let canvas1 = $("<canvas></canvas>").attr("width", img.width).attr("height", img.height)[0],
 			canvas2 = $("<canvas></canvas>").attr("width", width).attr("height", height)[0],
 			ctx1 = canvas1.getContext("2d"),

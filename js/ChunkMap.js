@@ -123,7 +123,7 @@ class ChunkMap{
 	
 	//获取方块（不可编辑）
 	get(x, y, z){  // 没有方块:null,不在范围:undefined,加载中:false
-		[x, y, z] = [Math.round(x), Math.round(y), Math.round(z)]; //规范化
+		x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 		
 		if (this.map[x] && this.map[x][y]){
 			return this.map[x][y][z];
@@ -138,7 +138,7 @@ class ChunkMap{
 		}*/
 	}
 	set(x, y, z, value){
-		[x, y, z] = [Math.round(x), Math.round(y), Math.round(z)]; //规范化
+		x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 		
 		if (!this.map[x])
 			this.map[x] = [];
@@ -224,7 +224,7 @@ class ChunkMap{
 	
 	//删除方块
 	delete(x, y, z){
-		[x, y, z] = [Math.round(x), Math.round(y), Math.round(z)]; //规范化
+		x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 		
 		if (!this.get(x,y,z)) // 没有方块(null)/不在范围(undefined)/加载中(false)
 			return;
@@ -243,7 +243,7 @@ class ChunkMap{
 	
 	//更新方块
 	update(x, y, z, b){
-		[x, y, z] = [Math.round(x), Math.round(y), Math.round(z)]; //规范化
+		x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 		
 		let thisBlock = this.get(x,y,z);
 		if (thisBlock === null) //空气    //没有方块(null)/不在范围(undefined) //加载中(false)
@@ -373,7 +373,8 @@ class ChunkMap{
 	//更新列方块
 	updateColumn(x, z){
 		//console.log("updateColumn:",x,z,+time.getTime());
-		for (let dy=this.size[0].y; dy<=this.size[1].y; dy++)
+		let yMax = this.size[1].y;
+		for (let dy=this.size[0].y; dy<=yMax; dy++)
 			this.update(x, dy, z);
 	}
 	
@@ -523,7 +524,7 @@ class ChunkMap{
 	} */
 	
 	perGet(x, y, z, edit){
-		// [x, y, z] = [Math.round(x), Math.round(y), Math.round(z)]; //规范化
+		// x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 		// console.warn("load", x, z)
 		
 		let height = sNoise.height(this.seed.noise, this.seed.h, x, z);

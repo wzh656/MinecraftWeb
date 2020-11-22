@@ -84,7 +84,7 @@ document.addEventListener("mousemove", function (e){
 		).id;
 		
 		if (mouse_choice.view){
-			let geometry1 = new THREE.BoxGeometry(100, 100, 100);
+			let geometry1 = new THREE.BoxBufferGeometry(100, 100, 100);
 			let material1 = new THREE.MeshBasicMaterial({
 				color: "blue",
 				transparent: true,
@@ -103,7 +103,7 @@ document.addEventListener("mousemove", function (e){
 			scene.add(mesh2);
 			mouse_choice.obj.push(mesh1);
 			mouse_choice.obj.push(mesh2);
-			/* let geometry2 = new THREE.BoxGeometry(map.size.x*100, map.size.y*100, map.size.z*100);
+			/* let geometry2 = new THREE.BoxBufferGeometry(map.size.x*100, map.size.y*100, map.size.z*100);
 			let mesh3 = new THREE.Mesh(geometry2, new THREE.MeshBasicMaterial({
 				color: "blue",
 				transparent: true,
