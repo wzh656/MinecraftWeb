@@ -287,7 +287,18 @@ Copyright © 2020 by wzh
 				font-family: zyyt, serif;
 			}*/
 			
-			
+			/* 打印信息 */
+			printgroup{
+				position: absolute;
+				top: 16vh;
+				left: 0;
+				max-width: 16vw;
+			}
+			printgroup > print{
+				display: block;
+				background-color: white;
+				opacity: 0.5;
+			}
 			/* 信息框 */
 			@keyframes messageIn{
 				from {
@@ -304,14 +315,12 @@ Copyright © 2020 by wzh
 			@keyframes messageOut{
 				from {
 					bottom: 16vh;
-					right: 1vw;
-					transform: translateX(0%) translateY(0%);
-					opacity: 1;				
+					transform: translateY(0%);
+					opacity: 1;
 				}
 				to {
 					bottom: 0;
-					right: 0;
-					transform: translateX(100%) translateY(100%);
+					transform: translateY(100%);
 					opacity: 0;
 				}
 			}
@@ -327,7 +336,7 @@ Copyright © 2020 by wzh
 				border: 0.6vmax double #ede0d3;
 				border-radius: 1vmax;
 				
-				z-index: 5;
+				z-index: 6;
 			}
 			message[open]{
 				right: 1vw;
@@ -628,20 +637,22 @@ deskgood.moveTo(0,10000*100);
 			Pause-Break: 暂停切换; F10: 打开/关闭dat.gui;<br/>
 			请先点击任意处锁定鼠标以开始游戏
 		</h1>
-		<!-- 2:进度条 -->
-		<h1 id="progress" style="z-index: 2;">
+		<!-- 2:print -->
+		<printgroup style="z-index: 2;"></printgroup>
+		<!-- 3:进度条 -->
+		<h1 id="progress" style="z-index: 3;">
 			<header>贴图加载中……</header>
 			进度：<progress></progress>
 			<span>0</span>%<br/>
 			<b>生命诚可贵，生命只有一次，请珍爱生命</b>
 		</h1>
-		<!-- 3:竖屏警告 -->
-		<h1 id="warning" style="z-index: 3;">
+		<!-- 4:竖屏警告 -->
+		<h1 id="warning" style="z-index: 4;">
 			推荐使用横屏运行（启用浏览器横屏或<a href="https://github.com/wzh656/MinecraftWeb/releases/download/v2.0.0-alpha/Minecraft.apk">下载apk（完整版）</a>）<br/>
 			<button onclick="this.parentElement.remove();">继续竖屏</button>
 		</h1>
-		<!-- 4:死亡通知书 -->
-		<h1 id="die" style="z-index: 4; display: none;">
+		<!-- 5:死亡通知书 -->
+		<h1 id="die" style="z-index: 5; display: none;">
 			<header>游戏结束！<p>GAME OVER</p></header>
 			角色deskgood死亡（正在播放：凉凉）<br/>
 			死因：<span class="resaon">未知</span><br/>
@@ -650,12 +661,13 @@ deskgood.moveTo(0,10000*100);
 		</h1>
 		<audio id="bgm" perload loop style="display: none;" src="./music/1.m4a" ></audio>
 		<!--<audio id="bgm" autoplay perload loop style="display: none;" src="https://vdse.bdstatic.com/876934f28995e8042230ec598237c67e.mp4?authorization=bce-auth-v1/fb297a5cc0fb434c971b8fa103e8dd7b/2017-05-11T09:02:31Z/-1//ab5b458a478fae53b754e194ab270b96f23aa23ba71c2e63b06fc06d0543040c"></audio>-->
-		<!-- <div style="display: none;">
+		<!-- 流量统计 -->
+		<div style="display: none;">
 			<script language="javascript" src="http://count24.51yes.com/click.aspx?id=248466766&logo=12" charset="gb2312"></script>
-		</div> -->
-		<!-- 5:message -->
-		<!-- 6:不支持js -->
-		<noscript><h1 style="z-index: 6;">你的浏览器不支持JavaScript，无法运行！</h1></noscript>
+		</div>
+		<!-- 6:message -->
+		<!-- 7:不支持js -->
+		<noscript><h1 style="z-index: 7;">你的浏览器不支持JavaScript，无法运行！</h1></noscript>
 
 <script src="./js/GameTime.js"></script>
 <script>
@@ -789,7 +801,7 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 	let pointerLockErrorEvent = function(){
 		console.error("鼠标锁定错误");
 		// alert("鼠标锁定错误\n请重试 或 关闭重新打开 或 切换/升级浏览器");
-		message("<font color='red'>鼠标锁定错误\n请重试 或 关闭重新打开 或 切换/升级浏览器</font>", 3);
+		print("鼠标锁定", "鼠标锁定错误\n请重试 或 关闭重新打开 或 切换/升级浏览器", "red", 3);
 		document.body.requestPointerLock();
 	};
 	
@@ -852,44 +864,37 @@ function GetQueryString(name){
 	if(r!=null)return  unescape(r[2]); return null;
 }
 
-function message(text, time=5){
-	/*if (navigator.userAgent.toLowerCase().indexOf("html5plus") != -1){
-		if (typeof plus != "undefined"){
-			plus.nativeUI.toast(
-				text,
-				{
-					type: "richtext",
-					duration: time1,
-					verticalAlign: "top",
-					richTextStyle: {
-						align:"center",
-					}
-				}
-			);
-		}else{
-			document.addEventListener("plusready", function(){
-				plus.nativeUI.toast(
-					text,
-					{
-						type: "richtext",
-						duration: time1,
-						verticalAlign: "top",
-						richTextStyle: {
-							align:"center",
-						}
-					}
-				);
-			});
-		}
-	}else{*/
-		let msg = $(`<message>${text}</message>`)
-			.attr("open", "true");
-		$( document.body ).append( msg );
-		setTimeout(()=>{
-			msg.removeAttr("open")
-			setTimeout(msg.remove, 3000);
-		}, time*1000);
+function print(id, text, color, time=3){
+	if (print.prototype.ids[id] == true) return; //已加载
+	print.prototype.ids[id] = true;
+	
+	let msg = $(`<print>${text}</print>`).css("backgroundColor", color);
+	$("printgroup").append( msg.fadeIn("slow") );
+	setTimeout(()=>{
+		msg.fadeOut("slow", msg.remove);
+		print.prototype.ids[id] = false;
+		
+		$("printgroup > print[style='display: none;']").remove(); //避免漏掉
+	}, time*1000);
 }
+print.prototype.ids = [];
+
+function message(id, text, time=5){
+	if (message.prototype.ids[id] == true) return; //已加载
+	message.prototype.ids[id] = true;
+	
+	let msg = $(`<message>${text}</message>`)
+		.attr("open", "true");
+	$( document.body ).append( msg );
+	setTimeout(()=>{
+		msg.removeAttr("open").attr("close");
+		setTimeout(()=>msg.remove(), 3000);
+		message.prototype.ids[id] = false;
+		
+		$("message:not(open)[close]").remove(); //避免漏掉
+	}, time*1000);
+}
+message.prototype.ids = [];
 
 function rnd_error(){
 	return Math.random()*0.2+0.9;

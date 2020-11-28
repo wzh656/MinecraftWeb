@@ -246,7 +246,7 @@ document.addEventListener("mousedown", function (e){
 						let free = !deskgood.hold[deskgood.choice]? deskgood.choice: deskgood.hold.indexOf(null);
 						if (free == -1){
 							console.info("not free!");
-							message("<font style='font-size:14px;'>两只手拿4m³方块已经够多了，反正我是拿不下了</font>", 3);
+							message("拿不下方块", "<font style='font-size:14px;'>两只手拿4m³方块已经够多了，反正我是拿不下了</font>", 3);
 						}else{
 							console.log("delete", click[i].object.position, map.get(x, y, z).id)
 							

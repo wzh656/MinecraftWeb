@@ -1,6 +1,51 @@
 /**
 * 创建网格模型
 */
+(async function(){
+	let keys = Object.keys(TEMPLATES);
+	for (let i of keys.slice(1)){ //除去空气
+		let block = TEMPLATES[i];
+		for (let j in block.block.face){
+			let face = block.block.face[j];
+			block.setTexture(
+				new THREE.TextureLoader().load(
+					Img.scale(
+						Img.clip(await Img.get(face[2]), [ face[0]*16, face[1]*16 ], [ 16, 16 ]),
+						64, 64
+					).toDataURL("image/png")
+				),
+				j
+			);
+		}
+	}
+	// 所有block贴图加载完毕
+	setTimeout(function(){
+		$("#progress header").text("载入方块中……");
+		$("#progress span").text(0);
+		$("#progress progress")[0].max = 1;
+		$("#progress progress")[0].value = 0;
+		
+		console.log("load_condition(load_texture)", perload_condition+1)
+		if (++perload_condition == 2){
+			map.perloadChunk({
+				progressCallback: (value)=>{
+					$("#progress span").text( Math.round(value*100, 2).changeDecimalBuZero(2, 2) );
+					$("#progress progress").val( value );
+				},
+				finishCallback: ()=>{
+					$("#progress span").text("100");
+					$("#progress progress").val("1");
+					setTimeout(function(){
+						render(); //纹理贴图加载成功后，调用渲染函数执行渲染操作
+						$("#progress").remove();
+					},0);
+				}
+			});
+		}
+	}, 0);
+})();
+
+
 // TextureLoader创建一个纹理加载器对象，可以加载图片作为几何体纹理
 // let num = 0;
 /*let texture_load = {
@@ -100,50 +145,8 @@ texture_load.id = setInterval(async function(){
 	}
 }, 0);
 */
-(async function(){
-	let keys = Object.keys(TEMPLATES),
-		textures = await Img.get("./img/textures.png");
-	for (let i of keys.slice(1)){ //除去空气
-		let block = TEMPLATES[i];
-		for (let j in block.block.face){
-			let face = block.block.face[j];
-			block.setTexture(
-				new THREE.TextureLoader().load(
-					Img.scale(
-						Img.clip(textures, [ face[0]*16, face[1]*16 ], [ 16, 16 ]),
-						64, 64
-					).toDataURL("image/png")
-				),
-				j
-			);
-		}
-	}
-	// 所有block贴图加载完毕
-	setTimeout(function(){
-		$("#progress header").text("载入方块中……");
-		$("#progress span").text(0);
-		$("#progress progress")[0].max = 1;
-		$("#progress progress")[0].value = 0;
-		
-		console.log("load_condition(load_texture)", perload_condition+1)
-		if (++perload_condition == 2){
-			map.perloadChunk({
-				progressCallback: (value)=>{
-					$("#progress span").text( Math.round(value*100, 2).changeDecimalBuZero(2, 2) );
-					$("#progress progress").val( value );
-				},
-				finishCallback: ()=>{
-					$("#progress span").text("100");
-					$("#progress progress").val("1");
-					setTimeout(function(){
-						render(); //纹理贴图加载成功后，调用渲染函数执行渲染操作
-						$("#progress").remove();
-					},0);
-				}
-			});
-		}
-	}, 0);
-})();
+
+
 /* (async function(){
 	let keys = Object.keys(TEMPLATES);
 	$("#progress progress")[0].max = keys.length; //进度条最大进度（贴图加载）

@@ -1,6 +1,6 @@
 if (localStorage.getItem("我的世界_seed") === null){
 	location.href = "home.html";
-	message("无法读取数据！<br/>请重新创建游戏", 3);
+	message("无法读取数据", "无法读取数据！<br/>请重新创建游戏", "red", 3);
 }
 let map = new ChunkMap([
 	{x: -8, y: 0, z: -8},

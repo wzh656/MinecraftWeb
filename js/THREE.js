@@ -59,13 +59,13 @@ directionalLight.shadow.camera.right = 200*100;
 directionalLight.shadow.camera.top = 200*100;
 directionalLight.shadow.camera.bottom = -200*100;
 setTimeout(function(){
-	message(
+	message("设备性能提示",
 	`<font style="font-size:16px">`+
 		`如果设备`+
 			`<b>性能差</b>`+
 			`，使用光影效果将会导致`+
 			`<b>卡顿</b>。`+
-			`<button onclick="directionalLight.castShadow=false;message('妈妈再也不用担心手机卡还发烫了（只担心画质丑的一批）',3);">`+
+			`<button onclick="directionalLight.castShadow=false;print('关闭光影','妈妈再也不用担心手机卡还发烫了（只担心画质丑的一批）', "",3);">`+
 				`点此可关闭光影`+
 			`</button>`+
 		`</font>`, 5);
@@ -380,7 +380,7 @@ function render(){
 			!map.get(deskgood.pos.x/100,
 				deskgood.pos.y/100,
 				deskgood.pos.z/100).get("attr", "block", "transparent") //不透明
-		) message("想窒息吗？还往头上放方块，看你怎么出来！", 1);
+		) print("窒息提示", "想窒息吗？还往头上放方块，看你怎么出来！", "red", 1);
 		/* try{
 			plus.nativeUI.toast(
 				"<font size=\"16\">想窒息吗？还往头上放方块，看你怎么出来！</font>",

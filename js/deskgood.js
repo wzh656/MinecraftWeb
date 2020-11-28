@@ -222,7 +222,7 @@ var deskgood = {
 				} */
 			}else{
 				// throw "block";
-				message("区块暂未加载完成，禁止进入<br/>（想加载快可以调节区块预加载范围，只要不卡死就行）", 1);
+				print("区块未加载完成", "区块暂未加载完成，禁止进入<br/>（想加载快可以调节区块预加载范围，只要不卡死就行）", 1);
 			}
 		/* }catch(err){
 			if (err == "block"){ // 未加载区块，禁止进入
@@ -606,7 +606,7 @@ if (ALLOW_GUI){
 			deskgood_look_folder.add(deskgood.look, "z", -1, 1, 0.01).listen().onChange(z => deskgood.look_refresh(undefined, undefined, z));
 		let deskgood_up_folder = deskgood_folder.addFolder("天旋地转（小心头晕）");
 			deskgood_up_folder.add(deskgood.up, "x", -1, 1, 0.01).onChange(function(){
-				message("<font style='font-size: 16px;'>头晕别怪我</font>", 3);
+				print("头晕", "<font style='font-size: 16px;'>头晕别怪我</font>", 3);
 				/* plus.nativeUI.toast(
 					"<font size=\"16\">头晕别怪我</font>",
 					{
@@ -617,7 +617,7 @@ if (ALLOW_GUI){
 				); }catch(err){} */
 			});
 			deskgood_up_folder.add(deskgood.up, "y", -1, 1, 0.01).onChange(function(){
-				message("<font style='font-size: 16px;'>头晕别怪我</font>", 3);
+				print("头晕", "<font style='font-size: 16px;'>头晕别怪我</font>", 3);
 					/* plus.nativeUI.toast(
 						"<font size=\"16\">头晕别怪我</font>",
 						{
@@ -628,7 +628,7 @@ if (ALLOW_GUI){
 					); }catch(err){} */
 				});
 			deskgood_up_folder.add(deskgood.up, "z", -1, 1, 0.01).onChange(function(){
-				message("<font style='font-size: 16px;'>头晕别怪我</font>", 3);
+				print("头晕", "<font style='font-size: 16px;'>头晕别怪我</font>", 3);
 					/* plus.nativeUI.toast(
 						"<font size=\"16\">头晕别怪我</font>",
 						{

@@ -323,7 +323,7 @@ class ThingGroup extends Array{
 					)[0]
 			);
 		if (this.fixedLength && this.maxLength)
-			for (let i=0; i<this.fixedLength; i++)
+			for (let i=0; i<this.fixedLength; i++) //添加空白
 				children.push(
 					$("<li></li>")
 					.append(
