@@ -22,7 +22,7 @@ function SQL_read(){
 			deskgood.pos.z = result[0].z;
 			deskgood.sensitivity = result[0].id;
 			[deskgood.lookAt.left_right, deskgood.lookAt.top_bottom] = result[0].attr.split(" ").map(Number);
-			deskgood.look_refresh();
+			deskgood.look_update();
 			
 			console.log("load_condition(sql)", perload_condition+1)
 			if (++perload_condition == 2){
@@ -118,5 +118,6 @@ function SQL_save(){
 	
 	console.log("存档+1中……");
 }
+
 setInterval(SQL_save, 10*1000); // 10s
-document.addEventListener("background", SQL_save, false);
+document.addEventListener("background", SQL_save, false); //plus切换到后台时自动保存

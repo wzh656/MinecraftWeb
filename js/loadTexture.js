@@ -1,9 +1,10 @@
 /**
 * 创建网格模型
 */
+let TEXTURES;
 (async function(){
-	let keys = Object.keys(TEMPLATES),
-		textures = Img.grid(await Img.get("./img/textures/textures.png"), 16, 16);
+	let keys = Object.keys(TEMPLATES);
+	TEXTURES = Img.grid(await Img.get("./img/textures/textures.png"), 16, 16);
 	for (let i of keys.slice(1)){ //除去空气
 		let block = TEMPLATES[i];
 		for (let j in block.block.face){
@@ -14,7 +15,7 @@
 						( face[2]? //自定义
 							Img.clip( await Img.get(face[2]), face[0]*16, face[1]*16, 16, 16 )
 						:
-							textures[ face[0] ][ face[1] ] ),
+							TEXTURES[ face[0] ][ face[1] ] ),
 						64, 64
 					).toDataURL("image/png")
 				), j

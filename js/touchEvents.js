@@ -227,83 +227,8 @@ $("#game").on("touchstart", function (e){
 			for (let i in click){
 				if (click[i].faceIndex){
 					if (click[i].object instanceof THREE.Mesh){
-						let {x, y, z} = click[i].object.position; // 单位 px=cm
-						if (Math.sqrt(
-							(x - deskgood.pos.x) **2+
-							(y - deskgood.pos.y) **2+
-							(z - deskgood.pos.z) **2
-						) < 500){ //距离小于500
-							[x, y, z] = [x, y, z].map(v => v/100); // 单位 m
-							if (
-								map.get(x, y, z).get("attr","block","onLongTouch") &&
-								eval(map.get(x, y, z).get("attr","block","onLongTouch")) === false
-							) return;
-							/*let free = -1;
-							if (deskgood.hold[deskgood.choice] == 0){
-								free = deskgood.choice;
-							}else{
-								for (let j in deskgood.hold){
-									if (deskgood.hold[j] == 0){
-										free = j;
-										break;
-									}
-								}
-							}*/
-							let free = !deskgood.hold[deskgood.choice]? deskgood.choice: deskgood.hold.indexOf(null);
-							if (free == -1){
-								console.info("not free!");
-								message("<font style='font-size:14px;'>两只手拿4m³方块已经够多了，反正我是拿不下了</font>", 3);
-								/* try{
-									plus.nativeUI.toast("<font style=\"font-size:14px\">两只手拿4m³方块已经够多了，反正我是拿不下了</font>",
-										{
-											type:"richtext",
-											verticalAlign: "top",
-											richTextStyle:{
-												align:"center"
-											}
-										}
-									);
-								}catch(err){} */
-							}else{
-								console.log("delete", click[i].object.position, map.get(x, y, z).id)
-								
-								deskgood.hold.addOne(new Thing(map.get(x, y, z)), free); //放在手中
-								map.delete(x, y, z); //删除方块
-								let xZ = Math.round(x/map.size.x),
-									zZ = Math.round(z/map.size.z);
-								for (let i in map.edit[xZ][zZ])
-									if (
-										map.edit[xZ][zZ].x == x &&
-										map.edit[xZ][zZ].y == y &&
-										map.edit[xZ][zZ].z == z
-									) map.edit[xZ][zZ].splice(i,1); //删除重复
-								map.edit[Math.round(x/map.size.x)][Math.round(z/map.size.z)].push({
-									x,
-									y,
-									z,
-									id: 0
-								});
-								map.updateRound(x, y, z); //刷新方块及周围
-								
-								[x, y, z] = [x, y, z].map(Math.round); //存储必须整数
-								//SQL
-								sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
-									sql.insertData("file", ["type", "x", "y", "z", "id"], [
-										0,
-										x,
-										y,
-										z,
-										0
-									]);
-								});
-								/*scene.remove(click[i].object);
-								every[ click[i].object.position.x/100 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] = 0;*/
-								/* if (
-									every[ click[i].object.position.x/100+1 ][ click[i].object.position.y/100 ][ click[i].object.position.z/100 ] 
-								) */
-							}
-							break;
-						}
+						deskgood.delete(click[i].object.position); //删除方块
+						break; //跳出 寻找有效放置的 循环
 					}
 				}
 			}
@@ -342,7 +267,7 @@ $("#game").on("touchmove", function (e){
 	if (deskgood.lookAt.top_bottom < -89.9)
 		deskgood.lookAt.top_bottom = -89.9;
 	
-	deskgood.look_refresh(); //刷新
+	deskgood.look_update(); //刷新
 	
 	if (Math.sqrt( (touch_screen.pos.x-x)**2 + (touch_screen.pos.y-y)**2 ) >= 100){ //误差100px
 		touch_screen.pos.x = -666;
@@ -365,110 +290,8 @@ $("#game").on("touchend", function (e){
 			let click = ray2D(true, x, y);
 			for (let i in click){
 				if (click[i].object instanceof THREE.Mesh){
-					let {x,y,z} = click[i].object.position; // 单位px=cm
-					[x, y, z] = [x, y, z].map(v => v/100); // 单位m
-					/* if (
-						Math.sqrt(
-							(click[i].object.position.x - deskgood.pos.x) **2+
-							(click[i].object.position.y - deskgood.pos.y) **2+
-							(click[i].object.position.z - deskgood.pos.z) **2
-					) < 500){ //距离<500
-						if (
-							map.get(click[i].object.position.x/100,
-								click[i].object.position.y/100,
-								click[i].object.position.z/100)
-							&&
-							map.get(click[i].object.position.x/100,
-								click[i].object.position.y/100,
-								click[i].object.position.z/100).id
-							==
-								1
-						){ //命令方块
-							state("command");
-							return;
-						}
-					} */
-					if (
-						map.get(x, y, z).get("attr","block","onShortTouch") &&
-						eval(map.get(x, y, z).get("attr","block","onShortTouch")) === false
-					) return;
-					if (!deskgood.hold[deskgood.choice]) //空气
-						return;
-					switch (click[i].faceIndex){
-						case 0:
-						case 1:
-							x++;
-							break;
-						case 2:
-						case 3:
-							x--;
-							break;
-						case 4:
-						case 5:
-							y++;
-							break;
-						case 6:
-						case 7:
-							y--;
-							break;
-						case 8:
-						case 9:
-							z++;
-							break;
-						case 10:
-						case 11:
-							z--;
-							break;
-						default:
-							return console.error("faceIndex wrong:", click[i].faceIndex);
-					}
-					if (Math.sqrt(
-						(x*100-deskgood.pos.x) **2+
-						(y*100-deskgood.pos.y) **2+
-						(z*100-deskgood.pos.z) **2
-					) < 500){ //距离<5m
-						console.log("put", {x,y,z}, deskgood.hold[deskgood.choice].id, deskgood.hold[deskgood.choice].attr)
-						map.addID(deskgood.hold[deskgood.choice].id, {
-							x,
-							y,
-							z
-						}, TEMPLATES, {
-							attr: deskgood.hold[deskgood.choice].attr
-						});
-						let thing = deskgood.hold[deskgood.choice],
-							attr = `'${JSON.stringify(map.get(x, y, z).attr).slice(1,-1)}'`;
-						let xZ = Math.round(x/map.size.x),
-							zZ = Math.round(z/map.size.z);
-						for (let i in map.edit[xZ][zZ])
-							if (
-								map.edit[xZ][zZ].x == x &&
-								map.edit[xZ][zZ].y == y &&
-								map.edit[xZ][zZ].z == z
-							) map.edit[xZ][zZ].splice(i,1); //删除重复
-						map.edit[xZ][zZ].push({
-							x,
-							y,
-							z,
-							id: thing.id,
-							attr
-						});
-						map.updateRound(x, y, z); //刷新方块及周围
-						
-						[x, y, z] = [x, y, z].map(Math.round); //存储必须整数
-						//SQL
-						sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, ()=>{
-							sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
-								0,
-								x,
-								y,
-								z,
-								thing.id,
-								attr
-							]);
-						});
-						deskgood.hold.delete(1, deskgood.choice); //删除手里的方块
-						break; //跳出 寻找有效放置的 循环
-					}
+					deskgood.put(click[i].object.position, click[i].faceIndex); //放置方块
+					break; //跳出 寻找有效放置的 循环
 				}
 			}
 		}

@@ -28,14 +28,14 @@ var deskgood = {
 		},
 		set left_right(value){
 			this._left_right = value;
-			deskgood.look_refresh();
+			deskgood.look_update();
 		},
 		get top_bottom(){
 			return this._top_bottom;
 		},
 		set top_bottom(value){
 			this._top_bottom = value;
-			deskgood.look_refresh();
+			deskgood.look_update();
 		} */
 	},
 	look: {
@@ -152,10 +152,12 @@ var deskgood = {
 		}
 	}),
 	sensitivity: device? 2.6: 1, //灵敏度：手机2，电脑1
+	// 死亡
 	die(reason="使用命令自杀"){
 		sql.deleteTable("file", undefined, function(){
 			localStorage.removeItem("我的世界_seed");
 			
+			document.exitPointerLock(); //取消鼠标锁定
 			gui.close(); //隐藏gui
 			$("#help, #warn").hide(); //隐藏 遮罩、横屏提示
 			$("#die")
@@ -171,9 +173,12 @@ var deskgood = {
 			console.warn("deskgood死亡");
 		});
 	},
-	look_refresh(x,y,z){
-		if (x !== undefined | y !== undefined | z !== undefined){
-			[x,y,z] = [x||deskgood.look.x, y||deskgood.look.y, z||deskgood.look.z];
+	// 视角更新
+	look_update(x,y,z){
+		if (x !== undefined || y !== undefined || z !== undefined){
+			x = x||deskgood.look.x;
+			y = y||deskgood.look.y;
+			z = z||deskgood.look.z;
 			let v = new THREE.Vector3(x,y,z).setLength(1); //单位向量（标准化）
 			camera.lookAt(deskgood.pos.x+v.x, deskgood.pos.y+v.y, deskgood.pos.z+v.z);
 			[deskgood.look.x, deskgood.look.y, deskgood.look.z] = [v.x, v.y, v.z];
@@ -191,6 +196,7 @@ var deskgood = {
 			[deskgood.look.x, deskgood.look.y, deskgood.look.z] = [x,y,z];
 		}
 	},
+	// 移动
 	move (x=deskgood.pos.x, y=deskgood.pos.y, z=deskgood.pos.z){
 		/*[x, z] = [x, z].map(
 			value => value+(0.1*Math.random()-0.05)
@@ -230,6 +236,7 @@ var deskgood = {
 			}
 		} */
 	},
+	// 前进
 	go (x=0, y=0, z=0){
 		[x, y, z] = [x, y, z].map(
 			value => value*rnd_error()
@@ -551,6 +558,155 @@ var deskgood = {
 			deskgood.pos.z = k;
 		}
 		return rt;*/
+	},
+	
+	// 放置方块
+	put({x, y, z}, faceIndex){ // 单位 px=cm
+		[x, y, z] = [x, y, z].map(v => v/100); //单位 m
+		
+		if (
+			map.get(x, y, z).get("attr", "block", "onRightMouseDown") && //事件
+			eval(map.get(x, y, z).get("attr", "block", "onRightMouseDown")) === false //事件取消
+		) return;
+		
+		if (!deskgood.hold[deskgood.choice]) //空气
+			return;
+		
+		switch (faceIndex){
+			case 0:
+			case 1:
+				x++;
+				break;
+			case 2:
+			case 3:
+				x--;
+				break;
+			case 4:
+			case 5:
+				y++;
+				break;
+			case 6:
+			case 7:
+				y--;
+				break;
+			case 8:
+			case 9:
+				z++;
+				break;
+			case 10:
+			case 11:
+				z--;
+				break;
+			default:
+				throw ["faceIndex wrong:", click[i].faceIndex];
+		}
+		
+		console.log(Math.abs(x - deskgood.pos.x),
+			Math.abs(y - deskgood.pos.y),
+			Math.abs(z - deskgood.pos.z))
+		if (Math.abs(y - deskgood.pos.y) < 100 &&
+			Math.abs(x - deskgood.pos.x) < 100 &&
+			Math.abs(z - deskgood.pos.z) < 100
+		) return false; //在头上放方块
+		
+		if (Math.sqrt(
+			(x*100 - deskgood.pos.x) **2+
+			(y*100 - deskgood.pos.y) **2+
+			(z*100 - deskgood.pos.z) **2
+		) >= 500) return false; //距离>=5m
+		
+		console.log("put", {x,y,z}, deskgood.hold[deskgood.choice].id, deskgood.hold[deskgood.choice].attr)
+		map.addID(deskgood.hold[deskgood.choice].id, {
+			x,
+			y,
+			z
+		}, TEMPLATES, {
+			attr: deskgood.hold[deskgood.choice].attr
+		});
+		let thing = deskgood.hold[deskgood.choice],
+			attr = `'${JSON.stringify(map.get(x, y, z).attr).slice(1,-1)}'`;
+		let xZ = Math.round(x/map.size.x),
+			zZ = Math.round(z/map.size.z);
+		for (let i in map.edit[xZ][zZ])
+			if (
+				map.edit[xZ][zZ].x == x &&
+				map.edit[xZ][zZ].y == y &&
+				map.edit[xZ][zZ].z == z
+			) map.edit[xZ][zZ].splice(i,1); //删除重复
+		map.edit[Math.round(x/map.size.x)][Math.round(z/map.size.z)].push({
+			x,
+			y,
+			z,
+			id: thing.id,
+			attr
+		});
+		map.updateRound(x, y, z); //刷新方块及周围
+		
+		[x, y, z] = [x, y, z].map(Math.round); //存储必须整数
+		//SQL
+		sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, ()=>{
+			sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
+				0,
+				x,
+				y,
+				z,
+				thing.id,
+				attr
+			])
+		});
+		deskgood.hold.delete(1, deskgood.choice); //删除手里的方块
+	},
+	
+	// 删除方块
+	delete({x, y, z}){ // 单位 px=cm
+		if (Math.sqrt(
+			(x - deskgood.pos.x) **2+
+			(y - deskgood.pos.y) **2+
+			(z - deskgood.pos.z) **2
+		) >= 500) return false; //距离>500px=500cm
+		
+		[x, y, z] = [x, y, z].map(v => v/100); // 单位 m
+		if (
+			map.get(x, y, z).get("attr", "block", "onLeftMouseDown") &&
+			eval(map.get(x, y, z).get("attr", "block", "onLeftMouseDown")) === false
+		) return;
+		let free = !deskgood.hold[deskgood.choice]? deskgood.choice: deskgood.hold.indexOf(null);
+		if (free == -1){
+			console.warn("not free!")
+			print("拿不下方块", "两只手拿4m³方块已经够多了，反正我是拿不下了", 3);
+		}else{
+			console.log("delete", {x,y,z}, map.get(x, y, z).id)
+			
+			deskgood.hold.addOne(new Block(map.get(x, y, z)), free); //放在手中
+			map.delete(x, y, z); //删除方块
+			let xZ = Math.round(x/map.size.x),
+				zZ = Math.round(z/map.size.z);
+			for (let i in map.edit[xZ][zZ])
+				if (
+					map.edit[xZ][zZ].x == x &&
+					map.edit[xZ][zZ].y == y &&
+					map.edit[xZ][zZ].z == z
+				) map.edit[xZ][zZ].splice(i,1); //删除重复
+			map.edit[Math.round(x/map.size.x)][Math.round(z/map.size.z)].push({
+				x,
+				y,
+				z,
+				id: 0
+			});
+			map.updateRound(x, y, z); //刷新方块及周围
+			
+			[x, y, z] = [x, y, z].map(Math.round); //存储必须整数
+			//SQL
+			sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
+				sql.insertData("file", ["type", "x", "y", "z", "id"], [
+					0,
+					x,
+					y,
+					z,
+					0
+				]);
+			});
+		}
 	}
 }
 deskgood.moveTo = deskgood.move;
@@ -561,11 +717,11 @@ deskgood.goX = x=>deskgood.go(x);
 deskgood.goY = y=>deskgood.go(0,y);
 deskgood.goZ = z=>deskgood.go(0,0,z);
 
-SQL_read();
+SQL_read(); //开始读取存档
 
 //初始化
 deskgood.hold.update();
-deskgood.look_refresh();
+deskgood.look_update();
 
 
 //gui
@@ -601,9 +757,9 @@ if (ALLOW_GUI){
 			deskgood_lookAt_folder.add(deskgood.lookAt, "left_right", 0, 360).listen().name("左右（水平）");
 			deskgood_lookAt_folder.add(deskgood.lookAt, "top_bottom", -90, 90).listen().name("上下（竖直）");
 		let deskgood_look_folder = deskgood_folder.addFolder("朝向（笛卡尔坐标系）");
-			deskgood_look_folder.add(deskgood.look, "x", -1, 1, 0.01).listen().onChange(x => deskgood.look_refresh(x));
-			deskgood_look_folder.add(deskgood.look, "y", -1, 1, 0.01).listen().onChange(y => deskgood.look_refresh(undefined, y));
-			deskgood_look_folder.add(deskgood.look, "z", -1, 1, 0.01).listen().onChange(z => deskgood.look_refresh(undefined, undefined, z));
+			deskgood_look_folder.add(deskgood.look, "x", -1, 1, 0.01).listen().onChange(x => deskgood.look_update(x));
+			deskgood_look_folder.add(deskgood.look, "y", -1, 1, 0.01).listen().onChange(y => deskgood.look_update(undefined, y));
+			deskgood_look_folder.add(deskgood.look, "z", -1, 1, 0.01).listen().onChange(z => deskgood.look_update(undefined, undefined, z));
 		let deskgood_up_folder = deskgood_folder.addFolder("天旋地转（小心头晕）");
 			deskgood_up_folder.add(deskgood.up, "x", -1, 1, 0.01).onChange(function(){
 				print("头晕", "<font style='font-size: 16px;'>头晕别怪我</font>", 3);

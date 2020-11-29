@@ -801,7 +801,7 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 	let pointerLockErrorEvent = function(){
 		console.error("鼠标锁定错误");
 		// alert("鼠标锁定错误\n请重试 或 关闭重新打开 或 切换/升级浏览器");
-		print("鼠标锁定", "鼠标锁定错误\n请重试 或 关闭重新打开 或 切换/升级浏览器", "red", 3);
+		print("鼠标锁定", "鼠标锁定错误\n请重试 或 关闭重新打开 或 切换/升级浏览器", 3, "#f68");
 		document.body.requestPointerLock();
 	};
 	
@@ -864,7 +864,7 @@ function GetQueryString(name){
 	if(r!=null)return  unescape(r[2]); return null;
 }
 
-function print(id, text, color, time=3){
+function print(id, text, time=3, color){
 	if (print.prototype.ids[id] == true) return; //已加载
 	print.prototype.ids[id] = true;
 	
