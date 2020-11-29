@@ -15,7 +15,7 @@ const Img = {
 		});
 	},
 	// 图片裁剪
-	clip(img, [x, y], [width, height]){
+	clip(img, x, y, width, height){
 		let canvas1 = $("<canvas></canvas>").attr("width", img.width).attr("height", img.height)[0],
 			canvas2 = $("<canvas></canvas>").attr("width", width).attr("height", height)[0],
 			ctx1 = canvas1.getContext("2d"),
@@ -24,6 +24,19 @@ const Img = {
 		let imgData = ctx1.getImageData(x, y, width, height);
 		ctx2.putImageData(imgData, 0, 0);
 		return canvas2;
+	},
+	// 图片按照网格裁剪
+	grid(img, width, height){
+		let x_max = img.width/width,
+			y_max = img.height/height,
+			result = [];
+		for (let x=0; x<x_max; x++){
+			result[x] = [];
+			for (let y=0; y<y_max; y++){
+				result[x][y] = Img.clip(img, x*width, y*height, width, height);
+			}
+		}
+		return result;
 	},
 	// 图片大小缩放
 	scale(img, width, height){

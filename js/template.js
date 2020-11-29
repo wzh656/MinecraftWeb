@@ -8,12 +8,7 @@ TEMPLATES.push(new Block({
 	name: "命令方块",
 	block: {
 		face: [
-			[1,0, "./img/textures/textures.png"],
-			[1,0, "./img/textures/textures.png"],
-			[0,0, "./img/textures/textures.png"],
-			[2,0, "./img/textures/textures.png"],
-			[1,0, "./img/textures/textures.png"],
-			[1,0, "./img/textures/textures.png"]
+			[1,0], [1,0], [0,0], [2,0], [1,0], [1,0]
 		]
 	},
 	attr: {
@@ -36,12 +31,7 @@ TEMPLATES.push(new Block({
 	name: "草方块",
 	block: {
 		face: [
-			[4,0, "./img/textures/textures.png"],
-			[4,0, "./img/textures/textures.png"],
-			[3,0, "./img/textures/textures.png"],
-			[5,0, "./img/textures/textures.png"],
-			[4,0, "./img/textures/textures.png"],
-			[4,0, "./img/textures/textures.png"]
+			[4,0], [4,0], [3,0], [5,0], [4,0], [4,0]
 		]
 	},
 	attr: {
@@ -55,12 +45,7 @@ TEMPLATES.push(new Block({
 	name: "泥土",
 	block: {
 		face: [
-			[5,0, "./img/textures/textures.png"],
-			[5,0, "./img/textures/textures.png"],
-			[5,0, "./img/textures/textures.png"],
-			[5,0, "./img/textures/textures.png"],
-			[5,0, "./img/textures/textures.png"],
-			[5,0, "./img/textures/textures.png"]
+			[5,0], [5,0], [5,0], [5,0], [5,0], [5,0]
 		]
 	},
 	attr: {}
@@ -70,12 +55,7 @@ TEMPLATES.push(new Block({
 	name: "原石",
 	block: {
 		face: [
-			[6,0, "./img/textures/textures.png"],
-			[6,0, "./img/textures/textures.png"],
-			[6,0, "./img/textures/textures.png"],
-			[6,0, "./img/textures/textures.png"],
-			[6,0, "./img/textures/textures.png"],
-			[6,0, "./img/textures/textures.png"]
+			[6,0], [6,0], [6,0], [6,0], [6,0], [6,0]
 		]
 	},
 	attr: {}
@@ -85,12 +65,7 @@ TEMPLATES.push(new Block({
 	name: "石头",
 	block: {
 		face: [
-			[7,0, "./img/textures/textures.png"],
-			[7,0, "./img/textures/textures.png"],
-			[7,0, "./img/textures/textures.png"],
-			[7,0, "./img/textures/textures.png"],
-			[7,0, "./img/textures/textures.png"],
-			[7,0, "./img/textures/textures.png"]
+			[7,0], [7,0], [7,0], [7,0], [7,0], [7,0]
 		]
 	},
 	attr: {}
@@ -100,12 +75,7 @@ TEMPLATES.push(new Block({
 	name: "沙子",
 	block: {
 		face: [
-			[0,1, "./img/textures/textures.png"],
-			[0,1, "./img/textures/textures.png"],
-			[0,1, "./img/textures/textures.png"],
-			[0,1, "./img/textures/textures.png"],
-			[0,1, "./img/textures/textures.png"],
-			[0,1, "./img/textures/textures.png"]
+			[0,1], [0,1], [0,1], [0,1], [0,1], [0,1]
 		]
 	},
 	attr: {}
@@ -116,36 +86,8 @@ TEMPLATES[7.1] = new Block({
 	block: {
 		parent: "./img/blocks/8/",
 		face: [
-			[2,1, "./img/textures/textures.png"],
-			[2,1, "./img/textures/textures.png"],
-			[1,1, "./img/textures/textures.png"],
-			[1,1, "./img/textures/textures.png"],
-			[2,1, "./img/textures/textures.png"],
-			[2,1, "./img/textures/textures.png"]
-		],
-		geometry: new THREE.BoxBufferGeometry(40, 100, 40)
-	},
-	attr: {
-		block: {
-			transparent: true, //部分透明方块（不让相邻方块透明）
-			noTransparent: true, //不让本方块透明
-		}
-	}
-});
-TEMPLATES[7.2] = new Block({
-	id: 7.2,
-	name: "粗橡木",
-	block: {
-		parent: "./img/blocks/8/",
-		face: [
-			[2,1, "./img/textures/textures.png"],
-			[2,1, "./img/textures/textures.png"],
-			[1,1, "./img/textures/textures.png"],
-			[1,1, "./img/textures/textures.png"],
-			[2,1, "./img/textures/textures.png"],
-			[2,1, "./img/textures/textures.png"]
-		],
-		geometry: new THREE.BoxBufferGeometry(70, 100, 70)
+			[2,1], [2,1], [1,1], [1,1], [2,1], [2,1]
+		], geometry: new THREE.BoxBufferGeometry(40, 100, 40)
 	},
 	attr: {
 		block: {
@@ -159,12 +101,7 @@ TEMPLATES[8] = new Block({
 	name: "树叶",
 	block: {
 		face: [
-			[3,1, "./img/textures/textures.png"],
-			[3,1, "./img/textures/textures.png"],
-			[3,1, "./img/textures/textures.png"],
-			[3,1, "./img/textures/textures.png"],
-			[3,1, "./img/textures/textures.png"],
-			[3,1, "./img/textures/textures.png"]
+			[3,1], [3,1], [3,1], [3,1], [3,1], [3,1]
 		]
 	},
 	attr: {
@@ -179,12 +116,7 @@ TEMPLATES.push(new Block({
 	name: "木板",
 	block: {
 		face: [
-			[4,1, "./img/textures/textures.png"],
-			[4,1, "./img/textures/textures.png"],
-			[4,1, "./img/textures/textures.png"],
-			[4,1, "./img/textures/textures.png"],
-			[4,1, "./img/textures/textures.png"],
-			[4,1, "./img/textures/textures.png"]
+			[4,1], [4,1], [4,1], [4,1], [4,1], [4,1]
 		]
 	},
 	attr: {}
@@ -194,12 +126,7 @@ TEMPLATES.push(new Block({
 	name: "砖",
 	block: {
 		face: [
-			[5,1, "./img/textures/textures.png"],
-			[5,1, "./img/textures/textures.png"],
-			[5,1, "./img/textures/textures.png"],
-			[5,1, "./img/textures/textures.png"],
-			[5,1, "./img/textures/textures.png"],
-			[5,1, "./img/textures/textures.png"]
+			[5,1], [5,1], [5,1], [5,1], [5,1], [5,1]
 		]
 	},
 	attr: {}
@@ -209,12 +136,7 @@ TEMPLATES.push(new Block({
 	name: "仙人掌",
 	block: {
 		face: [
-			[7,1, "./img/textures/textures.png"],
-			[7,1, "./img/textures/textures.png"],
-			[6,1, "./img/textures/textures.png"],
-			[0,2, "./img/textures/textures.png"],
-			[7,1, "./img/textures/textures.png"],
-			[7,1, "./img/textures/textures.png"]
+			[7,1], [7,1], [6,1], [0,2], [7,1], [7,1]
 		]
 	},
 	attr: {}

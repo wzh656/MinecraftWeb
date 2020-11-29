@@ -79,7 +79,6 @@ class Block extends Thing{
 				for (let i=0; i<opt.block.face.length; i++)
 					this.block.face[i] = opt.block.face[i];
 			}
-			if (opt.block.parent) this.block.parent = opt.block.parent;
 					
 			//texture
 			if (opt.block.texture){ //贴图 数据

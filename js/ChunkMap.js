@@ -593,10 +593,10 @@ class ChunkMap{
 					id = 0; // 空气/真空 (null)
 				}else if (y > height){
 					if (!treeTop) treeTop = y;
-					id = 8.1; //橡木
+					id = 7.1; //橡木
 				}else if (y == Math.floor(height) && !(height > 0.9*this.size[1].y)){ // 90%+ 高原（草木不生，积雪覆盖）
 					if (sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
-						id = 5; //草方块
+						id = 5; //石头
 					}else{
 						id = 2; //草方块
 					}
@@ -629,10 +629,10 @@ class ChunkMap{
 					id = 0; // 空气/真空 (null)
 				}/* else if (y > height){
 					if (!treeTop) treeTop = y;
-					id = 8.1; //橡木
+					id = 7.1; //橡木
 				} */else if (y == Math.floor(height) && !(height > 0.9*this.size[1].y)){ // 90%+ 高原（草木不生，积雪覆盖）
 					if (sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
-						id = 5; //草方块
+						id = 5; //石头
 					}else{
 						id = 2; //草方块
 					}
@@ -643,9 +643,7 @@ class ChunkMap{
 						id = 2; //草方块
 						// grass = true;
 					} */
-				}/*else if (y == 0){
-					id = 2; //基岩
-				}*/else{
+				}else{
 					/* if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
 						id = 2; //草方块
 						// grass = true;
@@ -661,9 +659,7 @@ class ChunkMap{
 					id = 0; // 空气/真空 (null)
 				}else if (y > earth){
 					id = 6; //沙子
-				}/*else if (y == 0){
-					id = 2; //基岩
-				}*/else{
+				}else{
 					/* if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
 						id = 6; //沙子
 						grass = true;
@@ -755,10 +751,10 @@ class ChunkMap{
 						id = 0; // 空气/真空 (null)
 					}else if (dy > height){
 						if (!treeTop) treeTop = dy;
-						id = 8.1; //橡木
+						id = 7.1; //橡木
 					}else if (dy == Math.floor(height) && !(height > 0.9*this.size[1].y)){ // 90%+ 高原（草木不生，积雪覆盖）
 						if (sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
-							id = 5; //草方块
+							id = 5; //石头
 						}else{
 							id = 2; //草方块
 						}
@@ -769,9 +765,7 @@ class ChunkMap{
 							id = 2; //草方块
 							// grass = true;
 						} */
-					}/*else if (dy == 0){
-						id = 2; //基岩
-					}*/else{
+					}else{
 						/* if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
 							id = 2; //草方块
 							grass = true;
@@ -791,10 +785,10 @@ class ChunkMap{
 						id = 0; // 空气/真空 (null)
 					}/* else if (dy > height){
 						if (!treeTop) treeTop = dy;
-						id = 8.1; //橡木
+						id = 7.1; //橡木
 					} */else if (dy == Math.floor(height) && !(height > 0.9*this.size[1].y)){ // 90%+ 高原（草木不生，积雪覆盖）
 						if (sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
-							id = 5; //草方块
+							id = 5; //石头
 						}else{
 							id = 2; //草方块
 						}
@@ -805,9 +799,7 @@ class ChunkMap{
 							id = 2; //草方块
 							// grass = true;
 						} */
-					}/*else if (dy == 0){
-						id = 2; //基岩
-					}*/else{
+					}else{
 						/* if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
 							id = 2; //草方块
 							// grass = true;
@@ -823,9 +815,7 @@ class ChunkMap{
 						id = 0; // 空气/真空 (null)
 					}else if (dy > earth){
 						id = 6; //沙子
-					}/*else if (dy == 0){
-						id = 2; //基岩
-					}*/else{
+					}else{
 						/* if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
 							id = 6; //沙子
 							grass = true;
