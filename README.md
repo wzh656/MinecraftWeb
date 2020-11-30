@@ -7,7 +7,9 @@
 [![latest-release](https://img.shields.io/github/v/release/wzh656/MinecraftWeb?include_prereleases&labelColor=aaa&style=plastic&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACdUlEQVRYR9VWgTFDQRCNClCBqAAVkApQgagAFYgKUIGoABWIClCBqAAV8N6fe5n9m73LzZcZ42Z27udu9927t3t3Wen9cVv54/V7JQJrIHcCO00k79GfwT4XkGbcJewg+V2hv87F5QgQ5BG27RZ7we9BgUQ/xbG3LRuXI8Dd7sO+zE44tgoj2E5GBc5twd5hQ6Mc4xh/6OMiApTuLjkeox+nbzt+gbGRA+Pv8zRGlSbpmylkSthIgERmLSIwxewGjLvou0U0xzrYhKke6PeWfF/R+9Qpjj3jsgSGmLlJsywcFaAC7G6sCiM4aPdWNcWxEFnQbC0VvAITOOwmR+aZObWtjx/aqd0NlWCe2dZh/qTsYYxFzfYA0wlpHUMLzuLjSYgaF2aK2Lgb+km1SH5hfBswpoE4LQJW3ifMkXXUxhg8ShO3qdfvKG3CmOBD6vI+YVpaBKxDVOUCskQltdSaq3KzgxG+VSezNNgasBKVgKiM8ukViupGPvYYzzYvAh60BMTdfmTSU7ra/RrNXaEAK49PTbSWrXrNlwpQPlblJs0ioKuXjjVAtl4EXipc+UzxoRPU1IEI2IkaoIhA6QSIgI3jmpsiYKVpXRSZXPuU0a10ciICTapJwBdHDVBEILqCPX8fNyABfzxqCAwRp9tPi9gXMCNc84LqLqDPIQnMDWKs9WQGaF41utQQ8MQvIgI1QF0JzKWbBCYw3dG1O4kIRK+gF8/HPXUl0AeynmUtUroF5VNFYPZU5iopjdujy6EaAvyn9GxwGwWmMN1OtUD060LAx72QwDKAOhP/1wQWlEh2uqX4bxRYGoGuQEuJqzk6S1koB/IDAjacvLF4OQ0AAAAASUVORK5CYII=)](https://github.com/wzh656/MinecraftWeb/releases/download/v1.1.0-alpha/Minecraft.apk)
 [![downloads](https://img.shields.io/github/downloads/wzh656/MinecraftWeb/total?style=plastic&labelColor=aaa&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACdElEQVRYR7WWjVEjMQyFoQLogFDBQQUsFRxUcKEDqIBQAUcFt1QAqYBQwR0VEDqACuB9nvWNI6T1Jiya0SS2ZelZv7u9tT4d6MqemN+S/mnxIuZ3MG0PlGwk91N8Ip5U7ix1fi+eixc1/TUAGLsUT2uKgvNW+1diQLnUBwCjfzY0bK+daQMwnygCgPCvkYxnNegEyAp5AL7DeAjCAphJkph/J5ET2ElUAmi0fjCWL7TGI2T/VHw0ENmj5H6LF+Jz51HH3dkKgKU2qe+S/gt2m4Cg/ql15EuadGcYpQwzNfpjH8bdfQSyB1DsZTxC1pCxW116ALiUKiMDwIh9PULWA1VrjkAEIHkBABPxc6B5DADkz12gPwEgSa4dgVvtEZoxqJUSr69cAGAh9rJ7jPhn8CTuX+cljxEAphqhGZPeIwDugYSbMa1LF6X7w+h8xQMeAIQPRwbg2Ul9wD3Qfm1Ur4svBBAlIR5Y6+umBxHhtN0Q8ZSEtE2+diytDI11n2vkW629Mpz39YHXLg+WXzQelSBqUx+YiKNOSAhOxZuCwDiu3w0ekTohtBDnZvTU7eWSwROM1hsx/4cQj8LldNnIOCO78aYhOcGkasS2h+MRLqLYo1abALef7J4snr0vS630Qu4D3pxIYzQAMNX+kA/Z9Hp0lABwW5kL2RAgZuIdMeFhui0DAH0Jl6+8dR5KOmyzKV+AAL1gaNyzgaix5fMVD3rdrnT7JlXQB+BT+KJ2a2MJEDxBRtdmRATAzZ2+fk+StGL7qVabERYAo528cdt6TRkvJiQwSejljc3HDIBko3/MrEC5rgEoZQkLgFDaR4AlXHivSh+QhoYeN6Q7yAAAAABJRU5ErkJggg==)](https://github.com/wzh656/MinecraftWeb/zipball/master)
 
-![文档修改日期-2020.11.14](https://img.shields.io/badge/文档修改日期-2020.11.14-blueviolet)
+![文档修改日期-2020.11.30](https://img.shields.io/badge/文档修改日期-2020.11.30-blueviolet)
+
+
 
 > # 运行
 
@@ -19,6 +21,8 @@
     注意，GitHub是国外网站，网络不好将**无法打开**并且部分旧版浏览器可能不支持。  
     竖屏使用时会有一个提示使用横屏或者下载，如果浏览器支持横屏，可以将手机横屏使用；  
     也可以点击关闭，直接竖屏运行（可能显示会有些奇怪）
+
+
 
 > # 介绍
 
@@ -34,10 +38,12 @@
 
 目前阶段，这三个战略缺一不可，并且是当前发展中需长期坚持的重要战略。
 
+
 ## （一）总述(general)
 本游戏使用WebGL技术，依赖Three.js进行更便捷的3D渲染。  
 规定：每1px为1cm，每100px为1m。
 > 注：*deskgood*为~~前任同桌~~某人的外号，作为游戏主角名，不要在意名称![](https://img.shields.io/github/search/wzh656/MinecraftWeb/deskgood)
+
 
 ## （二）操作方式
 > ### 电脑
@@ -65,6 +71,7 @@
     并且距离上一次跳跃超过1s
     则将以速度向量(0m/s, ≈5m/s, 0m/s)即沿着y轴正半轴方向以≈5m/s的速度跳起来
 
+
 ## （三）引用的js工具
 + > *state.js*：左上角(left-top corner) Canvas
     
@@ -87,5 +94,20 @@
     手机调试工具，点击右下角即可看到一堆输出，可以调试html+css+js，也可以运行JavaScript代码，等效于*命令方块*
 
 
-## （四）更多
-俗话说的好：“*最好的文档就是没有文档*”，为了保留神秘感，仅介绍至此，更多内容请自行[运行尝试](#运行)
+## （四）计划(plans)
+1. [ ] 【创新】天气：雨量随区块和时间按照`seed`变化
+2. [ ] 【创新】时间：自动存档当前时间
+3. [ ] 【优化】【改革】尝试使用多线程工作（除涉及`scene`等主线程对象以外）
+4. [ ] 【创新】【改革】使游戏更加科学：方块重力及强相互作用力和电磁力
+5. [ ] ……【未解密】天机不可泄露
+
+> 注：计划赶不上变化
+
+
+## （五）感谢
++ 感谢*deskgood*和*卓佳浩*对游戏的大力支持鼓励
+
++ [@jason-bowen-zheng](https://github.com/jason-bowen-zheng)提供了一些交流与建议
+
+## （六）更多
+俗话说的好：“*最好的文档就是没有文档*”，为了保留神秘感，则仅介绍至此，更多特性请自行[运行尝试](#运行)
