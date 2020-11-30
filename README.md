@@ -13,7 +13,7 @@
 
 > # 运行
 
-1. 手机apk软件运行：直接横屏运行
+1. 手机apk软件运行：可以直接横屏运行
     + [手机版(apk)v1.1.0-alpha临时完整版（较大，30+MB）](https://github.com/wzh656/MinecraftWeb/releases/download/v1.1.0-alpha/Minecraft.apk)
     + [手机版(apk)v1.0.0.3-alpha临时完整版（较大，30+MB）](https://github.com/wzh656/MinecraftWeb/releases/download/v1.0.0.3-alpha/full.apk)
     + [手机版(apk)v1.0.0.3-alpha临时简化版（在线字体、BGM，6+MB）](https://github.com/wzh656/MinecraftWeb/releases/download/v1.0.0.3-alpha/full.apk)
@@ -30,10 +30,10 @@
 本游戏是基于《我的世界》游戏思想的仿造，仿造原则是：
 在原版基础上**增加游戏真实性**（比如在物理和化学方面），但拒绝完全复制（体现在*“仿”*字），故名之***真实性原则***。
 
-### 战略方针(plans)
+### 战略方针
 目前，本游戏仍处在初级阶段，对此，根据*真实性原则*，需要坚持*三个战略*（总称*改革优化创新战略*）：
 1. ***改革***：泛指修bug
-3. ***优化***：泛指不断提高运行速度，减小CPU及内存占用
+3. ***优化***：泛指不断提高运行速度，增加FPS，减小CPU及内存占用
 2. ***创新***：泛指不断发展新功能
 
 目前阶段，这三个战略缺一不可，并且是当前发展中需长期坚持的重要战略。
@@ -41,8 +41,10 @@
 
 ## （一）总述(general)
 本游戏使用WebGL技术，依赖Three.js进行更便捷的3D渲染。  
-规定：每1px为1cm，每100px为1m。
-> 注：*deskgood*为~~前任同桌~~某人的外号，作为游戏主角名，不要在意名称![](https://img.shields.io/github/search/wzh656/MinecraftWeb/deskgood)
+> 之所以选择JavaScript+HTML+CSS是因为便于绘制图形化界面（HTML+CSS），并易于打包成EXE(electron)和APK(HTML5+)以兼容各个平台
+
+规定：游戏中的每1px为1cm，每100px为1m，每个*普通方块*为边长1m=100cm=100px的立方体。
+> 注：*deskgood*为~~某初中同桌~~的外号，作为游戏主角名，不要在意名称![](https://img.shields.io/github/search/wzh656/MinecraftWeb/deskgood)
 
 
 ## （二）操作方式
@@ -69,7 +71,7 @@
     可以与移动同时操作。  
     按下(`touch-start`)之后，如果脚下有方块
     并且距离上一次跳跃超过1s
-    则将以速度向量(0m/s, ≈5m/s, 0m/s)即沿着y轴正半轴方向以≈5m/s的速度跳起来
+    则将沿着y轴正半轴方向以≈5m/s的速度跳起来
 
 
 ## （三）引用的js工具
@@ -105,7 +107,7 @@
 
 
 ## （五）感谢
-+ 感谢*deskgood*和*卓佳浩*对游戏的大力支持鼓励
++ 感谢“*deskgood*”和“*卓佳浩*”对游戏的大力支持鼓励
 
 + [@jason-bowen-zheng](https://github.com/jason-bowen-zheng)提供了一些交流与建议
 
