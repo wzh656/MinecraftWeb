@@ -19,6 +19,7 @@ class GameTime{
 		return this;
 	}
 	stopTime(){
+		console.log(+this.getTime())
 		this.game = +this.getTime();
 		this.date = +new Date();
 		this.stop = !this.stop;

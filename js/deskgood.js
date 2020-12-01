@@ -53,7 +53,18 @@ var deskgood = {
 					.css("transform", (i==deskgood.choice)?"translateY(-3px)":"")
 					.css("margin", "0 0");
 				children[i].onclick = ()=>{
+					let before = deskgood.choice;
+					
+					if ( deskgood.hold[i] &&
+						eval( deskgood[i].get("attr", "onChangeLeave") ) === false
+					) return;
+					
 					deskgood.choice = i;
+					
+					if ( deskgood.hold[i] &&
+						eval( deskgood[i].get("attr", "onChangeTo") ) === false
+					) return (deskgood.choice = before);
+					
 					deskgood.hold.update();
 				};
 			}

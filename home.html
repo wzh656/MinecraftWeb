@@ -9,34 +9,33 @@
 		<!--icon-->
 		<link rel="icon" href="./img/icon.png" type="image/x-icon"/>
 		
+		<!-- 异步fonts加载 -->
+		<script src="https://staticfile.qnssl.com/webfont/1.6.16/webfontloader.js"></script>
+		<script>
+			WebFont.load({
+				google: {
+					families: ["kt", "st", "xs", "zyyt"],
+					api: "./css/fonts.css"
+				}
+			});
+		</script>
+		
 		<style>
-		@font-face{
-			font-family:kt; /*楷体*/
-			src:url("./fonts/kt.ttf");
-		}
-		@font-face{
-			font-family:st; /*宋体*/
-			src:url("./fonts/st.ttf");
-		}
-		@font-face{
-			font-family:xs; /*QQ*/
-			src:url("./fonts/QQ2.ttf");
-		}
-		@font-face{
-			font-family:zyyt; /*资源圆体*/
-			src:url("./fonts/zyyt.woff2");
-		}
-		*{
+		.wf-active *{
 			font-family: zyyt, serif;
 			outline: none;
 		}
-		h1,h2,h3,h4{
+		.wf-active h1,
+		.wf-active h2,
+		.wf-active h3,
+		.wf-active h4{
 			font-family: st, serif;
 		}
-		p,label{
+		.wf-active p,
+		.wf-active label{
 			font-family: kt, serif;
 		}
-		button{
+		.wf-active button{
 			font-family: xs, serif;
 			font-weight: bold;
 		}
@@ -184,7 +183,7 @@
 		<div class="init">
 			<h1>我的世界</h1>
 			<button>新的世界<p>NEW WORLD</p></button>
-			<button>帮助<p>ABOUT</p></button>
+			<button>主页<p>ABOUT</p></button>
 		</div>
 		<div class="new_world">
 			<h2>新的世界<p>NEW WORLD</p></h2>
@@ -264,12 +263,13 @@
 				<br style="clear:both;" />
 			</details>
 			<button>取消<p>CANCEL</p></button>
-			<button>开始游戏<p>OK</p></button>
+			<button>生成世界<p>OK</p></button>
 		</div>
 		<!-- <div style="display: none;">
 			<script language="javascript" src="http://count24.51yes.com/click.aspx?id=248466766&logo=12" charset="gb2312"></script>
 		</div> -->
 <script>
+//input处理
 let e = $(".more input");
 for (let i of e)
 	i["data-init"] = i.value;
@@ -306,17 +306,8 @@ $(`.more > .type > input[name='forest'],
 	$(".more > .type > input[name='desert']:not([type='range'])").val( $(".more > .type > input[name='desert'][type='range']").val() );
 });
 
-
-if (localStorage.getItem("我的世界_seed") !== null){
-	location.href = "main.html";
-	let msg = $("<dialog>加载中……</dialog>");
-	$(document.body).append(
-		msg.attr("open", "true").hide()
-	);
-	msg.fadeIn("fast");
-}
 //新的世界
-$(".init > button:eq(0)").click(function(){
+$(".init > button:eq(0)")[0].onclick = function(){
 	$(".init")
 		.css("left", "0%")
 		.css("opacity", "1")
@@ -331,17 +322,35 @@ $(".init > button:eq(0)").click(function(){
 			top: "0%",
 			opacity: 1
 		},1000);
-});
-//关于/帮助
-$(".init > button:eq(1)").click(function(){
-	// window.open("https://wzh656.github.io/MinecraftWeb/", "newwin", "height=366, width=666, toolbar=no, menubar=no, location=no");
-	location.href = "https://wzh656.github.io/MinecraftWeb/";
+};
+
+function open(part="main.html"){
 	let msg = $("<dialog>加载中……</dialog>");
 	$(document.body).append(
 		msg.attr("open", "true").hide()
 	);
 	msg.fadeIn("fast");
+	console.log(url)
+	//location.href = url;
+	
+	return false;
+}
+
+//已有存档
+if (localStorage.getItem("我的世界_seed") !== null){
+	$(".init > button:eq(0)")[0].innerHTML = "开始游戏<p>START PLAYING</p>"
+	$(".init > button:eq(0)")[0].onclick = open;
+}
+
+//主页
+$(".init > button:eq(1)").click(function(){
+	try{
+		plus.screen.lockOrientation("portrait-primary");
+	}catch(err){}
+	// window.open("https://wzh656.github.io/MinecraftWeb/", "newwin", "height=366, width=666, toolbar=no, menubar=no, location=no");
+	open("https://wzh656.github.io/MinecraftWeb/")
 });
+
 //取消
 $(".new_world > button:eq(0)").click(function(){
 	$(".init")
@@ -359,7 +368,8 @@ $(".new_world > button:eq(0)").click(function(){
 			opacity: 0
 		},1000);
 });
-//开始游戏
+
+//生成世界
 $(".new_world > button:eq(1)").click(function(){
 	let seed,
 		height={
@@ -430,13 +440,9 @@ $(".new_world > button:eq(1)").click(function(){
 	localStorage.setItem("我的世界_leavesScale", JSON.stringify(leavesScale));
 	localStorage.setItem("我的世界_openStone", JSON.stringify(openStone));
 	
-	location.href = "main.html";
-	let msg = $("<dialog>加载中……</dialog>");
-	$(document.body).append(
-		msg.attr("open", "true").hide()
-	);
-	msg.fadeIn("fast");
+	open();
 });
+
 //双击
 $("h1").on("dblclick",function(){
 	for (let i=0; i<36*Math.random()+36; i++){
@@ -467,6 +473,7 @@ $("h2").on("dblclick",function(){
 	},10);
 });
 
+//防止滑动
 $("*").attr("tabindex","-1");
 setInterval(function(){
 	window.scrollTo(0, 0);

@@ -68,7 +68,10 @@ TEMPLATES.push(new Block({
 			[7,0], [7,0], [7,0], [7,0], [7,0], [7,0]
 		]
 	},
-	attr: {}
+	attr: {
+		onChangeTo: "alert('changeTo!')",
+		onChangeLeave: "alert('changeLeave!')",
+	}
 }, false));
 TEMPLATES.push(new Block({
 	id: 6,

@@ -16,7 +16,18 @@ Copyright © 2020 by wzh
 		<title>我的世界</title>
 		
 		<!--icon-->
-		<link rel="icon" href="./img/icon.png" type="image/x-icon"/>
+		<link rel="icon" href="./img/icon.png" type="image/x-icon" />
+		
+		<!-- 异步fonts加载 -->
+		<script src="https://staticfile.qnssl.com/webfont/1.6.16/webfontloader.js"></script>
+		<script>
+			WebFont.load({
+				google: {
+					families: ["kt", "st", "xs", "zyyt"],
+					api: "./css/fonts.css"
+				}
+			});
+		</script>
 		
 		<style>
 			/* 我的世界颜色：
@@ -26,57 +37,17 @@ Copyright © 2020 by wzh
 			852*480 => 400*40
 			*/
 			
-		   /* 字体 */
-			@font-face{
-				font-family: kt; /*楷体*/
-				src:url("./fonts/kt.ttf");
-			}
-			@font-face{
-				font-family: st; /*宋体*/
-				src:url("./fonts/st.ttf");
-			}
-			@font-face{
-				font-family: xs; /*QQ*/
-				src:url("./fonts/qq2.ttf");
-			}
-			@font-face{
-				font-family: zyyt; /*资源圆体*/
-				src:url("./fonts/zyyt.woff2");
-			}
-			/*@font-face{
-				font-family:hwxk; /*华文楷体*//*
-				src:url("./fonts/hwxk.ttf");
-			}
-			@font-face{
-				font-family:fzybxskt; /*方正硬笔行书楷体*//*
-				src:url("./fonts/fzybxskt.ttf");
-			}
-			@font-face{
-				font-family:fzqtjt; /*方正启体简体*//*
-				src:url("./fonts/fzqtjt.ttf");
-			}
-			@font-face{
-				font-family:qq1; /*QQ*//*
-				src:url("./fonts/qq1.ttf");
-			}
-			@font-face{
-				font-family:qq2; /*QQ*//*
-				src:url("./fonts/qq2.ttf");
-			}
-			@font-face{
-				font-family:huawei; /*HUAWEI*//*
-				src:url("./fonts/huawei.ttf");
-			}*/
-			*{
+			.wf-active *{
 				font-family: zyyt, serif;
 			}
-			h1, h1 *{
+			.wf-active h1,
+			.wf-active h1 *{
 				font-family: kt, serif;
 			}
-			header{
+			.wf-active header{
 				font-family: st, serif;
 			}
-			button{
+			.wf-active button{
 				font-family: xs, serif;
 				font-weight: bold;
 			}
@@ -390,7 +361,7 @@ Copyright © 2020 by wzh
 				height: 6vmax;
 				display: inline-block;
 				margin: 0 -2px;
-				border: 3px groove #aaa;
+				border: 0.6vmax groove #aaa;
 			}
 			#tools > li > img{
 				width: 100%;
@@ -414,7 +385,7 @@ Copyright © 2020 by wzh
 				z-index: 1;
 				
 				background-color: rgb(200,200,200);
-				border: 3px #fff outset;
+				border: 0.6vmax #fff outset;
 				padding: 1.6%;
 			}
 			/*#command{
@@ -429,7 +400,7 @@ Copyright © 2020 by wzh
 				
 				color: black;
 				background-color: #d6d6d6;
-				border: 2px #fff inset;
+				border: 0.3vmax #fff inset;
 				font-size: 3vmax;
 			}
 			#command > span{
@@ -474,7 +445,7 @@ Copyright © 2020 by wzh
 				height: 5vh;
 				color: rgb(200,200,200);
 				background-color: rgb(116,116,116);
-				border: 3px outset rgb(200,200,200);
+				border: 0.6vmax outset rgb(200,200,200);
 				
 				text-align: center;
 				font-size: 3vmax;
@@ -490,21 +461,21 @@ Copyright © 2020 by wzh
 			#bag > nav > label[onclick]:hover{
 				color: black;
 				background-color: rgb(200,200,200);
-				border: 3px outset rgb(116,116,116);
+				border: 0.6vmax outset rgb(116,116,116);
 			}
 			#bag > input:nth-of-type(1)[type="radio"][name="bag-nav"]#bag-nav-choice1:checked ~ nav > label:nth-of-type(1),
 			#bag > input:nth-of-type(2)[type="radio"][name="bag-nav"]#bag-nav-choice2:checked ~ nav > label:nth-of-type(2),
 			#bag > input:nth-of-type(3)[type="radio"][name="bag-nav"]#bag-nav-choice3:checked ~ nav > label:nth-of-type(3){
 				color: black;
 				background-color: rgb(200,200,200);
-				border: 3px outset rgb(116,116,116);
+				border: 0.6vmax outset rgb(116,116,116);
 			}
 			#bag > div{
 				height: 100%;
 			}
 			#bag > div:nth-of-type(1) > #bag_deskgood{
 				margin: 1vw;
-				border: 3px inset rgb(200,200,200);
+				border: 0.6vmax inset rgb(200,200,200);
 			}
 			#bag > div:nth-of-type(1) > ul{
 				display: inline-flex;
@@ -526,7 +497,7 @@ Copyright © 2020 by wzh
 				display: block;
 				width: 6vmax;
 				height: 6vmax;
-				border: 2px inset rgb(116,116,116);
+				border: 0.3vmax inset rgb(116,116,116);
 			}
 			#bag > div:nth-of-type(1) > ul > li > ol > li > img{
 				width: 100%;
@@ -556,6 +527,7 @@ Copyright © 2020 by wzh
 		<script src="./js/modules/dat.gui.min.js"></script>
 		<script src="./js/modules/stats.min.js"></script>
 		<script src="./js/SQL.js"></script>
+		
 	</head>
 	
 	<body bgcolor="black">
@@ -972,6 +944,6 @@ Math.round = function (n, s){
 		<script src="./js/keyEvents.js"></script>
 		<script src="./js/mouseEvents.js"></script>
 		<script src="./js/touchEvents.js"></script>
-
+		
 	</body>
 </html>
