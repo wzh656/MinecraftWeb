@@ -35,9 +35,7 @@ TEMPLATES.push(new Block({
 		]
 	},
 	attr: {
-		block: {
-			onChangeTo: "alert();"
-		}
+		onPutToHead: "map.add(choice, {x:deskgood.pos.x/100, y:deskgood.y/100-1, z:deskgood.z});deskgood.hold.delete(1, deskgood.choice);false;"
 	}
 }, false));
 TEMPLATES.push(new Block({
@@ -68,10 +66,7 @@ TEMPLATES.push(new Block({
 			[7,0], [7,0], [7,0], [7,0], [7,0], [7,0]
 		]
 	},
-	attr: {
-		onChangeTo: "alert('changeTo!')",
-		onChangeLeave: "alert('changeLeave!')",
-	}
+	attr: {}
 }, false));
 TEMPLATES.push(new Block({
 	id: 6,

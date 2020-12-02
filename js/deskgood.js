@@ -55,14 +55,14 @@ var deskgood = {
 				children[i].onclick = ()=>{
 					let before = deskgood.choice;
 					
-					if ( deskgood.hold[i] &&
-						eval( deskgood[i].get("attr", "onChangeLeave") ) === false
+					if ( deskgood.hold[before] &&
+						eval( deskgood.hold[before].get("attr", "onChangeLeave") ) === false
 					) return;
 					
 					deskgood.choice = i;
 					
 					if ( deskgood.hold[i] &&
-						eval( deskgood[i].get("attr", "onChangeTo") ) === false
+						eval( deskgood.hold[i].get("attr", "onChangeTo") ) === false
 					) return (deskgood.choice = before);
 					
 					deskgood.hold.update();
@@ -84,11 +84,20 @@ var deskgood = {
 					.css("margin", "0 0");
 				children[i].onclick = ()=>{
 					if (deskgood.head[i]){ //有方块（放到手上）
-						deskgood.hold.addOne(deskgood.head[i], deskgood.choice);
+						if ( deskgood.head[deskgood.head.length-1] &&
+							eval( deskgood.head[deskgood.head.length-1].get("attr", "onHold") ) === false
+						) return;
+						
+						deskgood.hold.addOne(deskgood.head[deskgood.head.length-1], deskgood.choice);
 						deskgood.head.delete();
 					}else{ //无方块
-						if (deskgood.hold[deskgood.choice]){
-							deskgood.head.addOne(deskgood.hold[deskgood.choice]);
+						let choice = deskgood.hold[deskgood.choice];
+						if ( choice ){
+							if ( choice &&
+								eval( choice.get("attr", "onPutToHead") ) === false
+							) return;
+							
+							deskgood.head.addOne( choice );
 							deskgood.hold.delete(1, deskgood.choice);
 						}
 					}
@@ -106,11 +115,20 @@ var deskgood = {
 					.css("margin", "0 0");
 				children[i].onclick = ()=>{
 					if (deskgood.body[i]){ //有方块（放到手上）
-						deskgood.hold.addOne(deskgood.body[i], deskgood.choice);
+						if ( deskgood.body[deskgood.body.length-1] &&
+							eval( deskgood.body[deskgood.body.length-1].get("attr", "onHold") ) === false
+						) return;
+						
+						deskgood.hold.addOne(deskgood.body[deskgood.body.length-1], deskgood.choice);
 						deskgood.body.delete();
 					}else{ //无方块
-						if (deskgood.hold[deskgood.choice]){
-							deskgood.body.addOne(deskgood.hold[deskgood.choice]);
+						let choice = deskgood.hold[deskgood.choice];
+						if ( choice ){
+							if ( choice &&
+								eval( choice.get("attr", "onPutToBody") ) === false
+							) return;
+							
+							deskgood.body.addOne( choice );
 							deskgood.hold.delete(1, deskgood.choice);
 						}
 					}
@@ -128,11 +146,20 @@ var deskgood = {
 					.css("margin", "0 0");
 				children[i].onclick = ()=>{
 					if (deskgood.leg[i]){ //有方块（放到手上）
-						deskgood.hold.addOne(deskgood.leg[i], deskgood.choice);
+						if ( deskgood.leg[deskgood.leg.length-1] &&
+							eval( deskgood.leg[deskgood.leg.length-1].get("attr", "onHold") ) === false
+						) return;
+						
+						deskgood.hold.addOne(deskgood.leg[deskgood.leg.length-1], deskgood.choice);
 						deskgood.leg.delete();
 					}else{ //无方块
-						if (deskgood.hold[deskgood.choice]){
-							deskgood.leg.addOne(deskgood.hold[deskgood.choice]);
+						let choice = deskgood.hold[deskgood.choice];
+						if ( choice ){
+							if ( choice &&
+								eval( choice.get("attr", "onPutToLeg") ) === false
+							) return;
+							
+							deskgood.leg.addOne( choice );
 							deskgood.hold.delete(1, deskgood.choice);
 						}
 					}
@@ -149,12 +176,21 @@ var deskgood = {
 					.css("borderWidth", (i==children.length-1)?"3px":"2px")
 					.css("margin", "0 0");
 				children[i].onclick = ()=>{
+					if ( deskgood.foot[deskgood.foot.length-1] &&
+							eval( deskgood.foot[deskgood.foot.length-1].get("attr", "onHold") ) === false
+						) return;
+						
 					if (deskgood.foot[i]){ //有方块（放到手上）
-						deskgood.hold.addOne(deskgood.foot[i], deskgood.choice);
+						deskgood.hold.addOne(deskgood.foot[deskgood.foot.length-1], deskgood.choice);
 						deskgood.foot.delete();
 					}else{ //无方块
-						if (deskgood.hold[deskgood.choice]){
-							deskgood.foot.addOne(deskgood.hold[deskgood.choice]);
+						let choice = deskgood.hold[deskgood.choice];
+						if ( choice ){
+							if ( choice &&
+								eval( choice.get("attr", "onPutToFoot") ) === false
+							) return;
+							
+							deskgood.foot.addOne( choice );
 							deskgood.hold.delete(1, deskgood.choice);
 						}
 					}

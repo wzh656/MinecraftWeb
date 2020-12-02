@@ -180,12 +180,12 @@
 		<script>new VConsole();</script>
 	</head>
 	<body>
-		<div class="init">
+		<div class="init" style="display: flex;">
 			<h1>我的世界</h1>
 			<button>新的世界<p>NEW WORLD</p></button>
 			<button>主页<p>ABOUT</p></button>
 		</div>
-		<div class="new_world">
+		<div class="new_world" style="display: none;">
 			<h2>新的世界<p>NEW WORLD</p></h2>
 			<label for="seed">种子(seed)：</label><input name="seed" id="seed" placeholder="不输入则随机生成" autofocus />
 			<br/>
@@ -314,24 +314,25 @@ $(".init > button:eq(0)")[0].onclick = function(){
 		.animate({
 			left: (Math.round(Math.random())?"-":"") + "100%", //正负100%
 			opacity: 0
-		},1000);
+		}, 1000, ()=>$(".init").css("display", "flex"));
 	$(".new_world")
 		.css("top", (Math.round(Math.random())?"-":"") + "100%") //正负100%
 		.css("opacity", "0")
+		.css("display", "block")
 		.animate({
 			top: "0%",
 			opacity: 1
-		},1000);
+		}, 1000);
 };
 
-function open(part="main.html"){
+function open(url="main.html"){
 	let msg = $("<dialog>加载中……</dialog>");
 	$(document.body).append(
 		msg.attr("open", "true").hide()
 	);
 	msg.fadeIn("fast");
 	console.log(url)
-	//location.href = url;
+	location.href = url;
 	
 	return false;
 }
@@ -339,7 +340,7 @@ function open(part="main.html"){
 //已有存档
 if (localStorage.getItem("我的世界_seed") !== null){
 	$(".init > button:eq(0)")[0].innerHTML = "开始游戏<p>START PLAYING</p>"
-	$(".init > button:eq(0)")[0].onclick = open;
+	$(".init > button:eq(0)")[0].onclick = ()=>open();
 }
 
 //主页
@@ -356,17 +357,18 @@ $(".new_world > button:eq(0)").click(function(){
 	$(".init")
 		.css("left", (Math.round(Math.random())?"-":"") + "100%") //正负100%
 		.css("opacity", "0")
+		.css("display", "flex")
 		.animate({
 			left: "0%",
 			opacity: 1
-		},1000);
+		}, 1000);
 	$(".new_world")
 		.css("top", "0%")
 		.css("opacity", "1")
 		.animate({
 			top: (Math.round(Math.random())?"-":"") + "100%", //正负100%
 			opacity: 0
-		},1000);
+		}, 1000, ()=>$(".new_world").css("display", "none"));
 });
 
 //生成世界
@@ -474,7 +476,7 @@ $("h2").on("dblclick",function(){
 });
 
 //防止滑动
-$("*").attr("tabindex","-1");
+/*$("*").attr("tabindex","-1");
 setInterval(function(){
 	window.scrollTo(0, 0);
 },0);
@@ -486,7 +488,7 @@ document.onkeydown = function(e){
 			e.returnValue = false;
 		}
 	}
-}
+}*/
 </script>
 	</body>
 </html>

@@ -20,13 +20,14 @@ class Thing{
 			if (opt.attr.onPutToBody) this.attr.onPutToBody = opt.attr.onPutToBody;
 			if (opt.attr.onPutToLeg) this.attr.onPutToLeg = opt.attr.onPutToHead;
 			if (opt.attr.onPutToFoot) this.attr.onPutToFoot = opt.attr.onPutToFoot;
+			if (opt.attr.onHold) this.attr.onHold = opt.attr.onHold;
 			
-			if (opt.attr.hardness) this.attr.hardness = opt.attr.hardness; //硬度
+			/*if (opt.attr.hardness) this.attr.hardness = opt.attr.hardness; //硬度
 			if (opt.attr.durability) this.attr.durability = opt.attr.durability; //耐久
 			if (opt.attr.digSpeed) this.attr.digSpeed = opt.attr.digSpeed; //挖掘速度 m³/s
 			if (opt.attr.durabilityLoss) this.attr.durabilityLoss = opt.attr.durabilityLoss; //耐久损耗 /m³
 			if (opt.attr.hungerLoss) this.attr.hungerLoss = opt.attr.hungerLoss; //饥饿损耗 /m³
-			if (opt.attr.lifeLoss) this.attr.lifeLoss = opt.attr.lifeLoss; //生命损耗 /m³
+			if (opt.attr.lifeLoss) this.attr.lifeLoss = opt.attr.lifeLoss; //生命损耗 /m³*/
 		}
 	}
 	get(...attr){
