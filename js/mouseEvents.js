@@ -205,7 +205,30 @@ document.addEventListener("mousedown", function (e){
 		for (let i in click){
 			if (click[i].faceIndex){
 				if (click[i].object instanceof THREE.Mesh){
-					deskgood.delete(click[i].object.position, click[i].faceIndex);
+					let {x,y,z} = click[i].object.position; //单位 px=cm
+					
+					x = x/100, y = y/100, z = z/100; //单位 m
+					
+					if (
+						map.get(x, y, z) &&
+						eval(map.get(x, y, z).get("attr", "block", "onLeftMouseDown")) === false
+					) return;
+					
+					if (Math.sqrt(
+						(x*100 - deskgood.pos.x) **2+
+						(y*100 - deskgood.pos.y) **2+
+						(z*100 - deskgood.pos.z) **2
+					) >= deskgood.handLength) return; //距离>=手长
+					
+					let free = !deskgood.hold[deskgood.choice]? deskgood.choice: deskgood.hold.indexOf(null);
+					if (free == -1){
+						console.warn("not free!")
+						return print("拿不下方块", "两只手拿4m³方块已经够多了，反正我是拿不下了", 3);
+					}
+					deskgood.hold.addOne(map.get(x, y, z), free); //放在手中
+					
+					deskgood.delete( {x,y,z} ); //删除方块
+					
 					break;//跳出 寻找有效放置的 循环
 				}
 			}
@@ -214,8 +237,57 @@ document.addEventListener("mousedown", function (e){
 		let click = ray2D();
 		for (let i in click){
 			if (click[i].object instanceof THREE.Mesh){
-				deskgood.put(click[i].object.position, click[i].faceIndex);
-				break;//跳出 寻找有效放置的 循环
+				let {x,y,z} = click[i].object.position; //单位 px=cm
+				
+				x = x/100, y = y/100, z = z/100; //单位 m
+				if (
+					map.get(x, y, z) &&
+					eval(map.get(x, y, z).get("attr", "block", "onRightMouseDown")) === false
+				) return;
+				
+				switch (click[i].faceIndex){
+					case 0:
+					case 1:
+						x++;
+						break;
+					case 2:
+					case 3:
+						x--;
+						break;
+					case 4:
+					case 5:
+						y++;
+						break;
+					case 6:
+					case 7:
+						y--;
+						break;
+					case 8:
+					case 9:
+						z++;
+						break;
+					case 10:
+					case 11:
+						z--;
+						break;
+					default:
+						throw ["faceIndex wrong:", click[i].faceIndex];
+				}
+				
+				if (Math.sqrt(
+					(x*100 - deskgood.pos.x) **2+
+					(y*100 - deskgood.pos.y) **2+
+					(z*100 - deskgood.pos.z) **2
+				) >= deskgood.handLength) return; //距离>=手长
+				
+				if (!deskgood.hold[deskgood.choice]) //空气
+					return;
+				
+				deskgood.put(deskgood.hold[deskgood.choice], {x,y,z}); //放置方块
+				
+				deskgood.hold.delete(1, deskgood.choice); //删除手里的方块
+				
+				break; //跳出 寻找有效放置的 循环
 			}
 		}
 	}

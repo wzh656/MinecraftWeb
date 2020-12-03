@@ -387,7 +387,7 @@ Copyright © 2020 by wzh
 				z-index: 1;
 				
 				background-color: rgb(200,200,200);
-				border: 0.6vmax #fff outset;
+				border: 0.5vmax #fff outset;
 				padding: 1.6%;
 			}
 			/*#command{
@@ -415,7 +415,9 @@ Copyright © 2020 by wzh
 				font-size: 3vmax;
 			}
 			
-			/* 背包 */
+			/*
+				背包
+			*/
 			#bag{ /* 反向 */
 				flex-direction: column-reverse;
 				overflow-y: auto;
@@ -432,76 +434,77 @@ Copyright © 2020 by wzh
 			#bag > input[type="radio"][name="bag-nav"]:checked + div{ /* 选择的显示 */
 				display: flex;
 			}
-			/*#bag > input[type="radio"][name="bag-nav"]:nth-of-type(1):checked + div{
+			
+			#bag > nav{ /* 导航栏 */
 				display: flex;
-			}*/
-			#bag > nav{
-				display: flex;
-				display: -webkit-flex; /* Safari */
 				justify-content: center;
 				
 				width: 100%;
 			}
-			#bag > nav > label{
+			#bag > nav > label{ /* 导航栏项目 */
 				width: 33%;
 				height: 5vh;
+				margin: 0.3vmax;
+				/* 黑底白字白边框 */
 				color: rgb(200,200,200);
 				background-color: rgb(116,116,116);
-				border: 0.6vmax outset rgb(200,200,200);
+				border: 0.5vmax outset rgb(200,200,200);
 				
 				text-align: center;
 				font-size: 3vmax;
 				line-height: 5vh;
 			}
-			#bag > nav > label:not([onclick]):hover{
+			#bag > nav > label:not([onclick]):hover{ /* 悬停加深颜色 */
 				background-color: rgb(100,100,100);
 			}
-			#bag > nav > label[onclick]{
+			
+			#bag > nav > label[onclick]{ /* “关闭”按钮 */
 				width: 10%;
 				border-radius: 666px;
 			}
-			#bag > nav > label[onclick]:hover{
-				color: black;
+			#bag > nav > label[onclick]:hover{ /* 悬停白底黑字黑边框 */
+				color: rgb(116,116,116);
 				background-color: rgb(200,200,200);
-				border: 0.6vmax outset rgb(116,116,116);
+				border: 0.5vmax outset rgb(116,116,116);
 			}
 			#bag > input:nth-of-type(1)[type="radio"][name="bag-nav"]#bag-nav-choice1:checked ~ nav > label:nth-of-type(1),
 			#bag > input:nth-of-type(2)[type="radio"][name="bag-nav"]#bag-nav-choice2:checked ~ nav > label:nth-of-type(2),
-			#bag > input:nth-of-type(3)[type="radio"][name="bag-nav"]#bag-nav-choice3:checked ~ nav > label:nth-of-type(3){
+			#bag > input:nth-of-type(3)[type="radio"][name="bag-nav"]#bag-nav-choice3:checked ~ nav > label:nth-of-type(3)
+			{ /* 被选中 */
 				color: black;
 				background-color: rgb(200,200,200);
-				border: 0.6vmax outset rgb(116,116,116);
+				border: 0.5vmax outset rgb(116,116,116);
 			}
 			#bag > div{
 				height: 100%;
 			}
-			#bag > div:nth-of-type(1) > #bag_deskgood{
+			#bag > div:nth-of-type(1) > #bag_deskgood{ /* deskgood旋转动画 */
 				margin: 1vw;
 				border: 0.6vmax inset rgb(200,200,200);
 			}
-			#bag > div:nth-of-type(1) > ul{
+			#bag > div:nth-of-type(1) > ul{ /* 背包物品栏列表 */
 				display: inline-flex;
 				flex-direction: column;
 				justify-content: space-around;
 				margin: 1vw;
 				padding: 0;
 			}
-			#bag > div:nth-of-type(1) > ul > li{
+			#bag > div:nth-of-type(1) > ul > li{ /* 背包物品栏 */
 				display: block;
 				font-size: 3vmax;
 			}
-			#bag > div:nth-of-type(1) > ul > li > ol{
+			#bag > div:nth-of-type(1) > ul > li > ol{ /* 背包物品栏图片项目列表 */
 				display: inline-flex;
 				margin: 0;
 				padding: 0;
 			}
-			#bag > div:nth-of-type(1) > ul > li > ol > li{
+			#bag > div:nth-of-type(1) > ul > li > ol > li{ /* 背包物品图片项目 */
 				display: block;
 				width: 6vmax;
 				height: 6vmax;
 				border: 0.3vmax inset rgb(116,116,116);
 			}
-			#bag > div:nth-of-type(1) > ul > li > ol > li > img{
+			#bag > div:nth-of-type(1) > ul > li > ol > li > img{ /* 背包物品图片 */
 				width: 100%;
 				height: 100%;
 			}

@@ -121,6 +121,9 @@ class Block extends Thing{
 			if (opt.attr.block.onTouchMove) this.attr.block.onTouchMove = opt.attr.block.onTouchMove;
 			if (opt.attr.block.onTouchEnd) this.attr.block.onTouchEnd = opt.attr.block.onTouchEnd;
 			if (opt.attr.block.onTouchCancal) this.attr.block.onTouchCancal = opt.attr.block.onTouchCancal;
+			
+			if (opt.attr.block.onPut) this.attr.block.onPut = opt.attr.block.onPut; //被放置
+			if (opt.attr.block.onDelete) this.attr.block.onDelete = opt.attr.block.onDelete; //被删除
 		}
 	}
 	//face

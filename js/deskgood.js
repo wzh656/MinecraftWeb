@@ -1,7 +1,8 @@
 /**
 * 玩家(deskgood)
 */
-var deskgood = {
+let body_block = [];
+let deskgood = {
 	v: {
 		x: 0,
 		y: 0,
@@ -43,13 +44,14 @@ var deskgood = {
 		y: 0,
 		z: 0
 	},
+	handLength: 360, //手长（谐音手残）
 	choice: 0,
 	hold: new ThingGroup($("#tools")[0], {
 		fixedLength: 4,
 		updateCallback(children){
 			for (let i in children){
 				$(children[i]).css("borderColor", (i==deskgood.choice)?"#fff":"#aaa")
-					.css("borderWidth", (i==deskgood.choice)?"6px":"3px")
+					.css("borderWidth", (i==deskgood.choice)?"1vmax":"0.6vmax")
 					.css("transform", (i==deskgood.choice)?"translateY(-3px)":"")
 					.css("margin", "0 0");
 				children[i].onclick = ()=>{
@@ -80,7 +82,7 @@ var deskgood = {
 		updateCallback(children){
 			for (let i in children){
 				$(children[i]).css("borderColor", (i==children.length-1)?"#aaa":"rgb(116,116,116)")
-					.css("borderWidth", (i==children.length-1)?"3px":"2px")
+					.css("borderWidth", (i==children.length-1)?"0.5vmax":"0.3vmax")
 					.css("margin", "0 0");
 				children[i].onclick = ()=>{
 					if (deskgood.head[i]){ //有方块（放到手上）
@@ -92,14 +94,13 @@ var deskgood = {
 						deskgood.head.delete();
 					}else{ //无方块
 						let choice = deskgood.hold[deskgood.choice];
-						if ( choice ){
-							if ( choice &&
-								eval( choice.get("attr", "onPutToHead") ) === false
-							) return;
-							
-							deskgood.head.addOne( choice );
-							deskgood.hold.delete(1, deskgood.choice);
-						}
+						if ( !choice ) return;
+						if ( choice &&
+							eval( choice.get("attr", "onPutToHead") ) === false
+						) return;
+						
+						deskgood.head.addOne( choice );
+						deskgood.hold.delete(1, deskgood.choice);
 					}
 				};
 			}
@@ -111,7 +112,7 @@ var deskgood = {
 		updateCallback(children){
 			for (let i in children){
 				$(children[i]).css("borderColor", (i==children.length-1)?"#aaa":"rgb(116,116,116)")
-					.css("borderWidth", (i==children.length-1)?"3px":"2px")
+					.css("borderWidth", (i==children.length-1)?"0.5vmax":"0.3vmax")
 					.css("margin", "0 0");
 				children[i].onclick = ()=>{
 					if (deskgood.body[i]){ //有方块（放到手上）
@@ -142,7 +143,7 @@ var deskgood = {
 		updateCallback(children){
 			for (let i in children){
 				$(children[i]).css("borderColor", (i==children.length-1)?"#aaa":"rgb(116,116,116)")
-					.css("borderWidth", (i==children.length-1)?"3px":"2px")
+					.css("borderWidth", (i==children.length-1)?"0.5vmax":"0.3vmax")
 					.css("margin", "0 0");
 				children[i].onclick = ()=>{
 					if (deskgood.leg[i]){ //有方块（放到手上）
@@ -173,7 +174,7 @@ var deskgood = {
 		updateCallback(children){
 			for (let i in children){
 				$(children[i]).css("borderColor", (i==children.length-1)?"#aaa":"rgb(116,116,116)")
-					.css("borderWidth", (i==children.length-1)?"3px":"2px")
+					.css("borderWidth", (i==children.length-1)?"0.5vmax":"0.3vmax")
 					.css("margin", "0 0");
 				children[i].onclick = ()=>{
 					if ( deskgood.foot[deskgood.foot.length-1] &&
@@ -249,39 +250,68 @@ var deskgood = {
 			value => value+(0.1*Math.random()-0.05)
 		); //随机化*/
 		
-		// try{
-			if (
-				map.get(x/100, y/100, z/100) !== undefined && //不能移动到未加载的方块
-				map.initedChunk.some((item, index, value)=>{
-					return item[0] == Math.round(x/100/map.size.x) &&
-						item[1] == Math.round(z/100/map.size.z);
-				}) //含有（已加载和加载中的区块）
-			){
-				/* if (
+		if (
+			map.get(x/100, y/100, z/100) !== undefined && //不能移动到未加载的方块
+			map.initedChunk.some((item, index, value)=>{
+				return item[0] == Math.round(x/100/map.size.x) &&
+					item[1] == Math.round(z/100/map.size.z);
+			}) //含有（已加载和加载中的区块）
+		){
+			/* if (
+				(
+					map.get(deskgood.pos.x/100, deskgood.pos.y/100, deskgood.pos.z/100) && //有方块在头上
 					(
-						map.get(deskgood.pos.x/100, deskgood.pos.y/100, deskgood.pos.z/100) && //有方块在头上
-						(
-							map.get(deskgood.pos.x/100, deskgood.pos.y/100, deskgood.pos.z/100).get("attr", "block", "through") || //可穿透
-							map.get(deskgood.pos.x/100, deskgood.pos.y/100, deskgood.pos.z/100).get("attr", "block", "transparent") //透明
-						)
-					) || !map.get(deskgood.pos.x/100, deskgood.pos.y/100, deskgood.pos.z/100) //没有方块在头上
-				){ */
-					let changed = deskgood.pos.x != x || deskgood.pos.z != z; //改变了x|z坐标
-					[deskgood.pos.x, deskgood.pos.y, deskgood.pos.z] = [x,y,z];
-					if (changed) map.perloadChunk();
-				/* }else{
-					deskgood.v.y = 0;
-					throw "";
-				} */
-			}else{
-				// throw "block";
-				print("区块未加载完成", "区块暂未加载完成，禁止进入<br/>（想加载快可以调节区块预加载范围，只要不卡死就行）", 1);
-			}
-		/* }catch(err){
-			if (err == "block"){ // 未加载区块，禁止进入
-				message(`<font style="font-size: 16px;">区块暂未加载完成，禁止进入<br/>（想加载快可以调节区块预加载范围，只要不卡死就行）</font>`, 1);
-			}
-		} */
+						map.get(deskgood.pos.x/100, deskgood.pos.y/100, deskgood.pos.z/100).get("attr", "block", "through") || //可穿透
+						map.get(deskgood.pos.x/100, deskgood.pos.y/100, deskgood.pos.z/100).get("attr", "block", "transparent") //透明
+					)
+				) || !map.get(deskgood.pos.x/100, deskgood.pos.y/100, deskgood.pos.z/100) //没有方块在头上
+			){ */
+				let changed_x_z = deskgood.pos.x != x || deskgood.pos.z != z, //改变了x|z坐标
+					changed = changed_x_z || deskgood.pos.y != y;
+				[deskgood.pos.x, deskgood.pos.y, deskgood.pos.z] = [x,y,z];
+				if (changed_x_z) map.perloadChunk();
+				if (changed)
+					setTimeout(function(){
+						for (let i of body_block)
+							if (i)
+								map.update(i.x, i.y, i.z); //重新更新
+						
+						body_block = [];
+						for (let x=deskgood.pos.x/100-1; x<= deskgood.pos.x/100+1; x++){
+							for (let y=deskgood.pos.x/100-2; y<= deskgood.pos.y/100+1; y++){
+								for (let z=deskgood.pos.z/100-1; z<= deskgood.pos.z/100+1; z++){
+									body_block.push({x, y, z});
+								}
+							}
+						}
+						
+						for (let i of body_block){
+							//[i.x, i.y, i.z] = [i.x, i.y, i.z].map(Math.round)
+							let block = map.get(i.x, i.y, i.z);
+							//if (i.x == 9 && i.y == 0 && i.z == 26) console.warn(block);
+							if (block){
+								block.block.material.forEach((item, index, arr) => {
+									arr[index].visible = true;
+								}); //显示所有
+								//if (i.x == 9 && i.y == 0 && i.z == 26) console.warn(block.block.material.map(v => v.visible));
+								// console.info("显示面", i, [i.x,i.y,i.z].map(Math.round), block);
+								if (!block.block.addTo){
+									//if (i.x == 9 && i.y == 0 && i.z == 26) console.warn("add", block.block.addTo);
+									scene.add(block.block.mesh);
+									block.block.addTo = true;
+									// console.info("显示体", i, [i.x,i.y,i.z].map(Math.round), block);
+								}
+							}
+						}
+					}, 0);
+			/* }else{
+				deskgood.v.y = 0;
+				throw "";
+			} */
+		}else{
+			// throw "block";
+			print("区块未加载完成", "区块暂未加载完成，禁止进入<br/>（想加载快可以调节区块预加载范围，只要不卡死就行）", 1);
+		}
 	},
 	// 前进
 	go (x=0, y=0, z=0){
@@ -608,70 +638,69 @@ var deskgood = {
 	},
 	
 	// 放置方块
-	put({x, y, z}, faceIndex){ // 单位 px=cm
-		[x, y, z] = [x, y, z].map(v => v/100); //单位 m
+	put(block, {x, y, z}){ // 单位 px=cm
+		x = Math.round(x),
+		y = Math.round(y),
+		z = Math.round(z);
 		
 		if (
-			map.get(x, y, z).get("attr", "block", "onRightMouseDown") && //事件
-			eval(map.get(x, y, z).get("attr", "block", "onRightMouseDown")) === false //事件取消
+			map.get(x, y, z) &&
+			eval(map.get(x, y, z).get("attr", "block", "onPut")) === false
 		) return;
 		
-		if (!deskgood.hold[deskgood.choice]) //空气
-			return;
+		console.log("put", {x,y,z}, block.id, block.attr)
 		
-		switch (faceIndex){
-			case 0:
-			case 1:
-				x++;
-				break;
-			case 2:
-			case 3:
-				x--;
-				break;
-			case 4:
-			case 5:
-				y++;
-				break;
-			case 6:
-			case 7:
-				y--;
-				break;
-			case 8:
-			case 9:
-				z++;
-				break;
-			case 10:
-			case 11:
-				z--;
-				break;
-			default:
-				throw ["faceIndex wrong:", click[i].faceIndex];
-		}
+		map.add(block, {x,y,z});
 		
-		console.log(Math.abs(x - deskgood.pos.x),
-			Math.abs(y - deskgood.pos.y),
-			Math.abs(z - deskgood.pos.z))
-		if (Math.abs(y - deskgood.pos.y) < 100 &&
-			Math.abs(x - deskgood.pos.x) < 100 &&
-			Math.abs(z - deskgood.pos.z) < 100
-		) return false; //在头上放方块
-		
-		if (Math.sqrt(
-			(x*100 - deskgood.pos.x) **2+
-			(y*100 - deskgood.pos.y) **2+
-			(z*100 - deskgood.pos.z) **2
-		) >= 500) return false; //距离>=5m
-		
-		console.log("put", {x,y,z}, deskgood.hold[deskgood.choice].id, deskgood.hold[deskgood.choice].attr)
-		map.addID(deskgood.hold[deskgood.choice].id, {
+		let attr = `'${JSON.stringify(map.get(x, y, z).attr).slice(1,-1)}'`,
+			xZ = Math.round(x/map.size.x),
+			zZ = Math.round(z/map.size.z);
+		for (let i in map.edit[xZ][zZ])
+			if (
+				map.edit[xZ][zZ].x == x &&
+				map.edit[xZ][zZ].y == y &&
+				map.edit[xZ][zZ].z == z
+			) map.edit[xZ][zZ].splice(i,1); //删除重复
+		map.edit[Math.round(x/map.size.x)][Math.round(z/map.size.z)].push({
 			x,
 			y,
-			z
-		}, TEMPLATES, {
-			attr: deskgood.hold[deskgood.choice].attr
+			z,
+			id: block.id,
+			attr
+		}); //添加edit
+		map.updateRound(x, y, z); //刷新方块及周围
+		
+		x = Math.round(x),
+		y = Math.round(y),
+		z = Math.round(z); //存储必须整数
+		//SQL
+		sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, ()=>{
+			sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
+				0,
+				x,
+				y,
+				z,
+				block.id,
+				attr
+			])
 		});
-		let thing = deskgood.hold[deskgood.choice],
-			attr = `'${JSON.stringify(map.get(x, y, z).attr).slice(1,-1)}'`;
+	},
+	
+	// 删除方块
+	delete({x, y, z}){ // 单位 px=cm
+		x = Math.round(x),
+		y = Math.round(y),
+		z = Math.round(z);
+		
+		if (
+			map.get(x, y, z) &&
+			eval(map.get(x, y, z).get("attr", "block", "onDelete")) === false
+		) return;
+		
+		console.log("delete", {x,y,z}, map.get(x, y, z))
+		
+		map.delete(x, y, z); //删除方块
+		
 		let xZ = Math.round(x/map.size.x),
 			zZ = Math.round(z/map.size.z);
 		for (let i in map.edit[xZ][zZ])
@@ -684,76 +713,23 @@ var deskgood = {
 			x,
 			y,
 			z,
-			id: thing.id,
-			attr
-		});
+			id: 0
+		}); //添加edit
 		map.updateRound(x, y, z); //刷新方块及周围
 		
-		[x, y, z] = [x, y, z].map(Math.round); //存储必须整数
+		x = Math.round(x),
+		y = Math.round(y),
+		z = Math.round(z); //存储必须整数
 		//SQL
-		sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, ()=>{
-			sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
+		sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
+			sql.insertData("file", ["type", "x", "y", "z", "id"], [
 				0,
 				x,
 				y,
 				z,
-				thing.id,
-				attr
-			])
+				0
+			]);
 		});
-		deskgood.hold.delete(1, deskgood.choice); //删除手里的方块
-	},
-	
-	// 删除方块
-	delete({x, y, z}){ // 单位 px=cm
-		if (Math.sqrt(
-			(x - deskgood.pos.x) **2+
-			(y - deskgood.pos.y) **2+
-			(z - deskgood.pos.z) **2
-		) >= 500) return false; //距离>500px=500cm
-		
-		[x, y, z] = [x, y, z].map(v => v/100); // 单位 m
-		if (
-			map.get(x, y, z).get("attr", "block", "onLeftMouseDown") &&
-			eval(map.get(x, y, z).get("attr", "block", "onLeftMouseDown")) === false
-		) return;
-		let free = !deskgood.hold[deskgood.choice]? deskgood.choice: deskgood.hold.indexOf(null);
-		if (free == -1){
-			console.warn("not free!")
-			print("拿不下方块", "两只手拿4m³方块已经够多了，反正我是拿不下了", 3);
-		}else{
-			console.log("delete", {x,y,z}, map.get(x, y, z).id)
-			
-			deskgood.hold.addOne(new Block(map.get(x, y, z)), free); //放在手中
-			map.delete(x, y, z); //删除方块
-			let xZ = Math.round(x/map.size.x),
-				zZ = Math.round(z/map.size.z);
-			for (let i in map.edit[xZ][zZ])
-				if (
-					map.edit[xZ][zZ].x == x &&
-					map.edit[xZ][zZ].y == y &&
-					map.edit[xZ][zZ].z == z
-				) map.edit[xZ][zZ].splice(i,1); //删除重复
-			map.edit[Math.round(x/map.size.x)][Math.round(z/map.size.z)].push({
-				x,
-				y,
-				z,
-				id: 0
-			});
-			map.updateRound(x, y, z); //刷新方块及周围
-			
-			[x, y, z] = [x, y, z].map(Math.round); //存储必须整数
-			//SQL
-			sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
-				sql.insertData("file", ["type", "x", "y", "z", "id"], [
-					0,
-					x,
-					y,
-					z,
-					0
-				]);
-			});
-		}
 	}
 }
 deskgood.moveTo = deskgood.move;

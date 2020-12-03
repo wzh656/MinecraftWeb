@@ -15,7 +15,11 @@ TEMPLATES.push(new Block({
 		block: {
 			onRightMouseDown: "state('command');false;",
 			onShortTouch: "state('command');false;"
-		}
+		},
+		onPutToHead: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});message('放到头上', '你自己要把方块放头上的，别怪我');false;",
+		onPutToBody: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});message('放到身上', '你自己要把方块放身上的，别怪我');false;",
+		onPutToLeg: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});false;",
+		onPutToFoot: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});false;"
 	}
 }, false));
 /*TEMPLATES.push(new Block({
@@ -35,7 +39,10 @@ TEMPLATES.push(new Block({
 		]
 	},
 	attr: {
-		onPutToHead: "map.add(choice, {x:deskgood.pos.x/100, y:deskgood.y/100-1, z:deskgood.z});deskgood.hold.delete(1, deskgood.choice);false;"
+		onPutToHead: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});message('放到头上', '你自己要把方块放头上的，别怪我');message('绿色成就','【获得成就】<br/>恭喜获得成就：头上长草方块变绿');false;",
+		onPutToBody: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});message('放到身上', '你自己要把方块放身上的，别怪我');false;",
+		onPutToLeg: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});false;",
+		onPutToFoot: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});false;"
 	}
 }, false));
 TEMPLATES.push(new Block({
@@ -46,7 +53,12 @@ TEMPLATES.push(new Block({
 			[5,0], [5,0], [5,0], [5,0], [5,0], [5,0]
 		]
 	},
-	attr: {}
+	attr: {
+		onPutToHead: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});message('放到头上', '你自己要把方块放头上的，别怪我');false;",
+		onPutToBody: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});message('放到身上', '你自己要把方块放身上的，别怪我');false;",
+		onPutToLeg: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});false;",
+		onPutToFoot: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});false;"
+	}
 }, false));
 TEMPLATES.push(new Block({
 	id: 4,
@@ -56,7 +68,12 @@ TEMPLATES.push(new Block({
 			[6,0], [6,0], [6,0], [6,0], [6,0], [6,0]
 		]
 	},
-	attr: {}
+	attr: {
+		onPutToHead: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});message('放到头上', '你自己要把方块放头上的，别怪我');false;",
+		onPutToBody: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});message('放到身上', '你自己要把方块放身上的，别怪我');false;",
+		onPutToLeg: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});false;",
+		onPutToFoot: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});false;"
+	}
 }, false));
 TEMPLATES.push(new Block({
 	id: 5,
@@ -66,7 +83,12 @@ TEMPLATES.push(new Block({
 			[7,0], [7,0], [7,0], [7,0], [7,0], [7,0]
 		]
 	},
-	attr: {}
+	attr: {
+		onPutToHead: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});message('放到头上', '你自己要把方块放头上的，别怪我');false;",
+		onPutToBody: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});message('放到身上', '你自己要把方块放身上的，别怪我');false;",
+		onPutToLeg: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});false;",
+		onPutToFoot: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});false;"
+	}
 }, false));
 TEMPLATES.push(new Block({
 	id: 6,
@@ -76,7 +98,12 @@ TEMPLATES.push(new Block({
 			[0,1], [0,1], [0,1], [0,1], [0,1], [0,1]
 		]
 	},
-	attr: {}
+	attr: {
+		onPutToHead: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});message('放到头上', '你自己要把方块放头上的，别怪我');false;",
+		onPutToBody: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});message('放到身上', '你自己要把方块放身上的，别怪我');false;",
+		onPutToLeg: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});false;",
+		onPutToFoot: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});false;"
+	}
 }, false));
 TEMPLATES[7.1] = new Block({
 	id: 7.1,
@@ -91,6 +118,10 @@ TEMPLATES[7.1] = new Block({
 		block: {
 			transparent: true, //部分透明方块（不让相邻方块透明）
 			noTransparent: true, //不让本方块透明
+			onPutToHead: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});message('放到头上', '你自己要把方块放头上的，别怪我');false;",
+		onPutToBody: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});message('放到身上', '你自己要把方块放身上的，别怪我');false;",
+		onPutToLeg: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});false;",
+		onPutToFoot: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});false;"
 		}
 	}
 });
@@ -105,7 +136,11 @@ TEMPLATES[8] = new Block({
 	attr: {
 		block: {
 			transparent: true, //透明方块
-			through: true //可穿过
+			through: true, //可穿过
+			onPutToHead: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});message('放到头上', '你自己要把方块放头上的，别怪我');false;",
+		onPutToBody: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});message('放到身上', '你自己要把方块放身上的，别怪我');false;",
+		onPutToLeg: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});false;",
+		onPutToFoot: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});false;"
 		}
 	}
 });
@@ -117,7 +152,12 @@ TEMPLATES.push(new Block({
 			[4,1], [4,1], [4,1], [4,1], [4,1], [4,1]
 		]
 	},
-	attr: {}
+	attr: {
+		onPutToHead: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});message('放到头上', '你自己要把方块放头上的，别怪我');false;",
+		onPutToBody: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});message('放到身上', '你自己要把方块放身上的，别怪我');false;",
+		onPutToLeg: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});false;",
+		onPutToFoot: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});false;"
+	}
 }, false));
 TEMPLATES.push(new Block({
 	id: 10,
@@ -127,7 +167,12 @@ TEMPLATES.push(new Block({
 			[5,1], [5,1], [5,1], [5,1], [5,1], [5,1]
 		]
 	},
-	attr: {}
+	attr: {
+		onPutToHead: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});message('放到头上', '你自己要把方块放头上的，别怪我');false;",
+		onPutToBody: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});message('放到身上', '你自己要把方块放身上的，别怪我');false;",
+		onPutToLeg: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});false;",
+		onPutToFoot: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});false;"
+	}
 }, false));
 TEMPLATES.push(new Block({
 	id: 11,
@@ -137,5 +182,10 @@ TEMPLATES.push(new Block({
 			[7,1], [7,1], [6,1], [0,2], [7,1], [7,1]
 		]
 	},
-	attr: {}
+	attr: {
+		onPutToHead: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});message('放到头上', '你自己要把方块放头上的，别怪我');false;",
+		onPutToBody: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});message('放到身上', '你自己要把方块放身上的，别怪我');false;",
+		onPutToLeg: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});false;",
+		onPutToFoot: "deskgood.put(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});false;"
+	}
 }, false));

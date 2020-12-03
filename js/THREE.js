@@ -358,8 +358,7 @@ setInterval(function(){
 }, 5*1000); // 5s/次*/
 
 
-let body_block = [],
-	T0 = time.getTime() //上次时间
+let T0 = time.getTime(); //上次时间
 function render(){
 	let t = time.getTime()-T0; //时间差
 	T0 = time.getTime(); //把本次时间赋值给上次时间
@@ -407,14 +406,14 @@ function render(){
 	
 	if (warn.length && !stop){
 		if (!map.get(deskgood.pos.x/100,
-			deskgood.pos.y/100,
-			deskgood.pos.z/100
-		) &&
-		!map.get(deskgood.pos.x/100,
-			deskgood.pos.y/100+1,
-			deskgood.pos.z/100
-		) &&
-		+time.getTime()-last_jump >= 1000
+				deskgood.pos.y/100,
+				deskgood.pos.z/100
+			) &&
+			!map.get(deskgood.pos.x/100,
+				deskgood.pos.y/100+1,
+				deskgood.pos.z/100
+			) &&
+			+time.getTime()-last_jump >= 1000
 		){
 			last_jump = +time.getTime();
 			deskgood.v.y += deskgood.jump_v*rnd_error(); //自动跳跃
@@ -424,106 +423,6 @@ function render(){
 			console.warn(warn[0], warn[1]);
 		}else{
 			console.warn(warn[0]);
-		}
-	}
-	
-	for (let i of body_block)
-		if (i)
-			map.update(i.x, i.y, i.z); //重新更新
-	body_block = [];
-	body_block.push({
-		x: deskgood.pos.x/100,
-		y: deskgood.pos.y/100,
-		z: deskgood.pos.z/100
-	}); //上半身
-	body_block.push({
-		x: deskgood.pos.x/100,
-		y: deskgood.pos.y/100-1,
-		z: deskgood.pos.z/100
-	}); //下半身
-	
-	body_block.push({
-		x: deskgood.pos.x/100,
-		y: deskgood.pos.y/100+1,
-		z: deskgood.pos.z/100
-	}); //上
-	body_block.push({
-		x: deskgood.pos.x/100,
-		y: deskgood.pos.y/100-2,
-		z: deskgood.pos.z/100
-	}); //下
-	
-	body_block.push({
-		x: deskgood.pos.x/100,
-		y: deskgood.pos.y/100+2,
-		z: deskgood.pos.z/100
-	}); //上上
-	body_block.push({
-		x: deskgood.pos.x/100,
-		y: deskgood.pos.y/100-3,
-		z: deskgood.pos.z/100
-	}); //下下
-	
-	body_block.push({
-		x: deskgood.pos.x/100+1,
-		y: deskgood.pos.y/100,
-		z: deskgood.pos.z/100
-	}); //前上
-	body_block.push({
-		x: deskgood.pos.x/100+1,
-		y: deskgood.pos.y/100-1,
-		z: deskgood.pos.z/100
-	}); //前下
-	
-	body_block.push({
-		x: deskgood.pos.x/100-1,
-		y: deskgood.pos.y/100,
-		z: deskgood.pos.z/100
-	}); //后上
-	body_block.push({
-		x: deskgood.pos.x/100-1,
-		y: deskgood.pos.y/100-1,
-		z: deskgood.pos.z/100
-	}); //后下
-	
-	body_block.push({
-		x: deskgood.pos.x/100,
-		y: deskgood.pos.y/100,
-		z: deskgood.pos.z/100+1
-	}); //左上
-	body_block.push({
-		x: deskgood.pos.x/100,
-		y: deskgood.pos.y/100-1,
-		z: deskgood.pos.z/100+1
-	}); //左下
-	
-	body_block.push({
-		x: deskgood.pos.x/100,
-		y: deskgood.pos.y/100,
-		z: deskgood.pos.z/100-1
-	}); //右上
-	body_block.push({
-		x: deskgood.pos.x/100,
-		y: deskgood.pos.y/100-1,
-		z: deskgood.pos.z/100-1
-	}); //右下
-	
-	for (let i of body_block){
-		//[i.x, i.y, i.z] = [i.x, i.y, i.z].map(Math.round)
-		let block = map.get(i.x, i.y, i.z);
-		//if (i.x == 9 && i.y == 0 && i.z == 26) console.warn(block);
-		if (block){
-			block.block.material.forEach((item, index, arr) => {
-				arr[index].visible = true;
-			}); //显示所有
-			//if (i.x == 9 && i.y == 0 && i.z == 26) console.warn(block.block.material.map(v => v.visible));
-			// console.info("显示面", i, [i.x,i.y,i.z].map(Math.round), block);
-			if (!block.block.addTo){
-				//if (i.x == 9 && i.y == 0 && i.z == 26) console.warn("add", block.block.addTo);
-				scene.add(block.block.mesh);
-				block.block.addTo = true;
-				// console.info("显示体", i, [i.x,i.y,i.z].map(Math.round), block);
-			}
 		}
 	}
 	
