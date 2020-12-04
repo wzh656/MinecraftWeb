@@ -16,11 +16,11 @@ class Thing{
 		if (opt.attr){
 			if (opt.attr.onChangeTo) this.attr.onChangeTo = opt.attr.onChangeTo; //choice切换到
 			if (opt.attr.onChangeLeave) this.attr.onChangeLeave = opt.attr.onChangeLeave; //choice切换离开
-			if (opt.attr.onPutToHead) this.attr.onPutToHead = opt.attr.onPutToHead;
-			if (opt.attr.onPutToBody) this.attr.onPutToBody = opt.attr.onPutToBody;
-			if (opt.attr.onPutToLeg) this.attr.onPutToLeg = opt.attr.onPutToLeg;
-			if (opt.attr.onPutToFoot) this.attr.onPutToFoot = opt.attr.onPutToFoot;
-			if (opt.attr.onHold) this.attr.onHold = opt.attr.onHold;
+			if (opt.attr.onPutToHead) this.attr.onPutToHead = opt.attr.onPutToHead; //放到头上
+			if (opt.attr.onPutToBody) this.attr.onPutToBody = opt.attr.onPutToBody; //放到身上
+			if (opt.attr.onPutToLeg) this.attr.onPutToLeg = opt.attr.onPutToLeg; //放到腿上
+			if (opt.attr.onPutToFoot) this.attr.onPutToFoot = opt.attr.onPutToFoot; //放到脚上
+			if (opt.attr.onHold) this.attr.onHold = opt.attr.onHold; //放到手上
 			
 			/*if (opt.attr.hardness) this.attr.hardness = opt.attr.hardness; //硬度
 			if (opt.attr.durability) this.attr.durability = opt.attr.durability; //耐久
@@ -111,9 +111,9 @@ class Block extends Thing{
 			if (opt.attr.block.through) this.attr.block.through = opt.attr.block.through; //运行穿过
 			
 			if (opt.attr.block.onLeftMouseDown) this.attr.block.onLeftMouseDown = opt.attr.block.onLeftMouseDown; //鼠标左键按下
-			if (opt.attr.block.onLeftMouseUp) this.attr.block.onLeftMouseUp = opt.attr.block.onLeftMouseUp;
+			if (opt.attr.block.onLeftMouseUp) this.attr.block.onLeftMouseUp = opt.attr.block.onLeftMouseUp; //鼠标左键抬起
 			if (opt.attr.block.onRightMouseDown) this.attr.block.onRightMouseDown = opt.attr.block.onRightMouseDown; //鼠标右键按下
-			if (opt.attr.block.onRightMouseUp) this.attr.block.onRightMouseUp = opt.attr.block.onRightMouseUp;
+			if (opt.attr.block.onRightMouseUp) this.attr.block.onRightMouseUp = opt.attr.block.onRightMouseUp; //鼠标右键抬起
 			
 			if (opt.attr.block.onShortTouch) this.attr.block.onShortTouch = opt.attr.block.onShortTouch; //短按
 			if (opt.attr.block.onLongTouch) this.attr.block.onLongTouch = opt.attr.block.onLongTouch; //长按

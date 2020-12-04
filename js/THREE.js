@@ -366,6 +366,51 @@ function render(){
 	renderer.render(scene, camera); //执行渲染操作
 	stats.update();
 	
+	if (!stop){
+		let ρ = 1.25*rnd_error(), //空气密度/(kg/m³)
+			c = 0.4*rnd_error(), //空气阻力系数
+			s = [0.5, 0.2, 0.5], //面积/m²
+			v = [deskgood.v.x, deskgood.v.y, deskgood.v.z], //速度/(m/s)
+			Fw = [], //空气阻力/N
+			m = 50, //质量/m
+			Aw = [] //空气阻力产生的加速度/(m/s²)
+		for (let i=0; i<3; i++){
+			Fw[i] = (1/2) * c * ρ * s[i] * v[i]*v[i]; //F = (1/2)CρSV²
+			if (v[i] > 0) Fw[i] *= -1; //方向相反
+			Aw[i] = Fw[i] / m; //F=ma => a=F/m
+		}
+		
+		deskgood.v.y -= 9.8*t/1000*rnd_error(); //重力加速度
+		deskgood.v.x +=
+			Math.abs(Aw[0]*t/1000) < Math.abs(deskgood.v.x)?
+				Aw[0]*t/1000
+			:
+				-deskgood.v.x
+		;
+		deskgood.v.y +=
+			Math.abs(Aw[1]*t/1000) < Math.abs(deskgood.v.y)?
+				Aw[1]*t/1000
+			:
+				-deskgood.v.y
+		;
+		deskgood.v.z +=
+			Math.abs(Aw[2]*t/1000) < Math.abs(deskgood.v.z)?
+				Aw[2]*t/1000
+			:
+				-deskgood.v.z
+		;
+		// console.info("aw:",Aw[1], "Fw:",Fw[1], "v:", deskgood.v)
+		
+		let rt = deskgood.go(deskgood.v.x*100*t/1000, deskgood.v.y*100*t/1000, deskgood.v.z*100*t/1000);
+		//					m/s*100*ms/1000 => cm/s*s => cm => px
+		if (rt[0]) deskgood.v.x = 0;
+		if (rt[1]) deskgood.v.y = 0;
+		if (rt[2]) deskgood.v.x = 0;
+	}
+}
+
+//卡住检测
+setInterval(()=>{
 	let warn = [];
 	if (map.get(deskgood.pos.x/100,
 			deskgood.pos.y/100,
@@ -425,49 +470,7 @@ function render(){
 			console.warn(warn[0]);
 		}
 	}
-	
-	if (!stop){
-		let ρ = 1.25*rnd_error(), //空气密度/(kg/m³)
-			c = 0.4*rnd_error(), //空气阻力系数
-			s = [0.5, 0.2, 0.5], //面积/m²
-			v = [deskgood.v.x, deskgood.v.y, deskgood.v.z], //速度/(m/s)
-			Fw = [], //空气阻力/N
-			m = 50, //质量/m
-			Aw = [] //空气阻力产生的加速度/(m/s²)
-		for (let i=0; i<3; i++){
-			Fw[i] = (1/2) * c * ρ * s[i] * v[i]*v[i]; //F = (1/2)CρSV²
-			if (v[i] > 0) Fw[i] *= -1; //方向相反
-			Aw[i] = Fw[i] / m; //F=ma => a=F/m
-		}
-		
-		deskgood.v.y -= 9.8*t/1000*rnd_error(); //重力加速度
-		deskgood.v.x +=
-			Math.abs(Aw[0]*t/1000) < Math.abs(deskgood.v.x)?
-				Aw[0]*t/1000
-			:
-				-deskgood.v.x
-		;
-		deskgood.v.y +=
-			Math.abs(Aw[1]*t/1000) < Math.abs(deskgood.v.y)?
-				Aw[1]*t/1000
-			:
-				-deskgood.v.y
-		;
-		deskgood.v.z +=
-			Math.abs(Aw[2]*t/1000) < Math.abs(deskgood.v.z)?
-				Aw[2]*t/1000
-			:
-				-deskgood.v.z
-		;
-		// console.info("aw:",Aw[1], "Fw:",Fw[1], "v:", deskgood.v)
-		
-		let rt = deskgood.go(deskgood.v.x*100*t/1000, deskgood.v.y*100*t/1000, deskgood.v.z*100*t/1000);
-		//					m/s*100*ms/1000 => cm/s*s => cm => px
-		if (rt[0]) deskgood.v.x = 0;
-		if (rt[1]) deskgood.v.y = 0;
-		if (rt[2]) deskgood.v.x = 0;
-	}
-}
+}, 66);
 // render();
 // 间隔30ms周期性调用函数fun
 //setInterval("render()",16.7)

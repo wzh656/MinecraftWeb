@@ -648,6 +648,10 @@ deskgood.moveTo(0,10000*100);
 
 <script src="./js/GameTime.js"></script>
 <script>
+if (false){
+	console.log = console.info = console.warn = console.error = new Function();
+}
+
 //退出
 function exit(){
 	window.open("home.html", "_self").close();
@@ -706,16 +710,6 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 	document.body.appendChild(jump);
 	
 	stop = false;
-	
-	/*let vconsole = document.createElement("script");
-	vconsole.src = "https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js";
-	vconsole.onload = function(){
-		new VConsole();
-		document.getElementById("__vconsole").childNodes[1].style.opacity = 0.5;
-		document.getElementById("__vconsole").childNodes[1].style.borderRadius = "66px";
-	};
-	document.body.appendChild(vconsole);*/
-	//new VConsole();
 }else{ //电脑
 	device = false;
 	

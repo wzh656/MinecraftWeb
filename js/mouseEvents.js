@@ -34,18 +34,17 @@ document.addEventListener("mousemove", function (e){
 		e.movementX ||
 		e.mozMovementX ||
 		e.webkitMovementX ||
-		0
-	;
-	let dy =
+		0,
+		dy =
 		e.movementY ||
 		e.mozMovementY ||
 		e.webkitMovementY ||
-		0
-	;
+		0;
 	
-	let [x,y] = [dx/$("#game")[0].offsetWidth*360*deskgood.sensitivity, dy/$("#game")[0].offsetHeight*360*deskgood.sensitivity];
+	let x = dx/$("#game")[0].offsetWidth*360*deskgood.sensitivity,
+		y = dy/$("#game")[0].offsetHeight*360*deskgood.sensitivity;
 	
-	if (x**2 + y**2 > 200) return; //消除取消锁定前自动移动
+	if (Math.sqrt(x**2 + y**2) > 15) return; //消除取消锁定前自动移动
 	
 	deskgood.lookAt.left_right += dx/$("#game")[0].offsetWidth*360*deskgood.sensitivity;
 	deskgood.lookAt.top_bottom -= dy/$("#game")[0].offsetHeight*360*deskgood.sensitivity;
@@ -130,6 +129,8 @@ document.addEventListener("mousemove", function (e){
 	}
 });
 
+
+//滚轮
 $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind监听
 	if (stop && stop != "bag")
 		return;
@@ -193,6 +194,8 @@ $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind�
 	}  
 });
 
+
+//mousedown
 document.addEventListener("mousedown", function (e){
 	if (stop)
 		return;
@@ -286,6 +289,81 @@ document.addEventListener("mousedown", function (e){
 				deskgood.place(deskgood.hold[deskgood.choice], {x,y,z}); //放置方块
 				
 				deskgood.hold.delete(1, deskgood.choice); //删除手里的方块
+				
+				break; //跳出 寻找有效放置的 循环
+			}
+		}
+	}
+	return false;
+});
+
+// mouseup(事件专用)
+document.addEventListener("mousedown", function (e){
+	if (stop)
+		return;
+	
+	if (e.path[0] !== document.body)
+		return;
+	
+	if (e.button == 0){ //左键(onLeftMouseUp)
+		let click = ray2D();
+		for (let i in click){
+			if (click[i].faceIndex){
+				if (click[i].object instanceof THREE.Mesh){
+					let {x,y,z} = click[i].object.position; //单位 px=cm
+					
+					x = x/100, y = y/100, z = z/100; //单位 m
+					
+					if (
+						map.get(x, y, z) &&
+						eval(map.get(x, y, z).get("attr", "block", "onLeftMouseUp")) === false
+					) return;
+					
+					break;//跳出 寻找有效放置的 循环
+				}
+			}
+		}
+	}else if (e.button == 2){ //右键(onRightMouseDown)
+		let click = ray2D();
+		for (let i in click){
+			if (click[i].object instanceof THREE.Mesh){
+				let {x,y,z} = click[i].object.position; //单位 px=cm
+				
+				x = x/100, y = y/100, z = z/100; //单位 m
+				
+				switch (click[i].faceIndex){
+					case 0:
+					case 1:
+						x++;
+						break;
+					case 2:
+					case 3:
+						x--;
+						break;
+					case 4:
+					case 5:
+						y++;
+						break;
+					case 6:
+					case 7:
+						y--;
+						break;
+					case 8:
+					case 9:
+						z++;
+						break;
+					case 10:
+					case 11:
+						z--;
+						break;
+					default:
+						throw ["faceIndex wrong:", click[i].faceIndex];
+				}
+				
+				if (
+					map.get(x, y, z) &&
+					eval(map.get(x, y, z).get("attr", "block", "onRightMouseDown")) === false
+				) return;
 				
 				break; //跳出 寻找有效放置的 循环
 			}
