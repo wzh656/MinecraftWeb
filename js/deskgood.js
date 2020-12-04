@@ -94,10 +94,10 @@ let deskgood = {
 						deskgood.head.delete();
 					}else{ //无方块
 						let choice = deskgood.hold[deskgood.choice];
-						if ( !choice ) return;
-						if ( choice &&
-							eval( choice.get("attr", "onPutToHead") ) === false
-						) return;
+						if ( !choice ) return; //手上无方块
+						
+						if (eval( choice.get("attr", "onPutToHead") ) === false)
+							return;
 						
 						deskgood.head.addOne( choice );
 						deskgood.hold.delete(1, deskgood.choice);
@@ -124,14 +124,13 @@ let deskgood = {
 						deskgood.body.delete();
 					}else{ //无方块
 						let choice = deskgood.hold[deskgood.choice];
-						if ( choice ){
-							if ( choice &&
-								eval( choice.get("attr", "onPutToBody") ) === false
-							) return;
-							
-							deskgood.body.addOne( choice );
-							deskgood.hold.delete(1, deskgood.choice);
-						}
+						if ( !choice ) return; //手上无方块
+						
+						if (eval( choice.get("attr", "onPutToBody") ) === false)
+							return;
+						
+						deskgood.body.addOne( choice );
+						deskgood.hold.delete(1, deskgood.choice);
 					}
 				};
 			}
@@ -155,14 +154,14 @@ let deskgood = {
 						deskgood.leg.delete();
 					}else{ //无方块
 						let choice = deskgood.hold[deskgood.choice];
-						if ( choice ){
-							if ( choice &&
-								eval( choice.get("attr", "onPutToLeg") ) === false
-							) return;
-							
-							deskgood.leg.addOne( choice );
-							deskgood.hold.delete(1, deskgood.choice);
-						}
+						if ( !choice ) return; //手上无方块
+						
+						console.log(choice, TEMPLATES, choice.get("attr", "onPutToLeg"))
+						if ( eval( choice.get("attr", "onPutToLeg") ) === false )
+							return;
+						
+						deskgood.leg.addOne( choice );
+						deskgood.hold.delete(1, deskgood.choice);
 					}
 				};
 			}
@@ -186,14 +185,13 @@ let deskgood = {
 						deskgood.foot.delete();
 					}else{ //无方块
 						let choice = deskgood.hold[deskgood.choice];
-						if ( choice ){
-							if ( choice &&
-								eval( choice.get("attr", "onPutToFoot") ) === false
-							) return;
-							
-							deskgood.foot.addOne( choice );
-							deskgood.hold.delete(1, deskgood.choice);
-						}
+						if ( !choice ) return; //手上无方块
+						
+						if (eval( choice.get("attr", "onPutToFoot") ) === false)
+							return;
+						
+						deskgood.foot.addOne( choice );
+						deskgood.hold.delete(1, deskgood.choice);
 					}
 				};
 			}
@@ -638,7 +636,7 @@ let deskgood = {
 	},
 	
 	// 放置方块
-	put(block, {x, y, z}){ // 单位 px=cm
+	place(block, {x, y, z}){ // 单位 px=cm
 		x = Math.round(x),
 		y = Math.round(y),
 		z = Math.round(z);
@@ -648,9 +646,9 @@ let deskgood = {
 			eval(map.get(x, y, z).get("attr", "block", "onPut")) === false
 		) return;
 		
-		console.log("put", {x,y,z}, block.id, block.attr)
+		console.log("deskgood.place", {x,y,z}, block.id, block.attr)
 		
-		map.add(block, {x,y,z});
+		map.addID(block.id, {x,y,z}, TEMPLATES);
 		
 		let attr = `'${JSON.stringify(map.get(x, y, z).attr).slice(1,-1)}'`,
 			xZ = Math.round(x/map.size.x),
@@ -686,8 +684,8 @@ let deskgood = {
 		});
 	},
 	
-	// 删除方块
-	delete({x, y, z}){ // 单位 px=cm
+	// 移除方块
+	remove({x, y, z}){ // 单位 px=cm
 		x = Math.round(x),
 		y = Math.round(y),
 		z = Math.round(z);
@@ -697,7 +695,7 @@ let deskgood = {
 			eval(map.get(x, y, z).get("attr", "block", "onDelete")) === false
 		) return;
 		
-		console.log("delete", {x,y,z}, map.get(x, y, z))
+		console.log("deskgood.remove", {x,y,z}, map.get(x, y, z))
 		
 		map.delete(x, y, z); //删除方块
 		

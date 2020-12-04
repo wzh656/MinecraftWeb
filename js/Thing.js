@@ -18,7 +18,7 @@ class Thing{
 			if (opt.attr.onChangeLeave) this.attr.onChangeLeave = opt.attr.onChangeLeave; //choice切换离开
 			if (opt.attr.onPutToHead) this.attr.onPutToHead = opt.attr.onPutToHead;
 			if (opt.attr.onPutToBody) this.attr.onPutToBody = opt.attr.onPutToBody;
-			if (opt.attr.onPutToLeg) this.attr.onPutToLeg = opt.attr.onPutToHead;
+			if (opt.attr.onPutToLeg) this.attr.onPutToLeg = opt.attr.onPutToLeg;
 			if (opt.attr.onPutToFoot) this.attr.onPutToFoot = opt.attr.onPutToFoot;
 			if (opt.attr.onHold) this.attr.onHold = opt.attr.onHold;
 			
@@ -122,8 +122,8 @@ class Block extends Thing{
 			if (opt.attr.block.onTouchEnd) this.attr.block.onTouchEnd = opt.attr.block.onTouchEnd;
 			if (opt.attr.block.onTouchCancal) this.attr.block.onTouchCancal = opt.attr.block.onTouchCancal;
 			
-			if (opt.attr.block.onPut) this.attr.block.onPut = opt.attr.block.onPut; //被放置
-			if (opt.attr.block.onDelete) this.attr.block.onDelete = opt.attr.block.onDelete; //被删除
+			if (opt.attr.block.onPlace) this.attr.block.onPlace = opt.attr.block.onPlace; //被放置
+			if (opt.attr.block.onRemove) this.attr.block.onRemove = opt.attr.block.onRemove; //被删除
 		}
 	}
 	//face

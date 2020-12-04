@@ -225,9 +225,9 @@ document.addEventListener("mousedown", function (e){
 						console.warn("not free!")
 						return print("拿不下方块", "两只手拿4m³方块已经够多了，反正我是拿不下了", 3);
 					}
-					deskgood.hold.addOne(map.get(x, y, z), free); //放在手中
+					deskgood.hold.addOne(new Block(map.get(x, y, z)), free); //放在手中
 					
-					deskgood.delete( {x,y,z} ); //删除方块
+					deskgood.remove( {x,y,z} ); //删除方块
 					
 					break;//跳出 寻找有效放置的 循环
 				}
@@ -283,7 +283,7 @@ document.addEventListener("mousedown", function (e){
 				if (!deskgood.hold[deskgood.choice]) //空气
 					return;
 				
-				deskgood.put(deskgood.hold[deskgood.choice], {x,y,z}); //放置方块
+				deskgood.place(deskgood.hold[deskgood.choice], {x,y,z}); //放置方块
 				
 				deskgood.hold.delete(1, deskgood.choice); //删除手里的方块
 				

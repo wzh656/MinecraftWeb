@@ -15,7 +15,7 @@ $("#control").on("touchstart", function(e){
 	
 	let x = e.originalEvent.targetTouches[0].clientX,
 		y = e.originalEvent.targetTouches[0].clientY;
-	console.log("touchstart(control):", x, y);
+	//console.log("touchstart(control):", x, y);
 	
 	[touch_control.x0, touch_control.y0, touch_control.t0] = [x, y, +time.getTime()];
 	
@@ -152,9 +152,9 @@ $("#control").on("touchmove", function(e){
 	if (stop)
 		return;
 	
-	let x = e.originalEvent.targetTouches[0].clientX;
-	let y = e.originalEvent.targetTouches[0].clientY;
-	console.log("touchmove(control):", x, y);
+	let x = e.originalEvent.targetTouches[0].clientX,
+		y = e.originalEvent.targetTouches[0].clientY;
+	//console.log("touchmove(control):", x, y);
 	
 	[touch_control.x, touch_control.y] = [x, y];
 	
@@ -163,7 +163,7 @@ $("#control").on("touchmove", function(e){
 $("#control").on("touchend", function(e){
 	let x = e.originalEvent.changedTouches[0].clientX,
 		y = e.originalEvent.changedTouches[0].clientY;
-	console.log("touchend(control):", x, y);
+	//console.log("touchend(control):", x, y);
 	
 	clearInterval(touch_control.loop);
 	touch_control.x0 = touch_control.y0 = touch_control.x = touch_control.y = touch_control.t0 = touch_control.loop = null;
@@ -173,7 +173,7 @@ $("#control").on("touchend", function(e){
 $("#control").on("touchcancel", function(e){
 	let x = e.originalEvent.changedTouches[0].clientX,
 		y = e.originalEvent.changedTouches[0].clientY;
-	console.log("touchcancel(control):", x, y);
+	//console.log("touchcancel(control):", x, y);
 	
 	clearInterval(touch_control.loop);
 	touch_control.x0 = touch_control.y0 = touch_control.x = touch_control.y = touch_control.t0 = touch_control.loop = null;
@@ -205,24 +205,31 @@ $("#jump").on("touchstart", function(){
 
 let touch_screen = {
 	t: null,
-	pos: {x: null, y: null},
+	x: null,
+	y: null,
+	x0: null,
+	y0: null,
 	loop: null
 };
 $("#game").on("touchstart", function (e){
 	if (stop)
 		return;
 	
-	let x = e.originalEvent.targetTouches[0].pageX;
-	let y = e.originalEvent.targetTouches[0].pageY
-	//console.log("touchstart(screen):", x, y, +time.getTime());
+	let x = e.originalEvent.targetTouches[0].pageX,
+		y = e.originalEvent.targetTouches[0].pageY;
+	
+	//console.log("touchstart(screen):", {x, y}, touch_screen);
 	
 	//[x0,y0] = [x, y];
-	
-	touch_screen.t = time.getTime();
-	touch_screen.pos = {x,y};
+	touch_screen.x = touch_screen.x0 = x,
+	touch_screen.y = touch_screen.y0 = y;
 	touch_screen.loop = setTimeout(()=>{ //长按1000ms（删除）
 		touch_screen.loop = null;
-		if (Math.sqrt( (touch_screen.pos.x-x)**2 + (touch_screen.pos.y-y)**2 ) < 36){ //误差36px
+		if (Math.sqrt(
+				(touch_screen.x0 - touch_screen.x) **2+
+				(touch_screen.y0 - touch_screen.y) **2
+			) < 36
+		){ //误差36px
 			let click = ray2D(true, x, y);
 			for (let i in click){
 				if (click[i].faceIndex){
@@ -247,9 +254,9 @@ $("#game").on("touchstart", function (e){
 							console.warn("not free!")
 							return print("拿不下方块", "两只手拿4m³方块已经够多了，反正我是拿不下了", 3);
 						}
-						deskgood.hold.addOne(map.get(x, y, z), free); //放在手中
+						deskgood.hold.addOne(new Block(map.get(x, y, z)), free); //放在手中
 						
-						deskgood.delete( {x,y,z} ); //删除方块
+						deskgood.remove({x,y,z}); //删除方块
 						
 						break; //跳出 寻找有效放置的 循环
 					}
@@ -264,17 +271,21 @@ $("#game").on("touchmove", function (e){
 	if (stop)
 		return false;
 	
-	if (touch_screen.pos.x === null | touch_screen.pos.y === null)
-		return false;
+	/*if (touch_screen.pos.x === null || touch_screen.pos.y === null)
+		return false;*/
 	
-	let x = e.originalEvent.targetTouches[0].pageX;
-	let y = e.originalEvent.targetTouches[0].pageY;
-	console.log("touchmove:", x, y);
+	let x = e.originalEvent.targetTouches[0].pageX,
+		y = e.originalEvent.targetTouches[0].pageY;
 	
-	let [dx, dy] = [x - touch_screen.pos.x, y - touch_screen.pos.y];
-	touch_screen.pos = {x,y};
+	//console.log("touchmove(start):", {x, y}, touch_screen);
+	
+	let dx = x - touch_screen.x,
+		dy = y - touch_screen.y;
+	
+	touch_screen.x = x, touch_screen.y = y;
 	//[x0, y0] = [x, y];
-	console.log("move:", dx, dy);
+	
+	//console.log("moved(screen):", dx, dy);
 	deskgood.lookAt.left_right += dx/$("#game")[0].offsetWidth*90*deskgood.sensitivity;
 	deskgood.lookAt.top_bottom -= dy/$("#game")[0].offsetHeight*90*deskgood.sensitivity;
 	
@@ -290,26 +301,32 @@ $("#game").on("touchmove", function (e){
 	if (deskgood.lookAt.top_bottom < -89.9)
 		deskgood.lookAt.top_bottom = -89.9;
 	
-	deskgood.look_update(); //刷新
+	deskgood.look_update(); //刷新俯仰角
 	
-	if (Math.sqrt( (touch_screen.pos.x-x)**2 + (touch_screen.pos.y-y)**2 ) >= 100){ //误差100px
-		touch_screen.pos.x = -666;
-		touch_screen.pos.y = -666;
+	if (Math.sqrt( dx**2 + dy**2 ) >= 16){ //误差16px
+		touch_screen.x0 = -666;
+		touch_screen.y0 = -666;
 	}
+	
 	return false;
 });
 $("#game").on("touchend", function (e){
 	if (stop)
-		return;
+		return false;
 	
-	let x = e.originalEvent.changedTouches[0].pageX;
-	let y = e.originalEvent.changedTouches[0].pageY;
-	//console.log("touchend:", x, y, Number(time.getTime()));
+	let x = e.originalEvent.changedTouches[0].pageX,
+		y = e.originalEvent.changedTouches[0].pageY;
+	
+	//console.log("touchend(screen):", {x, y}, touch_screen);
 	
 	if (touch_screen.loop !== null){ //短按（放置）
 		clearTimeout(touch_screen.loop);
 		touch_screen.loop = null;
-		if (Math.sqrt( (touch_screen.pos.x-x)**2 + (touch_screen.pos.y-y)**2) < 36){ //误差36px
+		if (Math.sqrt(
+			(touch_screen.x0 - touch_screen.x) **2+
+			(touch_screen.y0 - touch_screen.y) **2)
+			< 36
+		){ //误差36px
 			let click = ray2D(true, x, y);
 			for (let i in click){
 				if (click[i].object instanceof THREE.Mesh){
@@ -360,7 +377,7 @@ $("#game").on("touchend", function (e){
 					if (!deskgood.hold[deskgood.choice]) //空气
 						return;
 					
-					deskgood.put(deskgood.hold[deskgood.choice], {x,y,z}); //放置方块
+					deskgood.place(deskgood.hold[deskgood.choice], {x,y,z}); //放置方块
 					
 					deskgood.hold.delete(1, deskgood.choice); //删除手里的方块
 					
@@ -370,21 +387,17 @@ $("#game").on("touchend", function (e){
 		}
 	}
 	
-	touch_screen.pos = {x: null, y:null};
-	//x0 = null, y0 = null;
+	touch_screen.x = touch_screen.y = touch_screen.x0 = touch_screen.y0 = null;
 });
 $("#game").on("touchcancel", function (e){
 	if (stop)
 		return;
 	
-	let x = e.originalEvent.changedTouches[0].pageX;
-	let y = e.originalEvent.changedTouches[0].pageY;
-	console.log("touchcancel:", x, y, Number(time.getTime()));
+	let x = e.originalEvent.changedTouches[0].pageX,
+		y = e.originalEvent.changedTouches[0].pageY;
 	
-	touch_screen.pos = {x: null, y:null};
-	//x0 = null, y0 = null;
+	//console.log("touchcancel(screen):", {x, y}, touch_screen);
 	
-	if (touch_screen.loop !== null){
-		clearTimeout(touch_screen.loop);
-	}
+	touch_screen.x = touch_screen.y = touch_screen.x0 = touch_screen.y0 = null;
+	clearTimeout(touch_screen.loop);
 });

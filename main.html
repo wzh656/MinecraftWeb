@@ -861,14 +861,22 @@ function message(id, text, time=5){
 	message.prototype.ids[id] = true;
 	
 	let msg = $(`<message>${text}</message>`)
-		.attr("open", "true");
+		.attr("open", "true")
+		.click(()=>{
+			msg.removeAttr("open").attr("close");
+			message.prototype.ids[id] = false;
+			msg.hide("slow", ()=>{
+				msg.remove();
+				$("message:not(open).close").remove(); //避免漏掉
+			});
+		});
 	$( document.body ).append( msg );
 	setTimeout(()=>{
 		msg.removeAttr("open").attr("close");
-		setTimeout(()=>msg.remove(), 3000);
 		message.prototype.ids[id] = false;
+		setTimeout(()=>msg.remove(), 3000);
 		
-		$("message:not(open)[close]").remove(); //避免漏掉
+		$("message:not(open).close").remove(); //避免漏掉
 	}, time*1000);
 }
 message.prototype.ids = [];
