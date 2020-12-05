@@ -1644,8 +1644,8 @@ class ChunkMap{
 		for (let x=-length; x<=length; x+=map.size.x){
 			for (let z=-length; z<=length; z+=map.size.z){
 				let push = [
-					Math.round((deskgood.pos.x+x)/100/map.size.x),
-					Math.round((deskgood.pos.z+z)/100/map.size.z),
+					Math.round( (deskgood.pos.x+x)/100/map.size.x ),
+					Math.round( (deskgood.pos.z+z)/100/map.size.z ),
 					(
 						(x>=0 && z>=0)? (
 							Math.abs(x)>=Math.abs(z)?
@@ -1675,8 +1675,8 @@ class ChunkMap{
 		for (let x of [-1,1,0]){
 			for (let z of [-1,1,0]){
 				let push = [
-					Math.round((deskgood.pos.x + x*length)/100/map.size.x),
-					Math.round((deskgood.pos.z + z*length)/100/map.size.z),
+					Math.round( (deskgood.pos.x + x*length)/100/map.size.x ),
+					Math.round( (deskgood.pos.z + z*length)/100/map.size.z ),
 					(
 						x>0 & z>0?
 							(Math.random()<0.5?

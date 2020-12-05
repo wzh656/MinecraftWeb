@@ -424,7 +424,7 @@ setInterval(()=>{
 			!map.get(deskgood.pos.x/100,
 				deskgood.pos.y/100,
 				deskgood.pos.z/100).get("attr", "block", "transparent") //不透明
-		) print("窒息提示", "想窒息吗？还往头上放方块，看你怎么出来！", 1, "#f68");
+		) print("窒息提示", "你的头竟然卡到方块里了，想窒息吗？看你怎么出来", 1, "#f68");
 		/* try{
 			plus.nativeUI.toast(
 				"<font size=\"16\">想窒息吗？还往头上放方块，看你怎么出来！</font>",
@@ -470,7 +470,7 @@ setInterval(()=>{
 			console.warn(warn[0]);
 		}
 	}
-}, 66);
+}, 36);
 // render();
 // 间隔30ms周期性调用函数fun
 //setInterval("render()",16.7)

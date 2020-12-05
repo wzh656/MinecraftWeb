@@ -41,7 +41,7 @@ $("#control").on("touchstart", function(e){
 			let x = Math.cos( deskgood.lookAt.left_right/180*Math.PI+r )*l;
 			let z = Math.sin( deskgood.lookAt.left_right/180*Math.PI+r )*l;
 			
-			console.log("touch control to move:", x, z);
+			//console.log("touch control to move:", x, z);
 			
 			deskgood.go(x, 0, z);
 			
@@ -376,6 +376,11 @@ $("#game").on("touchend", function (e){
 					
 					if (!deskgood.hold[deskgood.choice]) //空气
 						return;
+					
+					if ( Math.round(x) == Math.round(deskgood.pos.x/100) &&
+						Math.round(y) == Math.round(deskgood.pos.y/100) &&
+						Math.round(z) == Math.round(deskgood.pos.z/100)
+					) return print("往头上放方块", "想窒息吗？还往头上放方块！"); //放到头上
 					
 					deskgood.place(deskgood.hold[deskgood.choice], {x,y,z}); //放置方块
 					

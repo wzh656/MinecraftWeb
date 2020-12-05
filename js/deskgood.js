@@ -1,7 +1,10 @@
 /**
 * 玩家(deskgood)
 */
-let body_block = [];
+let delay_id = {
+	update_block: null,
+	perloadChunk: null
+}, body_blocks = [];
 let deskgood = {
 	v: {
 		x: 0,
@@ -44,6 +47,7 @@ let deskgood = {
 		y: 0,
 		z: 0
 	},
+	sensitivity: device? 2.6: 1, //灵敏度：手机2，电脑1
 	handLength: 360, //手长（谐音手残）
 	choice: 0,
 	hold: new ThingGroup($("#tools")[0], {
@@ -197,7 +201,6 @@ let deskgood = {
 			}
 		}
 	}),
-	sensitivity: device? 2.6: 1, //灵敏度：手机2，电脑1
 	// 死亡
 	die(reason="使用命令自杀"){
 		sql.deleteTable("file", undefined, function(){
@@ -222,8 +225,8 @@ let deskgood = {
 	// 视角更新
 	look_update(x,y,z){
 		if (x !== undefined || y !== undefined || z !== undefined){
-			x = x||deskgood.look.x;
-			y = y||deskgood.look.y;
+			x = x||deskgood.look.x,
+			y = y||deskgood.look.y,
 			z = z||deskgood.look.z;
 			let v = new THREE.Vector3(x,y,z).setLength(1); //单位向量（标准化）
 			camera.lookAt(deskgood.pos.x+v.x, deskgood.pos.y+v.y, deskgood.pos.z+v.z);
@@ -240,6 +243,36 @@ let deskgood = {
 			let y = Math.sin(deskgood.lookAt.top_bottom/180*Math.PI);
 			camera.lookAt(deskgood.pos.x+x, deskgood.pos.y+y, deskgood.pos.z+z);
 			[deskgood.look.x, deskgood.look.y, deskgood.look.z] = [x,y,z];
+		}
+	},
+	update_round_blocks(dx=1, dy=1, dz=1){
+		for (let i of body_blocks)
+			if (i)
+				map.update(i.x, i.y, i.z); //重新更新
+		
+		body_blocks = [];
+		for (let x=deskgood.pos.x/100-dx; x<= deskgood.pos.x/100+dx; x++)
+			for (let y=deskgood.pos.x/100-1-dy; y<= deskgood.pos.y/100+dy; y++)
+				for (let z=deskgood.pos.z/100-dz; z<= deskgood.pos.z/100+dz; z++)
+					body_blocks.push({x, y, z});
+		
+		for (let i of body_blocks){
+			//[i.x, i.y, i.z] = [i.x, i.y, i.z].map(Math.round)
+			let block = map.get(i.x, i.y, i.z);
+			//if (i.x == 9 && i.y == 0 && i.z == 26) console.warn(block);
+			if (!block) continue;
+			
+			block.block.material.forEach((item, index, arr) => {
+				arr[index].visible = true;
+			}); //显示所有
+			//if (i.x == 9 && i.y == 0 && i.z == 26) console.warn(block.block.material.map(v => v.visible));
+			// console.info("显示面", i, [i.x,i.y,i.z].map(Math.round), block);
+			if (!block.block.addTo){
+				//if (i.x == 9 && i.y == 0 && i.z == 26) console.warn("add", block.block.addTo);
+				scene.add(block.block.mesh);
+				block.block.addTo = true;
+				// console.info("显示体", i, [i.x,i.y,i.z].map(Math.round), block);
+			}
 		}
 	},
 	// 移动
@@ -266,42 +299,26 @@ let deskgood = {
 			){ */
 				let changed_x_z = deskgood.pos.x != x || deskgood.pos.z != z, //改变了x|z坐标
 					changed = changed_x_z || deskgood.pos.y != y;
+				
 				[deskgood.pos.x, deskgood.pos.y, deskgood.pos.z] = [x,y,z];
-				if (changed_x_z) map.perloadChunk();
-				if (changed)
-					setTimeout(function(){
-						for (let i of body_block)
-							if (i)
-								map.update(i.x, i.y, i.z); //重新更新
-						
-						body_block = [];
-						for (let x=deskgood.pos.x/100-1; x<= deskgood.pos.x/100+1; x++){
-							for (let y=deskgood.pos.x/100-2; y<= deskgood.pos.y/100+1; y++){
-								for (let z=deskgood.pos.z/100-1; z<= deskgood.pos.z/100+1; z++){
-									body_block.push({x, y, z});
-								}
-							}
-						}
-						
-						for (let i of body_block){
-							//[i.x, i.y, i.z] = [i.x, i.y, i.z].map(Math.round)
-							let block = map.get(i.x, i.y, i.z);
-							//if (i.x == 9 && i.y == 0 && i.z == 26) console.warn(block);
-							if (block){
-								block.block.material.forEach((item, index, arr) => {
-									arr[index].visible = true;
-								}); //显示所有
-								//if (i.x == 9 && i.y == 0 && i.z == 26) console.warn(block.block.material.map(v => v.visible));
-								// console.info("显示面", i, [i.x,i.y,i.z].map(Math.round), block);
-								if (!block.block.addTo){
-									//if (i.x == 9 && i.y == 0 && i.z == 26) console.warn("add", block.block.addTo);
-									scene.add(block.block.mesh);
-									block.block.addTo = true;
-									// console.info("显示体", i, [i.x,i.y,i.z].map(Math.round), block);
-								}
-							}
-						}
-					}, 0);
+				
+				//perloadChunk
+				if (changed_x_z){
+					if (!delay_id.perloadChunk)
+						delay_id.perloadChunk =  setTimeout(()=>{
+							map.perloadChunk();
+							delay_id.perloadChunk = null;
+						}, 100);
+				}
+				//更新周围方块
+				if (changed){
+					if (!delay_id.update_block){
+						delay_id.update_block = setTimeout(()=>{
+							deskgood.update_round_blocks();
+							delay_id.update_block = null;
+						}, 36);
+					}
+				}
 			/* }else{
 				deskgood.v.y = 0;
 				throw "";
@@ -313,11 +330,21 @@ let deskgood = {
 	},
 	// 前进
 	go (x=0, y=0, z=0){
-		[x, y, z] = [x, y, z].map(
-			value => value*rnd_error()
-		); //随机化
+		x = x*rnd_error(),
+		y = y*rnd_error(),
+		z = z*rnd_error(); //随机化
 		
 		let rt = [0,0,0]; //返回值
+		
+		if (y<0 && map.get(
+			deskgood.pos.x/100,
+			deskgood.pos.y/100-1,
+			deskgood.pos.z/100
+		)){ //腿上有方块
+			rt[1] = y;
+			y = 0;
+		}
+		
 		//X
 		if (x > 0){
 			//上半身
@@ -738,11 +765,9 @@ deskgood.goX = x=>deskgood.go(x);
 deskgood.goY = y=>deskgood.go(0,y);
 deskgood.goZ = z=>deskgood.go(0,0,z);
 
-SQL_read(); //开始读取存档
+SQL_read(); //读取存档
 
 //初始化
-deskgood.hold.update();
-deskgood.look_update();
 
 
 //gui
