@@ -286,6 +286,11 @@ document.addEventListener("mousedown", function (e){
 				if (!deskgood.hold[deskgood.choice]) //空气
 					return;
 				
+				if ( Math.round(x) == Math.round(deskgood.pos.x/100) &&
+					Math.round(y) == Math.round(deskgood.pos.y/100) &&
+					Math.round(z) == Math.round(deskgood.pos.z/100)
+				) return print("往头上放方块", "想窒息吗？还往头上放方块！"); //放到头上
+				
 				deskgood.place(deskgood.hold[deskgood.choice], {x,y,z}); //放置方块
 				
 				deskgood.hold.delete(1, deskgood.choice); //删除手里的方块

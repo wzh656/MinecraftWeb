@@ -14,7 +14,7 @@ bag_view.camera.position.z = 260;
 bag_view.renderer.setSize(0.1*WIDTH, 0.1*WIDTH);
 bag_view.renderer.setClearColor("rgb(196,196,196)");
 bag_view.renderer.domElement.id = "bag_deskgood";
-$("#bag > div:eq(0)").prepend( bag_view.renderer.domElement );
+$("#bag > section:eq(0)").prepend( bag_view.renderer.domElement );
 
 bag_view.geometry = new THREE.Geometry();
 

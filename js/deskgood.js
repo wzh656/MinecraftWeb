@@ -55,7 +55,7 @@ let deskgood = {
 		updateCallback(children){
 			for (let i in children){
 				$(children[i]).css("borderColor", (i==deskgood.choice)?"#fff":"#aaa")
-					.css("borderWidth", (i==deskgood.choice)?"1vmax":"0.6vmax")
+					.css("borderWidth", (i==deskgood.choice)?"0.6vmax":"0.5vmax")
 					.css("transform", (i==deskgood.choice)?"translateY(-3px)":"")
 					.css("margin", "0 0");
 				children[i].onclick = ()=>{
@@ -251,9 +251,9 @@ let deskgood = {
 				map.update(i.x, i.y, i.z); //重新更新
 		
 		body_blocks = [];
-		for (let x=deskgood.pos.x/100-dx; x<= deskgood.pos.x/100+dx; x++)
-			for (let y=deskgood.pos.x/100-1-dy; y<= deskgood.pos.y/100+dy; y++)
-				for (let z=deskgood.pos.z/100-dz; z<= deskgood.pos.z/100+dz; z++)
+		for (let x=deskgood.pos.x/100-dx; x<=deskgood.pos.x/100+dx; x++)
+			for (let y=deskgood.pos.y/100-1-dy; y<=deskgood.pos.y/100+dy; y++)
+				for (let z=deskgood.pos.z/100-dz; z<=deskgood.pos.z/100+dz; z++)
 					body_blocks.push({x, y, z});
 		
 		for (let i of body_blocks){
