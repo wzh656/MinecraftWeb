@@ -16,7 +16,7 @@
 1. 手机apk软件运行：可以直接横屏运行
     | 版本(version)	| 下载(download)																									| Github查看									|
     | -----------------	| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	| -----------------------------------------------------------------------------	|
-    | v1.1.0-alpha	| [完整版(22.49MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v1.1.0-alpha/Minecraft.apk)															| [release](https://github.com/wzh656/MinecraftWeb/releases/tag/v1.1.0-alpha)	|
+    | v1.1.0-alpha	| [完整版(22.49MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v1.1.0-alpha/Minecraft.apk)，[微云链接](https://share.weiyun.com/0LFvfYMw)								| [release](https://github.com/wzh656/MinecraftWeb/releases/tag/v1.1.0-alpha)	|
     | v1.0.0.3-alpha	| [完整版(34.06MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v1.0.0.3-alpha/full.apk)，[简化版(6.5MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v1.0.0.3-alpha/simplified.apk)		| [release](https://github.com/wzh656/MinecraftWeb/releases/tag/v1.0.0.3-alpha)	|
     | v1.0.0.1-alpha	| [完整版(23.88MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v1.0.0.1-alpha/Minecraft-full.apk)														| [release](https://github.com/wzh656/MinecraftWeb/releases/tag/v1.0.0.1-alpha)	|
     | v0.5.0-alpha	| [完整版(23.87MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v0.5.0-alpha/Minecraft-full.apk)，[简化版(5.35MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v0.5.0-alpha/Minecraft-simplified.apk)	| [release](https://github.com/wzh656/MinecraftWeb/releases/tag/v0.5.0-alpha)	|
