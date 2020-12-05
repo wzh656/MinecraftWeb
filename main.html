@@ -436,10 +436,6 @@ Copyright © 2020 by wzh
 				/* top: 45%; */
 				
 			}
-			#bag > :not(nav){
-				background-color: rgb(200,200,200);
-				border: 0.5vmax #fff outset;
-			}
 			
 			/* input */
 			#bag > input[type="radio"][name="bag-nav"]{ /* 隐藏input */
@@ -480,34 +476,20 @@ Copyright © 2020 by wzh
 			}
 			
 			#bag > nav > label[onclick]{ /* “关闭”按钮 */
-				width: 10%;
+				width: 6vh;
+				flex-grow: 0;
+				flex-shrink: 0;
+				
+				font-weight: 10000;
+				border: 0.5vmax solid rgb(200, 200, 200);
 				border-radius: 666px;
-			}
-			#bag > nav > label[onclick]:before{
-				content: "";
-				position: absolute;
-				top: 0;
-				left: 0;
-				width:0.3em;
-				height:1.5em;
-				background: #333;
-				transform: rotate(45deg);
-			}
-			#bag > nav > label[onclick]:after{
-				content: "";
-				position: absolute;
-				top: 0;
-				left: 0;
-				width:0.3em;
-				height:1.5em;
-				background: #333;
-				transform: rotate(270deg);
 			}
 			#bag > nav > label[onclick]:hover{ /* 悬停白底黑字黑边框 */
 				color: rgb(116,116,116);
 				background-color: rgb(200,200,200);
-				border: 0.5vmax outset rgb(116,116,116);
+				border: 0.5vmax solid rgb(116,116,116);
 			}
+			
 			#bag > input:nth-of-type(1)[type="radio"][name="bag-nav"]#bag-nav-choice1:checked ~ nav > label:nth-of-type(1),
 			#bag > input:nth-of-type(2)[type="radio"][name="bag-nav"]#bag-nav-choice2:checked ~ nav > label:nth-of-type(2),
 			#bag > input:nth-of-type(3)[type="radio"][name="bag-nav"]#bag-nav-choice3:checked ~ nav > label:nth-of-type(3)
@@ -519,6 +501,9 @@ Copyright © 2020 by wzh
 			
 			#bag > section{
 				height: 100%;
+				
+				background-color: rgb(200,200,200);
+				border: 0.5vmax #fff outset;
 			}
 			/* section1:背包 */
 			#bag > section:nth-of-type(1) > #bag_deskgood{ /* deskgood旋转动画 */
@@ -587,8 +572,12 @@ Copyright © 2020 by wzh
 			<li><img/></li>
 			<li><img src="./img/more.png" onclick="state('bag');" /></li>
 		</ul>
-		
-		<!-- 0:命令方块 -->
+		<!-- 0:鼠标指针 -->
+		<div id="pointer" style="display: none;">
+			<div></div>
+			<div></div>
+		</div>
+		<!-- 1:命令方块 -->
 		<div id="command" style="z-index: 1;">
 			<textarea>
 deskgood.goY(10000*100);
@@ -599,7 +588,7 @@ deskgood.moveTo(0,10000*100);
 			<button onclick="state('command');">关闭</button>
 			<button onclick="run($('#command > textarea').val());">运行</button>
 		</div>
-		<!-- 0:背包 -->
+		<!-- 1:背包 -->
 		<div id="bag" data-display="flex" style="z-index: 1;">
 			<input type="radio" name="bag-nav" id="bag-nav-choice1" checked />
 			<section>
@@ -642,13 +631,8 @@ deskgood.moveTo(0,10000*100);
 				<label for="bag-nav-choice1">物品</label>
 				<label for="bag-nav-choice2">状态</label>
 				<label for="bag-nav-choice3">智造</label>
-				<label onclick="state('bag');">关闭</label>
+				<label onclick="state('bag');">╳</label>
 			</nav>
-		</div>
-		<!-- 0:鼠标指针 -->
-		<div id="pointer" style="display: none;">
-			<div></div>
-			<div></div>
 		</div>
 		<!-- 1:遮罩 -->
 		<h1 id="help" style="z-index: 1; display: none;">

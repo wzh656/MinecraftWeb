@@ -218,7 +218,7 @@ let backgroundColor = new ColorUpdater({
 		t: {s: ColorUpdater.dateToNumber(18), d: 0.5},
 		v: {s: 250, i: -230}
 	}]
-}, renderer.setClearColor).update().autoUpdate(time, 20*1000);
+}, renderer.setClearColor).update().autoUpdate(20*1000);
 let ambientColor = new ColorUpdater({
 	//Red红色
 	R:[{ //日出
@@ -246,7 +246,7 @@ let ambientColor = new ColorUpdater({
 	}]
 }, (v)=>{
 	ambient.color = new THREE.Color(v);
-}).update().autoUpdate(time, 20*1000);
+}).update().autoUpdate(20*1000);
 /*function dateToNumber(h=0, m=0, s=0){
 	return (s/60+m)/60+h;
 }
