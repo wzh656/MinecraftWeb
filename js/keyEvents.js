@@ -90,6 +90,9 @@ document.addEventListener("keydown", function (e){
 		}
 		location.reload();
 	}
+	if (e.keyCode == 115){ //F4 录屏
+		record($("#game")[0], prompt("请输入欲录屏时长(s)")*1000);
+	}
 	
 	if (stop){
 		keydown.double_run = [];

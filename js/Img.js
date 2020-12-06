@@ -62,5 +62,14 @@ const Img = {
 			}
 		}
 		return canvas2;
+	},
+	download(url, name){
+		let a = $("<a></a>")
+			.attr("href", url)
+			.attr("download", name)
+			.css("display", "none");
+		$("body").append(a);
+		a[0].click();
+		a.remove();
 	}
 };

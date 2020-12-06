@@ -207,10 +207,7 @@ class ChunkMap{
 		let thing = new Block({
 			id,
 			attr
-		}).makeMaterial(template[id].block.material)
-			/*.makeMaterial()
-			.deleteTexture()*/
-			.makeMesh();
+		}).makeMesh();
 		this.add(
 			thing,
 			{
@@ -944,10 +941,7 @@ class ChunkMap{
 					columns[dx][dz-1] && columns[dx][dz-1][y].id
 				)){ //都没有方块
 					this.add(
-						columns[dx][dz][y]
-							.makeMaterial()
-							.deleteTexture()
-							.makeMesh(),
+						columns[dx][dz][y].makeMesh(),
 						{x, y, z}
 					);
 				}

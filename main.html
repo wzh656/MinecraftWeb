@@ -54,8 +54,8 @@ Copyright © 2020 by wzh
 			
 			/* 选择 */
 			::selection {
-			    color: #fff;
-			    background: #f9cc9d;
+				color: #fff;
+				background: #f9cc9d;
 			}
 			*{
 				/* 禁止复制选中 */
@@ -81,6 +81,43 @@ Copyright © 2020 by wzh
 				margin: 0;
 				overflow: hidden;
 				/* 隐藏body窗口区域滚动条 */
+			}
+			button{
+				font-weight: 400;
+				vertical-align: middle;
+				border: 1px solid #ced4da;
+				border-radius: 1vmax;
+				color: #212529;
+				background-color: #fff;
+				transition: color 0.3s, background-color 0.3s, border-color 0.3s;
+			}
+			button.success:hover{
+				color: #fff;
+				border-color: #007bff;
+				background-color: #007bff;
+				text-decoration: none;
+			}
+			button.info:hover{
+				color: #fff;
+				border-color: #46b8da;
+				background-color: #5bc0de;
+				text-decoration: none;
+			}
+			button.warn:hover{
+				color: #fff;
+				border-color: #eea236;
+				background-color: #f0ad4e;
+				text-decoration: none;
+			}
+			button.danger:hover{
+				color: #fff;
+				border-color: #d43f3a;
+				background-color: #d9534f;
+				text-decoration: none;
+			}
+			button.success:focus{
+				outline: 0;
+				box-shadow: 0 0 0 0.6vmax rgba(0,123,255,.25)
 			}
 			
 			h1{
@@ -585,8 +622,8 @@ deskgood.move(0,10000*100,0);
 deskgood.moveTo(0,10000*100);
 //这是注释，告诉你这三个命令都可以把deskgood送上万米高空</textarea>
 			<span>运行代码即表示同意《免责协议》：输入代码产生的一切后果由玩家自行承担</span><br/>
-			<button onclick="state('command');">关闭</button>
-			<button onclick="run($('#command > textarea').val());">运行</button>
+			<button onclick="state('command');" class="warn">关闭</button>
+			<button onclick="run($('#command > textarea').val());" class="success">运行</button>
 		</div>
 		<!-- 1:背包 -->
 		<div id="bag" data-display="flex" style="z-index: 1;">
@@ -784,12 +821,14 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 		){ //已锁定
 			console.warn("pointerLock yes");
 			stop = false;
-			time.stopTime();
+			if (time.stop) //true
+				time.stopTime();
 			$("#help").css("display", "none");
 		}else{ //未锁定
 			console.warn("pointerLock no");
 			stop = true;
-			time.stopTime();
+			if (!time.stop) //false
+				time.stopTime();
 			$("#help").css("display", "inline-block");
 			SQL_save();
 		}
@@ -948,6 +987,36 @@ Math.round = function (n, s){
 	if (s) return round(n*10**s)/10**s;
 	return round(n);
 };
+
+
+function record(canvas, time, opt={}){
+	const {fps=30, audioBitsPerSecond=128000, videoBitsPerSecond=8500000} = opt,
+		
+		chunks = new Set(),
+		mediaStream = canvas.captureStream(fps), // 设置帧频率(FPS)
+		mediaRecord = new MediaRecorder(mediaStream, {
+			audioBitsPerSecond,
+			videoBitsPerSecond
+		});
+	
+	mediaRecord.ondataavailable = (e)=>{ // 接收数据
+		chunks.add(e.data);
+		
+		console.log(e.data);
+		const videoBlob = new Blob(chunks, {type: "video/mp4"}),
+			videoUrl = window.URL.createObjectURL(videoBlob);
+		Img.download(videoUrl, "录屏.mp4");
+	};
+	
+	mediaRecord.start(); //开始录屏
+	setTimeout(()=>{
+		mediaRecord.stop(); //结束录屏
+		/* const videoBlob = new Blob(chunks, {type: "video/mp4"}),
+			videoUrl = window.URL.createObjectURL(videoBlob);
+		console.log(videoUrl);
+		Img.download(videoUrl, "录屏.mp4"); */
+	}, time);
+}
 </script>
 		<script src="./js/sendMessage.js"></script>
 		<script src="./js/playBGM.js"></script>

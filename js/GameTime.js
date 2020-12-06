@@ -3,7 +3,7 @@ class GameTime{
 		this.date = +new Date();
 		this.game = +new Date(3000,0,1,8);
 		this.speed = +speed;
-		this.stop = false;
+		this.stop = true;
 		this.onChangeSpeed = {};
 	}
 	getTime(){
@@ -12,19 +12,25 @@ class GameTime{
 	}
 	
 	setSpeed(speed=1){
+		let v0 = this.getSpeed();
 		this.game = +this.getTime();
 		this.date = +new Date();
 		this.speed = +speed;
-		for (let i of Object.values(this.onChangeSpeed))
-			i(speed);
+		let v1 = this.getSpeed();
+		if (v1 != v0)
+			for (let i of Object.values(this.onChangeSpeed))
+				i(v1);
 		return this;
 	}
 	stopTime(){
+		let v0 = this.getSpeed();
 		this.game = +this.getTime();
 		this.date = +new Date();
 		this.stop = !this.stop;
-		for (let i of Object.values(this.onChangeSpeed))
-			i(this.getSpeed());
+		let v1 = this.getSpeed();
+		if (v1 != v0)
+			for (let i of Object.values(this.onChangeSpeed))
+				i(v1);
 		return this;
 	}
 	getSpeed(){
@@ -48,7 +54,7 @@ class GameTime{
 		this.onChangeSpeed[key] = (speed)=>{
 			if (+new Date() <= time){
 				clearTimeout(id);
-				setTimeout( ()=>{
+				id = setTimeout( ()=>{
 					func( speed );
 					delete this.onChangeSpeed[key]; //删除监听
 				}, (time-new Date())/speed );
@@ -63,12 +69,10 @@ class GameTime{
 		while (this.onChangeSpeed[key])
 			key = Math.random().toString(36).substr(2);
 		
-		console.log(step, this.getSpeed(), step/this.getSpeed())
 		let id = setInterval( ()=>func( this.getSpeed() ), step/this.getSpeed() );
 		this.onChangeSpeed[key] = (speed)=>{
-			console.log(step, speed, step/speed)
 			clearInterval(id);
-			setInterval(()=>func(speed), step/speed);
+			id = setInterval(()=>func(speed), step/speed);
 		};
 		return [key, id];
 	}
