@@ -207,9 +207,9 @@ class ChunkMap{
 		let thing = new Block({
 			id,
 			attr
-		})
-			.makeMaterial()
-			.deleteTexture()
+		}).makeMaterial(template[id].block.material)
+			/*.makeMaterial()
+			.deleteTexture()*/
 			.makeMesh();
 		this.add(
 			thing,

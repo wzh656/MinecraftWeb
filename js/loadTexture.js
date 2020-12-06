@@ -21,6 +21,7 @@ let TEXTURES;
 				), j
 			);
 		}
+		block.makeMaterial();
 	}
 	// 所有block贴图加载完毕
 	setTimeout(function(){
