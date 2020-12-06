@@ -16,6 +16,7 @@ class ColorUpdater{
 				t[1].v.i / ( 1+pow( E,-(E/t[1].t.d)*(h-t[1].t.s) ) ) + t[1].v.s
 			));
 		}
+		console.log(+new Date(), colors)
 		if (typeof this.setter == "function"){
 			this.setter(`rgb(${colors.R},${colors.G},${colors.B})`);
 		}else{
@@ -25,14 +26,17 @@ class ColorUpdater{
 		}
 		return this;
 	}
-	autoUpdate(gameTime, step){
-		this.id = setInterval(()=>{this.update();}, step/gameTime.speed);
+	autoUpdate(step){
+		time.setInterval((speed)=>{
+			if(speed) this.update(); //时间流逝
+		}, step);
+		/*this.id = setInterval(()=>{this.update();}, step/gameTime.speed);
 		gameTime.addChangeSpeedListener((speed)=>{
 			if (speed){ //?0
 				clearInterval(this.id);
-				this.id = setInterval(()=>{this.update();}, step/speed);
+				this.id = setInterval(()=>this.update(), step/speed);
 			}
-		});
+		});*/
 		return this;
 	}
 	static dateToNumber(h=0, m=0, s=0){

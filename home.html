@@ -65,6 +65,46 @@
 		button,label,summary{
 			cursor: pointer;
 		}
+		
+		button{
+			font-weight: 400;
+			vertical-align: middle;
+			border: 1px solid #ced4da;
+			border-radius: 1vmax;
+			color: #212529;
+			background-color: #fff;
+			transition: color 0.3s, background-color 0.3s, border-color 0.3s;
+		}
+		button.success:hover{
+			color: #fff;
+			border-color: #007bff;
+			background-color: #007bff;
+			text-decoration: none;
+		}
+		button.info:hover{
+			color: #fff;
+			border-color: #17a2b8;
+			background-color: #17a2b8;
+			text-decoration: none;
+		}
+		button.warn:hover{
+			color: #fff;
+			border-color: #ffc107;
+			background-color: #ffc107;
+			text-decoration: none;
+		}
+		button.danger:hover{
+			color: #fff;
+			border-color: #dc3545;
+			background-color: #dc3545;
+			text-decoration: none;
+		}
+		button:focus{
+			outline: 0;
+			box-shadow: 0 0 0 0.6vmax rgba(0,123,255,.25)
+		}
+		
+		
 		.init{
 			position: absolute;
 			width: 100%;
@@ -113,6 +153,14 @@
 		.new_world input{
 			width: 66%;
 			font-size: 3vmax;
+			
+			border: 1px solid #ced4da;
+			border-radius: 0.3em;
+			padding: 0.3em;
+			line-height: 1.5;
+			color: #495057;
+			background-color: #fff;
+			background-clip: padding-box;
 		}
 		.new_world button{
 			width: 46vw;
@@ -126,7 +174,8 @@
 			text-align: left;
 		}
 		.more[open]{
-			border: 1px solid black;
+			/*border: 1px solid black;*/
+			padding-left: 1vw;
 			border-radius: 3px;
 			/* clear:both; */
 		}
@@ -169,23 +218,25 @@
 			transform: translateY(-50%);
 		}
 		</style>
+		
 		<script src="./js/modules/jquery.min.js"></script>
 		<script>
 		if (typeof(require) != "undefined")
 			window.$ = window.jQuery = require("./js/modules/jquery.min.js");
 		</script>
+		
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
 		<script>eruda.init();</script>
 		<script>new VConsole();</script>
 	</head>
 	<body>
-		<div class="init" style="display: flex;">
+		<section class="init" style="display: flex;">
 			<h1>我的世界</h1>
-			<button>新的世界<p>NEW WORLD</p></button>
-			<button>主页<p>ABOUT</p></button>
-		</div>
-		<div class="new_world" style="display: none;">
+			<button class="success">新的世界<p>NEW WORLD</p></button>
+			<button class="info">主页<p>ABOUT</p></button>
+		</section>
+		<section class="new_world" style="display: none;">
 			<h2>新的世界<p>NEW WORLD</p></h2>
 			<label for="seed">种子(seed)：</label><input name="seed" id="seed" placeholder="不输入则随机生成" autofocus />
 			<br/>
@@ -258,13 +309,13 @@
 					</div>
 				</div>
 				<div style="clear:both;">
-					<button onclick="reset();" style="clear:both;">重置</button>
+					<button onclick="reset();" class="danger" style="clear:both;">重置</button>
 				</div>
 				<br style="clear:both;" />
 			</details>
-			<button>取消<p>CANCEL</p></button>
-			<button>生成世界<p>OK</p></button>
-		</div>
+			<button class="warn">取消<p>CANCEL</p></button>
+			<button class="success">生成世界<p>OK</p></button>
+		</section>
 		<!-- <div style="display: none;">
 			<script language="javascript" src="http://count24.51yes.com/click.aspx?id=248466766&logo=12" charset="gb2312"></script>
 		</div> -->
