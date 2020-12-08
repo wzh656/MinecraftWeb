@@ -193,13 +193,14 @@ window.onresize = function(){
 /**
 * 背景
 */
+//clearColor
 let backgroundColor = new ColorUpdater({
 	//Red红色
 	R:[{ //日出
 		t: {s: ColorUpdater.dateToNumber(6), d: 0.5}, //时间time
 		v: {s: 10, i: 230} //取值范围
 	},{ //日落
-		t: {s: ColorUpdater.dateToNumber(18,10), d: 0.5},
+		t: {s: ColorUpdater.dateToNumber(18,5), d: 0.5},
 		v: {s: 240, i: -230}
 	}],
 	//Green绿色
@@ -215,17 +216,19 @@ let backgroundColor = new ColorUpdater({
 		t: {s: ColorUpdater.dateToNumber(6,10), d: 0.5},
 		v: {s: 20, i: 230}
 	},{ //日落
-		t: {s: ColorUpdater.dateToNumber(18), d: 0.5},
+		t: {s: ColorUpdater.dateToNumber(18,10), d: 0.5},
 		v: {s: 250, i: -230}
 	}]
 }, renderer.setClearColor).update().autoUpdate(20*1000);
+
+//ambientColor
 let ambientColor = new ColorUpdater({
 	//Red红色
 	R:[{ //日出
 		t: {s: ColorUpdater.dateToNumber(6), d: 0.5}, //时间time
 		v: {s: 20, i: 100} //取值范围
 	},{ //日落
-		t: {s: ColorUpdater.dateToNumber(18,10), d: 0.5},
+		t: {s: ColorUpdater.dateToNumber(18), d: 0.5},
 		v: {s: 120, i: -100}
 	}],
 	//Green绿色
@@ -241,7 +244,7 @@ let ambientColor = new ColorUpdater({
 		t: {s: ColorUpdater.dateToNumber(6,10), d: 0.5},
 		v: {s: 36, i: 100}
 	},{ //日落
-		t: {s: ColorUpdater.dateToNumber(18), d: 0.5},
+		t: {s: ColorUpdater.dateToNumber(18,10), d: 0.5},
 		v: {s: 136, i: -100}
 	}]
 }, (v)=>{

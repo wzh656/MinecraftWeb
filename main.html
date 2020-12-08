@@ -16,7 +16,7 @@ Copyright © 2020 by wzh
 		<title>我的世界</title>
 		
 		<!--icon-->
-		<link rel="icon" href="./img/icon.png" type="image/x-icon" />
+		<link href="./img/icon.png" rel="icon" type="image/x-icon"/>
 		
 		<!-- 异步fonts加载 -->
 		<script src="https://staticfile.qnssl.com/webfont/1.6.16/webfontloader.js"></script>
@@ -29,6 +29,7 @@ Copyright © 2020 by wzh
 			});
 		</script>
 		
+		<link href="./css/bootstrap.css" rel="stylesheet" type="text/css" />
 		<style>
 			/* 我的世界颜色：
 			按钮：(116,116,116),
@@ -130,226 +131,17 @@ Copyright © 2020 by wzh
 					0px -0.5px 0px #aaa; /*下*/
 			}
 			
-			/* 进度条 */
-			#progress{
-				font-size: 3vmax;
-				padding-top: 6.6vh;
-				/* animation-name: backgroundColor;
-				animation-duration: 1s;
-				animation-iteration-count: infinite; */
-				background-image: url(./img/loading.png);
-			}
-			/* @keyframes backgroundColor{
-				0%{
-					background-image: radial-gradient(#333, #112, #011);
-				}
-				25%{
-					background-image: radial-gradient(#555, #223, #122);
-				}
-				50%{
-					background-image: radial-gradient(#666, #334, #233);
-				}
-				75%{
-					background-image: radial-gradient(#888, #445, #344);
-				}
-				100%{
-					background-image: radial-gradient(#999, #556, #455);
-				}
-			} */
-			#progress > progress{
-				background-color: red;
-				width: 63vw;
-			}
-			#progress > progress::-webkit-progress-bar{
-				background-color: gray;
-				background-image: linear-gradient(45deg, black, gray, #aaa);
-			}
-			#progress > progress::-webkit-progress-value{
-				background-color: green;
-				background-image: repeating-linear-gradient(
-					135deg,
-					red 0vw,
-					orange 9vw,
-					yellow 18vw,
-					green 27vw,
-					blue 36vw,
-					indigo 45vw,
-					purple 54vw
-				);
-			}
-			
 			/* canvas */
 			#game{
 				height: 100% !important;
 				width: 100% !important;
 			}
 			
-			/* 遮罩 */
-			#help{
-				opacity: 0.5;
-				font-size: 3vmax;
-				padding-top: 6vh;
-				height: 94vh;
-			}
-			/* 指针 */
-			#pointer{
-				position: absolute;
-				width: 3.75vmax;
-				height: 3.75vmax;
-				left: 50%;
-				top: 50%;
-				transform: translate(-50%,-50%);
-				/* cursor: none; */
-			}
-			#pointer > div{
-				position: absolute;
-				background-color: rgba(255, 255, 255, 0.666666);
-				left: 50%;
-				top: 50%;
-				transform: translate(-50%,-50%);
-			}
-			#pointer > div:first-child{
-				width: 0.25vmax;
-				height: 3.75vmax;
-			}
-			#pointer > div:last-child{
-				width: 3.75vmax;
-				height: 0.25vmax;
-			}
+			////////////////////////////////////
 			
-			/* 横竖屏提示 */
-			@media not screen and (orientation:portrait){ /* 电脑 */
-				#warning{
-					display: none;
-				}
-			}
-			#warning{
-				font-size: 6.6vmax;
-				padding-top: 16.6vh;
-			}
-			#warning > button{
-				width: 80%;
-				/* height: 60px; */
-				position: relative;
-				top: 6vh;
-				font-size: 6vmax;
-			}
-			
-			/* 死亡 */
-			#die{
-				background-image: none;
-				background-color: rgba(200,0,0,0.392157);
-				font-size: 3.6vmax;
-				padding-top: 6vh;
-			}
-			#die p{
-				font-size: 0.36em;
-				margin: 0;
-			}
-			#die > header{
-				font-size: 5.6vmax;
-			}
-			#die > button{
-				width: 50%;
-				font-size: 6vmax;
-				/*font-family: hwxk, serif;*/
-			}
-			/*#die > .resaon{
-				font-family: zyyt, serif;
-			}*/
-			
-			/* 打印信息 */
-			printgroup{
-				position: absolute;
-				top: 16vh;
-				left: 0;
-				max-width: 16vw;
-				max-height: 86vh;
-				overflow-y: hidden;
-			}
-			printgroup > print{
-				display: block;
-				background-color: white;
-				opacity: 0.5;
-			}
-			/* 信息框 */
-			@keyframes messageIn{
-				from {
-					right: 0;
-					transform: translateX(100%);
-					opacity: 0;
-				}
-				to {
-					right: 1vw;
-					transform: translateX(0);
-					opacity: 1;
-				}
-			}
-			@keyframes messageOut{
-				from {
-					bottom: 16vh;
-					right: 1vw;
-					transform: translateY(0%);
-					opacity: 1;
-				}
-				to {
-					bottom: 0;
-					right: 1vw;
-					transform: translateY(100%);
-					opacity: 0;
-				}
-			}
-			message{
-				display: block;
-				position: absolute;
-				bottom: 16vh;
-				max-width: 36vw;
-				
-				background-color: #fffae8;
-				
-				padding: 1vmax;
-				border: 0.6vmax double #ede0d3;
-				border-radius: 1vmax;
-				
-				z-index: 6;
-			}
-			message[open]{
-				right: 1vw;
-				
-				animation: 3s messageIn;
-			}
-			message:not([open]){
-				bottom: 0;
-				right: 1vw;
-				transform: translateX(100%) translateY(100%);
-				opacity: 0;
-				
-				animation: 3s messageOut;
-			}
-			
-			/* 摇杆操纵 */
-			#control{
-				position: absolute;
-				bottom: 16%;
-				left: 10%;
-				background: #aaa;
-				opacity: 0.66;
-				width: 66px;
-				height: 66px;
-				border-radius: 50%;
-			}
-			#jump{
-				position: absolute;
-				bottom: 16%;
-				right: 10%;
-				background: #aaa;
-				opacity: 0.66;
-				width: 46px;
-				height: 46px;
-				border-radius: 50%;
-			}
-			
-			/* 物品栏 */
+			/*
+				0:物品栏
+			*/
 			#tools{
 				position: absolute;
 				bottom: 0;
@@ -378,7 +170,61 @@ Copyright © 2020 by wzh
 			
 			
 			/*
-				命令方块
+				0:十字准星
+			*/
+			#pointer{
+				position: absolute;
+				width: 3.75vmax;
+				height: 3.75vmax;
+				left: 50%;
+				top: 50%;
+				transform: translate(-50%,-50%);
+				/* cursor: none; */
+			}
+			#pointer > div{
+				position: absolute;
+				background-color: rgba(255, 255, 255, 0.666666);
+				left: 50%;
+				top: 50%;
+				transform: translate(-50%,-50%);
+			}
+			#pointer > div:first-child{
+				width: 0.25vmax;
+				height: 3.75vmax;
+			}
+			#pointer > div:last-child{
+				width: 3.75vmax;
+				height: 0.25vmax;
+			}
+			
+			
+			/*
+				0:摇杆操纵
+			*/
+			#control{
+				position: absolute;
+				bottom: 16%;
+				left: 10%;
+				background: #aaa;
+				opacity: 0.66;
+				width: 66px;
+				height: 66px;
+				border-radius: 50%;
+			}
+			#jump{
+				position: absolute;
+				bottom: 16%;
+				right: 10%;
+				background: #aaa;
+				opacity: 0.66;
+				width: 46px;
+				height: 46px;
+				border-radius: 50%;
+			}
+			
+			
+			/*
+				1:命令方块
 			*/
 			#command{
 				width: 80vw;
@@ -419,8 +265,9 @@ Copyright © 2020 by wzh
 				font-size: 3vmax;
 			}
 			
+			
 			/*
-				背包
+				1:背包
 			*/
 			#bag{
 				position: absolute;
@@ -536,6 +383,191 @@ Copyright © 2020 by wzh
 				width: 100%;
 				height: 100%;
 			}
+			
+			
+			/*
+				1:遮罩
+			*/
+			#help{
+				opacity: 0.5;
+				font-size: 3vmax;
+				padding-top: 6vh;
+				height: 94vh;
+			}
+			
+			
+			/*
+				2:打印信息
+			*/
+			printgroup{
+				position: absolute;
+				top: 16vh;
+				left: 0;
+				max-width: 16vw;
+				max-height: 86vh;
+				overflow-y: hidden;
+			}
+			printgroup > print{
+				display: block;
+				background-color: white;
+				opacity: 0.5;
+			}
+			
+			
+			/*
+				3:进度条
+			*/
+			#progress{
+				font-size: 3vmax;
+				padding-top: 6.6vh;
+				/* animation-name: backgroundColor;
+				animation-duration: 1s;
+				animation-iteration-count: infinite; */
+				background-image: url(./img/loading.png);
+			}
+			/* @keyframes backgroundColor{
+				0%{
+					background-image: radial-gradient(#333, #112, #011);
+				}
+				25%{
+					background-image: radial-gradient(#555, #223, #122);
+				}
+				50%{
+					background-image: radial-gradient(#666, #334, #233);
+				}
+				75%{
+					background-image: radial-gradient(#888, #445, #344);
+				}
+				100%{
+					background-image: radial-gradient(#999, #556, #455);
+				}
+			} */
+			#progress > progress{
+				background-color: red;
+				width: 63vw;
+			}
+			#progress > progress::-webkit-progress-bar{
+				background-color: gray;
+				background-image: linear-gradient(45deg, black, gray, #aaa);
+			}
+			#progress > progress::-webkit-progress-value{
+				background-color: green;
+				background-image: repeating-linear-gradient(
+					135deg,
+					red 0vw,
+					orange 9vw,
+					yellow 18vw,
+					green 27vw,
+					blue 36vw,
+					indigo 45vw,
+					purple 54vw
+				);
+			}
+			
+			
+			/*
+				4:竖屏警告
+			*/
+			@media not screen and (orientation:portrait){ /* 电脑 */
+				#warning{
+					display: none;
+				}
+			}
+			#warning{
+				font-size: 6.6vmax;
+				padding-top: 16.6vh;
+			}
+			#warning > button{
+				width: 80%;
+				/* height: 60px; */
+				position: relative;
+				top: 6vh;
+				font-size: 6vmax;
+			}
+			
+			
+			/*
+				5:死亡通知书
+			*/
+			#die{
+				background-image: none;
+				background-color: rgba(200,0,0,0.392157);
+				font-size: 3.6vmax;
+				padding-top: 6vh;
+			}
+			#die p{
+				font-size: 0.36em;
+				margin: 0;
+			}
+			#die > header{
+				font-size: 5.6vmax;
+			}
+			#die > button{
+				width: 50%;
+				font-size: 6vmax;
+				/*font-family: hwxk, serif;*/
+			}
+			/*#die > .resaon{
+				font-family: zyyt, serif;
+			}*/
+			
+			
+			/*
+				6:message
+			*/
+			@keyframes messageIn{
+				from {
+					right: 0;
+					transform: translateX(100%);
+					opacity: 0;
+				}
+				to {
+					right: 1vw;
+					transform: translateX(0);
+					opacity: 1;
+				}
+			}
+			@keyframes messageOut{
+				from {
+					bottom: 16vh;
+					right: 1vw;
+					transform: translateY(0%);
+					opacity: 1;
+				}
+				to {
+					bottom: 0;
+					right: 1vw;
+					transform: translateY(100%);
+					opacity: 0;
+				}
+			}
+			message{
+				display: block;
+				position: absolute;
+				bottom: 16vh;
+				max-width: 36vw;
+				
+				background-color: #fffae8;
+				
+				padding: 1vmax;
+				border: 0.6vmax double #ede0d3;
+				border-radius: 1vmax;
+				
+				z-index: 6;
+			}
+			message[open]{
+				right: 1vw;
+				
+				animation: 3s messageIn;
+			}
+			message:not([open]){
+				bottom: 0;
+				right: 1vw;
+				transform: translateX(100%) translateY(100%);
+				opacity: 0;
+				
+				animation: 3s messageOut;
+			}
 		</style>
 		
 		<script src="./js/modules/jquery.min.js"></script>
@@ -564,6 +596,7 @@ Copyright © 2020 by wzh
 	</head>
 	
 	<body bgcolor="black">
+		
 		<!-- 0:工具栏 -->
 		<ul id="tools">
 			<li><img/></li>
@@ -572,11 +605,15 @@ Copyright © 2020 by wzh
 			<li><img/></li>
 			<li><img src="./img/more.png" onclick="state('bag');" /></li>
 		</ul>
-		<!-- 0:鼠标指针 -->
+		
+		<!-- 0:十字准星 -->
 		<div id="pointer" style="display: none;">
 			<div></div>
 			<div></div>
 		</div>
+		
+		<!-- 0:摇杆操作 -->
+		
 		<!-- 1:命令方块 -->
 		<div id="command" style="z-index: 1;">
 			<textarea>
@@ -588,6 +625,7 @@ deskgood.moveTo(0,10000*100);
 			<button onclick="state('command');">关闭</button>
 			<button onclick="run($('#command > textarea').val());">运行</button>
 		</div>
+		
 		<!-- 1:背包 -->
 		<div id="bag" data-display="flex" style="z-index: 1;">
 			<input type="radio" name="bag-nav" id="bag-nav-choice1" checked />
@@ -634,6 +672,7 @@ deskgood.moveTo(0,10000*100);
 				<label onclick="state('bag');">╳</label>
 			</nav>
 		</div>
+		
 		<!-- 1:遮罩 -->
 		<h1 id="help" style="z-index: 1; display: none;">
 			WSAD/↑↓←→: 前后左右; 空格:跳跃; 连按W/ctrl+W:疾跑;<br/>
@@ -641,8 +680,10 @@ deskgood.moveTo(0,10000*100);
 			Pause-Break: 暂停切换; F10: 打开/关闭dat.gui;<br/>
 			请先点击任意处锁定鼠标以开始游戏
 		</h1>
+		
 		<!-- 2:print -->
 		<printgroup style="z-index: 2;"></printgroup>
+		
 		<!-- 3:进度条 -->
 		<h1 id="progress" style="z-index: 3;">
 			<header>贴图加载中……</header>
@@ -650,11 +691,14 @@ deskgood.moveTo(0,10000*100);
 			<span>0</span>%<br/>
 			<b>生命诚可贵，生命只有一次，请珍爱生命</b>
 		</h1>
+		
 		<!-- 4:竖屏警告 -->
 		<h1 id="warning" style="z-index: 4;">
-			推荐使用横屏运行（启用浏览器横屏或<a href="https://github.com/wzh656/MinecraftWeb/releases/download/v2.0.0-alpha/Minecraft.apk">下载apk（完整版）</a>）<br/>
-			<button onclick="this.parentElement.remove();">继续竖屏</button>
+			推荐使用横屏运行（请启用浏览器横屏或）<br/>
+			<button onclick="this.parentElement.remove();" class="success" >继续竖屏</button>
+			<button onclick="location.href='https://wzh656.github.io/Minecraft/';" class="info" >下载APK</button>
 		</h1>
+		
 		<!-- 5:死亡通知书 -->
 		<h1 id="die" style="z-index: 5; display: none;">
 			<header>游戏结束！<p>GAME OVER</p></header>
@@ -663,16 +707,21 @@ deskgood.moveTo(0,10000*100);
 			注：生命诚可贵，生命只有一次，请珍爱生命，deskgood无法重生，游戏即将关闭<br/>
 			<button onclick="exit();">结束<p>OVER</p></button>
 		</h1>
-		<audio id="bgm" perload loop style="display: none;" src="./music/1.m4a" ></audio>
-		<!--<audio id="bgm" autoplay perload loop style="display: none;" src="https://vdse.bdstatic.com/876934f28995e8042230ec598237c67e.mp4?authorization=bce-auth-v1/fb297a5cc0fb434c971b8fa103e8dd7b/2017-05-11T09:02:31Z/-1//ab5b458a478fae53b754e194ab270b96f23aa23ba71c2e63b06fc06d0543040c"></audio>-->
-		<!-- 流量统计 -->
+		
+		<!-- none:流量统计 -->
 		<div style="display: none;">
 			<script language="javascript" src="http://count24.51yes.com/click.aspx?id=248466766&logo=12" charset="gb2312"></script>
 		</div>
+		
 		<!-- 6:message -->
+		
 		<!-- 7:不支持js -->
 		<noscript><h1 style="z-index: 7;">你的浏览器不支持JavaScript，无法运行！</h1></noscript>
-
+		
+		<!-- bgm -->
+		<audio id="bgm" perload loop style="display: none;" src="./music/1.m4a" ></audio>
+		<!--<audio id="bgm" autoplay perload loop style="display: none;" src="https://vdse.bdstatic.com/876934f28995e8042230ec598237c67e.mp4?authorization=bce-auth-v1/fb297a5cc0fb434c971b8fa103e8dd7b/2017-05-11T09:02:31Z/-1//ab5b458a478fae53b754e194ab270b96f23aa23ba71c2e63b06fc06d0543040c"></audio>-->
+		
 <script src="./js/GameTime.js"></script>
 <script>
 if (false){

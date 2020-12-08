@@ -7,7 +7,7 @@
 		<title>我的世界</title>
 
 		<!--icon-->
-		<link rel="icon" href="./img/icon.png" type="image/x-icon"/>
+		<link href="./img/icon.png" rel="icon" type="image/x-icon"/>
 		
 		<!-- 异步fonts加载 -->
 		<script src="https://staticfile.qnssl.com/webfont/1.6.16/webfontloader.js"></script>
@@ -20,6 +20,7 @@
 			});
 		</script>
 		
+		<link href="./css/bootstrap.css" rel="stylesheet" type="text/css" />
 		<style>
 		.wf-active *{
 			font-family: zyyt, serif;
@@ -65,45 +66,6 @@
 		button,label,summary{
 			cursor: pointer;
 		}
-		
-		button{
-			font-weight: 400;
-			vertical-align: middle;
-			border: 1px solid #ced4da;
-			border-radius: 1vmax;
-			color: #212529;
-			background-color: #fff;
-			transition: color 0.3s, background-color 0.3s, border-color 0.3s;
-		}
-		button.success:hover{
-			color: #fff;
-			border-color: #007bff;
-			background-color: #007bff;
-			text-decoration: none;
-		}
-		button.info:hover{
-			color: #fff;
-			border-color: #17a2b8;
-			background-color: #17a2b8;
-			text-decoration: none;
-		}
-		button.warn:hover{
-			color: #fff;
-			border-color: #ffc107;
-			background-color: #ffc107;
-			text-decoration: none;
-		}
-		button.danger:hover{
-			color: #fff;
-			border-color: #dc3545;
-			background-color: #dc3545;
-			text-decoration: none;
-		}
-		button:focus{
-			outline: 0;
-			box-shadow: 0 0 0 0.6vmax rgba(0,123,255,.25)
-		}
-		
 		
 		.init{
 			position: absolute;
