@@ -1,21 +1,26 @@
 class ChunkMap{
 	constructor (size, seed, perloadLength){
-		//一区块大小
-		this.size = {};
-		this.size.x = Math.round(size[1].x - size[0].x)+1;
-		this.size.y = Math.round(size[1].y - size[0].y)+1;
-		this.size.z = Math.round(size[1].z - size[0].z)+1;
-		this.size[0] = {};
-		this.size[1] = {};
-		this.size[0].x = Math.round(size[0].x); //-8
-		this.size[0].y = Math.round(size[0].y); //0
-		this.size[0].z = Math.round(size[0].z); //-8
-		this.size[1].x = Math.round(size[1].x); //8
-		this.size[1].y = Math.round(size[1].y); //32
-		this.size[1].z = Math.round(size[1].z); //8
+		//区块大小
+		this.size = {
+			x: Math.round(size[1].x - size[0].x)+1,
+			y: Math.round(size[1].y - size[0].y)+1,
+			z: Math.round(size[1].z - size[0].z)+1,
+			0: {
+				x: Math.round(size[0].x), //-8
+				y: Math.round(size[0].y), //0
+				z: Math.round(size[0].z) //-8
+			},
+			1: {
+				x: Math.round(size[1].x), //8
+				y: Math.round(size[1].y), //256
+				z: Math.round(size[1].z) //8
+			}
+		};
 		
 		//所有方块
 		this.map = [];
+		//所有区块
+		this.chunks = [];
 		//已初始化的区块
 		this.initedChunk = [];
 		//活动区块（加载完毕）
@@ -1640,7 +1645,7 @@ class ChunkMap{
 			progressCallback,
 			finishCallback
 		} = opt;
-		let block = [];
+		let chunks = [];
 		for (let x=-length; x<=length; x+=map.size.x){
 			for (let z=-length; z<=length; z+=map.size.z){
 				let push = [
@@ -1670,89 +1675,81 @@ class ChunkMap{
 						)
 					)
 				];
-			}
-		}
-		for (let x of [-1,1,0]){
-			for (let z of [-1,1,0]){
-				let push = [
-					Math.round( (deskgood.pos.x + x*length)/100/map.size.x ),
-					Math.round( (deskgood.pos.z + z*length)/100/map.size.z ),
-					(
-						x>0 & z>0?
-							(Math.random()<0.5?
-								"x+1":"z+1"):
-						x>0 & z<0?
-							(Math.random()<0.5?
-								"x+1":"z+1"):
-						x<0 & z>0?
-							(Math.random()<0.5?
-								"x-1":"z+1"):
-						x<0 & z<0?
-							(Math.random()<0.5?
-								"x-1":"z-1"):
-						x > 0? "x+2":
-						x < 0? "x-2":
-						z > 0? "z+2":
-						z < 0? "z-2":
-						Math.random()<0.5?
-							(Math.random()<0.5?
-								"x+0":"x-0")
-							:
-							(Math.random()<0.5?
-								"z+0":"z-0")
-					)
-				];
 				let find = false;
-				for (let i in block){
-					if (block[i][0] == push[0] && block[i][1] == push[1]){ //相同
-						if (Number(block[i][2].slice(-1)) <= Number(push[2].slice(-1))) //block小
-							block[i] = push;
+				for (let i in chunks){
+					if (chunks[i][0] == push[0] && chunks[i][1] == push[1]){ //相同
+						/*if (Number(chunks[i][2].slice(-1)) <= Number(chunks[2].slice(-1))) //chunks小
+							chunks[i] = push;*/
 						find = true;
 						break;
 					}
 				}
 				if (!find)
-					block.push(push);
+					chunks.push(push);
 			}
 		}
 		
 		let loading=0, total=0; //当前正在加载 和 需加载总数
 		
-		for (let i in block){
+		if (!chunks.length){
+			if (finishCallback)
+				finishCallback();
+			return console.warn("chunk_perload chunks:", chunks);
+		}
+		
+		for (let i in chunks){
 			if (this.initedChunk.every(function(value, index, arr){
-				return value[0] != block[i][0] || value[1] != block[i][1];
+				return value[0] != chunks[i][0] || value[1] != chunks[i][1];
 			})){ //每个都不一样（不存在 & 不在加载中）
-				// this.initChunk(block[i][0], block[i][1]);
+				// this.initChunk(chunks[i][0], chunks[i][1]);
 				loading++;
-				this.loadChunkAsync(block[i][0], block[i][1], {
-					dir: block[i][2],
+				//用噪声填充区块
+				this.loadChunkAsync(chunks[i][0], chunks[i][1], {
+					dir: chunks[i][2],
 					progressCallback: (v)=>{
 						loading -= 1/(map.size.x);
 						if (progressCallback)
 							progressCallback((total-loading) / total); //反馈进度
 					},
 					finishCallback: ()=>{
+						if (!this.chunks[chunks[i][0]])
+							this.chunks[chunks[i][0]] = [];
+						if (!this.chunks[chunks[i][0]][chunks[i][1]])
+							this.chunks[chunks[i][0]][chunks[i][1]] = {};
+						this.chunks[chunks[i][0]][chunks[i][1]].weather = new Weather(
+							[
+								chunks[i][0]*map.size.x*100 +map.size[0].x,
+								chunks[i][1]*map.size.z*100 +map.size[0].z
+							],[
+								chunks[i][0]*map.size.x*100 +map.size[1].x,
+								chunks[i][1]*map.size.z*100 +map.size[1].z
+							],
+							Math.random()/5
+						);
+						this.chunks[chunks[i][0]][chunks[i][1]].weather.start_rain();
+						//更新区块
+						this.updateChunkAsync(chunks[i][0], chunks[i][1], {
+							breakTime: 36
+						});
 						if (loading < 1e-6 && finishCallback){ //完成所有
 							finishCallback();
 						}else if (progressCallback){
 							progressCallback((total-loading) / total); //反馈进度
 						}
-						this.updateChunkAsync(block[i][0], block[i][1], {
-							breakTime: 36
-						}); //更新区块
 					}
-				}); //用噪声填充区块
+				});
 			}
 		}
 		
 		for (let i of this.activeChunk)
 			if (
 				// (i[0] != 0 || i[1] != 0)&& //不是出生区块
-				block.every((value, index, arr)=>{
+				chunks.every((value, index, arr)=>{
 					return i[0] != value[0] || i[1] != value[1];
-				}) //不与任何block相等
+				}) //不与任何chunk相等
 			){
 				loading++;
+				//卸载区块
 				this.unloadChunkAsync(...i, {
 					breakTime: 36,
 					progressCallback: (v)=>{
@@ -1761,13 +1758,16 @@ class ChunkMap{
 							progressCallback((total-loading) / total); //反馈进度
 					},
 					finishCallback: ()=>{
+						this.chunks[chunks[i][0]][chunks[i][1]].weather.stop_rain();
+						delete this.chunks[chunks[i][0]][chunks[i][1]].weather;
+						delete this.chunks[chunks[i][0]][chunks[i][1]];
 						if (loading < 1e-6 && finishCallback){ //完成所有
 							finishCallback();
 						}else if (progressCallback){
 							progressCallback((total-loading) / total); //反馈进度
 						}
 					}
-				}); //卸载区块
+				});
 			}
 		
 		total = loading;

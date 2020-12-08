@@ -63,7 +63,7 @@ class GameTime{
 		while (this.onChangeSpeed[key])
 			key = Math.random().toString(36).substr(2);
 		
-		console.log(step, this.getSpeed(), step/this.getSpeed())
+		//console.log(step, this.getSpeed(), step/this.getSpeed())
 		let id = setInterval( ()=>func( this.getSpeed() ), step/this.getSpeed() );
 		this.onChangeSpeed[key] = (speed)=>{
 			console.log(step, speed, step/speed)
