@@ -678,15 +678,20 @@ let deskgood = {
 		map.addID(block.id, {x,y,z}, TEMPLATES);
 		
 		let attr = `'${JSON.stringify(map.get(x, y, z).attr).slice(1,-1)}'`,
-			xZ = Math.round(x/map.size.x),
-			zZ = Math.round(z/map.size.z);
-		for (let i in map.edit[xZ][zZ])
+			cX = Math.round(x/map.size.x),
+			cZ = Math.round(z/map.size.z);
+		map.chunks[cX][cX].edit = map.chunks[cX][cX].edit.filter(v =>
+			v.x != x &&
+			v.y != y &&
+			v.z != z
+		); //删除重复
+		/*for (let [i, item] of Object.entries(map.chunks[cX][cZ].edit) )
 			if (
-				map.edit[xZ][zZ].x == x &&
-				map.edit[xZ][zZ].y == y &&
-				map.edit[xZ][zZ].z == z
-			) map.edit[xZ][zZ].splice(i,1); //删除重复
-		map.edit[Math.round(x/map.size.x)][Math.round(z/map.size.z)].push({
+				item.x == x &&
+				item.y == y &&
+				item.z == z
+			) map.chunks[cX][cX].edit.splice(i,1); //删除重复*/
+		map.chunks[cX][cZ].edit.push({
 			x,
 			y,
 			z,
@@ -726,15 +731,20 @@ let deskgood = {
 		
 		map.delete(x, y, z); //删除方块
 		
-		let xZ = Math.round(x/map.size.x),
-			zZ = Math.round(z/map.size.z);
-		for (let i in map.edit[xZ][zZ])
+		let cX = Math.round(x/map.size.x),
+			cZ = Math.round(z/map.size.z);
+		map.chunks[cX][cX].edit = map.chunks[cX][cX].edit.filter(v =>
+			v.x != x &&
+			v.y != y &&
+			v.z != z
+		); //删除重复
+		/*for (let [i, item] of Object.entries(map.chunks[cX][cZ].edit) )
 			if (
-				map.edit[xZ][zZ].x == x &&
-				map.edit[xZ][zZ].y == y &&
-				map.edit[xZ][zZ].z == z
-			) map.edit[xZ][zZ].splice(i,1); //删除重复
-		map.edit[Math.round(x/map.size.x)][Math.round(z/map.size.z)].push({
+				item.x == x &&
+				item.y == y &&
+				item.z == z
+			) map.chunks[cX][cZ].edit.splice(i,1); //删除重复*/
+		map.chunks[cX][cZ].edit.push({
 			x,
 			y,
 			z,

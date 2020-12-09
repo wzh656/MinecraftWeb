@@ -62,6 +62,16 @@ let map = new ChunkMap([
 		min: -0.99,
 		max: 0.01,
 		q: 1
-	}
+	},
+	weatherRain: JSON.parse(localStorage.getItem("我的世界_weatherRain")) || {
+		min: -0.6, // 66%不下雨
+		max: 0.3,
+		q: 666,
+		error:{
+			min: -0.1,
+			max: 0.1,
+			q: 16
+		}
+	},
 }, 6*100);
 document.title = "我的世界:"+map.seed.seed||"读取数据失败";

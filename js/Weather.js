@@ -69,7 +69,7 @@ class Weather{
 		return this.rain_id;
 	}
 	
-	stop_rain(){
+	clear_rain(){
 		clearInterval(this.rain_id);
 		for (let i in this.rain_sys){
 			this.rain_sys[i].material.dispose(); //清除内存
