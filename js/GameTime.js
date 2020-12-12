@@ -1,9 +1,9 @@
 class GameTime{
-	constructor (speed=1){
+	constructor (speed=1, stop=true){
 		this.date = +new Date();
 		this.game = +new Date(3000,0,1,8);
 		this.speed = +speed;
-		this.stop = true;
+		this.stop = stop;
 		this.onChangeSpeed = {};
 	}
 	getTime(){
@@ -37,10 +37,16 @@ class GameTime{
 		return this.stop? 0: this.speed;
 	}
 	
+	
 	addChangeSpeedListener(key, func){
 		this.onChangeSpeed[key] = func;
 		return this;
 	}
+	removeChangeSpeedListener(key){
+		delete this.onChangeSpeed[key];
+		return this;
+	}
+	
 	setTimeout(func, delay){
 		let time = +new Date()+delay,
 			key = Math.random().toString(36).substr(2); //随机生成key
@@ -64,11 +70,13 @@ class GameTime{
 		};
 		return [key, id];
 	}
+	
 	setInterval(func, step){
 		let key = Math.random().toString(36).substr(2);
 		while (this.onChangeSpeed[key])
 			key = Math.random().toString(36).substr(2);
 		
+		//console.log(step, this.getSpeed(), step/this.getSpeed())
 		let id = setInterval( ()=>func( this.getSpeed() ), step/this.getSpeed() );
 		this.onChangeSpeed[key] = (speed)=>{
 			clearInterval(id);

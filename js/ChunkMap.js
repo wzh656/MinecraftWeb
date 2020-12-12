@@ -1,27 +1,30 @@
 class ChunkMap{
 	constructor (size, seed, perloadLength){
-		//一区块大小
-		this.size = {};
-		this.size.x = Math.round(size[1].x - size[0].x)+1;
-		this.size.y = Math.round(size[1].y - size[0].y)+1;
-		this.size.z = Math.round(size[1].z - size[0].z)+1;
-		this.size[0] = {};
-		this.size[1] = {};
-		this.size[0].x = Math.round(size[0].x); //-8
-		this.size[0].y = Math.round(size[0].y); //0
-		this.size[0].z = Math.round(size[0].z); //-8
-		this.size[1].x = Math.round(size[1].x); //8
-		this.size[1].y = Math.round(size[1].y); //32
-		this.size[1].z = Math.round(size[1].z); //8
+		//区块大小
+		this.size = {
+			x: Math.round(size[1].x - size[0].x)+1,
+			y: Math.round(size[1].y - size[0].y)+1,
+			z: Math.round(size[1].z - size[0].z)+1,
+			0: {
+				x: Math.round(size[0].x), //-8
+				y: Math.round(size[0].y), //0
+				z: Math.round(size[0].z) //-8
+			},
+			1: {
+				x: Math.round(size[1].x), //8
+				y: Math.round(size[1].y), //256
+				z: Math.round(size[1].z) //8
+			}
+		};
 		
 		//所有方块
 		this.map = [];
+		//所有区块信息(state, edit, weather)
+		this.chunks = [];
 		//已初始化的区块
 		this.initedChunk = [];
 		//活动区块（加载完毕）
 		this.activeChunk = [];
-		//区块编辑情况
-		this.edit = [];
 		//区块预加载范围
 		this.perloadLength = perloadLength;
 		//种子设置
@@ -88,6 +91,16 @@ class ChunkMap{
 						min: seed.leavesScale.error.min,
 						q: seed.leavesScale.error.q
 					}
+				},
+				wR: {
+					max: seed.weatherRain.max,
+					min: seed.weatherRain.min,
+					q: seed.weatherRain.q,
+					e: {
+						max: seed.weatherRain.error.max,
+						min: seed.weatherRain.error.min,
+						q: seed.weatherRain.error.q
+					}
 				}
 			};
 			this.seed.noise = new SimplexNoise(this.seed.seed);
@@ -117,6 +130,11 @@ class ChunkMap{
 			this.seed.lS.b = (this.seed.lS.max + this.seed.lS.min)/2;
 			this.seed.lS.e.k = (this.seed.lS.e.max - this.seed.lS.e.min)/2;
 			this.seed.lS.e.b = (this.seed.lS.e.max + this.seed.lS.e.min)/2;
+			
+			this.seed.wR.k = (this.seed.wR.max - this.seed.wR.min)/2;
+			this.seed.wR.b = (this.seed.wR.max + this.seed.wR.min)/2;
+			this.seed.wR.e.k = (this.seed.wR.e.max - this.seed.wR.e.min)/2;
+			this.seed.wR.e.b = (this.seed.wR.e.max + this.seed.wR.e.min)/2;
 		}
 	}
 	
@@ -247,8 +265,8 @@ class ChunkMap{
 			return;
 		let visibleValue;
 		if (thisBlock === undefined){ //未加载
-			let [xZ, zZ] = [Math.round(x/map.size.x), Math.round(z/map.size.z)], //所属区块(Chunk)
-				edit = this.edit[xZ] && this.edit[xZ][zZ],
+			let [cX, cZ] = [Math.round(x/map.size.x), Math.round(z/map.size.z)], //所属区块(Chunk)
+				edit = this.chunks[cX] && this.chunks[cX][cZ] && this.chunks[cX][cZ].edit,
 				get = new Block( this.perGet(x, y, z, edit||[]) ),
 				noTransparent = get.id && get.get("attr", "block", "noTransparent");
 			visibleValue = [
@@ -261,7 +279,7 @@ class ChunkMap{
 				// 没有方块 或 有方块非透明 则显示  或  自身透明 也显示
 			];
 			if (b) console.warn(thisBlock,visibleValue)
-			if (visibleValue.some(v => v) && this.initedChunk.some(v => v[0]==xZ && v[1]==zZ)){ //不可隐藏（有面true） and 在加载区块内
+			if (visibleValue.some(v => v) && this.initedChunk.some(v => v[0]==cX && v[1]==cZ)){ //不可隐藏（有面true） and 在加载区块内
 				this.addID(get.id, {
 					x,
 					y,
@@ -288,9 +306,9 @@ class ChunkMap{
 		}
 		
 		/*if (thisBlock === undefined){ //未加载
-			let [xZ, zZ] = [x/map.size.x, z/map.size.z].map(Math.round); //所属区块(Chunk)
-			if (visibleValue.some(v => v) && this.initedChunk.some(v => v[0]==xZ && v[1]==zZ)){ //不可隐藏（有面true） and 在加载区块内
-				let edit = this.edit[xZ] && this.edit[xZ][zZ];
+			let [cX, cZ] = [x/map.size.x, z/map.size.z].map(Math.round); //所属区块(Chunk)
+			if (visibleValue.some(v => v) && this.initedChunk.some(v => v[0]==cX && v[1]==cZ)){ //不可隐藏（有面true） and 在加载区块内
+				let edit = this.edit[cX] && this.edit[cX][cZ];
 				let get = this.perGet(x, y, z, edit||[]);
 				this.addID(get.id, {
 					x,
@@ -524,12 +542,27 @@ class ChunkMap{
 		// x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 		// console.warn("load", x, z)
 		
+		for (let i=edit.length-1; i>=0; i--){
+			const value = edit[i];
+			if (
+				value.x == x &&
+				value.y == y &&
+				value.z == z
+			){ //被编辑
+				return {
+					id: value.id,
+					attr: value.attr
+				};
+			}
+		} //未编辑
+		
 		let height = sNoise.height(this.seed.noise, this.seed.h, x, z);
-		if (height < this.size[0].y){
+		height = Math.max( this.size[0].y, Math.min(height, this.size[1].y) );
+		/*if (height < this.size[0].y){
 			height = this.size[0].y;
 		}else if (height > this.size[1].y){
 			height = this.size[1].y;
-		}
+		}*/
 		/* let sNoise = ( t.noise.more3D(0.6, x/t.h.q, z/t.h.q, 3)+
 		t.noise.more3D(-3.1415926, x/t.h.q, z/t.h.q, 3)+
 		t.noise.more3D(54.782, x/t.h.q, z/t.h.q, 3) )/3;
@@ -549,28 +582,26 @@ class ChunkMap{
 		// let height = t.noise.noise3D(0.6, x/t.h.q, z/t.h.q) *t.h.de + t.h.ave;
 		
 		// let grass = false;
-		let type = sNoise.type(this.seed.noise, this.seed.t, x, z);
+		let type = sNoise.type(this.seed.noise, this.seed.t, x, z),
 		// 90%+ 高原（草木不生，积雪覆盖）
 		// 70%+ 高山（无树，有草）
 		// 26+ 丘陵（树）
-		let treeTop = null; //保留最高树干坐标
-		let earth = height - height * sNoise.dirt(this.seed.noise, this.seed.d, x, z);
-		let treeHeight = height + sNoise.treeHeight(this.seed.noise, this.seed.tH, x, z);
+			//treeTop = null, //保留最高树干坐标
+			earth = height - height * sNoise.dirt(this.seed.noise, this.seed.d, x, z),
+			treeHeight = height + sNoise.treeHeight(this.seed.noise, this.seed.tH, x, z),
+			leaves = [+Infinity, -Infinity]; //(min, max]
 		
-		for (let i=edit.length-1; i>=0; i--){
-			let value = edit[i];
-			if (
-				value.x == x &&
-				value.y == y &&
-				value.z == z
-			){ //被编辑
-				return {
-					id: value.id,
-					attr: value.attr
-				};
+		for ( let [dx,dz] of [[1,0], [-1,0], [0,1],[0,-1]] ){
+			let tH = sNoise.treeHeight(this.seed.noise, this.seed.tH, x+dx, z+dz);
+			if ( tH ){ //有树
+				let lH = tH * sNoise.leavesScale(this.seed.noise, this.seed.lS, x+dz, z+dz), //叶高
+					h = sNoise.height(this.seed.noise, this.seed.h, x+dx, z+dz); //底面高度
+				h = Math.max( this.size[0].y, Math.min(h, this.size[1].y) );
+				leaves[1] = Math.max(leaves[1], h+tH);
+				leaves[0] = Math.min(leaves[0], h+tH-lH);
+				// console.log(`h:${h}, treeH:${tH}, leavesH:${lH}`, leaves)
 			}
 		}
-		//未编辑
 		
 		/* let earth = height - height * (t.noise.more3D(6.6, x/t.s.q, z/t.s.q, 6) *t.s.k +t.s.b)+
 		t.noise.more3D(-52.6338, x/t.s.e.q, z/t.s.e.q, 3) *t.s.e.k +t.s.e.b; */
@@ -587,9 +618,13 @@ class ChunkMap{
 					treeHeight = height;
 				
 				if (y > treeHeight){
-					id = 0; // 空气/真空 (null)
+					if (y <= leaves[1] && y > leaves[0]){
+						id = 8; //树叶
+					}else{
+						id = 0; // 空气/真空 (null)
+					}
 				}else if (y > height){
-					if (!treeTop) treeTop = y;
+					//if (!treeTop) treeTop = y;
 					id = 7.1; //橡木
 				}else if (y == Math.floor(height) && !(height > 0.9*this.size[1].y)){ // 90%+ 高原（草木不生，积雪覆盖）
 					if (sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
@@ -623,9 +658,13 @@ class ChunkMap{
 				} */
 				
 				if (y > height){
-					id = 0; // 空气/真空 (null)
+					if (y <= leaves[1] && y > leaves[0]){
+						id = 8; //树叶
+					}else{
+						id = 0; // 空气/真空 (null)
+					}
 				}/* else if (y > height){
-					if (!treeTop) treeTop = y;
+					//if (!treeTop) treeTop = y;
 					id = 7.1; //橡木
 				} */else if (y == Math.floor(height) && !(height > 0.9*this.size[1].y)){ // 90%+ 高原（草木不生，积雪覆盖）
 					if (sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
@@ -653,7 +692,11 @@ class ChunkMap{
 			case 2: //沙漠
 				
 				if (y > height){
-					id = 0; // 空气/真空 (null)
+					if (y <= leaves[1] && y > leaves[0]){
+						id = 8; //树叶
+					}else{
+						id = 0; // 空气/真空 (null)
+					}
 				}else if (y > earth){
 					id = 6; //沙子
 				}else{
@@ -677,13 +720,14 @@ class ChunkMap{
 		// [x, z] = [Math.round(x), Math.round(z)]; //规范化
 		// console.warn("load", x, z)
 		
-		let column = [];
-		let height = sNoise.height(this.seed.noise, this.seed.h, x, z);
-		if (height < this.size[0].y){
+		let column = [],
+			height = sNoise.height(this.seed.noise, this.seed.h, x, z);
+		height = Math.max( this.size[0].y, Math.min(height, this.size[1].y) );
+		/*if (height < this.size[0].y){
 			height = this.size[0].y;
 		}else if (height > this.size[1].y){
 			height = this.size[1].y;
-		}
+		}*/
 		/* let sNoise = ( t.noise.more3D(0.6, x/t.h.q, z/t.h.q, 3)+
 		t.noise.more3D(-3.1415926, x/t.h.q, z/t.h.q, 3)+
 		t.noise.more3D(54.782, x/t.h.q, z/t.h.q, 3) )/3;
@@ -703,18 +747,31 @@ class ChunkMap{
 		// let height = t.noise.noise3D(0.6, x/t.h.q, z/t.h.q) *t.h.de + t.h.ave;
 		
 		// let grass = false;
-		let type = sNoise.type(this.seed.noise, this.seed.t, x, z);
+		let type = sNoise.type(this.seed.noise, this.seed.t, x, z),
 		// 90%+ 高原（草木不生，积雪覆盖）
 		// 70%+ 高山（无树，有草）
 		// 26+ 丘陵（树）
-		let treeTop = null; //保留最高树干坐标
-		let earth = height - height * sNoise.dirt(this.seed.noise, this.seed.d, x, z);
-		let treeHeight = height + sNoise.treeHeight(this.seed.noise, this.seed.tH, x, z);
+			//treeTop = null, //保留最高树干坐标
+			earth = height - height * sNoise.dirt(this.seed.noise, this.seed.d, x, z),
+			treeHeight = height + sNoise.treeHeight(this.seed.noise, this.seed.tH, x, z),
+			leaves = [+Infinity, -Infinity]; //(min, max]
+		
+		for ( let [dx,dz] of [[1,0], [-1,0], [0,1],[0,-1]] ){
+			let tH = sNoise.treeHeight(this.seed.noise, this.seed.tH, x+dx, z+dz);
+			if ( tH ){ //有树
+				let lH = tH * sNoise.leavesScale(this.seed.noise, this.seed.lS, x+dz, z+dz), //叶高
+					h = sNoise.height(this.seed.noise, this.seed.h, x+dx, z+dz); //底面高度
+				h = Math.max( this.size[0].y, Math.min(h, this.size[1].y) );
+				leaves[1] = Math.max(leaves[1], h+tH);
+				leaves[0] = Math.min(leaves[0], h+tH-lH);
+				// console.log(`h:${h}, treeH:${tH}, leavesH:${lH}`, leaves)
+			}
+		}
+		
 		for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
 			
-			let edited = false;
 			for (let i = edit.length-1; i>=0; i--){
-				let value = edit[i];
+				const value = edit[i];
 				if (
 					value.x == x &&
 					value.y == dy &&
@@ -724,10 +781,9 @@ class ChunkMap{
 						id: value.id,
 						attr: value.attr
 					});
-					edited = true;
+					continue;
 				}
 			}
-			if (edited) continue;
 			//未编辑
 			
 			/* let earth = height - height * (t.noise.more3D(6.6, x/t.s.q, z/t.s.q, 6) *t.s.k +t.s.b)+
@@ -745,9 +801,13 @@ class ChunkMap{
 						treeHeight = height;
 					
 					if (dy > treeHeight){
-						id = 0; // 空气/真空 (null)
+						if (dy <= leaves[1] && dy > leaves[0]){
+							id = 8; //树叶
+						}else{
+							id = 0; // 空气/真空 (null)
+						}
 					}else if (dy > height){
-						if (!treeTop) treeTop = dy;
+						//if (!treeTop) treeTop = dy;
 						id = 7.1; //橡木
 					}else if (dy == Math.floor(height) && !(height > 0.9*this.size[1].y)){ // 90%+ 高原（草木不生，积雪覆盖）
 						if (sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
@@ -779,9 +839,13 @@ class ChunkMap{
 					} */
 					
 					if (dy > height){
-						id = 0; // 空气/真空 (null)
+						if (dy <= leaves[1] && dy > leaves[0]){
+							id = 8; //树叶
+						}else{
+							id = 0; // 空气/真空 (null)
+						}
 					}/* else if (dy > height){
-						if (!treeTop) treeTop = dy;
+						//if (!treeTop) treeTop = dy;
 						id = 7.1; //橡木
 					} */else if (dy == Math.floor(height) && !(height > 0.9*this.size[1].y)){ // 90%+ 高原（草木不生，积雪覆盖）
 						if (sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
@@ -809,16 +873,21 @@ class ChunkMap{
 				case 2: //沙漠
 					
 					if (dy > height){
-						id = 0; // 空气/真空 (null)
+						if (dy <= leaves[1] && dy > leaves[0]){
+							id = 8; //树叶
+						}else{
+							id = 0; // 空气/真空 (null)
+						}
 					}else if (dy > earth){
 						id = 6; //沙子
+						//grass = true;
 					}else{
-						/* if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
+						/*if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
 							id = 6; //沙子
 							grass = true;
-						}else{ */
+						}else{*/
 							id = 5; //石头
-						// }
+						//}
 					}
 					break;
 				
@@ -969,9 +1038,7 @@ class ChunkMap{
 				console.log("edit(sql):", edit);
 				
 				//保存edit
-				if (!this.edit[x])
-					this.edit[x] = [];
-				this.edit[x][z] = edit;
+				this.chunks[x][z].edit = edit;
 				
 				let columns = this.perGetChunk(x, z, edit);
 				
@@ -1011,9 +1078,7 @@ class ChunkMap{
 		
 		let func = (edit)=>{
 			//保存edit
-			if (!this.edit[x])
-				this.edit[x] = [];
-			this.edit[x][z] = edit;
+			this.chunks[x][z].edit = edit;
 			// console.log("save edit", x, z, edit)
 			
 			if (!columns)
@@ -1634,7 +1699,7 @@ class ChunkMap{
 			progressCallback,
 			finishCallback
 		} = opt;
-		let block = [];
+		let chunks = [];
 		for (let x=-length; x<=length; x+=map.size.x){
 			for (let z=-length; z<=length; z+=map.size.z){
 				let push = [
@@ -1664,89 +1729,94 @@ class ChunkMap{
 						)
 					)
 				];
-			}
-		}
-		for (let x of [-1,1,0]){
-			for (let z of [-1,1,0]){
-				let push = [
-					Math.round( (deskgood.pos.x + x*length)/100/map.size.x ),
-					Math.round( (deskgood.pos.z + z*length)/100/map.size.z ),
-					(
-						x>0 & z>0?
-							(Math.random()<0.5?
-								"x+1":"z+1"):
-						x>0 & z<0?
-							(Math.random()<0.5?
-								"x+1":"z+1"):
-						x<0 & z>0?
-							(Math.random()<0.5?
-								"x-1":"z+1"):
-						x<0 & z<0?
-							(Math.random()<0.5?
-								"x-1":"z-1"):
-						x > 0? "x+2":
-						x < 0? "x-2":
-						z > 0? "z+2":
-						z < 0? "z-2":
-						Math.random()<0.5?
-							(Math.random()<0.5?
-								"x+0":"x-0")
-							:
-							(Math.random()<0.5?
-								"z+0":"z-0")
-					)
-				];
 				let find = false;
-				for (let i in block){
-					if (block[i][0] == push[0] && block[i][1] == push[1]){ //相同
-						if (Number(block[i][2].slice(-1)) <= Number(push[2].slice(-1))) //block小
-							block[i] = push;
+				for (let i in chunks){
+					if (chunks[i][0] == push[0] && chunks[i][1] == push[1]){ //相同
+						/*if (Number(chunks[i][2].slice(-1)) <= Number(chunks[2].slice(-1))) //chunks小
+							chunks[i] = push;*/
 						find = true;
 						break;
 					}
 				}
 				if (!find)
-					block.push(push);
+					chunks.push(push);
 			}
 		}
 		
 		let loading=0, total=0; //当前正在加载 和 需加载总数
 		
-		for (let i in block){
+		if (!chunks.length){
+			if (finishCallback)
+				finishCallback();
+			return console.warn("chunk_perload chunks:", chunks);
+		}
+		
+		for (let i in chunks){
+			const [cX, cZ] = chunks[i];
 			if (this.initedChunk.every(function(value, index, arr){
-				return value[0] != block[i][0] || value[1] != block[i][1];
+				return value[0] != cX || value[1] != cZ;
 			})){ //每个都不一样（不存在 & 不在加载中）
-				// this.initChunk(block[i][0], block[i][1]);
+				// this.initChunk(cX, cZ);
 				loading++;
-				this.loadChunkAsync(block[i][0], block[i][1], {
-					dir: block[i][2],
+				
+				if (!this.chunks[cX])
+					this.chunks[cX] = [];
+				if (!this.chunks[cX][cZ])
+					this.chunks[cX][cZ] = {};
+				//用噪声填充区块
+				this.loadChunkAsync(cX, cZ, {
+					dir: chunks[i][2],
 					progressCallback: (v)=>{
 						loading -= 1/(map.size.x);
 						if (progressCallback)
 							progressCallback((total-loading) / total); //反馈进度
 					},
 					finishCallback: ()=>{
+						this.chunks[cX][cZ].state = true; //加载完毕
+						this.chunks[cX][cZ].edit = [];
+						this.chunks[cX][cZ].weather = new Weather(
+							[
+								cX *map.size.x*100 +map.size[0].x,
+								cZ *map.size.z*100 +map.size[0].z
+							],[
+								cX *map.size.x*100 +map.size[1].x,
+								cZ *map.size.z*100 +map.size[1].z
+							],
+							sNoise.weatherRain( this.seed.noise, this.seed.wR, cX*map.size.x, cZ*map.size.z, time.getTime() )
+						);
+						console.log("weather:", sNoise.weatherRain( this.seed.noise, this.seed.wR, cX*map.size.x, cZ*map.size.z, time.getTime()/1000/60 ))
+						time.setInterval((speed)=>{
+							if (!speed) return;
+							console.log("weather:", sNoise.weatherRain( this.seed.noise, this.seed.wR, cX*map.size.x, cZ*map.size.z, time.getTime()/1000/3600 ))
+							this.chunks[cX][cZ].weather.rain =
+								sNoise.weatherRain( this.seed.noise, this.seed.wR, cX*map.size.x, cZ*map.size.z, time.getTime()/1000/3600 );
+						}, 60*1000)
+						this.chunks[cX][cZ].weather.start_rain();
+						
+						//更新区块
+						this.updateChunkAsync(cX, cZ, {
+							breakTime: 36
+						});
 						if (loading < 1e-6 && finishCallback){ //完成所有
 							finishCallback();
 						}else if (progressCallback){
 							progressCallback((total-loading) / total); //反馈进度
 						}
-						this.updateChunkAsync(block[i][0], block[i][1], {
-							breakTime: 36
-						}); //更新区块
 					}
-				}); //用噪声填充区块
+				});
 			}
 		}
 		
 		for (let i of this.activeChunk)
 			if (
 				// (i[0] != 0 || i[1] != 0)&& //不是出生区块
-				block.every((value, index, arr)=>{
+				chunks.every((value, index, arr)=>{
 					return i[0] != value[0] || i[1] != value[1];
-				}) //不与任何block相等
+				}) //不与任何chunk相等
 			){
 				loading++;
+				const [cX, cZ] = i;
+				//卸载区块
 				this.unloadChunkAsync(...i, {
 					breakTime: 36,
 					progressCallback: (v)=>{
@@ -1755,13 +1825,16 @@ class ChunkMap{
 							progressCallback((total-loading) / total); //反馈进度
 					},
 					finishCallback: ()=>{
+						this.chunks[cX][cZ].weather.stop_rain();
+						delete this.chunks[cX][cZ].weather;
+						delete this.chunks[cX][cZ];
 						if (loading < 1e-6 && finishCallback){ //完成所有
 							finishCallback();
 						}else if (progressCallback){
 							progressCallback((total-loading) / total); //反馈进度
 						}
 					}
-				}); //卸载区块
+				});
 			}
 		
 		total = loading;

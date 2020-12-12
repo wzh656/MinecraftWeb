@@ -16,7 +16,7 @@ class ColorUpdater{
 				t[1].v.i / ( 1+pow( E,-(E/t[1].t.d)*(h-t[1].t.s) ) ) + t[1].v.s
 			));
 		}
-		
+		//console.log(+new Date(), colors)
 		if (typeof this.setter == "function"){
 			this.setter(`rgb(${colors.R},${colors.G},${colors.B})`);
 		}else{
