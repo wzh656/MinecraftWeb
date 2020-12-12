@@ -149,8 +149,8 @@ setInterval(function(){
 	
 	let x=0, y=0, z=0;
 	
-	if (keydown.key.size)
-		// console.log("keydown:", keydown.key);
+	/* if (keydown.key.size)
+		console.log("keydown:", keydown.key); */
 	
 	if ((keydown.key.has(87) | keydown.key.has(38)) & keydown.key.has(17)){ //control 按下
 		keydown.double_run = true;

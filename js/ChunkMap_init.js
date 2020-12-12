@@ -49,8 +49,8 @@ let map = new ChunkMap([
 		}
 	},
 	leavesScale: JSON.parse(localStorage.getItem("我的世界_leavesScale")) || {
-		min: 0.4,
-		max: 0.8,
+		min: 0.6,
+		max: 0.9,
 		q: 16,
 		error:{
 			min: -0.1,

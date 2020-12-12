@@ -802,6 +802,8 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 	document.body.appendChild(jump);
 	
 	stop = false;
+	if (time.stop)
+		time.stopTime();
 }else{ //电脑
 	device = false;
 	
@@ -849,12 +851,14 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 		){ //已锁定
 			console.warn("pointerLock yes");
 			stop = false;
-			time.stopTime();
+			if (time.stop)
+				time.stopTime();
 			$("#help").css("display", "none");
 		}else{ //未锁定
 			console.warn("pointerLock no");
 			stop = true;
-			time.stopTime();
+			if (!time.stop)
+				time.stopTime();
 			$("#help").css("display", "inline-block");
 			SQL_save();
 		}

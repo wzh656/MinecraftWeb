@@ -602,7 +602,7 @@ class ChunkMap{
 				h = Math.max( this.size[0].y, Math.min(h, this.size[1].y) );
 				leaves[1] = Math.max(leaves[1], h+tH);
 				leaves[0] = Math.min(leaves[0], h+tH-lH);
-				console.log(`h:${h}, treeH:${tH}, leavesH:${lH}`, leaves)
+				// console.log(`h:${h}, treeH:${tH}, leavesH:${lH}`, leaves)
 			}
 		}
 		
@@ -621,7 +621,7 @@ class ChunkMap{
 					treeHeight = height;
 				
 				if (y > treeHeight){
-					if (dy <= leaves[1] && dy > leaves[0]){
+					if (y <= leaves[1] && y > leaves[0]){
 						id = 8; //树叶
 					}else{
 						id = 0; // 空气/真空 (null)
@@ -661,7 +661,7 @@ class ChunkMap{
 				} */
 				
 				if (y > height){
-					if (dy <= leaves[1] && dy > leaves[0]){
+					if (y <= leaves[1] && y > leaves[0]){
 						id = 8; //树叶
 					}else{
 						id = 0; // 空气/真空 (null)
@@ -695,7 +695,7 @@ class ChunkMap{
 			case 2: //沙漠
 				
 				if (y > height){
-					if (dy <= leaves[1] && dy > leaves[0]){
+					if (y <= leaves[1] && y > leaves[0]){
 						id = 8; //树叶
 					}else{
 						id = 0; // 空气/真空 (null)
@@ -767,7 +767,7 @@ class ChunkMap{
 				h = Math.max( this.size[0].y, Math.min(h, this.size[1].y) );
 				leaves[1] = Math.max(leaves[1], h+tH);
 				leaves[0] = Math.min(leaves[0], h+tH-lH);
-				console.log(`h:${h}, treeH:${tH}, leavesH:${lH}`, leaves)
+				// console.log(`h:${h}, treeH:${tH}, leavesH:${lH}`, leaves)
 			}
 		}
 		
