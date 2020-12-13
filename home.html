@@ -114,11 +114,11 @@
 		}
 		.new_world input{
 			width: 66%;
-			font-size: 3vmax;
+			font-size: 2.6vmax;
 			
 			border: 1px solid #ced4da;
 			border-radius: 0.3em;
-			padding: 0.3em;
+			padding: 0.2vmax;
 			line-height: 1.5;
 			color: #495057;
 			background-color: #fff;
@@ -147,17 +147,21 @@
 			margin-left: 1%;
 			outline: none;
 		}
-		.more h3{
+		.more > fieldset{
+			width: 42vw;
+			display: inline-block;
+		}
+		.more > fieldset > legend{
 			font-size: 3vmax;
 			margin: 0;
 		}
-		.more h4{
+		.more > fieldset > fieldset > legend{
 			font-size: 2vmax;
 			margin: 0;
 		}
 		.more input:not([type="range"]){
 			width: 6vw;
-			font-size: 2vmax;
+			font-size: 1.6vmax;
 		}
 		.more input[type="range"]{
 			width: 16vw;
@@ -204,72 +208,84 @@
 			<br/>
 			<details class="more">
 				<summary>高级设置</summary>
-				<div class="height">
-					<h3>高度(height)</h3>
-					最小/m：1m<input type="range" min="1" max="256" step="0.1" value="1" name="min" />256m <input value="1" />m<br/>
-					最大/m：1m<input type="range" min="1" max="256" step="0.1" value="256" name="max" />256m <input value="256"/>m<br/>
-					平滑程度：1<input type="range" min="1" max="1000" step="1" value="166" name="q" />1000 <input value="166"/>
-					<div class="error">
-						<h4>误差(error)</h4>
-						最小/m：-5m<input type="range" min="-5" max="5" step="0.1" value="-1" name="min" />5m <input value="-1"/>m<br/>
-						最大/m：-5m<input type="range" min="-5" max="5" step="0.1" value="1" name="max" />5m <input value="1"/>m<br/>
-						平滑程度：1<input type="range" min="1" max="100" value="36" name="q" />100 <input value="36"/>
-					</div>
-				</div>
-				<div class="dirt">
-					<h3>泥土层百分比(dirt)</h3>
-					最小：0<input type="range" min="0" max="1" value="0.1" step="0.01" name="min" />1 <input value="0.1"/><br/>
-					最大：0<input type="range" min="0" max="1" value="0.4" step="0.01" name="max" />1 <input value="0.4"/><br/>
-					平滑程度：1<input type="range" min="1" max="1000" step="1" value="66" name="q" />1000 <input value="66"/>
-					<div class="error">
-						<h4>误差(error)</h4>
-						最小：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="-0.1" name="min" />0.5 <input value="-0.1"/><br/>
-						最大：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="0.1" name="max" />0.5 <input value="0.1"/><br/>
-						平滑程度：1<input type="range" min="1" max="100" value="6" name="q" />100 <input value="6"/>
-					</div>
-				</div>
-				<div class="openStone">
-					<h3>允许石头露天出现（负值不允许）(openStone)</h3>
-					最小：-5<input type="range" min="-5" max="5" value="-0.99" step="0.01" name="min" />5 <input value="-0.99"/><br/>
-					最大：-5<input type="range" min="-5" max="5" value="0.01" step="0.01" name="max" />5 <input value="0.01"/><br/>
-					平滑程度：1<input type="range" min="1" max="1000" step="1" value="1" name="q" />1000 <input value="1"/>
-				</div>
-				<div class="type">
-					<h3>区块类型(type)</h3>
+				<fieldset class="height">
+					<legend>高度(height)</legend>
+					最小/m：1m<input type="range" min="1" max="256" step="0.1" value="1" name="min" />256m <input type="number" value="1" />m<br/>
+					最大/m：1m<input type="range" min="1" max="256" step="0.1" value="256" name="max" />256m <input type="number" value="256"/>m<br/>
+					平滑程度：1<input type="range" min="1" max="1000" step="1" value="166" name="q" />1000 <input type="number" value="166"/>
+					<fieldset class="error">
+						<legend>误差(error)</legend>
+						最小/m：-5m<input type="range" min="-5" max="5" step="0.1" value="-1" name="min" />5m <input type="number" value="-1"/>m<br/>
+						最大/m：-5m<input type="range" min="-5" max="5" step="0.1" value="1" name="max" />5m <input type="number" value="1"/>m<br/>
+						平滑程度：1<input type="range" min="1" max="100" value="36" name="q" />100 <input type="number" value="36"/>
+					</fieldset>
+				</fieldset>
+				<fieldset class="dirt">
+					<legend>泥土层百分比(dirt)</legend>
+					最小：0<input type="range" min="0" max="1" value="0.1" step="0.01" name="min" />1 <input type="number" value="0.1"/><br/>
+					最大：0<input type="range" min="0" max="1" value="0.4" step="0.01" name="max" />1 <input type="number" value="0.4"/><br/>
+					平滑程度：1<input type="range" min="1" max="1000" step="1" value="66" name="q" />1000 <input type="number" value="66"/>
+					<fieldset class="error">
+						<legend>误差(error)</legend>
+						最小：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="-0.1" name="min" />0.5 <input type="number" value="-0.1"/><br/>
+						最大：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="0.1" name="max" />0.5 <input type="number" value="0.1"/><br/>
+						平滑程度：1<input type="range" min="1" max="100" value="6" name="q" />100 <input type="number" value="6"/>
+					</fieldset>
+				</fieldset>
+				<fieldset class="openStone">
+					<legend>允许石头露天出现（负值不允许）(openStone)</legend>
+					最小：-5<input type="range" min="-5" max="5" value="-0.99" step="0.01" name="min" />5 <input type="number" value="-0.99"/><br/>
+					最大：-5<input type="range" min="-5" max="5" value="0.01" step="0.01" name="max" />5 <input type="number" value="0.01"/><br/>
+					平滑程度：1<input type="range" min="1" max="1000" step="1" value="1" name="q" />1000 <input type="number" value="1"/>
+				</fieldset>
+				<fieldset class="type">
+					<legend>区块类型(type)</legend>
 					生成森林(forest)的概率：0<input type="range" min="0" max="1" step="0.01" value="0.4" name="forest" />1 <input name="forest" value="0.4"/><br/>
 					生成草原(grassland)的概率：0<input type="range" min="0" max="1" step="0.01" value="0.4" name="grassland" />1 <input name="grassland" value="0.4"/><br/>
 					生成沙漠(desert)的概率：0<input type="range" min="0" max="1" step="0.01" value="0.2" name="desert" />1 <input name="desert" value="0.2"/><br/>
-					平滑程度：1<input type="range" min="1" max="1000" step="1" value="666" name="q" />1000 <input value="666"/>
-				</div>
-				<div class="treeHeight">
-					<h3>树高(treeHeight)</h3>
-					<div class="plant">
-						<h4>允许生成树(plant)</h4>
-						最小：-1<input type="range" min="-1" max="1" value="0.5" step="0.001" name="min" />1 <input value="0.5"/><br/>
-						最大：-1<input type="range" min="-1" max="1" value="0.667" step="0.001" name="max" />1 <input value="0.667"/><br/>
-					</div>
-					最小：1<input type="range" min="1" max="30" value="1" step="0.1" name="min" />10 <input value="1"/><br/>
-					最大：1<input type="range" min="1" max="30" value="10" step="0.1" name="max" />10 <input value="10"/><br/>
-					平滑程度：1<input type="range" min="1" max="100" step="1" value="1" name="q" />100 <input value="1"/>
-					<div class="error">
-						<h4>误差(error)</h4>
-						最小：-5<input type="range" min="-5" max="5" step="0.1" value="-1" name="min" />5 <input value="-1"/><br/>
-						最大：-5<input type="range" min="-5" max="5" step="0.1" value="1" name="max" />5 <input value="1"/><br/>
-						平滑程度：1<input type="range" min="1" max="100" value="1" name="q" />100 <input value="1"/>
-					</div>
-				</div>
-				<div class="leavesScale">
-					<h3>树叶高度与树高之比(leavesScale)</h3>
-					最小：0.01<input type="range" min="0.01" max="0.99" value="0.1" step="0.01" name="min" />0.99 <input value="0.1"/><br/>
-					最大：0.01<input type="range" min="0.01" max="0.99" value="0.4" step="0.01" name="max" />0.99 <input value="0.4"/><br/>
-					平滑程度：1<input type="range" min="1" max="100" step="1" value="16" name="q" />100 <input value="16"/>
-					<div class="error">
-						<h4>误差(error)</h4>
-						最小：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="-0.1" name="min" />0.5 <input value="-0.1"/><br/>
-						最大：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="0.1" name="max" />0.5 <input value="0.1"/><br/>
-						平滑程度：1<input type="range" min="1" max="100" value="6" name="q" />100 <input value="6"/>
-					</div>
-				</div>
+					平滑程度：1<input type="range" min="1" max="1000" step="1" value="666" name="q" />1000 <input type="number" value="666"/>
+				</fieldset>
+				<fieldset class="treeHeight">
+					<legend>树高(treeHeight)</legend>
+					<fieldset class="plant">
+						<legend>允许生成树(plant)</legend>
+						最小：-1<input type="range" min="-1" max="1" value="0.5" step="0.001" name="min" />1 <input type="number" value="0.5"/><br/>
+						最大：-1<input type="range" min="-1" max="1" value="0.667" step="0.001" name="max" />1 <input type="number" value="0.667"/><br/>
+					</fieldset>
+					最小：1<input type="range" min="1" max="30" value="1" step="0.1" name="min" />10 <input type="number" value="1"/><br/>
+					最大：1<input type="range" min="1" max="30" value="10" step="0.1" name="max" />10 <input type="number" value="10"/><br/>
+					平滑程度：1<input type="range" min="1" max="100" step="1" value="1" name="q" />100 <input type="number" value="1"/>
+					<fieldset class="error">
+						<legend>误差(error)</legend>
+						最小：-5<input type="range" min="-5" max="5" step="0.1" value="-1" name="min" />5 <input type="number" value="-1"/><br/>
+						最大：-5<input type="range" min="-5" max="5" step="0.1" value="1" name="max" />5 <input type="number" value="1"/><br/>
+						平滑程度：1<input type="range" min="1" max="100" value="1" name="q" />100 <input type="number" value="1"/>
+					</fieldset>
+				</fieldset>
+				<fieldset class="leavesScale">
+					<legend>树叶高度与树高之比(leavesScale)</legend>
+					最小：0.01<input type="range" min="0.01" max="0.99" value="0.6" step="0.01" name="min" />0.99 <input type="number" value="0.6"/><br/>
+					最大：0.01<input type="range" min="0.01" max="0.99" value="0.86" step="0.01" name="max" />0.99 <input type="number" value="0.86"/><br/>
+					平滑程度：1<input type="range" min="1" max="100" step="1" value="16" name="q" />100 <input type="number" value="16"/>
+					<fieldset class="error">
+						<legend>误差(error)</legend>
+						最小：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="-0.1" name="min" />0.5 <input type="number" value="-0.1"/><br/>
+						最大：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="0.1" name="max" />0.5 <input type="number" value="0.1"/><br/>
+						平滑程度：1<input type="range" min="1" max="100" value="6" name="q" />100 <input type="number" value="6"/>
+					</fieldset>
+				</fieldset>
+				<fieldset class="weatherRain">
+					<legend>降雨概率（负值不下雨）(weatherRain)</legend>
+					最小：-1<input type="range" min="-1" max="1" value="-0.6" step="0.01" name="min" />1 <input type="number" value="-0.6"/><br/>
+					最大：-1<input type="range" min="-1" max="1" value="0.3" step="0.01" name="max" />1 <input type="number" value="0.3"/><br/>
+					平滑程度：1<input type="range" min="1" max="100" step="1" value="16" name="q" />100 <input type="number" value="16"/>
+					<fieldset class="error">
+						<legend>误差(error)</legend>
+						最小：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="-0.1" name="min" />0.5 <input type="number" value="-0.1"/><br/>
+						最大：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="0.1" name="max" />0.5 <input type="number" value="0.1"/><br/>
+						平滑程度：1<input type="range" min="1" max="100" value="6" name="q" />100 <input type="number" value="6"/>
+					</fieldset>
+				</fieldset>
 				<div style="clear:both;">
 					<button onclick="reset();" class="danger" style="clear:both;">重置</button>
 				</div>
@@ -278,9 +294,9 @@
 			<button class="warn">取消<p>CANCEL</p></button>
 			<button class="success">生成世界<p>OK</p></button>
 		</section>
-		<!-- <div style="display: none;">
+		<div style="display: none;">
 			<script language="javascript" src="http://count24.51yes.com/click.aspx?id=248466766&logo=12" charset="gb2312"></script>
-		</div> -->
+		</div>
 <script>
 //input处理
 let e = $(".more input");
@@ -388,59 +404,69 @@ $(".new_world > button:eq(0)").click(function(){
 $(".new_world > button:eq(1)").click(function(){
 	let seed,
 		height={
-			min: Number( $(".more > .height > [name='min']").val() ),
-			max: Number( $(".more > .height > [name='max']").val() ),
-			q: Number( $(".more > .height > [name='q']").val() ),
+			min: +$(".more > .height > [name='min']").val(),
+			max: +$(".more > .height > [name='max']").val(),
+			q: +$(".more > .height > [name='q']").val(),
 			error:{
-				min: Number( $(".more > .height > .error > [name='min']").val() ),
-				max: Number( $(".more > .height > .error > [name='max']").val() ),
-				q: Number( $(".more > .height > .error > [name='q']").val() )
+				min: +$(".more > .height > .error > [name='min']").val(),
+				max: +$(".more > .height > .error > [name='max']").val(),
+				q: +$(".more > .height > .error > [name='q']").val()
 			}
 		},
 		dirt={
-			min: Number( $(".more > .dirt > [name='min']").val() ),
-			max: Number( $(".more > .dirt > [name='max']").val() ),
-			q: Number( $(".more > .dirt > [name='q']").val() ),
+			min: +$(".more > .dirt > [name='min']").val(),
+			max: +$(".more > .dirt > [name='max']").val(),
+			q: +$(".more > .dirt > [name='q']").val(),
 			error:{
-				min: Number( $(".more > .dirt > .error > [name='min']").val() ),
-				max: Number( $(".more > .dirt > .error > [name='max']").val() ),
-				q: Number( $(".more > .dirt > .error > [name='q']").val() )
+				min: +$(".more > .dirt > .error > [name='min']").val(),
+				max: +$(".more > .dirt > .error > [name='max']").val(),
+				q: +$(".more > .dirt > .error > [name='q']").val()
 			}
 		},
 		type={
-			foreset: Number( $(".more > .type > [name='foreset']").val() ),
-			grassland: Number( $(".more > .type > [name='grassland']").val() ),
-			desert: Number( $(".more > .type > [name='desert']").val() ),
-			q: Number( $(".more > .type > [name='q']").val() )
+			foreset: +$(".more > .type > [name='foreset']").val(),
+			grassland: +$(".more > .type > [name='grassland']").val(),
+			desert: +$(".more > .type > [name='desert']").val(),
+			q: +$(".more > .type > [name='q']").val()
 		},
 		treeHeight={
 			plant:{
-				min: Number( $(".more > .treeHeight > .plant > [name='min']").val() ),
-				max: Number( $(".more > .treeHeight > .plant > [name='max']").val() )
+				min: +$(".more > .treeHeight > .plant > [name='min']").val(),
+				max: +$(".more > .treeHeight > .plant > [name='max']").val()
 			},
-			min: Number( $(".more > .treeHeight > [name='min']").val() ),
-			max: Number( $(".more > .treeHeight > [name='max']").val() ),
-			q: Number( $(".more > .treeHeight > [name='q']").val() ),
+			min: +$(".more > .treeHeight > [name='min']").val(),
+			max: +$(".more > .treeHeight > [name='max']").val(),
+			q: +$(".more > .treeHeight > [name='q']").val(),
 			error:{
-				min: Number( $(".more > .treeHeight > .error > [name='min']").val() ),
-				max: Number( $(".more > .treeHeight > .error > [name='max']").val() ),
-				q: Number( $(".more > .treeHeight > .error > [name='q']").val() )
+				min: +$(".more > .treeHeight > .error > [name='min']").val(),
+				max: +$(".more > .treeHeight > .error > [name='max']").val(),
+				q: +$(".more > .treeHeight > .error > [name='q']").val()
 			}
 		},
 		leavesScale={
-			min: Number( $(".more > .leavesScale > [name='min']").val() ),
-			max: Number( $(".more > .leavesScale > [name='max']").val() ),
-			q: Number( $(".more > .leavesScale > [name='q']").val() ),
+			min: +$(".more > .leavesScale > [name='min']").val(),
+			max: +$(".more > .leavesScale > [name='max']").val(),
+			q: +$(".more > .leavesScale > [name='q']").val(),
 			error:{
-				min: Number( $(".more > .leavesScale > .error > [name='min']").val() ),
-				max: Number( $(".more > .leavesScale > .error > [name='max']").val() ),
-				q: Number( $(".more > .leavesScale > .error > [name='q']").val() )
+				min: +$(".more > .leavesScale > .error > [name='min']").val(),
+				max: +$(".more > .leavesScale > .error > [name='max']").val(),
+				q: +$(".more > .leavesScale > .error > [name='q']").val()
 			}
 		},
 		openStone={
-			min: Number( $(".more > .openStone > [name='min']").val() ),
-			max: Number( $(".more > .openStone > [name='max']").val() ),
-			q: Number( $(".more > .openStone > [name='q']").val() )
+			min: +$(".more > .openStone > [name='min']").val(),
+			max: +$(".more > .openStone > [name='max']").val(),
+			q: +$(".more > .openStone > [name='q']").val()
+		},
+		weatherRain={
+			min: +$(".more > .weatherRain > [name='min']").val(),
+			max: +$(".more > .weatherRain > [name='max']").val(),
+			q: +$(".more > .weatherRain > [name='q']").val(),
+			error:{
+				min: +$(".more > .weatherRain > .error > [name='min']").val(),
+				max: +$(".more > .weatherRain > .error > [name='max']").val(),
+				q: +$(".more > .weatherRain > .error > [name='q']").val()
+			}
 		};
 	if ($("[name='seed']").val() === ""){ //随机种子
 		seed = Math.random().toString(36).substring(2);

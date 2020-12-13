@@ -1,10 +1,11 @@
 // SQL
-const sql = new SQL("Minecraft", "1.0", "我的世界游戏存档", 10*1024*1024);
+const sql = new SQL("Minecraft", "1.0", "我的世界游戏存档", 10*1024*1024),
+	tableName = "world";
 sql.setErrCallback(function(err){
 	console.error("SQL运行出错：", err, err.message);
 	//alert("SQL存档数据库 读取/写入 错误");
 });
-sql.createTable("file", [
+sql.createTable(tableName, [
 	"type UNSIGNED TINYINT",
 	"x INT",
 	"y INT",
@@ -15,7 +16,7 @@ sql.createTable("file", [
 
 // 读取存档
 function SQL_read(){
-	sql.selectData("file", ["x", "y", "z", "id", "attr"], "type=1", function(result){
+	sql.selectData(tableName, ["x", "y", "z", "id", "attr"], "type=1", function(result){
 		if (result.length){
 			deskgood.pos.x = result[0].x;
 			deskgood.pos.y = result[0].y;
@@ -44,14 +45,14 @@ function SQL_read(){
 			});
 		}
 	});
-	sql.selectData("file", ["x", "y", "z"], "type=2", function(result){
+	sql.selectData(tableName, ["x", "y", "z"], "type=2", function(result){
 		if (result.length){
 			deskgood.v.x = result[0].x;
 			deskgood.v.y = result[0].y;
 			deskgood.v.z = result[0].z;
 		}
 	});
-	sql.selectData("file", ["id", "attr"], "type=3 AND x=0", function(result){ //物品栏
+	sql.selectData(tableName, ["id", "attr"], "type=3 AND x=0", function(result){ //物品栏
 		if (result.length){
 			console.log(result)
 			for (let i=0; i<result.length; i++){
@@ -68,7 +69,7 @@ function SQL_read(){
 			deskgood.hold.update();
 		}
 	});
-	sql.selectData("file", ["id"], "type=3 AND x=1", function(result){ //选择物品
+	sql.selectData(tableName, ["id"], "type=3 AND x=1", function(result){ //选择物品
 		if (result.length){
 			deskgood.choice = result[0].id;
 			deskgood.hold.update();
@@ -78,8 +79,8 @@ function SQL_read(){
 
 // 保存存档
 function SQL_save(){
-	sql.deleteData("file", "type=1", undefined, function(){
-		sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
+	sql.deleteData(tableName, "type=1", undefined, function(){
+		sql.insertData(tableName, ["type", "x", "y", "z", "id", "attr"], [
 			1,
 			Math.round(deskgood.pos.x),
 			Math.round(deskgood.pos.y),
@@ -88,29 +89,29 @@ function SQL_save(){
 			`"${deskgood.lookAt.left_right} ${deskgood.lookAt.top_bottom}"`
 		]);
 	});
-	sql.deleteData("file", "type=2", undefined, function(){
-		sql.insertData("file", ["type", "x", "y", "z"], [
+	sql.deleteData(tableName, "type=2", undefined, function(){
+		sql.insertData(tableName, ["type", "x", "y", "z"], [
 			2,
 			Math.round(deskgood.v.x),
 			Math.round(deskgood.v.y),
 			Math.round(deskgood.v.z)
 		]);
 	});
-	sql.deleteData("file", "type=3", undefined, function(){
+	sql.deleteData(tableName, "type=3", undefined, function(){
 		for (let i of deskgood.hold){
 			console.log(
 				(i? JSON.stringify(i.attr).slice(1,-1): "")+
 				"\n"+
 				(i? `'${JSON.stringify(i.attr).slice(1,-1)}'`: '""')
 			)
-			sql.insertData("file", ["type", "x", "id", "attr"], [
+			sql.insertData(tableName, ["type", "x", "id", "attr"], [
 				3,
 				0, //物品栏
 				i? i.id: 0,
 				i? `'${JSON.stringify(i.attr).slice(1,-1)}'`: '""'
 			]);
 		}
-		sql.insertData("file", ["type", "x", "id"], [
+		sql.insertData(tableName, ["type", "x", "id"], [
 			3,
 			1, //选择物品
 			deskgood.choice

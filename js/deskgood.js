@@ -203,7 +203,7 @@ let deskgood = {
 	}),
 	// 死亡
 	die(reason="使用命令自杀"){
-		sql.deleteTable("file", undefined, function(){
+		sql.deleteTable(tableName, undefined, function(){
 			localStorage.removeItem("我的世界_seed");
 			
 			document.exitPointerLock(); //取消鼠标锁定
@@ -681,7 +681,7 @@ let deskgood = {
 		let attr = `'${JSON.stringify(map.get(x, y, z).attr).slice(1,-1)}'`,
 			cX = Math.round(x/map.size.x),
 			cZ = Math.round(z/map.size.z);
-		map.chunks[cX][cX].edit = map.chunks[cX][cX].edit.filter(v =>
+		map.chunks[cX][cZ].edit = map.chunks[cX][cZ].edit.filter(v =>
 			v.x != x &&
 			v.y != y &&
 			v.z != z
@@ -705,8 +705,8 @@ let deskgood = {
 		y = Math.round(y),
 		z = Math.round(z); //存储必须整数
 		//SQL
-		sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, ()=>{
-			sql.insertData("file", ["type", "x", "y", "z", "id", "attr"], [
+		sql.deleteData(tableName, `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, ()=>{
+			sql.insertData(tableName, ["type", "x", "y", "z", "id", "attr"], [
 				0,
 				x,
 				y,
@@ -734,7 +734,7 @@ let deskgood = {
 		
 		let cX = Math.round(x/map.size.x),
 			cZ = Math.round(z/map.size.z);
-		map.chunks[cX][cX].edit = map.chunks[cX][cX].edit.filter(v =>
+		map.chunks[cX][cZ].edit = map.chunks[cX][cZ].edit.filter(v =>
 			v.x != x &&
 			v.y != y &&
 			v.z != z
@@ -757,8 +757,8 @@ let deskgood = {
 		y = Math.round(y),
 		z = Math.round(z); //存储必须整数
 		//SQL
-		sql.deleteData("file", `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
-			sql.insertData("file", ["type", "x", "y", "z", "id"], [
+		sql.deleteData(tableName, `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
+			sql.insertData(tableName, ["type", "x", "y", "z", "id"], [
 				0,
 				x,
 				y,

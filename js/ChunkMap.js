@@ -593,7 +593,10 @@ class ChunkMap{
 		
 		for ( let [dx,dz] of [[1,0], [-1,0], [0,1],[0,-1]] ){
 			const tH = sNoise.treeHeight(this.seed.noise, this.seed.tH, x+dx, z+dz);
-			if ( tH ){ //有树
+			if ( tH &&
+				!sNoise.type(this.seed.noise, this.seed.t, x+dx, z+dz) &&
+				!sNoise.openStone(this.seed.noise, this.seed.oS, x, z)
+			){ //有树 且 为森林 且 无石头
 				let lH = tH * sNoise.leavesScale(this.seed.noise, this.seed.lS, x+dz, z+dz), //叶高
 					h = sNoise.height(this.seed.noise, this.seed.h, x+dx, z+dz); //底面高度
 				h = Math.max( this.size[0].y, Math.min(h, this.size[1].y) );
@@ -766,7 +769,10 @@ class ChunkMap{
 		
 		for ( const [dx,dz] of [[1,0], [-1,0], [0,1],[0,-1]] ){
 			const tH = sNoise.treeHeight(this.seed.noise, this.seed.tH, x+dx, z+dz);
-			if ( tH ){ //有树
+			if ( tH &&
+				!sNoise.type(this.seed.noise, this.seed.t, x+dx, z+dz) &&
+				!sNoise.openStone(this.seed.noise, this.seed.oS, x+dx, z+dz)
+			){ //有树 且 为森林 且 无石头
 				let lH = tH * sNoise.leavesScale(this.seed.noise, this.seed.lS, x+dz, z+dz), //叶高
 					h = sNoise.height(this.seed.noise, this.seed.h, x+dx, z+dz); //底面高度
 				h = Math.max( this.size[0].y, Math.min(h, this.size[1].y) );
@@ -1047,7 +1053,7 @@ class ChunkMap{
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 			
-		sql.selectData("file", ["x", "y", "z", "id", "attr"],
+		sql.selectData(tableName, ["x", "y", "z", "id", "attr"],
 			`type=0 AND`+
 			` (x BETWEEN ${ ox+this.size[0].x } AND ${ ox+this.size[1].x }) AND`+
 			` (z BETWEEN ${ oz+this.size[0].z } AND ${ oz+this.size[1].z })`,
@@ -1530,7 +1536,7 @@ class ChunkMap{
 		if (breakPoint && breakPoint.edit){
 			func(breakPoint.edit);
 		}else{
-			sql.selectData("file", ["x", "y", "z", "id", "attr"],
+			sql.selectData(tableName, ["x", "y", "z", "id", "attr"],
 				`type=0 AND`+
 				` (x BETWEEN ${ ox+this.size[0].x } AND ${ ox+this.size[1].x }) AND`+
 				` (z BETWEEN ${ oz+this.size[0].z } AND ${ oz+this.size[1].z })`,
