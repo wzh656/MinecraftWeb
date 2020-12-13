@@ -631,7 +631,9 @@ Copyright © 2020 by wzh
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
 		<script>
-			if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
+			const DEBUG = localStorage.getItem("debug")=="false"? false: true;
+			if (//DEBUG &&
+				/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 					navigator.userAgent.toLowerCase()
 				)
 			){ //手机
@@ -777,7 +779,7 @@ deskgood.moveTo(0,10000*100);
 		
 <script src="./js/GameTime.js"></script>
 <script>
-if (false){
+if (!DEBUG){
 	console.log = console.info = console.warn = console.error = new Function();
 }
 

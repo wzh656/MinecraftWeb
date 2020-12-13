@@ -32,7 +32,7 @@ class Weather{
 				return;
 			
 			//雨滴降落
-			for (let i=0; i<this.rain_sys.length; i++){
+			for (let i=this.rain_sys.length-1; i>=0; i--){
 				const item = this.rain_sys[i];
 				item.position.y -= 10*100 *t *rnd_error(); //10m/s
 				if (map.get(
@@ -45,7 +45,6 @@ class Weather{
 					item.material.dispose(); //清除内存
 					scene.remove( item );
 					this.rain_sys.splice(i, 1);
-					i--;
 				}
 			}
 			
@@ -53,7 +52,7 @@ class Weather{
 			while (count--){
 				if (Math.random() <= this.rain){
 					//创建精灵模型对象，不需要几何体geometry参数
-					let sprite = new THREE.Sprite(this.rain_material),
+					const sprite = new THREE.Sprite(this.rain_material),
 						x = Math.random() *this.size.x*100 + this.size[0].x*100, //[-1000,1000)
 						y = Math.random() *10*100 + deskgood.pos.y +10*100, //[~+10m, ~+20m)
 						z =Math.random() *this.size.z*100 + this.size[0].z*100; //[-1000,1000)
@@ -71,7 +70,7 @@ class Weather{
 	
 	clear_rain(){
 		clearInterval(this.rain_id);
-		for (let i in this.rain_sys){
+		for (let i=this.rain_sys.length-1; i>=0; i--){
 			this.rain_sys[i].material.dispose(); //清除内存
 			scene.remove(this.rain_sys[i]);
 			delete this.rain_sys[i];

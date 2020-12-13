@@ -14,7 +14,7 @@ function playBGM(){
 			console.info("bgm(BackGround Music)", "begin(2.m4a)", "time:"+time.getTime());
 		}
 		setTimeout(function(){
-			if (ALLOW_GUI){
+			if (DEBUG){
 				let bgm_folder = gui.addFolder("背景音乐(bgm)")
 				bgm_folder.add(bgm, "volume", 0, 1, 0.01).name("音量(volume)");
 				bgm_folder.add(bgm, "paused").name("是否暂停(paused)").listen();

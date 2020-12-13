@@ -592,7 +592,7 @@ class ChunkMap{
 			leaves = [+Infinity, -Infinity]; //(min, max]
 		
 		for ( let [dx,dz] of [[1,0], [-1,0], [0,1],[0,-1]] ){
-			let tH = sNoise.treeHeight(this.seed.noise, this.seed.tH, x+dx, z+dz);
+			const tH = sNoise.treeHeight(this.seed.noise, this.seed.tH, x+dx, z+dz);
 			if ( tH ){ //有树
 				let lH = tH * sNoise.leavesScale(this.seed.noise, this.seed.lS, x+dz, z+dz), //叶高
 					h = sNoise.height(this.seed.noise, this.seed.h, x+dx, z+dz); //底面高度
@@ -617,8 +617,16 @@ class ChunkMap{
 				if (sNoise.openStone(this.seed.noise, this.seed.oS, x, z)) //石头上不长树
 					treeHeight = height;
 				
-				if (y > treeHeight){
+				if (y > treeHeight+1){
 					if (y <= leaves[1] && y > leaves[0]){
+						id = 8; //树叶
+					}else{
+						id = 0; // 空气/真空 (null)
+					}
+				}else if (y > treeHeight){
+					if ( treeHeight != height ||
+						(y <= leaves[1] && y > leaves[0])
+					){ //有树或旁边有树
 						id = 8; //树叶
 					}else{
 						id = 0; // 空气/真空 (null)
@@ -756,8 +764,8 @@ class ChunkMap{
 			treeHeight = height + sNoise.treeHeight(this.seed.noise, this.seed.tH, x, z),
 			leaves = [+Infinity, -Infinity]; //(min, max]
 		
-		for ( let [dx,dz] of [[1,0], [-1,0], [0,1],[0,-1]] ){
-			let tH = sNoise.treeHeight(this.seed.noise, this.seed.tH, x+dx, z+dz);
+		for ( const [dx,dz] of [[1,0], [-1,0], [0,1],[0,-1]] ){
+			const tH = sNoise.treeHeight(this.seed.noise, this.seed.tH, x+dx, z+dz);
 			if ( tH ){ //有树
 				let lH = tH * sNoise.leavesScale(this.seed.noise, this.seed.lS, x+dz, z+dz), //叶高
 					h = sNoise.height(this.seed.noise, this.seed.h, x+dx, z+dz); //底面高度
@@ -800,14 +808,22 @@ class ChunkMap{
 					if (sNoise.openStone(this.seed.noise, this.seed.oS, x, z)) //石头上不长树
 						treeHeight = height;
 					
-					if (dy > treeHeight){
+					if (dy > treeHeight+1){
 						if (dy <= leaves[1] && dy > leaves[0]){
 							id = 8; //树叶
 						}else{
 							id = 0; // 空气/真空 (null)
 						}
+					}else if (dy > treeHeight){
+						if ( treeHeight != height ||
+							(dy <= leaves[1] && dy > leaves[0])
+						){ //有树或旁边有树
+							id = 8; //树叶
+						}else{
+							id = 0; // 空气/真空 (null)
+						}
 					}else if (dy > height){
-						//if (!treeTop) treeTop = dy;
+						//if (!treeTop) treeTop = y;
 						id = 7.1; //橡木
 					}else if (dy == Math.floor(height) && !(height > 0.9*this.size[1].y)){ // 90%+ 高原（草木不生，积雪覆盖）
 						if (sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
@@ -953,7 +969,7 @@ class ChunkMap{
 	}*/
 	
 	perGetChunk(x, z, edit){
-		[x, z] = [Math.round(x), Math.round(z)]; //规范化
+		x = Math.round(x), z = Math.round(z); //规范化
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
@@ -992,18 +1008,19 @@ class ChunkMap{
 	
 	//加载列
 	loadColumn(x, z, columns, edit){
-		[x, z] = [Math.round(x), Math.round(z)]; //规范化
+		x = Math.round(x), z = Math.round(z); //规范化
 		let ox = Math.round(x/map.size.x)*map.size.x,
-			oz = Math.round(z/map.size.z)*map.size.z;
-		let [dx, dz] = [x-ox, z-oz];
+			oz = Math.round(z/map.size.z)*map.size.z,
+			dx = x-ox,
+			dz = z-oz;
 		
 		for (let y=this.size[0].y; y<=this.size[1].y; y++){
 			if (columns[dx][dz][y].id){ //有方块
 				if (!(
-					y != this.size[0].y && //不在最底层
+					//y != this.size[0].y && //不在最底层
 					y != this.size[1].y && //不在最顶层
 					columns[dx][dz][y+1].id &&
-					columns[dx][dz][y-1].id &&
+					(y == this.size[0].y || columns[dx][dz][y-1].id) &&
 					columns[dx+1] && columns[dx+1][dz] && columns[dx+1][dz][y].id &&
 					columns[dx-1] && columns[dx-1][dz] && columns[dx-1][dz][y].id &&
 					columns[dx][dz+1] && columns[dx][dz+1][y].id &&
@@ -1527,7 +1544,7 @@ class ChunkMap{
 	
 	//卸载区块（同步）
 	unloadChunk(x, z){
-		[x, z] = [Math.round(x), Math.round(z)]; //规范化
+		x = Math.round(x), z = Math.round(z); //规范化
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
@@ -1704,8 +1721,18 @@ class ChunkMap{
 			for (let z=-length; z<=length; z+=map.size.z){
 				let push = [
 					Math.round( (deskgood.pos.x+x)/100/map.size.x ),
-					Math.round( (deskgood.pos.z+z)/100/map.size.z ),
-					(
+					Math.round( (deskgood.pos.z+z)/100/map.size.z )
+				];
+				const dx = push[0]*map.size.x*100 - deskgood.pos.x,
+						dz = push[1]*map.size.z*100 - deskgood.pos.z; //区块中心到玩家的距离
+				push[2] = (
+					Math.abs(dx) >= Math.abs(dz) ?(
+						dx >= 0? "x+": "x-"
+					): (
+						dz >= 0? "z+": "z-"
+					)
+				);
+					/*(
 						(x>=0 && z>=0)? (
 							Math.abs(x)>=Math.abs(z)?
 								"x+"
@@ -1728,17 +1755,8 @@ class ChunkMap{
 								"z-"
 						)
 					)
-				];
-				let find = false;
-				for (let i in chunks){
-					if (chunks[i][0] == push[0] && chunks[i][1] == push[1]){ //相同
-						/*if (Number(chunks[i][2].slice(-1)) <= Number(chunks[2].slice(-1))) //chunks小
-							chunks[i] = push;*/
-						find = true;
-						break;
-					}
-				}
-				if (!find)
+				];*/
+				if ( !chunks.some(v => v[0]==push[0] && v[1]==push[1]) ) //没有相同的
 					chunks.push(push);
 			}
 		}
@@ -1765,6 +1783,7 @@ class ChunkMap{
 					this.chunks[cX][cZ] = {};
 				//用噪声填充区块
 				this.loadChunkAsync(cX, cZ, {
+					breakTime: 16,
 					dir: chunks[i][2],
 					progressCallback: (v)=>{
 						loading -= 1/(map.size.x);
@@ -1818,7 +1837,7 @@ class ChunkMap{
 				const [cX, cZ] = i;
 				//卸载区块
 				this.unloadChunkAsync(...i, {
-					breakTime: 36,
+					breakTime: 16,
 					progressCallback: (v)=>{
 						loading -= 1/(map.size.x);
 						if (progressCallback)

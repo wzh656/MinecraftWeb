@@ -782,7 +782,7 @@ SQL_read(); //读取存档
 
 
 //gui
-if (ALLOW_GUI){
+if (DEBUG){
 	let deskgood_folder = gui.addFolder("玩家/观察者(deskgood)");
 	deskgood_folder.open();
 		deskgood_folder.add(window, "stop").listen();

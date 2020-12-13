@@ -5,7 +5,7 @@ let scene = new THREE.Scene();
 scene.fog = new THREE.Fog("#fff", 0.01, 300*100);
 //						 雾气颜色，近处的距离，远处的距离(66m)
 
-if (ALLOW_GUI){
+if (DEBUG){
 	let scene_folder = gui.addFolder("场景(scene)");
 		scene_folder.add(scene.children, "length", 0, 10000).name("物体(object)个数").listen();
 		scene_folder.add(localStorage, "我的世界_seed").name("地图种子");
@@ -41,7 +41,7 @@ scene.add(axesHelper); */
 let point = new THREE.PointLight(0xffffff);
 point.position.set(0, 10*100, 0); //点光源位置
 scene.add(point); //点光源添加到场景中*/
-if (ALLOW_GUI){
+if (DEBUG){
 	let scene_light_folder = gui.__folders["场景(scene)"].addFolder("光源(light)");
 }
 
@@ -83,7 +83,7 @@ setTimeout(function(){
 }); */
 scene.add(directionalLight);
 
-if (ALLOW_GUI){
+if (DEBUG){
 	let scene_light_directionalLight_folder = gui.__folders["场景(scene)"].__folders["光源(light)"].addFolder("平行光(directionalLight)");
 		scene_light_directionalLight_folder.add(directionalLight, "castShadow").name("阴影").listen();
 		let scene_light_directionalLight_mapSize_folder = scene_light_directionalLight_folder.addFolder("阴影贴图大小(mapSize)");
@@ -104,7 +104,7 @@ var hemiLight = new THREE.HemisphereLight("#87ceeb", "#f5deb3", 0.4/*"#aaf", "#8
 hemiLight.position.set(0,500,0);
 scene.add(hemiLight);
 
-if (ALLOW_GUI){
+if (DEBUG){
 	let scene_light_hemiLight_folder = gui.__folders["场景(scene)"].__folders["光源(light)"].addFolder("户外光源(hemiLight)");
 		let scene_light_hemiLight_position_folder = scene_light_hemiLight_folder.addFolder("位置(position)");
 			scene_light_hemiLight_position_folder.add(hemiLight.position, "x", -3, 3, 0.1);
@@ -116,7 +116,7 @@ if (ALLOW_GUI){
 let ambient = new THREE.AmbientLight(0x444444);
 scene.add(ambient);
 
-if (ALLOW_GUI){
+if (DEBUG){
 	let scene_light_ambient_folder = gui.__folders["场景(scene)"].__folders["光源(light)"].addFolder("环境光(ambient)");
 		scene_light_ambient_folder.addColor(ambient, "color").listen();
 }
@@ -176,7 +176,7 @@ renderer.color = {
 		, 1);
 	}
 };
-if (ALLOW_GUI){
+if (DEBUG){
 	let renderer_folder = gui.addFolder("渲染器(renderer)");
 		renderer_folder.addColor(renderer.color, "clearColor").listen();
 }

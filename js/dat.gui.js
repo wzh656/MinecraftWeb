@@ -1,9 +1,8 @@
 /**
 * dat.gui
 */
-const ALLOW_GUI = localStorage.getItem("debug")=="false"? false: true;
 let gui;
-if (ALLOW_GUI){
+if (DEBUG){
 	gui = new dat.GUI({
 		name: "控制/调试",
 		useLocalStorage: false, // 使用LocalStorage来存储

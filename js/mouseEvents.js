@@ -10,7 +10,7 @@ let mouse_choice = {
 	faceIndex: -1,
 	id: -1
 };
-if (ALLOW_GUI){
+if (DEBUG){
 	let deskgood_choice_folder = gui.__folders["玩家/观察者(deskgood)"].addFolder("选择物体");
 		deskgood_choice_folder.add(mouse_choice, "view").name("选择模式").listen();
 		deskgood_choice_folder.add(mouse_choice, "x", -1000, 1000, 100).listen();
