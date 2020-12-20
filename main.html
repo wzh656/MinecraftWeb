@@ -21,12 +21,21 @@ Copyright © 2020 by wzh
 		<!-- 异步fonts加载 -->
 		<script src="https://staticfile.qnssl.com/webfont/1.6.16/webfontloader.js"></script>
 		<script>
+		if (typeof require != "undefined"){ //electron
+			console.log("electron")
+			document.write(`<link href="./css/fonts.css" rel="stylesheet" type="text/css" />`);
+			window.onload = function(){
+				console.log("onload")
+				$("body").addClass("wf-active");
+			}
+		}else{
 			WebFont.load({
 				google: {
 					families: ["kt", "st", "xs", "zyyt"],
 					api: "./css/fonts.css"
 				}
 			});
+		}
 		</script>
 		
 		<link href="./css/bootstrap.css" rel="stylesheet" type="text/css" />
@@ -625,21 +634,24 @@ Copyright © 2020 by wzh
 		
 		<script src="./js/modules/jquery.min.js"></script>
 		<script>
-		if (typeof(require) != "undefined")
+		let ipcRenderer;
+		if (typeof require != "undefined"){ //electron
 			window.$ = window.jQuery = require("./js/modules/jquery.min.js");
+			ipcRenderer = require('electron').ipcRenderer;
+		}
 		</script>
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
 		<script>
-			const DEBUG = localStorage.getItem("debug")=="false"? false: true;
-			if (//DEBUG &&
-				/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
-					navigator.userAgent.toLowerCase()
-				)
-			){ //手机
-				eruda.init();
-				new VConsole();
-			}
+		const DEBUG = localStorage.getItem("debug")=="false"? false: true;
+		if (DEBUG &&
+			/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
+				navigator.userAgent.toLowerCase()
+			)
+		){ //手机
+			eruda.init();
+			new VConsole();
+		}
 		</script>
 		<script src="./js/modules/three.min.js"></script>
 		<script src="./js/modules/OrbitControls.js"></script>
@@ -785,8 +797,13 @@ if (!DEBUG){
 
 //退出
 function exit(){
-	window.open("home.html", "_self").close();
-	try{
+	if (typeof require != "undefined"){ //electron
+		window.close();
+	}
+
+	window.open("home.html", "_self").close(); //website
+
+	try{ //html5+
 		plus.runtime.quit();
 	}catch(e){}
 }
@@ -1087,7 +1104,7 @@ function record(canvas, time, opt={}){
 	}, time);
 }
 </script>
-		<script src="./js/sendMessage.js"></script>
+		<!-- <script src="./js/sendMessage.js"></script> -->
 		<script src="./js/playBGM.js"></script>
 		
 		<script src="./js/sql_init.js"></script>

@@ -12,13 +12,23 @@
 		<!-- 异步fonts加载 -->
 		<script src="https://staticfile.qnssl.com/webfont/1.6.16/webfontloader.js"></script>
 		<script>
+		if (typeof require != "undefined"){ //electron
+			console.log("electron")
+			document.write(`<link href="./css/fonts.css" rel="stylesheet" type="text/css" />`);
+			window.onload = function(){
+				console.log("onload")
+				$("body").addClass("wf-active");
+			}
+		}else{
 			WebFont.load({
 				google: {
 					families: ["kt", "st", "xs", "zyyt"],
 					api: "./css/fonts.css"
 				}
 			});
+		}
 		</script>
+
 		
 		<link href="./css/bootstrap.css" rel="stylesheet" type="text/css" />
 		<style>
@@ -187,14 +197,14 @@
 		
 		<script src="./js/modules/jquery.min.js"></script>
 		<script>
-		if (typeof(require) != "undefined")
+		if (typeof require != "undefined") //electron
 			window.$ = window.jQuery = require("./js/modules/jquery.min.js");
 		</script>
 		
-		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+		<!-- <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
 		<script>eruda.init();</script>
-		<script>new VConsole();</script>
+		<script>new VConsole();</script> -->
 	</head>
 	<body>
 		<section class="init" style="display: flex;">
