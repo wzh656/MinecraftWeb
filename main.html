@@ -839,7 +839,7 @@ function run(code){
 var stop = true,
 	device, //设备：true手机，false电脑
 	perload_condition = 0,
-	time = new GameTime(1);
+	time = new GameTime(localStorage.getItem("我的世界_time"), 1);
 /**
 * 判断手机电脑
 */

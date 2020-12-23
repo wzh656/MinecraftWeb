@@ -1,4 +1,4 @@
-button{
+button, input[type="button"]{
 	font-weight: 400;
 	vertical-align: middle;
 	border: 1px solid #ced4da;

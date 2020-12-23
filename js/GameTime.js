@@ -1,7 +1,7 @@
 class GameTime{
-	constructor (speed=1, stop=true){
+	constructor (date, speed=1, stop=true){
 		this.date = +new Date();
-		this.game = +new Date(3000,0,1,8);
+		this.game = +(date || new Date(3000,0,1,8));
 		this.speed = +speed;
 		this.stop = stop;
 		this.onChangeSpeed = {};

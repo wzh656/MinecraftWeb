@@ -1,24 +1,24 @@
 /**
 * 创建场景对象Scene
 */
-let scene = new THREE.Scene();
+const scene = new THREE.Scene();
 scene.fog = new THREE.Fog("#fff", 0.01, 300*100);
 //						 雾气颜色，近处的距离，远处的距离(66m)
 
 if (DEBUG){
-	let scene_folder = gui.addFolder("场景(scene)");
+	const scene_folder = gui.addFolder("场景(scene)");
 		scene_folder.add(scene.children, "length", 0, 10000).name("物体(object)个数").listen();
 		scene_folder.add(localStorage, "我的世界_seed").name("地图种子");
-		let scene_fog_folder = scene_folder.addFolder("雾(fog)");
+		const scene_fog_folder = scene_folder.addFolder("雾(fog)");
 			scene_fog_folder.add(scene.fog, "far", 15*100, 1000*100, 100);
 			scene_fog_folder.add(scene.fog, "near", 0.001, 10);
 			scene_fog_folder.addColor(scene.fog, "color").listen();
-		let scene_chunk_folder = scene_folder.addFolder("区块(chunk)");
+		const scene_chunk_folder = scene_folder.addFolder("区块(chunk)");
 			scene_chunk_folder.add(map, "perloadLength", 100, 10000, 100).name("预加载范围/px");
 }
 
-/* let floor_geometry = new THREE.PlaneGeometry(1000, 1000, 6, 6);
-let floor_material = new THREE.MeshBasicMaterial({ color:"#fff"});
+/* const floor_geometry = new THREE.PlaneGeometry(1000, 1000, 6, 6);
+const floor_material = new THREE.MeshBasicMaterial({ color:"#fff"});
 //floor_material.wireframe = true; //仅框架
 floor_mesh = new THREE.Mesh(floor_geometry, floor_material);
 // 由于平地添加后默认是在正前方 所以需要旋转一下
@@ -29,7 +29,7 @@ scene.add(floor_mesh); */
 
 /* // 改变AxesHelper构造函数的参数，可以改变三维坐标轴的大小
 // 参数设置坐标轴大小:1000
-var axesHelper = new THREE.AxesHelper(1666);
+const axesHelper = new THREE.AxesHelper(1666);
 scene.add(axesHelper); */
 
 
@@ -38,15 +38,15 @@ scene.add(axesHelper); */
 */
 
 /*//点光源
-let point = new THREE.PointLight(0xffffff);
+const point = new THREE.PointLight(0xffffff);
 point.position.set(0, 10*100, 0); //点光源位置
 scene.add(point); //点光源添加到场景中*/
 if (DEBUG){
-	let scene_light_folder = gui.__folders["场景(scene)"].addFolder("光源(light)");
+	const scene_light_folder = gui.__folders["场景(scene)"].addFolder("光源(light)");
 }
 
 //平行光
-var directionalLight = new THREE.DirectionalLight("#fff", 1);
+const directionalLight = new THREE.DirectionalLight("#fff", 1);
 directionalLight.position.set(2, 1, 2);
 directionalLight.castShadow = true;
 directionalLight.onlyShadow = true;
@@ -84,40 +84,40 @@ setTimeout(function(){
 scene.add(directionalLight);
 
 if (DEBUG){
-	let scene_light_directionalLight_folder = gui.__folders["场景(scene)"].__folders["光源(light)"].addFolder("平行光(directionalLight)");
+	const scene_light_directionalLight_folder = gui.__folders["场景(scene)"].__folders["光源(light)"].addFolder("平行光(directionalLight)");
 		scene_light_directionalLight_folder.add(directionalLight, "castShadow").name("阴影").listen();
-		let scene_light_directionalLight_mapSize_folder = scene_light_directionalLight_folder.addFolder("阴影贴图大小(mapSize)");
+		const scene_light_directionalLight_mapSize_folder = scene_light_directionalLight_folder.addFolder("阴影贴图大小(mapSize)");
 			scene_light_directionalLight_mapSize_folder.add(directionalLight.shadow.mapSize, "width", 2**9, 2**12, 2**9);
 			scene_light_directionalLight_mapSize_folder.add(directionalLight.shadow.mapSize, "height", 2**9, 2**12, 2**9);
-		let scene_light_directionalLight_position_folder = scene_light_directionalLight_folder.addFolder("位置(position)");
+		const scene_light_directionalLight_position_folder = scene_light_directionalLight_folder.addFolder("位置(position)");
 			scene_light_directionalLight_position_folder.add(directionalLight.position, "x", -3, 3, 0.1);
 			scene_light_directionalLight_position_folder.add(directionalLight.position, "y", -3, 3, 0.1);
 			scene_light_directionalLight_position_folder.add(directionalLight.position, "z", -3, 3, 0.1);
 }
 
 //辅助线
-//var directionalLight_CameraHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
+//const directionalLight_CameraHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
 //scene.add(directionalLight_CameraHelper);
 
 //户外光源
-var hemiLight = new THREE.HemisphereLight("#87ceeb", "#f5deb3", 0.4/*"#aaf", "#888", 1*/);
+const hemiLight = new THREE.HemisphereLight("#87ceeb", "#f5deb3", 0.4/*"#aaf", "#888", 1*/);
 hemiLight.position.set(0,500,0);
 scene.add(hemiLight);
 
 if (DEBUG){
-	let scene_light_hemiLight_folder = gui.__folders["场景(scene)"].__folders["光源(light)"].addFolder("户外光源(hemiLight)");
-		let scene_light_hemiLight_position_folder = scene_light_hemiLight_folder.addFolder("位置(position)");
+	const scene_light_hemiLight_folder = gui.__folders["场景(scene)"].__folders["光源(light)"].addFolder("户外光源(hemiLight)");
+		const scene_light_hemiLight_position_folder = scene_light_hemiLight_folder.addFolder("位置(position)");
 			scene_light_hemiLight_position_folder.add(hemiLight.position, "x", -3, 3, 0.1);
 			scene_light_hemiLight_position_folder.add(hemiLight.position, "y", -3, 3, 0.1);
 			scene_light_hemiLight_position_folder.add(hemiLight.position, "z", -3, 3, 0.1);
 }
 
 //环境光
-let ambient = new THREE.AmbientLight(0x444444);
+const ambient = new THREE.AmbientLight(0x444444);
 scene.add(ambient);
 
 if (DEBUG){
-	let scene_light_ambient_folder = gui.__folders["场景(scene)"].__folders["光源(light)"].addFolder("环境光(ambient)");
+	const scene_light_ambient_folder = gui.__folders["场景(scene)"].__folders["光源(light)"].addFolder("环境光(ambient)");
 		scene_light_ambient_folder.addColor(ambient, "color").listen();
 }
 
@@ -126,17 +126,17 @@ if (DEBUG){
 */
 /* let width = window.innerWidth; //窗口宽度
 let height = window.innerHeight; //窗口高度
-let k = width / height; //窗口宽高比
-let s = 1000; //三维场景显示范围控制系数，系数越大，显示的范围越大
+const k = width / height; //窗口宽高比
+const s = 1000; //三维场景显示范围控制系数，系数越大，显示的范围越大
 //创建相机对象
-let camera = new THREE.OrthographicCamera(-s * k, s * k, s, -s, 1, 1000);
+const camera = new THREE.OrthographicCamera(-s * k, s * k, s, -s, 1, 1000);
 camera.position.set(0, 200, 0); //设置相机位置
 camera.lookAt(scene.position); //设置相机方向(指向的场景对象) */
 
 let WIDTH = window.innerWidth,
 	HEIGHT = window.innerHeight;
 
-var camera = new THREE.PerspectiveCamera(45, WIDTH/HEIGHT, 1, 1000*100);
+const camera = new THREE.PerspectiveCamera(45, WIDTH/HEIGHT, 1, 1000*100);
 //								 view_angle, aspect, near, far(1km)
 camera.position.set(0, ( Math.floor(sNoise.height(map.seed.noise, map.seed.h, 0, 0))+2 )*100, 0); //设置相机位置
 camera.lookAt(scene.position); //设置相机方向(指向的场景对象)
@@ -147,7 +147,7 @@ camera.lookAt(scene.position); //设置相机方向(指向的场景对象)
 /**
 * 创建渲染器对象
 */
-let renderer = new THREE.WebGLRenderer({
+const renderer = new THREE.WebGLRenderer({
 	antialias: true, //抗锯齿
 	preserveDrawingBuffer: true // required to support .toDataURL()
 });
@@ -177,7 +177,7 @@ renderer.color = {
 	}
 };
 if (DEBUG){
-	let renderer_folder = gui.addFolder("渲染器(renderer)");
+	const renderer_folder = gui.addFolder("渲染器(renderer)");
 		renderer_folder.addColor(renderer.color, "clearColor").listen();
 }
 
@@ -193,67 +193,74 @@ window.onresize = function(){
 /**
 * 背景
 */
+const {latitude:40, longitude:116} = localStorage.setItem("我的世界_position") || {};
+const θ = THREE.Math.degToRad(20); //纬度20°
+let daytime;
+time.setInterval(function(){
+	let δ
+	let daytime = 24 - 2/15 *Math.acos( Math.sin(23.5) * Math.sin(20) );
+})
 //clearColor
-let backgroundColor = new ColorUpdater({
+const backgroundColor = new ColorUpdater({
 	//Red红色
 	R:[{ //日出
 		t: {s: ColorUpdater.dateToNumber(6), d: 0.5}, //时间time
-		v: {s: 10, i: 230} //取值范围
+		v: {s: 10, i: 220} //10->230
 	},{ //日落
-		t: {s: ColorUpdater.dateToNumber(18,5), d: 0.5},
-		v: {s: 240, i: -230}
+		t: {s: ColorUpdater.dateToNumber(18), d: 0.5},
+		v: {s: 230, i: -220} //230->10
 	}],
 	//Green绿色
 	G:[{ //日出
-		t: {s: ColorUpdater.dateToNumber(6,10), d: 0.5},
-		v: {s: 10, i: 230}
+		t: {s: ColorUpdater.dateToNumber(6), d: 0.5},
+		v: {s: 10, i: 220} //10->230
 	},{ //日落
 		t: {s: ColorUpdater.dateToNumber(18), d: 0.5},
-		v: {s: 240, i: -230}
+		v: {s: 230, i: -220} //230->10
 	}],
 	//Blue蓝色
 	B:[{ //日出
-		t: {s: ColorUpdater.dateToNumber(6,10), d: 0.5},
-		v: {s: 20, i: 230}
+		t: {s: ColorUpdater.dateToNumber(6), d: 0.5},
+		v: {s: 20, i: 230} //20->250
 	},{ //日落
-		t: {s: ColorUpdater.dateToNumber(18,10), d: 0.5},
-		v: {s: 250, i: -230}
+		t: {s: ColorUpdater.dateToNumber(18), d: 0.5},
+		v: {s: 250, i: -230} //250->20
 	}]
-}, renderer.setClearColor).update().autoUpdate(20*1000);
+}, renderer.setClearColor).update().autoUpdate(20*1000); // 20s/time
 
 //ambientColor
-let ambientColor = new ColorUpdater({
+const ambientColor = new ColorUpdater({
 	//Red红色
 	R:[{ //日出
 		t: {s: ColorUpdater.dateToNumber(6), d: 0.5}, //时间time
-		v: {s: 20, i: 100} //取值范围
+		v: {s: 20, i: 100} //20->120
 	},{ //日落
 		t: {s: ColorUpdater.dateToNumber(18), d: 0.5},
-		v: {s: 120, i: -100}
+		v: {s: 120, i: -100} //120->20
 	}],
 	//Green绿色
 	G:[{ //日出
-		t: {s: ColorUpdater.dateToNumber(6,10), d: 0.5},
-		v: {s: 20, i: 100}
+		t: {s: ColorUpdater.dateToNumber(6), d: 0.5},
+		v: {s: 20, i: 100} //20->120
 	},{ //日落
 		t: {s: ColorUpdater.dateToNumber(18), d: 0.5},
-		v: {s: 120, i: -100}
+		v: {s: 120, i: -100} //120->20
 	}],
 	//Blue蓝色
 	B:[{ //日出
-		t: {s: ColorUpdater.dateToNumber(6,10), d: 0.5},
-		v: {s: 36, i: 100}
+		t: {s: ColorUpdater.dateToNumber(6), d: 0.5},
+		v: {s: 36, i: 100} //36->136
 	},{ //日落
-		t: {s: ColorUpdater.dateToNumber(18,10), d: 0.5},
-		v: {s: 136, i: -100}
+		t: {s: ColorUpdater.dateToNumber(18), d: 0.5},
+		v: {s: 136, i: -100} //136->36
 	}]
 }, (v)=>{
 	ambient.color = new THREE.Color(v);
-}).update().autoUpdate(20*1000);
+}).update().autoUpdate(20*1000); // 20s/time
 /*function dateToNumber(h=0, m=0, s=0){
 	return (s/60+m)/60+h;
 }
-let bgcConfig = {
+const bgcConfig = {
 	//Red红色
 	R:[{ //日出
 		t: {s: dateToNumber(6), c: 0.5}, //时间time
@@ -284,9 +291,9 @@ let bgcConfig = {
 		h = h.getHours() + h.getMinutes()/60 + h.getSeconds()/3600;
 		//h = (h.getSeconds()+h.getMilliseconds()/1000)/60*24
 		
-		let pow = Math.pow, E = Math.E;
-		for (let i of ["R", "G", "B"]){
-			let t = bgcConfig[i];
+		const pow = Math.pow, E = Math.E;
+		for (const i of ["R", "G", "B"]){
+			const t = bgcConfig[i];
 			colors[i] = Math.round(Math.min(
 				t[0].v.i / ( 1+pow( E,-(E/t[0].t.c)*(h-t[0].t.s) ) ) + t[0].v.s,
 				t[1].v.i / ( 1+pow( E,-(E/t[1].t.c)*(h-t[1].t.s) ) ) + t[1].v.s
@@ -363,14 +370,14 @@ setInterval(function(){
 
 let T0 = time.getTime(); //上次时间
 function render(){
-	let t = time.getTime()-T0; //时间差
+	const t = time.getTime()-T0; //时间差
 	T0 = time.getTime(); //把本次时间赋值给上次时间
 	requestAnimationFrame(render);
 	renderer.render(scene, camera); //执行渲染操作
 	stats.update();
 	
 	if (!stop){
-		let ρ = 1.25*rnd_error(), //空气密度/(kg/m³)
+		const ρ = 1.25*rnd_error(), //空气密度/(kg/m³)
 			c = 0.4*rnd_error(), //空气阻力系数
 			s = [0.5, 0.2, 0.5], //面积/m²
 			v = [deskgood.v.x, deskgood.v.y, deskgood.v.z], //速度/(m/s)
@@ -404,7 +411,7 @@ function render(){
 		;
 		// console.info("aw:",Aw[1], "Fw:",Fw[1], "v:", deskgood.v)
 		
-		let rt = deskgood.go(deskgood.v.x*100*t/1000, deskgood.v.y*100*t/1000, deskgood.v.z*100*t/1000);
+		const rt = deskgood.go(deskgood.v.x*100*t/1000, deskgood.v.y*100*t/1000, deskgood.v.z*100*t/1000);
 		//					m/s*100*ms/1000 => cm/s*s => cm => px
 		if (rt[0]) deskgood.v.x = 0;
 		if (rt[1]) deskgood.v.y = 0;
@@ -414,7 +421,7 @@ function render(){
 
 //卡住检测
 setInterval(()=>{
-	let warn = [];
+	const warn = [];
 	if (map.get(deskgood.pos.x/100,
 			deskgood.pos.y/100,
 			deskgood.pos.z/100) &&
@@ -478,5 +485,5 @@ setInterval(()=>{
 // 间隔30ms周期性调用函数fun
 //setInterval("render()",16.7)
 
-/* let controls = new THREE.OrbitControls(camera,renderer.domElement);//创建控件对象
+/* const controls = new THREE.OrbitControls(camera,renderer.domElement);//创建控件对象
 controls.addEventListener("change", render);//监听鼠标、键盘事件 */

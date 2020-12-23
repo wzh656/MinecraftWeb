@@ -158,8 +158,9 @@
 			outline: none;
 		}
 		.more > fieldset{
-			width: 42vw;
 			display: inline-block;
+			width: 42vw;
+			margin: 0;
 		}
 		.more > fieldset > legend{
 			font-size: 3vmax;
@@ -201,10 +202,10 @@
 			window.$ = window.jQuery = require("./js/modules/jquery.min.js");
 		</script>
 		
-		<!-- <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
 		<script>eruda.init();</script>
-		<script>new VConsole();</script> -->
+		<script>new VConsole();</script>
 	</head>
 	<body>
 		<section class="init" style="display: flex;">
@@ -218,82 +219,94 @@
 			<br/>
 			<details class="more">
 				<summary>高级设置</summary>
+				<fieldset class="time-position">
+					<legend>时空(time&position)</legend>
+					游戏开始时间：<input type="datetime-local" name="time" style="width: 36vw;" /><br/><br/>
+					<hr/>
+					坐标原点纬度：<br/>
+					-90°(S)<input type="range" min="-90" max="90" value="40" step="0.00001" name="latitude" />90°(N)
+					<input type="number" min="-90" max="90" step="0.00001" value="40" style="width: 16vw;" />°<br/>
+					<br/>
+					坐标原点经度：<br/>
+					-180°(E)<input type="range" min="-180" max="180" value="116" step="0.00001" name="longitude" />180°(S)
+					<input type="number" min="-180" max="180" step="0.00001" value="116" style="width: 16vw;" />°
+				</fieldset>
 				<fieldset class="height">
 					<legend>高度(height)</legend>
-					最小/m：1m<input type="range" min="1" max="256" step="0.1" value="1" name="min" />256m <input type="number" value="1" />m<br/>
-					最大/m：1m<input type="range" min="1" max="256" step="0.1" value="256" name="max" />256m <input type="number" value="256"/>m<br/>
-					平滑程度：1<input type="range" min="1" max="1000" step="1" value="166" name="q" />1000 <input type="number" value="166"/>
+					最小/m：1m<input type="range" min="1" max="256" step="0.1" value="1" name="min" />256m <input type="number" min="1" max="256" step="0.1" value="1" value="1" />m<br/>
+					最大/m：1m<input type="range" min="1" max="256" step="0.1" value="256" name="max" />256m <input type="number" min="1" max="256" step="0.1" value="256"/>m<br/>
+					平滑程度：1<input type="range" min="1" max="1000" step="1" value="166" name="q" />1000 <input type="number" min="1" max="1000" step="1" value="166"/>
 					<fieldset class="error">
 						<legend>误差(error)</legend>
-						最小/m：-5m<input type="range" min="-5" max="5" step="0.1" value="-1" name="min" />5m <input type="number" value="-1"/>m<br/>
-						最大/m：-5m<input type="range" min="-5" max="5" step="0.1" value="1" name="max" />5m <input type="number" value="1"/>m<br/>
-						平滑程度：1<input type="range" min="1" max="100" value="36" name="q" />100 <input type="number" value="36"/>
+						最小/m：-5m<input type="range" min="-5" max="5" step="0.1" value="-1" name="min" />5m <input type="number" min="-5" max="5" step="0.1" value="-1"/>m<br/>
+						最大/m：-5m<input type="range" min="-5" max="5" step="0.1" value="1" name="max" />5m <input type="number" min="-5" max="5" step="0.1" value="1"/>m<br/>
+						平滑程度：1<input type="range" min="1" max="100" step="1" value="36" name="q" />100 <input type="number" min="1" max="100" step="1" value="36"/>
 					</fieldset>
 				</fieldset>
 				<fieldset class="dirt">
 					<legend>泥土层百分比(dirt)</legend>
-					最小：0<input type="range" min="0" max="1" value="0.1" step="0.01" name="min" />1 <input type="number" value="0.1"/><br/>
-					最大：0<input type="range" min="0" max="1" value="0.4" step="0.01" name="max" />1 <input type="number" value="0.4"/><br/>
-					平滑程度：1<input type="range" min="1" max="1000" step="1" value="66" name="q" />1000 <input type="number" value="66"/>
+					最小：0<input type="range" min="0" max="1" step="0.01" value="0.1" name="min" />1 <input type="number" min="0" max="1" step="0.01" value="0.1"/><br/>
+					最大：0<input type="range" min="0" max="1" step="0.01" value="0.4" name="max" />1 <input type="number" min="0" max="1" step="0.01" value="0.4"/><br/>
+					平滑程度：1<input type="range" min="1" max="1000" step="1" value="66" name="q" />1000 <input type="number" min="1" max="1000" step="1" value="66"/>
 					<fieldset class="error">
 						<legend>误差(error)</legend>
-						最小：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="-0.1" name="min" />0.5 <input type="number" value="-0.1"/><br/>
-						最大：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="0.1" name="max" />0.5 <input type="number" value="0.1"/><br/>
-						平滑程度：1<input type="range" min="1" max="100" value="6" name="q" />100 <input type="number" value="6"/>
+						最小：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="-0.1" name="min" />0.5 <input type="number" min="-0.5" max="0.5" step="0.01" value="-0.1"/><br/>
+						最大：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="0.1" name="max" />0.5 <input type="number" min="-0.5" max="0.5" step="0.01" value="0.1"/><br/>
+						平滑程度：1<input type="range" min="1" max="100" step="1" value="6" name="q" />100 <input type="number" min="1" max="100" step="1" value="6"/>
 					</fieldset>
 				</fieldset>
 				<fieldset class="openStone">
 					<legend>允许石头露天出现（负值不允许）(openStone)</legend>
-					最小：-5<input type="range" min="-5" max="5" value="-0.99" step="0.01" name="min" />5 <input type="number" value="-0.99"/><br/>
-					最大：-5<input type="range" min="-5" max="5" value="0.01" step="0.01" name="max" />5 <input type="number" value="0.01"/><br/>
-					平滑程度：1<input type="range" min="1" max="1000" step="1" value="1" name="q" />1000 <input type="number" value="1"/>
+					最小：-5<input type="range" min="-5" max="5" step="0.01" value="-0.99" name="min" />5 <input type="number" min="-5" max="5" step="0.01"  value="-0.99"/><br/>
+					最大：-5<input type="range" min="-5" max="5" step="0.01" value="0.01" name="max" />5 <input type="number" min="-5" max="5" step="0.01"  value="0.01"/><br/>
+					平滑程度：1<input type="range" min="1" max="1000" step="1" value="1" name="q" />1000 <input type="number" min="1" max="1000" step="1" value="1"/>
 				</fieldset>
 				<fieldset class="type">
 					<legend>区块类型(type)</legend>
-					生成森林(forest)的概率：0<input type="range" min="0" max="1" step="0.01" value="0.4" name="forest" />1 <input name="forest" value="0.4"/><br/>
-					生成草原(grassland)的概率：0<input type="range" min="0" max="1" step="0.01" value="0.4" name="grassland" />1 <input name="grassland" value="0.4"/><br/>
-					生成沙漠(desert)的概率：0<input type="range" min="0" max="1" step="0.01" value="0.2" name="desert" />1 <input name="desert" value="0.2"/><br/>
-					平滑程度：1<input type="range" min="1" max="1000" step="1" value="666" name="q" />1000 <input type="number" value="666"/>
+					生成森林(forest)的概率：0<input type="range" min="0" max="1" step="0.01" value="0.4" name="forest" />1 <input name="forest" min="0" max="1" step="0.01" value="0.4"/><br/>
+					生成草原(grassland)的概率：0<input type="range" min="0" max="1" step="0.01" value="0.4" name="grassland" />1 <input name="grassland" min="0" max="1" step="0.01" value="0.4"/><br/>
+					生成沙漠(desert)的概率：0<input type="range" min="0" max="1" step="0.01" value="0.2" name="desert" />1 <input name="desert" min="0" max="1" step="0.01" value="0.2"/><br/>
+					平滑程度：1<input type="range" min="1" max="1000" step="1" value="666" name="q" />1000 <input type="number" min="1" max="1000" step="1" value="666"/>
 				</fieldset>
 				<fieldset class="treeHeight">
 					<legend>树高(treeHeight)</legend>
 					<fieldset class="plant">
 						<legend>允许生成树(plant)</legend>
-						最小：-1<input type="range" min="-1" max="1" value="0.5" step="0.001" name="min" />1 <input type="number" value="0.5"/><br/>
-						最大：-1<input type="range" min="-1" max="1" value="0.667" step="0.001" name="max" />1 <input type="number" value="0.667"/><br/>
+						最小：-1<input type="range" min="-1" max="1" step="0.001" value="0.5" name="min" />1 <input type="number" min="-1" max="1" step="0.001" value="0.5"/><br/>
+						最大：-1<input type="range" min="-1" max="1" step="0.001" value="0.667" name="max" />1 <input type="number" min="-1" max="1" step="0.001" value="0.667"/><br/>
 					</fieldset>
-					最小：1<input type="range" min="1" max="30" value="1" step="0.1" name="min" />10 <input type="number" value="1"/><br/>
-					最大：1<input type="range" min="1" max="30" value="10" step="0.1" name="max" />10 <input type="number" value="10"/><br/>
-					平滑程度：1<input type="range" min="1" max="100" step="1" value="1" name="q" />100 <input type="number" value="1"/>
+					最小：1<input type="range" min="1" max="30" step="0.1" value="1" name="min" />10 <input type="number" min="1" max="30" step="0.1" value="1"/><br/>
+					最大：1<input type="range" min="1" max="30" step="0.1" value="10" name="max" />10 <input type="number" min="1" max="30" step="0.1" value="10"/><br/>
+					平滑程度：1<input type="range" min="1" max="100" step="1" value="1" name="q" />100 <input type="number" min="1" max="100" step="1" value="1"/>
 					<fieldset class="error">
 						<legend>误差(error)</legend>
-						最小：-5<input type="range" min="-5" max="5" step="0.1" value="-1" name="min" />5 <input type="number" value="-1"/><br/>
-						最大：-5<input type="range" min="-5" max="5" step="0.1" value="1" name="max" />5 <input type="number" value="1"/><br/>
-						平滑程度：1<input type="range" min="1" max="100" value="1" name="q" />100 <input type="number" value="1"/>
+						最小：-5<input type="range" min="-5" max="5" step="0.1" value="-1" name="min" />5 <input type="number" min="-5" max="5" step="0.1" value="-1"/><br/>
+						最大：-5<input type="range" min="-5" max="5" step="0.1" value="1" name="max" />5 <input type="number" min="-5" max="5" step="0.1" value="1"/><br/>
+						平滑程度：1<input type="range" min="1" max="100" step="1" value="1" name="q" />100 <input type="number" min="1" max="100" step="1" value="1"/>
 					</fieldset>
 				</fieldset>
 				<fieldset class="leavesScale">
 					<legend>树叶高度与树高之比(leavesScale)</legend>
-					最小：0.01<input type="range" min="0.01" max="0.99" value="0.6" step="0.01" name="min" />0.99 <input type="number" value="0.6"/><br/>
-					最大：0.01<input type="range" min="0.01" max="0.99" value="0.86" step="0.01" name="max" />0.99 <input type="number" value="0.86"/><br/>
-					平滑程度：1<input type="range" min="1" max="100" step="1" value="16" name="q" />100 <input type="number" value="16"/>
+					最小：0.01<input type="range" min="0.01" max="0.99" step="0.01" value="0.6" name="min" />0.99 <input type="number" min="0.01" max="0.99" step="0.01" value="0.6"/><br/>
+					最大：0.01<input type="range" min="0.01" max="0.99" step="0.01" value="0.86" name="max" />0.99 <input type="number" min="0.01" max="0.99" step="0.01" value="0.86"/><br/>
+					平滑程度：1<input type="range" min="1" max="100" step="1" value="16" name="q" />100 <input type="number" min="1" max="100" step="1" value="16"/>
 					<fieldset class="error">
 						<legend>误差(error)</legend>
-						最小：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="-0.1" name="min" />0.5 <input type="number" value="-0.1"/><br/>
-						最大：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="0.1" name="max" />0.5 <input type="number" value="0.1"/><br/>
-						平滑程度：1<input type="range" min="1" max="100" value="6" name="q" />100 <input type="number" value="6"/>
+						最小：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="-0.1" name="min" />0.5 <input type="number" min="-0.5" max="0.5" step="0.01" value="-0.1"/><br/>
+						最大：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="0.1" name="max" />0.5 <input type="number" min="-0.5" max="0.5" step="0.01" value="0.1"/><br/>
+						平滑程度：1<input type="range" min="1" max="100" step="1" value="6" name="q" />100 <input type="number" min="1" max="100" step="1" value="6"/>
 					</fieldset>
 				</fieldset>
 				<fieldset class="weatherRain">
 					<legend>降雨概率（负值不下雨）(weatherRain)</legend>
-					最小：-1<input type="range" min="-1" max="1" value="-0.6" step="0.01" name="min" />1 <input type="number" value="-0.6"/><br/>
-					最大：-1<input type="range" min="-1" max="1" value="0.3" step="0.01" name="max" />1 <input type="number" value="0.3"/><br/>
-					平滑程度：1<input type="range" min="1" max="100" step="1" value="16" name="q" />100 <input type="number" value="16"/>
+					最小：-1<input type="range" min="-1" max="1" step="0.01" value="-0.6" name="min" />1 <input type="number"min="-1" max="1" step="0.01"  value="-0.6"/><br/>
+					最大：-1<input type="range" min="-1" max="1" step="0.01" value="0.3" name="max" />1 <input type="number"min="-1" max="1" step="0.01"  value="0.3"/><br/>
+					平滑程度：1<input type="range" min="1" max="100" step="1" value="16" name="q" />100 <input type="number" min="1" max="100" step="1" value="16"/>
 					<fieldset class="error">
 						<legend>误差(error)</legend>
-						最小：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="-0.1" name="min" />0.5 <input type="number" value="-0.1"/><br/>
-						最大：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="0.1" name="max" />0.5 <input type="number" value="0.1"/><br/>
-						平滑程度：1<input type="range" min="1" max="100" value="6" name="q" />100 <input type="number" value="6"/>
+						最小：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="-0.1" name="min" />0.5 <input type="number" min="-0.5" max="0.5" step="0.01" value="-0.1"/><br/>
+						最大：-0.5<input type="range" min="-0.5" max="0.5" step="0.01" value="0.1" name="max" />0.5 <input type="number" min="-0.5" max="0.5" step="0.01" value="0.1"/><br/>
+						平滑程度：1<input type="range" min="1" max="100" step="1" value="6" name="q" />100 <input type="number"min="1" max="100" step="1"  value="6"/>
 					</fieldset>
 				</fieldset>
 				<div style="clear:both;">
@@ -309,25 +322,77 @@
 		</div>
 <script>
 //input处理
-let e = $(".more input");
-for (let i of e)
+for (const i of $(".more input"))
 	i["data-init"] = i.value;
 
+//重置
 function reset(){
-	let e = $(".more input");
-	for (let i of e)
+	for (const i of $(".more input"))
 		i.value = i["data-init"];
 }
 
-$(".more input[type='range']").on("change", function(){
+//range <==> number
+$(".more input[type='range']").change(function(){
 	$(this).next().val(this.value);
 });
-$(".more input:not([type='range'])").on("change", function(){
+$(".more input[type='number']").change(function(){
 	if (isNaN(this.value))
 		this.value = this["data-init"];
 	$(this).prev().val( Number(this.value) );
 	this.value=$(this).prev().val();
 });
+
+//time
+function dateToInputValue(date){
+	if (typeof date == "number") date = new Date(date);
+	return `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}T${date.getHours()}:${date.getMinutes()}`;
+}
+function inputValueToDate(date){
+	const [, year, mouth, day, hour, minute] = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(date);
+	return new Date(year, mouth, day, hour, minute);
+}
+$(".more > .time-position > input[name='time']")
+	.val( dateToInputValue( (new Date()).setFullYear(3000) ) )
+	.change(function(){
+		if (!this.value)
+			this.value = dateToInputValue( (new Date()).setFullYear(3000) );
+	});
+
+//position
+if (navigator.geolocation)
+	navigator.geolocation.getCurrentPosition(function(position){
+		const {latitude, longitude} = position.coords;
+		console.log(pos, latitude, longitude)
+		$(".more > .time-position > input[name='latitude']").val( latitude ).next().val( latitude );
+		$(".more > .time-position > input[name='longitude']").val( longitude ).next().val( longitude );
+	}, function (err) {
+		switch (err.code) {
+			case 1:
+				console.err("位置服务被拒绝", err);
+				break;
+			case 2:
+				console.err("暂时获取不到位置信息", err);
+				break;
+			case 3:
+				console.err("获取位置信息超时", err);
+				break;
+			default:
+				console.err("未知错误", err);
+				break;
+		}
+	});
+document.addEventListener("plusready", function(){
+	plus.geolocation.getCurrentPosition(function(position){
+		const {latitude, longitude} = position.coords;
+		console.log(position, latitude, longitude)
+		$(".more > .time-position > input[name='latitude']").val( latitude ).next().val( latitude );
+		$(".more > .time-position > input[name='longitude']").val( longitude ).next().val( longitude );
+	}, function(err){
+		console.error("获取地理位置错误", err);
+	});
+});
+
+//type
 $(`.more > .type > input[name='forest'],
 .more > .type > input[name='grassland'],
 .more > .type > input[name='desert']`).on("change", function(){
@@ -347,13 +412,17 @@ $(`.more > .type > input[name='forest'],
 
 //新的世界
 $(".init > button:eq(0)")[0].onclick = function(){
+	console.log("new world", $(".init").css("display"), $(".new_world").css("display"));
 	$(".init")
 		.css("left", "0%")
 		.css("opacity", "1")
 		.animate({
 			left: (Math.round(Math.random())?"-":"") + "100%", //正负100%
 			opacity: 0
-		}, 1000, ()=>$(".init").css("display", "flex"));
+		}, 1000, ()=>{
+			$(".init").css("display", "none");
+			console.log("new world", "animate end", $(".init").css("display"), $(".new_world").css("display"));
+		});
 	$(".new_world")
 		.css("top", (Math.round(Math.random())?"-":"") + "100%") //正负100%
 		.css("opacity", "0")
@@ -362,6 +431,7 @@ $(".init > button:eq(0)")[0].onclick = function(){
 			top: "0%",
 			opacity: 1
 		}, 1000);
+	console.log("new world", "animate start", $(".init").css("display"), $(".new_world").css("display"));
 };
 
 function open(url="main.html"){
@@ -393,6 +463,7 @@ $(".init > button:eq(1)").click(function(){
 
 //取消
 $(".new_world > button:eq(0)").click(function(){
+	console.log("init", $(".init").css("display"), $(".new_world").css("display"));
 	$(".init")
 		.css("left", (Math.round(Math.random())?"-":"") + "100%") //正负100%
 		.css("opacity", "0")
@@ -407,13 +478,22 @@ $(".new_world > button:eq(0)").click(function(){
 		.animate({
 			top: (Math.round(Math.random())?"-":"") + "100%", //正负100%
 			opacity: 0
-		}, 1000, ()=>$(".new_world").css("display", "none"));
+		}, 1000, ()=>{
+			$(".new_world").css("display", "none");
+			console.log("init", "animate end", $(".init").css("display"), $(".new_world").css("display"));
+		});
+	console.log("init", "animate start", $(".init").css("display"), $(".new_world").css("display"));
 });
 
 //生成世界
 $(".new_world > button:eq(1)").click(function(){
-	let seed,
-		height={
+	const
+		time = +inputValueToDate( $(".more > .time-position > input[name='time']").val() )
+		position = {
+			latitude: +$(".more > .time-position > input[name='latitude']").val(),
+			longitude: +$(".more > .time-position > input[name='longitude']").val()
+		},
+		height = {
 			min: +$(".more > .height > [name='min']").val(),
 			max: +$(".more > .height > [name='max']").val(),
 			q: +$(".more > .height > [name='q']").val(),
@@ -423,7 +503,7 @@ $(".new_world > button:eq(1)").click(function(){
 				q: +$(".more > .height > .error > [name='q']").val()
 			}
 		},
-		dirt={
+		dirt = {
 			min: +$(".more > .dirt > [name='min']").val(),
 			max: +$(".more > .dirt > [name='max']").val(),
 			q: +$(".more > .dirt > [name='q']").val(),
@@ -433,13 +513,13 @@ $(".new_world > button:eq(1)").click(function(){
 				q: +$(".more > .dirt > .error > [name='q']").val()
 			}
 		},
-		type={
+		type = {
 			foreset: +$(".more > .type > [name='foreset']").val(),
 			grassland: +$(".more > .type > [name='grassland']").val(),
 			desert: +$(".more > .type > [name='desert']").val(),
 			q: +$(".more > .type > [name='q']").val()
 		},
-		treeHeight={
+		treeHeight = {
 			plant:{
 				min: +$(".more > .treeHeight > .plant > [name='min']").val(),
 				max: +$(".more > .treeHeight > .plant > [name='max']").val()
@@ -453,7 +533,7 @@ $(".new_world > button:eq(1)").click(function(){
 				q: +$(".more > .treeHeight > .error > [name='q']").val()
 			}
 		},
-		leavesScale={
+		leavesScale = {
 			min: +$(".more > .leavesScale > [name='min']").val(),
 			max: +$(".more > .leavesScale > [name='max']").val(),
 			q: +$(".more > .leavesScale > [name='q']").val(),
@@ -463,12 +543,12 @@ $(".new_world > button:eq(1)").click(function(){
 				q: +$(".more > .leavesScale > .error > [name='q']").val()
 			}
 		},
-		openStone={
+		openStone = {
 			min: +$(".more > .openStone > [name='min']").val(),
 			max: +$(".more > .openStone > [name='max']").val(),
 			q: +$(".more > .openStone > [name='q']").val()
 		},
-		weatherRain={
+		weatherRain = {
 			min: +$(".more > .weatherRain > [name='min']").val(),
 			max: +$(".more > .weatherRain > [name='max']").val(),
 			q: +$(".more > .weatherRain > [name='q']").val(),
@@ -478,18 +558,22 @@ $(".new_world > button:eq(1)").click(function(){
 				q: +$(".more > .weatherRain > .error > [name='q']").val()
 			}
 		};
+	let seed;
 	if ($("[name='seed']").val() === ""){ //随机种子
 		seed = Math.random().toString(36).substring(2);
 	}else{
 		seed = $("[name='seed']").val();
 	}
 	localStorage.setItem("我的世界_seed", seed);
+	localStorage.setItem("我的世界_time", time);
+	localStorage.setItem("我的世界_position", JSON.stringify(position));
 	localStorage.setItem("我的世界_height", JSON.stringify(height));
 	localStorage.setItem("我的世界_dirt", JSON.stringify(dirt));
 	localStorage.setItem("我的世界_type", JSON.stringify(type));
 	localStorage.setItem("我的世界_treeHeight", JSON.stringify(treeHeight));
 	localStorage.setItem("我的世界_leavesScale", JSON.stringify(leavesScale));
 	localStorage.setItem("我的世界_openStone", JSON.stringify(openStone));
+	localStorage.setItem("我的世界_weatherRain", JSON.stringify(weatherRain));
 	
 	open();
 });

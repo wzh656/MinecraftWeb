@@ -2,13 +2,14 @@ if (localStorage.getItem("我的世界_seed") === null){
 	location.href = "home.html";
 	message("无法读取数据", "无法读取数据！<br/>请重新创建游戏", "red", 3);
 }
-let map = new ChunkMap([
+
+const map = new ChunkMap([
 	{x: -8, y: 0, z: -8},
 	{x: 8, y: 256, z: 8}
 ],{
 	seed: localStorage.getItem("我的世界_seed"),
 	height: JSON.parse(localStorage.getItem("我的世界_height")) || {
-		min: 30,
+		min: 1,
 		max: 256,
 		//ave: 10,
 		q: 166,
