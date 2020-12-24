@@ -349,7 +349,7 @@ function dateToInputValue(date){
 }
 function inputValueToDate(date){
 	const [, year, mouth, day, hour, minute] = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(date);
-	return new Date(year, mouth, day, hour, minute);
+	return new Date(year, mouth-1, day, hour, minute);
 }
 $(".more > .time-position > input[name='time']")
 	.val( dateToInputValue( (new Date()).setFullYear(3000) ) )

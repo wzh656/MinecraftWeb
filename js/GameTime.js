@@ -12,22 +12,22 @@ class GameTime{
 	}
 	
 	setSpeed(speed=1){
-		let v0 = this.getSpeed();
+		const v0 = this.getSpeed();
 		this.game = +this.getTime();
 		this.date = +new Date();
 		this.speed = +speed;
-		let v1 = this.getSpeed();
+		const v1 = this.getSpeed();
 		if (v1 != v0)
 			for (let i of Object.values(this.onChangeSpeed))
 				i(v1);
 		return this;
 	}
 	stopTime(){
-		let v0 = this.getSpeed();
+		const v0 = this.getSpeed();
 		this.game = +this.getTime();
 		this.date = +new Date();
 		this.stop = !this.stop;
-		let v1 = this.getSpeed();
+		const v1 = this.getSpeed();
 		if (v1 != v0)
 			for (let i of Object.values(this.onChangeSpeed))
 				i(v1);
@@ -68,7 +68,7 @@ class GameTime{
 				delete this.onChangeSpeed[key];
 			}
 		};
-		return [key, id];
+		return {key, id, func};
 	}
 	
 	setInterval(func, step){
@@ -82,6 +82,6 @@ class GameTime{
 			clearInterval(id);
 			id = setInterval(()=>func(speed), step/speed);
 		};
-		return [key, id];
+		return {key, id, func};
 	}
 }

@@ -1,11 +1,11 @@
 /**
 * 玩家(deskgood)
 */
-let delay_id = {
+const delay_id = {
 	update_block: null,
 	perloadChunk: null
 }, body_blocks = [];
-let deskgood = {
+const deskgood = {
 	v: {
 		x: 0,
 		y: 0,
@@ -53,13 +53,13 @@ let deskgood = {
 	hold: new ThingGroup($("#tools")[0], {
 		fixedLength: 4,
 		updateCallback(children){
-			for (let i in children){
+			for (let i=0, len=children.length; i<len; i++){
 				$(children[i]).css("borderColor", (i==deskgood.choice)?"#fff":"#aaa")
 					.css("borderWidth", (i==deskgood.choice)?"0.6vmax":"0.5vmax")
 					.css("transform", (i==deskgood.choice)?"translateY(-3px)":"")
 					.css("margin", "0 0");
 				children[i].onclick = ()=>{
-					let before = deskgood.choice;
+					const before = deskgood.choice;
 					
 					if ( deskgood.hold[before] &&
 						eval( deskgood.hold[before].get("attr", "onChangeLeave") ) === false
@@ -84,7 +84,7 @@ let deskgood = {
 		fixedLength: 1,
 		maxLength: Infinity,
 		updateCallback(children){
-			for (let i in children){
+			for (let i=0, len=children.length; i<len; i++){
 				$(children[i]).css("borderColor", (i==children.length-1)?"#aaa":"rgb(116,116,116)")
 					.css("borderWidth", (i==children.length-1)?"0.5vmax":"0.3vmax")
 					.css("margin", "0 0");
@@ -97,7 +97,7 @@ let deskgood = {
 						deskgood.hold.addOne(deskgood.head[deskgood.head.length-1], deskgood.choice);
 						deskgood.head.delete();
 					}else{ //无方块
-						let choice = deskgood.hold[deskgood.choice];
+						const choice = deskgood.hold[deskgood.choice];
 						if ( !choice ) return; //手上无方块
 						
 						if (eval( choice.get("attr", "onPutToHead") ) === false)
@@ -114,7 +114,7 @@ let deskgood = {
 		fixedLength: 1,
 		maxLength: Infinity,
 		updateCallback(children){
-			for (let i in children){
+			for (let i=0, len=children.length; i<len; i++){
 				$(children[i]).css("borderColor", (i==children.length-1)?"#aaa":"rgb(116,116,116)")
 					.css("borderWidth", (i==children.length-1)?"0.5vmax":"0.3vmax")
 					.css("margin", "0 0");
@@ -127,7 +127,7 @@ let deskgood = {
 						deskgood.hold.addOne(deskgood.body[deskgood.body.length-1], deskgood.choice);
 						deskgood.body.delete();
 					}else{ //无方块
-						let choice = deskgood.hold[deskgood.choice];
+						const choice = deskgood.hold[deskgood.choice];
 						if ( !choice ) return; //手上无方块
 						
 						if (eval( choice.get("attr", "onPutToBody") ) === false)
@@ -144,7 +144,7 @@ let deskgood = {
 		fixedLength: 1,
 		maxLength: Infinity,
 		updateCallback(children){
-			for (let i in children){
+			for (let i=0, len=children.length; i<len; i++){
 				$(children[i]).css("borderColor", (i==children.length-1)?"#aaa":"rgb(116,116,116)")
 					.css("borderWidth", (i==children.length-1)?"0.5vmax":"0.3vmax")
 					.css("margin", "0 0");
@@ -157,7 +157,7 @@ let deskgood = {
 						deskgood.hold.addOne(deskgood.leg[deskgood.leg.length-1], deskgood.choice);
 						deskgood.leg.delete();
 					}else{ //无方块
-						let choice = deskgood.hold[deskgood.choice];
+						const choice = deskgood.hold[deskgood.choice];
 						if ( !choice ) return; //手上无方块
 						
 						console.log(choice, TEMPLATES, choice.get("attr", "onPutToLeg"))
@@ -175,7 +175,7 @@ let deskgood = {
 		fixedLength: 1,
 		maxLength: Infinity,
 		updateCallback(children){
-			for (let i in children){
+			for (let i=0, len=children.length; i<len; i++){
 				$(children[i]).css("borderColor", (i==children.length-1)?"#aaa":"rgb(116,116,116)")
 					.css("borderWidth", (i==children.length-1)?"0.5vmax":"0.3vmax")
 					.css("margin", "0 0");
@@ -188,7 +188,7 @@ let deskgood = {
 						deskgood.hold.addOne(deskgood.foot[deskgood.foot.length-1], deskgood.choice);
 						deskgood.foot.delete();
 					}else{ //无方块
-						let choice = deskgood.hold[deskgood.choice];
+						const choice = deskgood.hold[deskgood.choice];
 						if ( !choice ) return; //手上无方块
 						
 						if (eval( choice.get("attr", "onPutToFoot") ) === false)
@@ -214,7 +214,7 @@ let deskgood = {
 				.children(".resaon").html(reason);
 			$("#die").hide().fadeIn("slow");
 			
-			let bgm = $("#bgm")[0];
+			const bgm = $("#bgm")[0];
 			bgm.volume = 1;
 			bgm.src = "./music/凉凉.mp3";
 			bgm.play();
@@ -228,37 +228,35 @@ let deskgood = {
 			x = x||deskgood.look.x,
 			y = y||deskgood.look.y,
 			z = z||deskgood.look.z;
-			let v = new THREE.Vector3(x,y,z).setLength(1); //单位向量（标准化）
+			const v = new THREE.Vector3(x,y,z).setLength(1); //单位向量（标准化）
 			camera.lookAt(deskgood.pos.x+v.x, deskgood.pos.y+v.y, deskgood.pos.z+v.z);
 			[deskgood.look.x, deskgood.look.y, deskgood.look.z] = [v.x, v.y, v.z];
 		}else{
-			let x =
-				Math.cos(deskgood.lookAt.left_right/180*Math.PI)*
-				Math.cos(deskgood.lookAt.top_bottom/180*Math.PI)
-			;
-			let z =
-				Math.sin(deskgood.lookAt.left_right/180*Math.PI)*
-				Math.cos(deskgood.lookAt.top_bottom/180*Math.PI)
-			;
-			let y = Math.sin(deskgood.lookAt.top_bottom/180*Math.PI);
+			const x =
+					Math.cos(deskgood.lookAt.left_right/180*Math.PI)*
+					Math.cos(deskgood.lookAt.top_bottom/180*Math.PI),
+				z =
+					Math.sin(deskgood.lookAt.left_right/180*Math.PI)*
+					Math.cos(deskgood.lookAt.top_bottom/180*Math.PI),
+				y = Math.sin(deskgood.lookAt.top_bottom/180*Math.PI);
 			camera.lookAt(deskgood.pos.x+x, deskgood.pos.y+y, deskgood.pos.z+z);
 			[deskgood.look.x, deskgood.look.y, deskgood.look.z] = [x,y,z];
 		}
 	},
 	update_round_blocks(dx=1, dy=1, dz=1){
-		for (let i of body_blocks)
+		for (const i of body_blocks)
 			if (i)
 				map.update(i.x, i.y, i.z); //重新更新
 		
-		body_blocks = [];
+		body_blocks.splice(0, body_blocks.length);
 		for (let x=deskgood.pos.x/100-dx; x<=deskgood.pos.x/100+dx; x++)
 			for (let y=deskgood.pos.y/100-1-dy; y<=deskgood.pos.y/100+dy; y++)
 				for (let z=deskgood.pos.z/100-dz; z<=deskgood.pos.z/100+dz; z++)
 					body_blocks.push({x, y, z});
 		
-		for (let i of body_blocks){
+		for (const i of body_blocks){
 			//[i.x, i.y, i.z] = [i.x, i.y, i.z].map(Math.round)
-			let block = map.get(i.x, i.y, i.z);
+			const block = map.get(i.x, i.y, i.z);
 			//if (i.x == 9 && i.y == 0 && i.z == 26) console.warn(block);
 			if (!block) continue;
 			
@@ -297,7 +295,7 @@ let deskgood = {
 					)
 				) || !map.get(deskgood.pos.x/100, deskgood.pos.y/100, deskgood.pos.z/100) //没有方块在头上
 			){ */
-				let changed_x_z = deskgood.pos.x != x || deskgood.pos.z != z, //改变了x|z坐标
+				const changed_x_z = deskgood.pos.x != x || deskgood.pos.z != z, //改变了x|z坐标
 					changed = changed_x_z || deskgood.pos.y != y;
 				
 				[deskgood.pos.x, deskgood.pos.y, deskgood.pos.z] = [x,y,z];
@@ -334,7 +332,7 @@ let deskgood = {
 		y = y*rnd_error(),
 		z = z*rnd_error(); //随机化
 		
-		let rt = [0,0,0]; //返回值
+		const rt = [0,0,0]; //返回值
 		
 		if (y<0 && map.get(
 			deskgood.pos.x/100,
@@ -349,14 +347,14 @@ let deskgood = {
 		//X
 		if (x > 0){
 			//上半身
-			let objs = ray3D(
+			const objs = ray3D(
 				{x: deskgood.pos.x-50},
 				{x: 1},
 				0,
 				x+60
 			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
-				let fx = Math.min(...objs.map(v => v.point.x))-10; //获取碰撞点，计算移动位置
+				const fx = Math.min(...objs.map(v => v.point.x))-10; //获取碰撞点，计算移动位置
 				rt[0] = fx-(deskgood.pos.x+x);
 				deskgood.moveX(fx);
 				console.log("x+ 上 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), fx, rt[0])
@@ -371,7 +369,7 @@ let deskgood = {
 				x+60
 			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
-				let fx = Math.min(...objs.map(v => v.point.x))-10; //获取碰撞点，计算移动位置
+				const fx = Math.min(...objs.map(v => v.point.x))-10; //获取碰撞点，计算移动位置
 				rt[0] = fx-(deskgood.pos.x+x);
 				deskgood.moveX(fx);
 				console.log("x+ 下 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), fx, rt[0])
@@ -380,14 +378,14 @@ let deskgood = {
 			}
 		}else if (x < 0){
 			//上半身
-			let objs = ray3D(
+			const objs = ray3D(
 				{x: deskgood.pos.x+50},
 				{x: -1},
 				0,
 				-x+60
 			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
-				let fx = Math.max(...objs.map(v => v.point.x))+10; //获取碰撞点，计算移动位置
+				const fx = Math.max(...objs.map(v => v.point.x))+10; //获取碰撞点，计算移动位置
 				rt[0] = fx-(deskgood.pos.x+x);
 				deskgood.moveX(fx);
 				console.log("x- 上 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), fx, rt[0])
@@ -403,7 +401,7 @@ let deskgood = {
 				-x+60
 			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
-				let fx = Math.max(...objs.map(v => v.point.x))+10; //获取碰撞点，计算移动位置
+				const fx = Math.max(...objs.map(v => v.point.x))+10; //获取碰撞点，计算移动位置
 				rt[0] = fx-(deskgood.pos.x+x);
 				deskgood.moveX(fx);
 				console.log("x- 下 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), fx, rt[0])
@@ -415,36 +413,36 @@ let deskgood = {
 		
 		//Y
 		if (y > 0){ //上
-			let objs = ray3D(
+			const objs = ray3D(
 				{y: deskgood.pos.y+50},
 				{y: 1},
 				0,
 				y
 			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
-				/*let fy = Math.min(...ray3D(
+				/*const fy = Math.min(...ray3D(
 					{y: deskgood.pos.y+50},
 					{y: 1}
 				).map(v => v.point.y))-50;*/
-				let fy = Math.min(...objs.map(v => v.point.y))-50; //获取碰撞点，计算移动位置
+				const fy = Math.min(...objs.map(v => v.point.y))-50; //获取碰撞点，计算移动位置
 				rt[1] = fy-(deskgood.pos.y+y);
 				deskgood.moveY(fy);
 			}else{ //无阻挡
 				deskgood.moveY(deskgood.pos.y+y);
 			}
 		}else if (y < 0){ //下
-			let objs = ray3D(
+			const objs = ray3D(
 				{y: deskgood.pos.y-150},
 				{y: -1},
 				0,
 				-y
 			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
-				/*let fy = Math.max(...ray3D(
+				/*const fy = Math.max(...ray3D(
 					{y: deskgood.pos.y-150},
 					{y: -1}
 				).map(v => v.point.y))+150;*/
-				let fy = Math.max(...objs.map(v => v.point.y))+150; //获取碰撞点，计算移动位置
+				const fy = Math.max(...objs.map(v => v.point.y))+150; //获取碰撞点，计算移动位置
 				rt[1] = fy-(deskgood.pos.y+y);
 				deskgood.moveY(fy);
 			}else{ //无阻挡
@@ -455,14 +453,14 @@ let deskgood = {
 		//z
 		if (z > 0){
 			//上半身
-			let objs = ray3D(
+			const objs = ray3D(
 				{z: deskgood.pos.z-50},
 				{z: 1},
 				0,
 				z+60
 			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
-				let fz = Math.min(...objs.map(v => v.point.z))-10; //获取碰撞点，计算移动位置
+				const fz = Math.min(...objs.map(v => v.point.z))-10; //获取碰撞点，计算移动位置
 				rt[2] = fz-(deskgood.pos.z+z);
 				deskgood.moveZ(fz);
 				console.log("z+ 上 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), fz, rt[2])
@@ -477,7 +475,7 @@ let deskgood = {
 				z+60
 			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
-				let fz = Math.min(...objs.map(v => v.point.z))-10; //获取碰撞点，计算移动位置
+				const fz = Math.min(...objs.map(v => v.point.z))-10; //获取碰撞点，计算移动位置
 				rt[2] = fz-(deskgood.pos.z+z);
 				deskgood.moveZ(fz);
 				console.log("z+ 下 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), fz, rt[2])
@@ -486,14 +484,14 @@ let deskgood = {
 			}
 		}else if (z < 0){
 			//上半身
-			let objs = ray3D(
+			const objs = ray3D(
 				{z: deskgood.pos.z+50},
 				{z: -1},
 				0,
 				-z+60
 			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
-				let fz = Math.max(...objs.map(v => v.point.z))+10; //获取碰撞点，计算移动位置
+				const fz = Math.max(...objs.map(v => v.point.z))+10; //获取碰撞点，计算移动位置
 				rt[2] = fz-(deskgood.pos.z+z);
 				deskgood.moveZ(fz);
 				console.log("z- 上 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), fz, rt[2])
@@ -509,7 +507,7 @@ let deskgood = {
 				-z+60
 			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
-				let fz = Math.max(...objs.map(v => v.point.z))+10; //获取碰撞点，计算移动位置
+				const fz = Math.max(...objs.map(v => v.point.z))+10; //获取碰撞点，计算移动位置
 				rt[2] = fz-(deskgood.pos.z+z);
 				deskgood.moveZ(fz);
 				console.log("z- 下 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), fz, rt[2])
@@ -524,7 +522,7 @@ let deskgood = {
 		/*if (x & z)
 			console.log(x,y,z);
 		
-		let rt = [false, false, false];
+		const rt = [false, false, false];
 		//x
 		if (x > 0){ //向前
 			for (var i=deskgood.pos.x; i<=deskgood.pos.x+x; i+=dx){
@@ -585,7 +583,7 @@ let deskgood = {
 						null
 				){
 					rt[1] = true;
-					let s = (deskgood.pos.y-150+y)-j;
+					const s = (deskgood.pos.y-150+y)-j;
 					if (s)
 						console.log("撞到天花板，s:", s);
 					break;
@@ -601,7 +599,7 @@ let deskgood = {
 						null
 				){
 					rt[1] = true;
-					let s = j-(deskgood.pos.y-150+y);
+					const s = j-(deskgood.pos.y-150+y);
 					if (s)
 						// console.log("撞到地面，s:", s);
 					break;
@@ -678,7 +676,7 @@ let deskgood = {
 		
 		map.addID(block.id, {x,y,z}, TEMPLATES);
 		
-		let attr = `'${JSON.stringify(map.get(x, y, z).attr).slice(1,-1)}'`,
+		const attr = `'${JSON.stringify(map.get(x, y, z).attr).slice(1,-1)}'`,
 			cX = Math.round(x/map.size.x),
 			cZ = Math.round(z/map.size.z);
 		map.chunks[cX][cZ].edit = map.chunks[cX][cZ].edit.filter(v =>
@@ -686,7 +684,7 @@ let deskgood = {
 			v.y != y &&
 			v.z != z
 		); //删除重复
-		/*for (let [i, item] of Object.entries(map.chunks[cX][cZ].edit) )
+		/*for (const [i, item] of Object.entries(map.chunks[cX][cZ].edit) )
 			if (
 				item.x == x &&
 				item.y == y &&
@@ -732,14 +730,14 @@ let deskgood = {
 		
 		map.delete(x, y, z); //删除方块
 		
-		let cX = Math.round(x/map.size.x),
+		const cX = Math.round(x/map.size.x),
 			cZ = Math.round(z/map.size.z);
 		map.chunks[cX][cZ].edit = map.chunks[cX][cZ].edit.filter(v =>
 			v.x != x &&
 			v.y != y &&
 			v.z != z
 		); //删除重复
-		/*for (let [i, item] of Object.entries(map.chunks[cX][cZ].edit) )
+		/*for (const [i, item] of Object.entries(map.chunks[cX][cZ].edit) )
 			if (
 				item.x == x &&
 				item.y == y &&
@@ -783,18 +781,18 @@ SQL_read(); //读取存档
 
 //gui
 if (DEBUG){
-	let deskgood_folder = gui.addFolder("玩家/观察者(deskgood)");
+	const deskgood_folder = gui.addFolder("玩家/观察者(deskgood)");
 	deskgood_folder.open();
 		deskgood_folder.add(window, "stop").listen();
 		deskgood_folder.add(deskgood, "die").name("Game Over(自杀)");
 		deskgood_folder.add(deskgood, "sensitivity", 0.1, 10).name("灵敏度");
 		deskgood_folder.add(deskgood, "jump_v", 1, 36).name("跳跃速度");
-		let deskgood_position_folder = deskgood_folder.addFolder("位置/px");
+		const deskgood_position_folder = deskgood_folder.addFolder("位置/px");
 		deskgood_position_folder.open();
 			deskgood_position_folder.add(deskgood.pos, "x", map.size[0].x*100, map.size[1].x*100, 0.01).listen();
 			deskgood_position_folder.add(deskgood.pos, "y", map.size[0].y*100, map.size[1].y*100, 0.01).listen();
 			deskgood_position_folder.add(deskgood.pos, "z", map.size[0].z*100, map.size[1].z*100, 0.01).listen();
-			let deskgood_position_zone_folder = deskgood_position_folder.addFolder("区块(Chunk)");
+			const deskgood_position_zone_folder = deskgood_position_folder.addFolder("区块(Chunk)");
 			deskgood_position_zone_folder.open();
 				deskgood_position_folder.add({
 					get x(){ return Math.round(deskgood.pos.x/100/map.size.x) },
@@ -804,20 +802,20 @@ if (DEBUG){
 					get z(){ return Math.round(deskgood.pos.z/100/map.size.z) },
 					set z(v){ deskgood.pos.z = v*100*map.size.z }
 				}, "z", -100, 100, 1).listen();
-		let deskgood_v_folder = deskgood_folder.addFolder("速度/(m/s)");
+		const deskgood_v_folder = deskgood_folder.addFolder("速度/(m/s)");
 			deskgood_v_folder.add(deskgood.v, "x", -10, 10, 1e-3).listen();
 			deskgood_v_folder.add(deskgood.v, "y", -100, 100, 1e-3).listen().onChange((value) => {
 				deskgood.v.y = (value/100)**3 *100;
 			});
 			deskgood_v_folder.add(deskgood.v, "z", -10, 10, 1e-3).listen();
-		let deskgood_lookAt_folder = deskgood_folder.addFolder("朝向（球坐标系）");
+		const deskgood_lookAt_folder = deskgood_folder.addFolder("朝向（球坐标系）");
 			deskgood_lookAt_folder.add(deskgood.lookAt, "left_right", 0, 360).listen().name("左右（水平）");
 			deskgood_lookAt_folder.add(deskgood.lookAt, "top_bottom", -90, 90).listen().name("上下（竖直）");
-		let deskgood_look_folder = deskgood_folder.addFolder("朝向（笛卡尔坐标系）");
+		const deskgood_look_folder = deskgood_folder.addFolder("朝向（笛卡尔坐标系）");
 			deskgood_look_folder.add(deskgood.look, "x", -1, 1, 0.01).listen().onChange(x => deskgood.look_update(x));
 			deskgood_look_folder.add(deskgood.look, "y", -1, 1, 0.01).listen().onChange(y => deskgood.look_update(undefined, y));
 			deskgood_look_folder.add(deskgood.look, "z", -1, 1, 0.01).listen().onChange(z => deskgood.look_update(undefined, undefined, z));
-		let deskgood_up_folder = deskgood_folder.addFolder("天旋地转（小心头晕）");
+		const deskgood_up_folder = deskgood_folder.addFolder("天旋地转（小心头晕）");
 			deskgood_up_folder.add(deskgood.up, "x", -1, 1, 0.01).onChange(function(){
 				print("头晕", "<font style='font-size: 16px;'>头晕别怪我</font>", 3);
 				/* plus.nativeUI.toast(
@@ -851,10 +849,10 @@ if (DEBUG){
 						}
 					); }catch(err){} */
 				});
-		let deskgood_hold_folder = deskgood_folder.addFolder("工具栏(tools)");
+		const deskgood_hold_folder = deskgood_folder.addFolder("工具栏(tools)");
 		deskgood_hold_folder.open();
 			deskgood_hold_folder.add(deskgood, "choice", 0, 3, 1).listen().name("选择工具").onChange(deskgood.hold.update);
-			let deskgood_hold_things_folder = deskgood_hold_folder.addFolder("物品(只读勿编辑)");
+			const deskgood_hold_things_folder = deskgood_hold_folder.addFolder("物品(只读勿编辑)");
 			deskgood_hold_things_folder.open();
 				deskgood_hold_things_folder.add(deskgood.hold[0] || {id:0}, "id").name("0").listen().onChange(deskgood.hold.update);
 				deskgood_hold_things_folder.add(deskgood.hold[1] || {id:0}, "id").name("1").listen().onChange(deskgood.hold.update);

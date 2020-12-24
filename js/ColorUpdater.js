@@ -8,15 +8,15 @@ class ColorUpdater{
 		h = h.getHours() + h.getMinutes()/60 + h.getSeconds()/3600 + h.getMilliseconds()/1000/3600;
 		//h = (h.getSeconds()+h.getMilliseconds()/1000)/60*24
 		
-		let pow = Math.pow, E = Math.E;
-		for (let i of ["R", "G", "B"]){
-			let t = this.config[i];
+		const {pow, E} = Math;
+		for (const i of ["R", "G", "B"]){
+			const t = this.config[i];
 			colors[i] = Math.round(Math.min(
 				t[0].v.i / ( 1+pow( E,-(E/t[0].t.d)*(h-t[0].t.s) ) ) + t[0].v.s,
 				t[1].v.i / ( 1+pow( E,-(E/t[1].t.d)*(h-t[1].t.s) ) ) + t[1].v.s
 			));
 		}
-		//console.log(+new Date(), colors)
+		//.console.log(+new Date(), colors)
 		if (typeof this.setter == "function"){
 			this.setter(`rgb(${colors.R},${colors.G},${colors.B})`);
 		}else{
