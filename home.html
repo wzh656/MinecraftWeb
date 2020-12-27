@@ -229,7 +229,9 @@
 					<br/>
 					坐标原点经度：<br/>
 					-180°(E)<input type="range" min="-180" max="180" value="116" step="0.00001" name="longitude" />180°(S)
-					<input type="number" min="-180" max="180" step="0.00001" value="116" style="width: 16vw;" />°
+					<input type="number" min="-180" max="180" step="0.00001" value="116" style="width: 16vw;" />°<br/>
+					<button class="success" style="width: 36vw;">重新获取地理位置<p>注意：请先打开GPS开关</p></button>
+					<p></p>
 				</fieldset>
 				<fieldset class="height">
 					<legend>高度(height)</legend>
@@ -359,37 +361,62 @@ $(".more > .time-position > input[name='time']")
 	});
 
 //position
-if (navigator.geolocation)
-	navigator.geolocation.getCurrentPosition(function(position){
-		const {latitude, longitude} = position.coords;
-		console.log(pos, latitude, longitude)
-		$(".more > .time-position > input[name='latitude']").val( latitude ).next().val( latitude );
-		$(".more > .time-position > input[name='longitude']").val( longitude ).next().val( longitude );
-	}, function (err) {
-		switch (err.code) {
-			case 1:
-				console.err("位置服务被拒绝", err);
-				break;
-			case 2:
-				console.err("暂时获取不到位置信息", err);
-				break;
-			case 3:
-				console.err("获取位置信息超时", err);
-				break;
-			default:
-				console.err("未知错误", err);
-				break;
+function getGeolocationPosition(){
+	return new Promise((resolve, reject)=>{
+		if (navigator.geolocation){
+			navigator.geolocation.getCurrentPosition(function(position){
+				const {latitude, longitude} = position.coords;
+				console.log(pos, latitude, longitude)
+				$(".more > .time-position > input[name='latitude']").val( latitude ).next().val( latitude );
+				$(".more > .time-position > input[name='longitude']").val( longitude ).next().val( longitude );
+			}, function (err) {
+				switch (err.code) {
+					case 1:
+						resolve(["地理位置服务被拒绝", err]);
+						break;
+					case 2:
+						resolve(["暂时获取不到地理位置信息", err]);
+						break;
+					case 3:
+						resolve(["获取地理位置信息超时", err]);
+						break;
+					default:
+						resolve(["未知错误", err]);
+						break;
+				}
+			});
+		}else{
+			resolve(["浏览器不支持获取地理位置"]);
+		}
+		if (plus){
+			plus.geolocation.getCurrentPosition(function(position){
+				const {latitude, longitude} = position.coords;
+				console.log(position, latitude, longitude)
+				$(".more > .time-position > input[name='latitude']").val( latitude ).next().val( latitude );
+				$(".more > .time-position > input[name='longitude']").val( longitude ).next().val( longitude );
+			}, function(err){
+				resolve(["获取地理位置错误", err]);
+			});
+		}else{
+			document.addEventListener("plusready", function(){
+				plus.geolocation.getCurrentPosition(function(position){
+					const {latitude, longitude} = position.coords;
+					console.log(position, latitude, longitude)
+					$(".more > .time-position > input[name='latitude']").val( latitude ).next().val( latitude );
+					$(".more > .time-position > input[name='longitude']").val( longitude ).next().val( longitude );
+				}, function(err){
+					resolve(["获取地理位置错误", err]);
+				});
+			});
 		}
 	});
-document.addEventListener("plusready", function(){
-	plus.geolocation.getCurrentPosition(function(position){
-		const {latitude, longitude} = position.coords;
-		console.log(position, latitude, longitude)
-		$(".more > .time-position > input[name='latitude']").val( latitude ).next().val( latitude );
-		$(".more > .time-position > input[name='longitude']").val( longitude ).next().val( longitude );
-	}, function(err){
-		console.error("获取地理位置错误", err);
-	});
+}
+getGeolocationPosition();
+$(".more > .time-position > button").click(async function(){
+	const res = await getGeolocationPosition();
+	if (res && res[0]){
+		$(".more > .time-position > p").val( res[0] )
+	}
 });
 
 //type

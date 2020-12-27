@@ -265,7 +265,8 @@ class ChunkMap{
 			return;
 		let visibleValue;
 		if (thisBlock === undefined){ //未加载
-			let [cX, cZ] = [Math.round(x/map.size.x), Math.round(z/map.size.z)], //所属区块(Chunk)
+			const cX = Math.round(x/map.size.x),
+				cZ = Math.round(z/map.size.z), //所属区块(Chunk)
 				edit = this.chunks[cX] && this.chunks[cX][cZ] && this.chunks[cX][cZ].edit,
 				get = new Block( this.perGet(x, y, z, edit||[]) ),
 				noTransparent = get.id && get.get("attr", "block", "noTransparent");
@@ -292,7 +293,7 @@ class ChunkMap{
 			if (!thisBlock) //undefined（无需加载） or null（加载为空气）
 				return;
 		}else{
-			let noTransparent =  thisBlock.get("attr", "block", "noTransparent");
+			const noTransparent =  thisBlock.get("attr", "block", "noTransparent");
 			visibleValue = [
 				!( this.get(x+1, y, z) && !this.get(x+1, y, z).get("attr", "block", "transparent")) || noTransparent,
 				!( this.get(x-1, y, z) && !this.get(x-1, y, z).get("attr", "block", "transparent")) || noTransparent,
@@ -322,8 +323,8 @@ class ChunkMap{
 			if (!thisBlock) //undefined（仍未加载） or null（加载为空气）
 				return;
 		}*/
-		let material = thisBlock.block.material;
-		for (let i in material)
+		const material = thisBlock.block.material;
+		for (const i in material)
 			material[i].visible = visibleValue[i];
 		
 		if (thisBlock.block.addTo == true && visibleValue.every(value => !value)){ //已加入 and 可隐藏（每面都false）
@@ -388,14 +389,13 @@ class ChunkMap{
 	//更新列方块
 	updateColumn(x, z){
 		//console.log("updateColumn:",x,z,+time.getTime());
-		let yMax = this.size[1].y;
-		for (let dy=this.size[0].y; dy<=yMax; dy++)
+		for (let dy=this.size[0].y, yMax = this.size[1].y; dy<=yMax; dy++)
 			this.update(x, dy, z);
 	}
 	
 	//更新区块内所有方块（同步）
 	updateChunk(x, z){
-		let ox = x*this.size.x,
+		const ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
 		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
@@ -417,7 +417,7 @@ class ChunkMap{
 		} = opt;
 		// console.log("update", x, z, finishCallback, progressCallback)
 		
-		let ox = x*this.size.x,
+		const ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
 		if (finishCallback || progressCallback || breakTime || mostSpeed){ // 有回调（必须setInterval）or限速
@@ -976,15 +976,15 @@ class ChunkMap{
 	
 	perGetChunk(x, z, edit){
 		x = Math.round(x), z = Math.round(z); //规范化
-		let ox = x*this.size.x,
+		const ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
-		let result = [];
+		const result = [];
 		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
 			result[dx] = [];
 			for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
 				result[dx][dz] = this.perGetColumn(ox+dx, oz+dz, edit);
-				for (let y in result[dx][dz])
+				for (const y in result[dx][dz])
 					result[dx][dz][y] = new Block(result[dx][dz][y]);
 			}
 		}
@@ -1015,7 +1015,7 @@ class ChunkMap{
 	//加载列
 	loadColumn(x, z, columns, edit){
 		x = Math.round(x), z = Math.round(z); //规范化
-		let ox = Math.round(x/map.size.x)*map.size.x,
+		const ox = Math.round(x/map.size.x)*map.size.x,
 			oz = Math.round(z/map.size.z)*map.size.z,
 			dx = x-ox,
 			dz = z-oz;
@@ -1031,11 +1031,24 @@ class ChunkMap{
 					columns[dx-1] && columns[dx-1][dz] && columns[dx-1][dz][y].id &&
 					columns[dx][dz+1] && columns[dx][dz+1][y].id &&
 					columns[dx][dz-1] && columns[dx][dz-1][y].id
-				)){ //都没有方块
+				)){ //不是都没有方块
 					this.add(
 						columns[dx][dz][y].makeMesh(),
 						{x, y, z}
 					);
+					const noTransparent =  columns[dx][dz][y].get("attr", "block", "noTransparent"),
+						visibleValue = [
+							!( columns[x+1] && columns[x+1][y] && columns[x+1][y][z] && columns[x+1][y][z].id && !columns[x+1][y][z].get("attr", "block", "transparent")) || noTransparent,
+							!( columns[x-1] && columns[x-1][y] && columns[x-1][y][z] && columns[x-1][y][z].id && !columns[x-1][y][z].get("attr", "block", "transparent")) || noTransparent,
+							!( columns[x] && columns[x][y+1] && columns[x][y+1][z] && columns[x][y+1][z].id && !columns[x][y+1][z].get("attr", "block", "transparent")) || noTransparent,
+							!( columns[x] && columns[x][y-1] &&  columns[x][y-1][z] && columns[x][y-1][z].id && !columns[x][y-1][z].get("attr", "block", "transparent")) || noTransparent,
+							!( columns[x] && columns[x][y] && columns[x][y][z+1] && columns[x][y][z+1].id && !columns[x][y][z+1].get("attr", "block", "transparent")) || noTransparent,
+							!( columns[x] && columns[x][y] && columns[x][y][z-1] && columns[x][y][z-1].id && !columns[x][y][z-1].get("attr", "block", "transparent")) || noTransparent
+							// 没有方块 或 有方块非透明 则显示  或  自身透明 也显示
+						],
+						material = columns[dx][dz][y].block.material;
+					for (const i in material)
+						material[i].visible = visibleValue[i];
 				}
 			}else{ //空气
 				this.addID(0, {
@@ -1049,8 +1062,8 @@ class ChunkMap{
 	
 	//加载区块（同步）
 	loadChunk(x, z){
-		[x, z] = [Math.round(x), Math.round(z)]; //规范化
-		let ox = x*this.size.x,
+		x = Math.round(x), z = Math.round(z); //规范化
+		const ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 			
 		sql.selectData(tableName, ["x", "y", "z", "id", "attr"],
@@ -1063,7 +1076,7 @@ class ChunkMap{
 				//保存edit
 				this.chunks[x][z].edit = edit;
 				
-				let columns = this.perGetChunk(x, z, edit);
+				const columns = this.perGetChunk(x, z, edit);
 				
 				if (this.activeChunk.every(function(value, index, arr){
 					return value[0] != x || value[1] != z;

@@ -347,7 +347,7 @@ const deskgood = {
 		//X
 		if (x > 0){
 			//上半身
-			const objs = ray3D(
+			let objs = ray3D(
 				{x: deskgood.pos.x-50},
 				{x: 1},
 				0,
@@ -378,7 +378,7 @@ const deskgood = {
 			}
 		}else if (x < 0){
 			//上半身
-			const objs = ray3D(
+			let objs = ray3D(
 				{x: deskgood.pos.x+50},
 				{x: -1},
 				0,
@@ -413,7 +413,7 @@ const deskgood = {
 		
 		//Y
 		if (y > 0){ //上
-			const objs = ray3D(
+			let objs = ray3D(
 				{y: deskgood.pos.y+50},
 				{y: 1},
 				0,
@@ -431,7 +431,7 @@ const deskgood = {
 				deskgood.moveY(deskgood.pos.y+y);
 			}
 		}else if (y < 0){ //下
-			const objs = ray3D(
+			let objs = ray3D(
 				{y: deskgood.pos.y-150},
 				{y: -1},
 				0,
@@ -453,7 +453,7 @@ const deskgood = {
 		//z
 		if (z > 0){
 			//上半身
-			const objs = ray3D(
+			let objs = ray3D(
 				{z: deskgood.pos.z-50},
 				{z: 1},
 				0,
@@ -484,7 +484,7 @@ const deskgood = {
 			}
 		}else if (z < 0){
 			//上半身
-			const objs = ray3D(
+			let objs = ray3D(
 				{z: deskgood.pos.z+50},
 				{z: -1},
 				0,

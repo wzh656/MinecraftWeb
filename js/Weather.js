@@ -58,7 +58,7 @@ class Weather{
 						z =Math.random() *this.size.z*100 + this.size[0].z*100; //[-1000,1000)
 					
 					sprite.position.set(x, y, z); //设置精灵位置
-					sprite.scale.set(Math.random()*4+6, Math.random()*8+12, 1); //只需要设置x、y两个分量就可以 x:[6,10) y:[12,20) //控制精灵大小，比如可视化中精灵大小表征数据大小
+					sprite.scale.set(Math.random()*0.4+0.6, Math.random()*0.8+1.2, 1); //只需要设置x、y两个分量就可以 x:[6,10) y:[12,20) //控制精灵大小，比如可视化中精灵大小表征数据大小
 					
 					scene.add(sprite);
 					this.rain_sys.push(sprite);
