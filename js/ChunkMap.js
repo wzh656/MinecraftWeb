@@ -984,8 +984,8 @@ class ChunkMap{
 			result[dx] = [];
 			for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
 				result[dx][dz] = this.perGetColumn(ox+dx, oz+dz, edit);
-				for (const y in result[dx][dz])
-					result[dx][dz][y] = new Block(result[dx][dz][y]);
+				/* for (const y in result[dx][dz])
+					result[dx][dz][y] = new Block(result[dx][dz][y]); */
 			}
 		}
 		return result;
@@ -1032,21 +1032,38 @@ class ChunkMap{
 					columns[dx][dz+1] && columns[dx][dz+1][y].id &&
 					columns[dx][dz-1] && columns[dx][dz-1][y].id
 				)){ //不是都没有方块
+					const thisBlock = new Block(columns[dx][dz][y]);
 					this.add(
-						columns[dx][dz][y].makeMesh(),
+						thisBlock.makeMesh(),
 						{x, y, z}
 					);
-					const noTransparent =  columns[dx][dz][y].get("attr", "block", "noTransparent"),
-						visibleValue = [
-							!( columns[x+1] && columns[x+1][y] && columns[x+1][y][z] && columns[x+1][y][z].id && !columns[x+1][y][z].get("attr", "block", "transparent")) || noTransparent,
-							!( columns[x-1] && columns[x-1][y] && columns[x-1][y][z] && columns[x-1][y][z].id && !columns[x-1][y][z].get("attr", "block", "transparent")) || noTransparent,
-							!( columns[x] && columns[x][y+1] && columns[x][y+1][z] && columns[x][y+1][z].id && !columns[x][y+1][z].get("attr", "block", "transparent")) || noTransparent,
-							!( columns[x] && columns[x][y-1] &&  columns[x][y-1][z] && columns[x][y-1][z].id && !columns[x][y-1][z].get("attr", "block", "transparent")) || noTransparent,
-							!( columns[x] && columns[x][y] && columns[x][y][z+1] && columns[x][y][z+1].id && !columns[x][y][z+1].get("attr", "block", "transparent")) || noTransparent,
-							!( columns[x] && columns[x][y] && columns[x][y][z-1] && columns[x][y][z-1].id && !columns[x][y][z-1].get("attr", "block", "transparent")) || noTransparent
-							// 没有方块 或 有方块非透明 则显示  或  自身透明 也显示
+					
+					const noTransparent = thisBlock.get("attr", "block", "noTransparent"),
+						visibleValue = [],
+						material = thisBlock.block.material;
+					for (const x of [1,-1,0,0,0,0]){
+						for (const y of [0,0,1,-1,0,0]){
+							for (const z of [0,0,0,0,1,-1]){
+								if (!columns[x] || !columns[x][y] || !columns[x][y][z] || !columns[x][y][z].id || !columns[x][y][z].attr){
+									visibleValue.push(true);
+								}else{
+									visibleValue.push(
+										( columns[x][y][z].attr.transparent || TEMPLATES[columns[x][y][z].id].attr.transparent ) || noTransparent,
+										// 没有方块 或 有方块非透明 则显示  或  自身透明 也显示
+									);
+								}
+							}
+						}
+					}
+						/* [
+							
+							!( columns[x-1] && columns[x-1][y] && columns[x-1][y][z] && columns[x-1][y][z].id && !( columns[x-1][y][z].attr.transparent||TEMPLATES[columns[x-1][y][z].id].attr.transparent ) || noTransparent,
+							!( columns[x] && columns[x][y+1] && columns[x][y+1][z] && columns[x][y+1][z].id && !( columns[x][y+1][z].attr.transparent||TEMPLATES[columns[x][y+1][z].id].attr.transparent ) || noTransparent,
+							!( columns[x] && columns[x][y-1] &&  columns[x][y-1][z] && columns[x][y-1][z].id && !( columns[x][y-1][z].attr.transparent||TEMPLATES[columns[x][y-1][z].id].attr.transparent ) || noTransparent,
+							!( columns[x] && columns[x][y] && columns[x][y][z+1] && columns[x][y][z+1].id && !( columns[x][y][z+1].attr.transparent||TEMPLATES[columns[x][y][z+1].id].attr.transparent ) || noTransparent,
+							!( columns[x] && columns[x][y] && columns[x][y][z-1] && columns[x][y][z-1].id && !( columns[x][y][z-1].attr.transparent||TEMPLATES[columns[x][y][z-1].id].attr.transparent ) || noTransparent
 						],
-						material = columns[dx][dz][y].block.material;
+						; */
 					for (const i in material)
 						material[i].visible = visibleValue[i];
 				}
