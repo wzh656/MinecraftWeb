@@ -411,7 +411,6 @@ function getGeolocationPosition(){
 		}
 	});
 }
-getGeolocationPosition();
 $(".more > .time-position > button").click(async function(){
 	const res = await getGeolocationPosition();
 	if (res && res[0]){
@@ -477,6 +476,8 @@ function open(url="main.html"){
 if (localStorage.getItem("我的世界_seed") !== null){
 	$(".init > button:eq(0)")[0].innerHTML = "开始游戏<p>START PLAYING</p>"
 	$(".init > button:eq(0)")[0].onclick = ()=>open();
+}else{ //无存档
+	getGeolocationPosition();
 }
 
 //主页
