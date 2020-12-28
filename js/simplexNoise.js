@@ -51,13 +51,13 @@ const sNoise = {
 		return value<0?0: value>1? 1: value;
 	},
 	treeHeight(noise, t, x, z){
-		let result = [0, 0, 0, 0 ,0],
+		const result = [0, 0, 0, 0 ,0],
 			value = noise.more3D(SEED_RANDOM_CONSTANT[7], x/t.q, z/t.q, 3);
 		if (t.plt.min < value && value < t.plt.max) // 1/12
 			result[0] = noise.more3D(SEED_RANDOM_CONSTANT[8], x/t.q, z/t.q, 3) *t.k +t.b+
 				sNoise.error(noise, t.e, SEED_RANDOM_CONSTANT[9], x, z);
 		
-		value = noise.more3D(SEED_RANDOM_CONSTANT[7], (x+1)/t.q, z/t.q, 3);
+		/* value = noise.more3D(SEED_RANDOM_CONSTANT[7], (x+1)/t.q, z/t.q, 3);
 		if (t.plt.min < value && value < t.plt.max) // 1/12
 			result[1] = noise.more3D(SEED_RANDOM_CONSTANT[8], (x+1)/t.q, z/t.q, 3) *t.k +t.b+
 				sNoise.error(noise, t.e, SEED_RANDOM_CONSTANT[9], (x+1), z);
@@ -79,7 +79,7 @@ const sNoise = {
 		
 		if (result.splice(1).some(function(value){
 			return value != 0;
-		})) result[0] = 0; //防止树木过密
+		})) result[0] = 0; //防止树木过密 */
 		return result[0];
 	},
 	leavesScale(noise, t, x, z){
