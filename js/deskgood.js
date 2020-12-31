@@ -222,16 +222,18 @@ const deskgood = {
 			console.warn("deskgood死亡");
 		});
 	},
-	// 视角更新
+	// 旋转角&仰俯角更新
 	look_update(x,y,z){
-		if (x !== undefined || y !== undefined || z !== undefined){
+		if (x !== undefined || y !== undefined || z !== undefined){ //有不为undefined的值
 			x = x||deskgood.look.x,
 			y = y||deskgood.look.y,
 			z = z||deskgood.look.z;
 			const v = new THREE.Vector3(x,y,z).setLength(1); //单位向量（标准化）
 			camera.lookAt(deskgood.pos.x+v.x, deskgood.pos.y+v.y, deskgood.pos.z+v.z);
-			[deskgood.look.x, deskgood.look.y, deskgood.look.z] = [v.x, v.y, v.z];
-		}else{
+			deskgood.look.x = v.x,
+			deskgood.look.y = v.y,
+			deskgood.look.z = v.z;
+		}else{ //无参数调用
 			const x =
 					Math.cos(deskgood.lookAt.left_right/180*Math.PI)*
 					Math.cos(deskgood.lookAt.top_bottom/180*Math.PI),
@@ -240,7 +242,9 @@ const deskgood = {
 					Math.cos(deskgood.lookAt.top_bottom/180*Math.PI),
 				y = Math.sin(deskgood.lookAt.top_bottom/180*Math.PI);
 			camera.lookAt(deskgood.pos.x+x, deskgood.pos.y+y, deskgood.pos.z+z);
-			[deskgood.look.x, deskgood.look.y, deskgood.look.z] = [x,y,z];
+			deskgood.look.x = x,
+			deskgood.look.y = y,
+			deskgood.look.z = z;
 		}
 	},
 	update_round_blocks(dx=1, dy=1, dz=1){
