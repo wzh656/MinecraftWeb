@@ -785,6 +785,30 @@ SQL_read(); //读取存档
 
 //gui
 if (DEBUG){
+	const scene_chunk_now_folder = gui.__folders["场景(scene)"].__folders["区块(chunk)"].__folders["当前区块"];
+		scene_chunk_now_folder.add({
+			get x(){ return Math.round(deskgood.pos.x/100/map.size.x); },
+			set x(v){ deskgood.pos.x = v*100*map.size.x; }
+		}, "x", -16, 16, 1).listen();
+		scene_chunk_now_folder.add({
+			get z(){ return Math.round(deskgood.pos.z/100/map.size.z); },
+			set z(v){ deskgood.pos.z = v*100*map.size.z; }
+		}, "z", -16, 16, 1).listen();
+	const scene_chunk_now_weather_folder = gui.__folders["场景(scene)"].__folders["区块(chunk)"].__folders["当前区块"].__folders["天气"];
+		scene_chunk_now_weather_folder.add({
+			get r(){
+				cX = Math.round(deskgood.pos.x/100/map.size.x),
+				cZ = Math.round(deskgood.pos.z/100/map.size.z);
+				return (map.chunks[cX] && map.chunks[cX][cZ] && map.chunks[cX][cZ].weather && map.chunks[cX][cZ].weather.rain)||0;
+			},
+			set r(v){
+				cX = Math.round(deskgood.pos.x/100/map.size.x),
+				cZ = Math.round(deskgood.pos.z/100/map.size.z);
+				if ( map.chunks[cX] && map.chunks[cX][cZ] && map.chunks[cX][cZ].weather )
+					map.chunks[cX][cZ].weather.rain = v;
+			}
+		}, "r", 0, 0.333, 1e-6).name("降水(rain)").listen();
+	
 	const deskgood_folder = gui.addFolder("玩家/观察者(deskgood)");
 	deskgood_folder.open();
 		deskgood_folder.add(window, "stop").listen();
@@ -796,16 +820,6 @@ if (DEBUG){
 			deskgood_position_folder.add(deskgood.pos, "x", map.size[0].x*100, map.size[1].x*100, 0.01).listen();
 			deskgood_position_folder.add(deskgood.pos, "y", map.size[0].y*100, map.size[1].y*100, 0.01).listen();
 			deskgood_position_folder.add(deskgood.pos, "z", map.size[0].z*100, map.size[1].z*100, 0.01).listen();
-			const deskgood_position_zone_folder = deskgood_position_folder.addFolder("区块(Chunk)");
-			deskgood_position_zone_folder.open();
-				deskgood_position_folder.add({
-					get x(){ return Math.round(deskgood.pos.x/100/map.size.x) },
-					set x(v){ deskgood.pos.x = v*100*map.size.x }
-				}, "x", -100, 100, 1).listen();
-				deskgood_position_folder.add({
-					get z(){ return Math.round(deskgood.pos.z/100/map.size.z) },
-					set z(v){ deskgood.pos.z = v*100*map.size.z }
-				}, "z", -100, 100, 1).listen();
 		const deskgood_v_folder = deskgood_folder.addFolder("速度/(m/s)");
 			deskgood_v_folder.add(deskgood.v, "x", -10, 10, 1e-3).listen();
 			deskgood_v_folder.add(deskgood.v, "y", -100, 100, 1e-3).listen().onChange((value) => {
@@ -863,6 +877,73 @@ if (DEBUG){
 				deskgood_hold_things_folder.add(deskgood.hold[2] || {id:0}, "id").name("2").listen().onChange(deskgood.hold.update);
 				deskgood_hold_things_folder.add(deskgood.hold[3] || {id:0}, "id").name("3").listen().onChange(deskgood.hold.update);
 }
+
+
+/*
+* 卡住检测
+*/
+setInterval(()=>{
+	const warn = [];
+	if (map.get(deskgood.pos.x/100,
+			deskgood.pos.y/100,
+			deskgood.pos.z/100) &&
+		!map.get(deskgood.pos.x/100,
+			deskgood.pos.y/100,
+			deskgood.pos.z/100).get("attr", "block", "through")
+	){ //头被卡住
+		warn.push("头被卡住？");
+		if (
+			!map.get(deskgood.pos.x/100,
+				deskgood.pos.y/100,
+				deskgood.pos.z/100).get("attr", "block", "transparent") //不透明
+		) print("窒息提示", "你的头竟然卡到方块里了，想窒息吗？看你怎么出来", 1, "#f68");
+		/* try{
+			plus.nativeUI.toast(
+				"<font size=\"16\">想窒息吗？还往头上放方块，看你怎么出来！</font>",
+				{
+					type:"richtext",
+					verticalAlign: "top",
+					richTextStyle:{align:"center"}
+				}
+			);
+		}catch(err){} */
+		/*setTimeout(function(){
+			try{ plus.nativeUI.closeToast(); }catch(err){}
+		},1);*/
+	}
+	if (map.get(deskgood.pos.x/100,
+			deskgood.pos.y/100-1,
+			deskgood.pos.z/100) &&
+		!map.get(deskgood.pos.x/100,
+			deskgood.pos.y/100-1,
+			deskgood.pos.z/100).get("attr", "block", "through")
+	){ //脚被卡住
+		warn.push("脚被卡住？");
+	}
+	
+	if (warn.length && !stop){
+		if (!map.get(deskgood.pos.x/100,
+				deskgood.pos.y/100,
+				deskgood.pos.z/100
+			) &&
+			!map.get(deskgood.pos.x/100,
+				deskgood.pos.y/100+1,
+				deskgood.pos.z/100
+			) &&
+			+time.getTime()-last_jump >= 1000
+		){
+			last_jump = +time.getTime();
+			deskgood.v.y += deskgood.jump_v*rnd_error(); //自动跳跃
+		}
+		
+		if (warn[0] & warn[1]){
+			console.warn(warn[0], warn[1]);
+		}else{
+			console.warn(warn[0]);
+		}
+	}
+}, 36);
+
 
 /*
 * 天堂、地狱

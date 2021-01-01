@@ -15,6 +15,8 @@ if (DEBUG){
 			scene_fog_folder.addColor(scene.fog, "color").listen();
 		const scene_chunk_folder = scene_folder.addFolder("区块(chunk)");
 			scene_chunk_folder.add(map, "perloadLength", 100, 10000, 100).name("预加载范围/px");
+			const scene_chunk_now_folder = scene_chunk_folder.addFolder("当前区块");
+				const scene_chunk_now_weather_folder = scene_chunk_now_folder.addFolder("天气");
 }
 
 /* const floor_geometry = new THREE.PlaneGeometry(1000, 1000, 6, 6);
@@ -450,68 +452,6 @@ function render(){
 	}
 }
 
-//卡住检测
-setInterval(()=>{
-	const warn = [];
-	if (map.get(deskgood.pos.x/100,
-			deskgood.pos.y/100,
-			deskgood.pos.z/100) &&
-		!map.get(deskgood.pos.x/100,
-			deskgood.pos.y/100,
-			deskgood.pos.z/100).get("attr", "block", "through")
-	){ //头被卡住
-		warn.push("头被卡住？");
-		if (
-			!map.get(deskgood.pos.x/100,
-				deskgood.pos.y/100,
-				deskgood.pos.z/100).get("attr", "block", "transparent") //不透明
-		) print("窒息提示", "你的头竟然卡到方块里了，想窒息吗？看你怎么出来", 1, "#f68");
-		/* try{
-			plus.nativeUI.toast(
-				"<font size=\"16\">想窒息吗？还往头上放方块，看你怎么出来！</font>",
-				{
-					type:"richtext",
-					verticalAlign: "top",
-					richTextStyle:{align:"center"}
-				}
-			);
-		}catch(err){} */
-		/*setTimeout(function(){
-			try{ plus.nativeUI.closeToast(); }catch(err){}
-		},1);*/
-	}
-	if (map.get(deskgood.pos.x/100,
-			deskgood.pos.y/100-1,
-			deskgood.pos.z/100) &&
-		!map.get(deskgood.pos.x/100,
-			deskgood.pos.y/100-1,
-			deskgood.pos.z/100).get("attr", "block", "through")
-	){ //脚被卡住
-		warn.push("脚被卡住？");
-	}
-	
-	if (warn.length && !stop){
-		if (!map.get(deskgood.pos.x/100,
-				deskgood.pos.y/100,
-				deskgood.pos.z/100
-			) &&
-			!map.get(deskgood.pos.x/100,
-				deskgood.pos.y/100+1,
-				deskgood.pos.z/100
-			) &&
-			+time.getTime()-last_jump >= 1000
-		){
-			last_jump = +time.getTime();
-			deskgood.v.y += deskgood.jump_v*rnd_error(); //自动跳跃
-		}
-		
-		if (warn[0] & warn[1]){
-			console.warn(warn[0], warn[1]);
-		}else{
-			console.warn(warn[0]);
-		}
-	}
-}, 36);
 // render();
 // 间隔30ms周期性调用函数fun
 //setInterval("render()",16.7)
