@@ -98,7 +98,7 @@ function SQL_read(){
 	});
 	
 	//type=4：时间，灵敏度，旋转角&俯仰角：(x, id, attr)
-	sql.selectData(tableName, ["x", "id", "attr"], "type=3 AND x=1", function(result){ //选择物品
+	sql.selectData(tableName, ["x", "id", "attr"], "type=4", function(result){ //选择物品
 		console.log("sql read","type=4", result)
 		if (!result.length) return;
 		const res = result[ result.length-1 ];
