@@ -144,11 +144,16 @@
 		.more{
 			margin: 3px;
 			text-align: left;
+			
+			display: flex;
+			flex-direction: column;
+			justify-content: space-around;
+			flex-wrap: wrap;
 		}
 		.more[open]{
 			/*border: 1px solid black;*/
 			padding-left: 1vw;
-			border-radius: 3px;
+			/*border-radius: 3px;*/
 			/* clear:both; */
 		}
 		.more > summary{
@@ -159,8 +164,15 @@
 		}
 		.more > fieldset{
 			display: inline-block;
-			width: 42vw;
-			margin: 0;
+			width: 80vw;
+			margin: 3vw;
+		}
+		/* 横屏情况下 */
+		@media screen and (orientation:landscape) {
+			.more > fieldset{
+				width: 42vw;
+				margin: 1vh 0;
+			}
 		}
 		.more > fieldset > legend{
 			font-size: 3vmax;
@@ -201,6 +213,7 @@
 		if (typeof require != "undefined") //electron
 			window.$ = window.jQuery = require("./js/modules/jquery.min.js");
 		</script>
+		<script src="./js/modules/js+.js"></script>
 		
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
@@ -230,7 +243,7 @@
 					坐标原点经度：<br/>
 					-180°(E)<input type="range" min="-180" max="180" value="116" step="0.00001" name="longitude" />180°(S)
 					<input type="number" min="-180" max="180" step="0.00001" value="116" style="width: 16vw;" />°<br/>
-					<button class="success" style="width: 36vw;">重新获取地理位置<p>注意：请先打开GPS开关</p></button>
+					<button class="success" style="width: 96%; font-size: 2vmax;">重新获取地理位置<p>注意：请先打开GPS开关</p></button>
 					<p></p>
 				</fieldset>
 				<fieldset class="height">
@@ -347,7 +360,13 @@ $(".more input[type='number']").change(function(){
 //time
 function dateToInputValue(date){
 	if (typeof date == "number") date = new Date(date);
-	return `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}T${date.getHours()}:${date.getMinutes()}`;
+	return (
+			date.getFullYear() + "-"+
+			String( date.getMonth()+1 ).padStart(2, "0") + "-"+
+			String( date.getDate() ).padStart(2,"0") + "T"+
+			String( date.getHours() ).padStart(2,"0") + ":"+
+			String( date.getMinutes() ).padStart(2,"0")
+		);
 }
 function inputValueToDate(date){
 	const [, year, mouth, day, hour, minute] = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(date);
