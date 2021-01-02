@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Copyright © 2020 by wzh -->
+<!-- Copyright © 2020~2021 by wzh -->
 <html lang="zh">
 	<head>
 		<meta charset="UTF-8" />
@@ -76,7 +76,14 @@
 		button,label,summary{
 			cursor: pointer;
 		}
+		dialog{
+			border-radius: 6px;
+			
+			top: 50%;
+			transform: translateY(-50%);
+		}
 		
+		/*INIT*/
 		.init{
 			position: absolute;
 			width: 100%;
@@ -104,6 +111,7 @@
 			/*font-family: zyyt, serif;*/
 		}
 		
+		/* NEW WORLD */
 		.new_world{
 			position: absolute;
 			width: 100%;
@@ -113,11 +121,11 @@
 			margin: 0;
 			background-color: white;
 			opacity: 0;
-			text-align: center;
 			overflow-y: auto;
 		}
 		.new_world h2{
 			font-size: 6vmax;
+			text-align: center;
 		}
 		.new_world label{
 			font-size: 3vmax;
@@ -141,9 +149,9 @@
 			font-size: 3vmax;
 		}
 		
+		/* MORE */
 		.more{
 			margin: 3px;
-			text-align: left;
 			
 			display: flex;
 			flex-direction: column;
@@ -158,7 +166,6 @@
 		}
 		.more > summary{
 			font-size: 3vmax;
-			text-align: left;
 			margin-left: 1%;
 			outline: none;
 		}
@@ -200,11 +207,29 @@
 			padding-left: 2vw;
 		}
 		
-		dialog{
-			border-radius: 6px;
-			
-			top: 50%;
-			transform: translateY(-50%);
+		/* ABOUT */
+		.about{
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			top: 100%;
+			left: 0;
+			margin: 0;
+			background-color: white;
+			opacity: 0;
+			overflow-y: auto;
+		}
+		.about h2{
+			font-size: 6vmax;
+			text-align: center;
+		}
+		.about button{
+			width: 66vw;
+			font-size: 5vmax;
+		}
+		.about > div{
+			padding: 2vmax;
+			margin: 1vmax;
 		}
 		</style>
 		
@@ -240,8 +265,8 @@
 	<body>
 		<section class="init" style="display: flex;">
 			<h1>我的世界</h1>
-			<button class="success">新的世界<p>NEW WORLD</p></button>
-			<button class="info">主页<p>ABOUT</p></button>
+			<button class="success">新的世界<p>New World</p></button>
+			<button class="info">关于一切<p>About</p></button>
 		</section>
 		<section class="new_world" style="display: none;">
 			<h2>新的世界<p>NEW WORLD</p></h2>
@@ -346,12 +371,34 @@
 				</div>
 				<br style="clear:both;" />
 			</details>
-			<button class="warn">取消<p>CANCEL</p></button>
+			<button class="warn">取消<p>Cancel</p></button>
 			<button class="success">生成世界<p>OK</p></button>
 		</section>
-		<div style="display: none;">
-			<script language="javascript" src="http://count24.51yes.com/click.aspx?id=248466766&logo=12" charset="gb2312"></script>
-		</div>
+		<section class="about" style="display: none;">
+			<h2>关于<p>ABOUT</p></h2>
+			<div style="font-family: kt;">
+				&nbsp;&nbsp;&nbsp;&nbsp;本游戏是一个依据《我的世界》游戏精神<b>仿制</b>（注：不是复制）的网页版游戏，目前仍处于初级发展阶段。<br/>
+				&nbsp;&nbsp;&nbsp;&nbsp;本游戏的灵感仅来源于数亿年前宇宙另一侧的一次蝴蝶效应扰动。<br/>
+				&nbsp;&nbsp;&nbsp;&nbsp;忆往事：去年(2020)5月网课时，偶遇Three.js，顿时灵感大作，码思泉涌，故本游戏终得诞生。<br/>
+				<font style="font-family: st;">&nbsp;&nbsp;&nbsp;&nbsp;往事不堪回首，前行之路可期。今年2021，愿新的一年里，终能不负所期！</font><br/>
+				<span style="float: right;">——2020年1月2日</span>
+			</div>
+			<div>
+				<hr/>
+				开发者：@wzh656<br/>
+				<a class="newTable" href="https://github.com/wzh656/">Github</a><br/>
+				<a class="newTable" href="https://gitee.com/wzh656/">Gitee</a><br/>
+				<a class="newTable" href="https://gitter.im/wzh656/Minecraft?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge&amp;utm_content=badge">Gitter<img src="https://badges.gitter.im/wzh656/Minecraft.svg" alt="Join the chat at https://gitter.im/wzh656/Minecraft" /></a><br/>
+				邮箱：<a href="mailto:1826632591@qq.com?subject=关于《我的世界》">1826632591@qq.com</a><br/>
+				QQ：1826632591<a target="_blank" href="http://wpa.qq.com/msgrd?v=3&uin=1826632591&site=qq&menu=yes"><img border="0" src="http://wpa.qq.com/pa?p=2:1826632591:51" alt="点击这里给我发消息" title="点击这里给我发消息"/></a><br/>
+				<a href="http://chat.daovoice.io?id=cfb04fc0" onclick="if (typeof plus != undefined) plus.screen.lockOrientation('portrait-primary');">联系作者</a>
+			</div>
+			<hr/>
+			<center><button class="warn">返回<p>Back</p></button></center>
+			<footer style="display: none;"><center>
+				<script language="javascript" src="http://count24.51yes.com/click.aspx?id=248466766&logo=1" charset="gb2312"></script>
+			</center></footer>
+		</section>
 <script>
 //input处理
 for (const i of $(".more input"))
@@ -472,35 +519,18 @@ $(`.more > .type > input[name='forest'],
 	$(".more > .type > input[name='desert']:not([type='range'])").val( $(".more > .type > input[name='desert'][type='range']").val() );
 });
 
-//新的世界
-$(".init > button:eq(0)")[0].onclick = function(){
-	console.log("new world", $(".init").css("display"), $(".new_world").css("display"));
-	
-	$(".init")
-		.css("left", "0%")
-		.css("opacity", "1")
-		.animate({
-			left: (Math.round(Math.random())?"-":"") + "100%", //正负100%
-			opacity: 0
-		}, 1000, ()=>{
-			$(".init").css("display", "none");
-			console.log("new world", "animate end", $(".init").css("display"), $(".new_world").css("display"));
-		});
-	$(".new_world")
-		.css("top", (Math.round(Math.random())?"-":"") + "100%") //正负100%
-		.css("opacity", "0")
-		.css("display", "block")
-		.animate({
-			top: "0%",
-			opacity: 1
-		}, 1000);
-	$(".more").removeAttr("open");
-	
-	console.log("new world", "animate start", $(".init").css("display"), $(".new_world").css("display"));
-};
+//浏览器打开
+$("a.newTable").click(function(){
+	if (typeof plus == "undefined"){
+		window.open( this.href );
+	}else{
+		plus.runtime.openURL( this.href );
+	}
+});
 
+//打开页面
 function open(url="main.html"){
-	let msg = $("<dialog>加载中……</dialog>");
+	const msg = $("<dialog>加载中……</dialog>");
 	$(document.body).append(
 		msg.attr("open", "true").hide()
 	);
@@ -519,16 +549,35 @@ if (localStorage.getItem("我的世界_seed") !== null){
 	getGeolocationPosition();
 }
 
-//主页
-$(".init > button:eq(1)").click(function(){
-	try{
-		plus.screen.lockOrientation("portrait-primary");
-	}catch(err){}
-	// window.open("https://wzh656.github.io/MinecraftWeb/", "newwin", "height=366, width=666, toolbar=no, menubar=no, location=no");
-	open("https://wzh656.github.io/MinecraftWeb/")
-});
 
-//取消
+//新的世界
+$(".init > button:eq(0)")[0].onclick = function(){
+	console.log("new_world", $(".init").css("display"), $(".new_world").css("display"));
+	
+	$(".init")
+		.css("left", "0%")
+		.css("opacity", "1")
+		.animate({
+			left: (Math.round(Math.random())?"-":"") + "100%", //正负100%
+			opacity: 0
+		}, 1000, ()=>{
+			$(".init").css("display", "none");
+			console.log("new_world", "animate end", $(".init").css("display"), $(".new_world").css("display"));
+		});
+	$(".new_world")
+		.css("top", (Math.round(Math.random())?"-":"") + "100%") //正负100%
+		.css("opacity", "0")
+		.css("display", "block")
+		.animate({
+			top: "0%",
+			opacity: 1
+		}, 1000);
+	$(".more").removeAttr("open");
+	
+	console.log("new_world", "animate start", $(".init").css("display"), $(".new_world").css("display"));
+};
+
+//新的世界 取消
 $(".new_world > button:eq(0)").click(function(){
 	console.log("init", $(".init").css("display"), $(".new_world").css("display"));
 	
@@ -553,6 +602,65 @@ $(".new_world > button:eq(0)").click(function(){
 	$(".more").removeAttr("open");
 	
 	console.log("init", "animate start", $(".init").css("display"), $(".new_world").css("display"));
+});
+
+//关于
+$(".init > button:eq(1)").click(function(){
+	console.log("about", $(".init").css("display"), $(".about").css("display"));
+	
+	$(".init")
+		.css("left", "0%")
+		.css("opacity", "1")
+		.animate({
+			left: (Math.round(Math.random())?"-":"") + "100%", //正负100%
+			opacity: 0
+		}, 1000, ()=>{
+			$(".init").css("display", "none");
+			console.log("about", "animate end", $(".init").css("display"), $(".about").css("display"));
+		});
+	$(".about")
+		.css("top", (Math.round(Math.random())?"-":"") + "100%") //正负100%
+		.css("opacity", "0")
+		.css("display", "block")
+		.animate({
+			top: "0%",
+			opacity: 1
+		}, 1000);
+	
+	console.log("about", "animate start", $(".init").css("display"), $(".about").css("display"));
+	
+	/*try{
+		plus.screen.lockOrientation("portrait-primary");
+	}catch(err){}
+	// window.open("https://wzh656.github.io/MinecraftWeb/", "newwin", "height=366, width=666, toolbar=no, menubar=no, location=no");
+	open("https://wzh656.github.io/MinecraftWeb/")*/
+});
+
+//关于 取消
+$(".about > center > button:eq(0)").click(function(){
+	console.log("init", $(".init").css("display"), $(".about").css("display"));
+	
+	$(".init")
+		.css("left", (Math.round(Math.random())?"-":"") + "100%") //正负100%
+		.css("opacity", "0")
+		.css("display", "flex")
+		.animate({
+			left: "0%",
+			opacity: 1
+		}, 1000);
+	$(".about")
+		.css("top", "0%")
+		.css("opacity", "1")
+		.animate({
+			top: (Math.round(Math.random())?"-":"") + "100%", //正负100%
+			opacity: 0
+		}, 1000, ()=>{
+			$(".about").css("display", "none");
+			console.log("init", "animate end", $(".init").css("display"), $(".about").css("display"));
+		});
+	$(".more").removeAttr("open");
+	
+	console.log("init", "animate start", $(".init").css("display"), $(".about").css("display"));
 });
 
 //生成世界
