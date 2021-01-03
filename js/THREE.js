@@ -15,8 +15,7 @@ if (DEBUG){
 			scene_fog_folder.addColor(scene.fog, "color").listen();
 		const scene_chunk_folder = scene_folder.addFolder("区块(chunk)");
 			scene_chunk_folder.add(map, "perloadLength", 100, 10000, 100).name("预加载范围/px");
-			const scene_chunk_now_folder = scene_chunk_folder.addFolder("当前区块");
-				const scene_chunk_now_weather_folder = scene_chunk_now_folder.addFolder("天气");
+			const scene_chunk_weather_folder = scene_chunk_folder.addFolder("天气");
 }
 
 /* const floor_geometry = new THREE.PlaneGeometry(1000, 1000, 6, 6);

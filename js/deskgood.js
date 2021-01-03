@@ -734,7 +734,7 @@ const deskgood = {
 					stepCallback: function(res){
 						if (res.x!=x || res.y!=y || res.z!=z) return;
 						if (find){
-							console.log("DB 删除多余", res.key, res);
+							// console.log("DB 删除多余", res.key, res);
 							db.remove(TABLE.WORLD, res.key);
 						}else{
 							find = true;
@@ -811,7 +811,7 @@ const deskgood = {
 					stepCallback: function(res){
 						if (res.x!=x || res.y!=y || res.z!=z) return;
 						if (find){
-							console.log("DB 删除多余", res.key, res);
+							// console.log("DB 删除多余", res.key, res);
 							db.remove(TABLE.WORLD, res.key);
 						}else{
 							find = true;
@@ -844,17 +844,26 @@ DB_read(); //读取存档
 
 //gui
 if (DEBUG){
-	const scene_chunk_now_folder = gui.__folders["场景(scene)"].__folders["区块(chunk)"].__folders["当前区块"];
-		scene_chunk_now_folder.add({
+	const scene_chunk_folder = gui.__folders["场景(scene)"].__folders["区块(chunk)"];
+		scene_chunk_folder.add({
 			get x(){ return Math.round(deskgood.pos.x/100/map.size.x); },
 			set x(v){ deskgood.pos.x = v*100*map.size.x; }
 		}, "x", -16, 16, 1).listen();
-		scene_chunk_now_folder.add({
+		scene_chunk_folder.add({
 			get z(){ return Math.round(deskgood.pos.z/100/map.size.z); },
 			set z(v){ deskgood.pos.z = v*100*map.size.z; }
 		}, "z", -16, 16, 1).listen();
-	const scene_chunk_now_weather_folder = gui.__folders["场景(scene)"].__folders["区块(chunk)"].__folders["当前区块"].__folders["天气"];
-		scene_chunk_now_weather_folder.add({
+		scene_chunk_folder.add({
+			f(){
+				cX = Math.round(deskgood.pos.x/100/map.size.x),
+				cZ = Math.round(deskgood.pos.z/100/map.size.z);
+				map.updateChunkAsync(cX, cZ, {
+					breakTime: 16
+				});
+			}
+		}, "f").name("更新区块(update)");
+	const scene_chunk_weather_folder = gui.__folders["场景(scene)"].__folders["区块(chunk)"].__folders["天气"];
+		scene_chunk_weather_folder.add({
 			get r(){
 				cX = Math.round(deskgood.pos.x/100/map.size.x),
 				cZ = Math.round(deskgood.pos.z/100/map.size.z);

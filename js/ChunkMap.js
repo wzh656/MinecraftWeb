@@ -412,6 +412,7 @@ class ChunkMap{
 	}
 	//更新区块内所有方块（异步）
 	updateChunkAsync(x, z, opt={}){
+		console.log("updateChunkAsync", x, z)
 		let {
 			finishCallback,
 			progressCallback,
@@ -1026,22 +1027,47 @@ class ChunkMap{
 		
 		for (let y=this.size[0].y; y<=this.size[1].y; y++){
 			if (columns[dx][dz][y].id){ //有方块
-				if (!(
-					//y != this.size[0].y && //不在最底层
-					y != this.size[1].y && //不在最顶层
-					columns[dx][dz][y+1].id &&
-					(y == this.size[0].y || columns[dx][dz][y-1].id) &&
-					columns[dx+1] && columns[dx+1][dz] && columns[dx+1][dz][y].id &&
-					columns[dx-1] && columns[dx-1][dz] && columns[dx-1][dz][y].id &&
-					columns[dx][dz+1] && columns[dx][dz+1][y].id &&
-					columns[dx][dz-1] && columns[dx][dz-1][y].id
-				)){ //不是都没有方块
+				
+				const visibleValue = [];
+				let needLoad = false;
+				for (const [ddx,ddy,ddz] of [
+					[1,0,0],
+					[-1,0,0],
+					[0,1,0],
+					[0,-1,0],
+					[0,0,1],
+					[0,0,-1]
+				]){
+					const px=dx+ddx, py=y+ddy, pz=dz+ddz;
+					//if (dx==4 && y==2 && dz==4) console.log({px,py,pz}, columns[px][pz][py], columns[px] && columns[px][pz] && columns[px][pz][py] && columns[px][pz][py].id)
+					if (py < map.size[0].y){ //最下面有方块
+						visibleValue.push(false);
+					}else if ( !(columns[px] && columns[px][pz] && columns[px][pz][py] && columns[px][pz][py].id) ){ //无方块 显示
+						needLoad = true;
+						visibleValue.push(true);
+					}else if ( columns[px][pz][py].attr && columns[px][pz][py].attr.block ){ //有属性
+						const visible = columns[px][pz][py].attr.block.transparent
+						needLoad = visible || needLoad;
+						visibleValue.push( needLoad ); //方块透明 显示
+					}else{ //继承模板
+						const visible = TEMPLATES[columns[px][pz][py].id].attr.block.transparent;
+						needLoad = visible || needLoad;
+						visibleValue.push( visible ); //方块透明 显示
+					}
+				}
+				
+				if ( needLoad ){ //有面需显示
 					const thisBlock = new Block(columns[dx][dz][y]);
+					
 					this.add(
 						thisBlock.makeMesh(),
 						{x, y, z}
 					);
 					
+					const material = thisBlock.block.material;
+					if ( !thisBlock.get("attr", "block", "noTransparent") ) //允许透明
+						for (const i in material)
+							material[i].visible = visibleValue[i];
 					// x,z,y
 					/*const noTransparent =  thisBlock.get("attr", "block", "noTransparent"),
 						visibleValue = [
@@ -1054,33 +1080,10 @@ class ChunkMap{
 							// 没有方块 或 有方块非透明 则显示  或  自身透明 也显示
 						],*/
 					
-					if ( thisBlock.get("attr", "block", "noTransparent") ) //不允许透明
-						continue;
+					// if (dx == 4 && y == 1 && dz == -3) debugger
 					
-					const visibleValue = [],
-						material = thisBlock.block.material;
-					for (const [ddx,ddy,ddz] of [
-						[1,0,0],
-						[-1,0,0],
-						[0,1,0],
-						[0,-1,0],
-						[0,0,1],
-						[0,0,-1]
-					]){
-						const px=dx+ddx, py=y+ddy, pz=dz+ddz;
-						//if (dx==4 && y==2 && dz==4) console.log({px,py,pz}, columns[px][pz][py], columns[px] && columns[px][pz] && columns[px][pz][py] && columns[px][pz][py].id)
-						if ( !(columns[px] && columns[px][pz] && columns[px][pz][py] && columns[px][pz][py].id) ){ //无方块 显示
-							visibleValue.push(true);
-						}else if ( columns[px][pz][py].attr ){ //自己有属性
-							visibleValue.push( columns[px][pz][py].attr.block.transparent ); //方块透明 显示
-						}else{ //继承模板
-							visibleValue.push( TEMPLATES[columns[px][pz][py].id].attr.block.transparent ); //方块透明 显示
-						}
-					}
-					
-					for (const i in material)
-						material[i].visible = visibleValue[i];
 				}
+				
 			}else{ //空气
 				this.addID(0, {
 					x,

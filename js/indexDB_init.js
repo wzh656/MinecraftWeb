@@ -1,12 +1,13 @@
 const try_start_load = function(){
 	console.log("load_condition", try_start_load.prototype.condition+1)
 	if (++try_start_load.prototype.condition == 2){
+		deskgood.hold.update();
 		map.perloadChunk({
 			progressCallback: (value)=>{
 				$("#progress span").text( Math.round(value*100, 2).padding(2, 2) );
 				$("#progress progress").val( value );
 				if (ipcRenderer)
-					ipcRenderer.send('progressUpdate', Math.min(value, 1));
+					ipcRenderer.send("progressUpdate", Math.min(value, 1));
 			},
 			finishCallback: ()=>{
 				$("#progress span").text("100");
@@ -17,7 +18,7 @@ const try_start_load = function(){
 					render(); //纹理贴图加载成功后，调用渲染函数执行渲染操作
 					$("#progress").remove();
 					if (ipcRenderer)
-						ipcRenderer.send('progressUpdate', -1); //关闭进度条
+						ipcRenderer.send("progressUpdate", -1); //关闭进度条
 				},0);
 			}
 		});
@@ -86,7 +87,6 @@ function DB_read(){
 					deskgood.hold[i] = null;
 				}
 			deskgood.choice = res.choice;
-			deskgood.hold.update();
 			
 			deskgood.sensitivity = res.sensitivity;
 			
@@ -146,7 +146,7 @@ function DB_save(){
 				dirt: "prev",
 				stepCallback: function(res){
 					if (find){
-						console.log("DB 删除多余", res.key, res);
+						// console.log("DB 删除多余", res.key, res);
 						db.remove(TABLE.WORLD, res.key);
 					}else{
 						find = true;

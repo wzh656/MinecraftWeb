@@ -63,15 +63,6 @@ document.addEventListener("keydown", function (e){
 		}
 		return false;
 	}
-	if (e.keyCode == 121){ //F10 切换调试
-		console.log("F10:", keydown.key);
-		if (gui.closed){
-			gui.open();
-		}else{
-			gui.close();
-		}
-		return false;
-	}
 	if (e.keyCode == 113){ //F2 截图
 		console.log("F2:", keydown.key);
 		var oA = document.createElement("a");
@@ -81,14 +72,24 @@ document.addEventListener("keydown", function (e){
 		oA.click();
 		oA.remove(); // 下载之后把创建的元素删除
 	}
-	if (e.keyCode == 114){ //F3 切换调试
-		console.log("F3:", keydown.key);
-		if (localStorage.getItem("debug") == "false"){ //false
-			localStorage.setItem("debug", true);
-		}else{ //true 或 null
-			localStorage.setItem("debug", false);
+	if (e.keyCode == 114){ //F3
+		if (e.shiftKey){ //shift+F3 切换调试
+			console.log("shift+F3:", keydown.key);
+			if (localStorage.getItem("debug") == "false"){ //false
+				localStorage.setItem("debug", true);
+			}else{ //true 或 null
+				localStorage.setItem("debug", false);
+			}
+			location.reload();
+		}else{ //F3 切换调试
+			console.log("F3:", keydown.key);
+			if (gui.closed){
+				gui.open();
+			}else{
+				gui.close();
+			}
+			return false;
 		}
-		location.reload();
 	}
 	if (e.keyCode == 115){ //F4 录屏
 		record($("#game")[0], prompt("请输入欲录屏时长(s)")*1000);
@@ -163,23 +164,23 @@ setInterval(function(){
 	
 	if (keydown.key.has(87) | keydown.key.has(38)){ //前
 		console.log("front:", keydown.key);
-		x += Math.cos( (deskgood.lookAt.left_right+0) /180*Math.PI) *(keydown.double_run==true?3:1) *rnd_error();
-		z += Math.sin( (deskgood.lookAt.left_right+0) /180*Math.PI) *(keydown.double_run==true?3:1) *rnd_error();
+		x += Math.cos( (deskgood.look.left_right+0) /180*Math.PI) *(keydown.double_run==true?3:1) *rnd_error();
+		z += Math.sin( (deskgood.look.left_right+0) /180*Math.PI) *(keydown.double_run==true?3:1) *rnd_error();
 	}
 	if (keydown.key.has(83) | keydown.key.has(40)){ //后
 		console.log("behind:", keydown.key);
-		x += Math.cos( (deskgood.lookAt.left_right+180) /180*Math.PI) *rnd_error();
-		z += Math.sin( (deskgood.lookAt.left_right+180) /180*Math.PI) *rnd_error();
+		x += Math.cos( (deskgood.look.left_right+180) /180*Math.PI) *rnd_error();
+		z += Math.sin( (deskgood.look.left_right+180) /180*Math.PI) *rnd_error();
 	}
 	if (keydown.key.has(65) | keydown.key.has(37)){ //左
 		console.log("left:", keydown.key);
-		x += Math.cos( (deskgood.lookAt.left_right-90) /180*Math.PI) *rnd_error();
-		z += Math.sin( (deskgood.lookAt.left_right-90) /180*Math.PI) *rnd_error();
+		x += Math.cos( (deskgood.look.left_right-90) /180*Math.PI) *rnd_error();
+		z += Math.sin( (deskgood.look.left_right-90) /180*Math.PI) *rnd_error();
 	}
 	if (keydown.key.has(68) | keydown.key.has(39)){ //右
 		console.log("right:", keydown.key);
-		x += Math.cos( (deskgood.lookAt.left_right+90) /180*Math.PI) *rnd_error();
-		z += Math.sin( (deskgood.lookAt.left_right+90) /180*Math.PI) *rnd_error();
+		x += Math.cos( (deskgood.look.left_right+90) /180*Math.PI) *rnd_error();
+		z += Math.sin( (deskgood.look.left_right+90) /180*Math.PI) *rnd_error();
 	}
 	if (keydown.key.has(32)){ //上
 		console.log("up:", keydown.key);
@@ -242,8 +243,6 @@ setInterval(function(){
 	
 	deskgood.pos.x += x*rnd_error();
 	deskgood.pos.z += z*rnd_error(); */
-	
-	debugger
 	
 	if (x && z)
 		console.log("go",x,z);

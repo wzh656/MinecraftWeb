@@ -325,12 +325,14 @@ class ThingGroup extends Array{
 			let src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP4//8/AwAI/AL+eMSysAAAAABJRU5ErkJggg=="; //透明图片
 			if (this[i]){
 				let face = this[i].get("block","face")[0];
+				try{
 				src = Img.scale( face[2]? //自定义
 						Img.clip( await Img.get(face[2]), face[0]*16, face[1]*16, 16, 16 )
 					:
 						TEXTURES[ face[0] ][ face[1] ]
 					, 32, 32
 				).toDataURL("image/png");
+				}catch(err){debugger}
 			}
 			children.push(
 				$("<li></li>")

@@ -30,7 +30,7 @@ let TEXTURES;
 		$("#progress progress")[0].max = 1;
 		$("#progress progress")[0].value = 0;
 		
-		try_start_load();
+		try_start_load(); //加载区块
 	}, 0);
 })();
 
