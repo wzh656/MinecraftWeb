@@ -35,7 +35,7 @@ document.addEventListener("keydown", function (e){
 			console.log("pointerLock no");
 			stop = true;
 			$("#help").css("display", "inline-block");
-			SQL_save();
+			DB_save();
 		}
 		
 		return false;
@@ -57,7 +57,7 @@ document.addEventListener("keydown", function (e){
 			let stop0 = stop;
 			stop = true;
 			// $("#game,#mouse").css("cursor", "default");
-			SQL_save();
+			DB_save();
 			document.exitPointerLock();
 			console.log("Pause-Break", stop0, "changeTo", stop);
 		}
@@ -104,7 +104,7 @@ document.addEventListener("keydown", function (e){
 		
 		stop = true;
 		// $("#game,#mouse").css("cursor", "default");
-		SQL_save();
+		DB_save();
 		document.exitPointerLock();
 		
 		return false;
@@ -134,6 +134,7 @@ document.addEventListener("keyup", function (e){
 	}
 	return false;
 });
+
 let last_jump = time.getTime()-1000;
 setInterval(function(){
 	if (stop){
@@ -241,6 +242,8 @@ setInterval(function(){
 	
 	deskgood.pos.x += x*rnd_error();
 	deskgood.pos.z += z*rnd_error(); */
+	
+	debugger
 	
 	if (x && z)
 		console.log("go",x,z);

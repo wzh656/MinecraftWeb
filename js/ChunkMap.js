@@ -1096,14 +1096,19 @@ class ChunkMap{
 		x = Math.round(x), z = Math.round(z); //规范化
 		const ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
-			
-		sql.selectData(tableName, ["x", "y", "z", "id", "attr"],
-			`type=0 AND`+
-			` (x BETWEEN ${ ox+this.size[0].x } AND ${ ox+this.size[1].x }) AND`+
-			` (z BETWEEN ${ oz+this.size[0].z } AND ${ oz+this.size[1].z })`,
-			(edit)=>{
-				console.log("edit(sql):", edit);
-				
+		
+		const edit = [];
+		db.readStep(TABLE.WORLD, {
+			index: "type",
+			range: ["only", 0],
+			stepCallback: (res)=>{
+				if (
+					res.x >= ox+this.size[0].x && res.x <= ox+this.size[1].x &&
+					res.z >= oz+this.size[0].z && res.z <= oz+this.size[1].z
+				) edit.push(res);
+			},
+			successCallback: ()=>{
+				console.log("edit(DB):", edit);
 				//保存edit
 				this.chunks[x][z].edit = edit;
 				
@@ -1119,7 +1124,7 @@ class ChunkMap{
 						for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
 							this.loadColumn(ox+dx, oz+dz, columns, edit);
 			}
-		);
+		});
 	}
 	//加载区块（异步）
 	loadChunkAsync(x, z, opt={}){
@@ -1134,7 +1139,7 @@ class ChunkMap{
 		} = opt;
 		
 		[x, z] = [Math.round(x), Math.round(z)]; //规范化
-		let ox = x*this.size.x,
+		const ox = x*this.size.x,
 			oz = z*this.size.z, //区块中心坐标
 			t = this.seed; //临时变量
 		
@@ -1143,7 +1148,7 @@ class ChunkMap{
 		})) //每个都不一样（不存在）
 			this.initedChunk.push([x,z]);
 		
-		let func = (edit)=>{
+		const func = (edit)=>{
 			//保存edit
 			this.chunks[x][z].edit = edit;
 			// console.log("save edit", x, z, edit)
@@ -1588,7 +1593,7 @@ class ChunkMap{
 					if (
 						res.x >= ox+this.size[0].x && res.x <= ox+this.size[1].x &&
 						res.z >= oz+this.size[0].z && res.z <= oz+this.size[1].z
-					) data.push(res);
+					) edit.push(res);
 				},
 				successCallback: ()=>{
 					console.log("edit(DB):", edit);

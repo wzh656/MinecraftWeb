@@ -31,6 +31,12 @@ class IndexDB{
 		this.successCallback = callback;
 	};
 	
+	// 删除数据库
+	remove(){
+		indexedDB.deleteDatabase(this.db.name);
+	}
+	
+	
 	//获取所有表名
 	getTableNames(){
 		return this.db.objectStoreNames;
@@ -57,6 +63,20 @@ class IndexDB{
 		return this;
 	}
 	
+	// 清空表
+	clearTable(tableName, opt={}){
+		const {successCallback, errorCallback} = opt,
+			request = this.db.transaction([tableName], "readwrite")
+				.objectStore( tableName )
+				.clear();
+		
+		request.onsuccess = successCallback || this.successCallback;
+		request.onerror = errorCallback || this.errCallback || function(e){
+			console.error("表clear失败", e);
+		};
+	}
+	
+	
 	//添加数据
 	addData(tableName, data, opt={}){
 		const {successCallback, errorCallback} = opt,
@@ -66,7 +86,7 @@ class IndexDB{
 		
 		//request.oncomplete = successCallback || this.successCallback;
 		request.onsuccess = successCallback || this.successCallback;
-		request.onerror = errorCallback || this.errCallback || function (e) {
+		request.onerror = errorCallback || this.errCallback || function(e){
 			console.error("数据add失败", e);
 		};
 		
@@ -81,7 +101,7 @@ class IndexDB{
 				.put( data );
 		
 		request.onsuccess = successCallback || this.successCallback;
-		request.onerror = errorCallback || this.errCallback || function (e) {
+		request.onerror = errorCallback || this.errCallback || function(e){
 			console.error("数据update失败", e);
 		};
 		
@@ -100,7 +120,7 @@ class IndexDB{
 		request.onsuccess = function(e){
 			(successCallback || this.successCallback)(request.result, e);
 		};
-		request.onerror = errorCallback || this.errCallback || function (e) {
+		request.onerror = errorCallback || this.errCallback || function(e){
 			console.error("数据readByKey失败", e);
 		};
 		
@@ -117,7 +137,7 @@ class IndexDB{
 		request.onsuccess = (e)=>{
 			(successCallback || this.successCallback)(e.target.result, e);
 		};
-		request.onerror = errorCallback || this.errCallback || function (e) {
+		request.onerror = errorCallback || this.errCallback || function(e){
 			console.error("数据readAll失败", e);
 		};
 		
@@ -149,7 +169,7 @@ class IndexDB{
 				if (successCallback) successCallback(cursor);
 			}
 		};
-		request.onerror = errorCallback || this.errCallback || function (e) {
+		request.onerror = errorCallback || this.errCallback || function(e){
 			console.error("数据readAll失败", e);
 		};
 		
@@ -164,7 +184,7 @@ class IndexDB{
 				.delete( keyValue );
 		
 		request.onsuccess = successCallback || this.successCallback;
-		request.onerror = errorCallback || this.errCallback || function (e) {
+		request.onerror = errorCallback || this.errCallback || function(e){
 			console.error("数据removeByKey失败", e);
 		};
 		
@@ -180,7 +200,7 @@ class IndexDB{
 				.delete( indexValue );
 		
 		request.onsuccess = successCallback || this.successCallback;
-		request.onerror = errorCallback || this.errCallback || function (e) {
+		request.onerror = errorCallback || this.errCallback || function(e){
 			console.error("数据removeByIndex失败", e);
 		};
 		

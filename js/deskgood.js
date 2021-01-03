@@ -203,24 +203,34 @@ const deskgood = {
 	}),
 	// 死亡
 	die(reason="使用命令自杀"){
-		sql.deleteTable(tableName, undefined, function(){
-			localStorage.removeItem("我的世界_seed");
-			
-			document.exitPointerLock(); //取消鼠标锁定
-			gui.close(); //隐藏gui
-			$("#help, #warn").hide(); //隐藏 遮罩、横屏提示
-			$("#die")
-				.css("display", "block")
-				.children(".resaon").html(reason);
-			$("#die").hide().fadeIn("slow");
-			
-			const bgm = $("#bgm")[0];
-			bgm.volume = 1;
-			bgm.src = "./music/凉凉.mp3";
-			bgm.play();
-			
-			console.warn("deskgood死亡");
-		});
+		DB.clearTable(TABLE.WORLD); //删表
+		DB.remove(); //删库
+		localStorage.removeItem("我的世界_seed");
+		localStorage.removeItem("我的世界_seed");
+		localStorage.removeItem("我的世界_time");
+		localStorage.removeItem("我的世界_position");
+		localStorage.removeItem("我的世界_height");
+		localStorage.removeItem("我的世界_dirt");
+		localStorage.removeItem("我的世界_type");
+		localStorage.removeItem("我的世界_treeHeight");
+		localStorage.removeItem("我的世界_leavesScale");
+		localStorage.removeItem("我的世界_openStone");
+		localStorage.removeItem("我的世界_weatherRain");
+		
+		document.exitPointerLock(); //取消鼠标锁定
+		gui.close(); //隐藏gui
+		$("#help, #warn").hide(); //隐藏 遮罩、横屏提示
+		$("#die")
+			.css("display", "block")
+			.children(".resaon").html(reason);
+		$("#die").hide().fadeIn("slow");
+		
+		const bgm = $("#bgm")[0];
+		bgm.volume = 1;
+		bgm.src = "./music/凉凉.mp3";
+		bgm.play();
+		
+		console.warn("deskgood死亡");
 	},
 	// 旋转角&仰俯角更新
 	look_update(x,y,z){
