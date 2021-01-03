@@ -38,8 +38,8 @@ $("#control").on("touchstart", function(e){
 			);
 			let l = Math.sqrt(dx**2 + dy**2);
 			l = l>100? 0.26*t: l*t/866;
-			let x = Math.cos( deskgood.lookAt.left_right/180*Math.PI+r )*l;
-			let z = Math.sin( deskgood.lookAt.left_right/180*Math.PI+r )*l;
+			const x = Math.cos( deskgood.look.left_right/180*Math.PI+r )*l,
+				z = Math.sin( deskgood.look.left_right/180*Math.PI+r )*l;
 			
 			//console.log("touch control to move:", x, z);
 			
@@ -274,32 +274,32 @@ $("#game").on("touchmove", function (e){
 	/*if (touch_screen.pos.x === null || touch_screen.pos.y === null)
 		return false;*/
 	
-	let x = e.originalEvent.targetTouches[0].pageX,
+	const x = e.originalEvent.targetTouches[0].pageX,
 		y = e.originalEvent.targetTouches[0].pageY;
 	
 	//console.log("touchmove(start):", {x, y}, touch_screen);
 	
-	let dx = x - touch_screen.x,
+	const dx = x - touch_screen.x,
 		dy = y - touch_screen.y;
 	
 	touch_screen.x = x, touch_screen.y = y;
 	//[x0, y0] = [x, y];
 	
 	//console.log("moved(screen):", dx, dy);
-	deskgood.lookAt.left_right += dx/$("#game")[0].offsetWidth*90*deskgood.sensitivity;
-	deskgood.lookAt.top_bottom -= dy/$("#game")[0].offsetHeight*90*deskgood.sensitivity;
+	deskgood.look.left_right += dx/$("#game")[0].offsetWidth*90*deskgood.sensitivity;
+	deskgood.look.top_bottom -= dy/$("#game")[0].offsetHeight*90*deskgood.sensitivity;
 	
-	if (deskgood.lookAt.left_right > 360)
-		while (deskgood.lookAt.left_right > 360)
-			deskgood.lookAt.left_right -= 360;
-	if (deskgood.lookAt.left_right < 0)
-		while (deskgood.lookAt.left_right < 0)
-			deskgood.lookAt.left_right += 360;
+	if (deskgood.look.left_right > 360)
+		while (deskgood.look.left_right > 360)
+			deskgood.look.left_right -= 360;
+	if (deskgood.look.left_right < 0)
+		while (deskgood.look.left_right < 0)
+			deskgood.look.left_right += 360;
 	
-	if (deskgood.lookAt.top_bottom > 89.9)
-		deskgood.lookAt.top_bottom = 89.9;
-	if (deskgood.lookAt.top_bottom < -89.9)
-		deskgood.lookAt.top_bottom = -89.9;
+	if (deskgood.look.top_bottom > 89.9)
+		deskgood.look.top_bottom = 89.9;
+	if (deskgood.look.top_bottom < -89.9)
+		deskgood.look.top_bottom = -89.9;
 	
 	deskgood.look_update(); //刷新俯仰角
 	

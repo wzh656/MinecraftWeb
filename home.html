@@ -541,14 +541,6 @@ function open(url="main.html"){
 	return false;
 }
 
-//已有存档
-if (localStorage.getItem("我的世界_seed") !== null){
-	$(".init > button:eq(0)")[0].innerHTML = "开始游戏<p>START PLAYING</p>"
-	$(".init > button:eq(0)")[0].onclick = ()=>open();
-}else{ //无存档
-	getGeolocationPosition();
-}
-
 
 //新的世界
 $(".init > button:eq(0)")[0].onclick = function(){
@@ -576,6 +568,13 @@ $(".init > button:eq(0)")[0].onclick = function(){
 	
 	console.log("new_world", "animate start", $(".init").css("display"), $(".new_world").css("display"));
 };
+//已有存档
+if (localStorage.getItem("我的世界_seed") !== null){
+	$(".init > button:eq(0)")[0].innerHTML = "开始游戏<p>START PLAYING</p>"
+	$(".init > button:eq(0)")[0].onclick = ()=>open();
+}else{ //无存档
+	getGeolocationPosition();
+}
 
 //新的世界 取消
 $(".new_world > button:eq(0)").click(function(){

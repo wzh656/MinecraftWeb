@@ -1,208 +1,162 @@
-const db = new IndexDB("Minecraft", 1, function(){
-		db.createTable(TABLE.WORLD, {
-			autoIncrement: true
-		}, [
-			{name:"type", attr:"type", unique:false}
-		]);
+const try_start_load = function(){
+	console.log("load_condition", try_start_load.prototype.condition+1)
+	if (++try_start_load.prototype.condition == 2){
+		map.perloadChunk({
+			progressCallback: (value)=>{
+				$("#progress span").text( Math.round(value*100, 2).padding(2, 2) );
+				$("#progress progress").val( value );
+				if (ipcRenderer)
+					ipcRenderer.send('progressUpdate', Math.min(value, 1));
+			},
+			finishCallback: ()=>{
+				$("#progress span").text("100");
+				$("#progress progress").val("1");
+				deskgood.update_round_blocks();
+				deskgood.update_round_blocks();
+				setTimeout(function(){
+					render(); //纹理贴图加载成功后，调用渲染函数执行渲染操作
+					$("#progress").remove();
+					if (ipcRenderer)
+						ipcRenderer.send('progressUpdate', -1); //关闭进度条
+				},0);
+			}
+		});
+	}
+};
+try_start_load.prototype.condition = 0;
+
+
+
+//数据库
+let openDBListener = null;
+const db = new IndexDB("Minecraft", 1, {
+		updateCallback: function(){
+			db.createTable(TABLE.WORLD, {
+				keyPath: "key",
+				autoIncrement: true
+			}, [
+				{name:"type", attr:"type", unique:false}
+			]);
+		},
+		successCallback: function(){
+			if (openDBListener)
+				openDBListener();
+		}
 	}),
 	TABLE = {
 		WORLD: "world"
 	};
 
 db.setErrCallback(function(err){
-	console.error("SQL运行出错", err);
-	//alert("SQL存档数据库 读取/写入 错误");
+	console.error("DB运行出错", err);
+	//alert("DB存档数据库 读取/写入 错误");
 });
 
-/* type
-* 0：方块放置/移除：(x,y,z,id,attr)
-* 1：坐标：(x,y,z)
-* 2：速度：(x,y,z)
-* 3：{
-*	x=0：物品栏：((row, )id, attr)，
-*	x=1：选中物品：(id)
-* }
-* 4：时间，灵敏度，旋转角&俯仰角：(x, id, attr)
-*/
-
 // 读取存档
-function SQL_read(){
-	//type=1：坐标：(x,y,z)
-	sql.readStep(TABLE.WORLD, {
+function DB_read(){
+	if (!db.db) //未加载完毕
+		return (openDBListener = DB_read);
+	
+	db.readStep(TABLE.WORLD, {
+		index: "type",
+		range: ["only", 1],
 		dirt: "prev",
-		
-	}["x", "y", "z"], "type=1", function(result){
-		console.log("sql read","type=1", result)
-		if (result.length){
-			const res = result[ result.length-1 ];
-			deskgood.pos.x = res.x;
-			deskgood.pos.y = res.y;
-			deskgood.pos.z = res.z;
-		}
-		
-		//加载区块
-		console.log("load_condition(sql)", perload_condition+1)
-		if (++perload_condition == 2){
-			map.perloadChunk({
-				progressCallback: (value)=>{
-					$("#progress span").text( Math.round(value*100, 2).changeDecimalBuZero(2, 2) );
-					$("#progress progress").val( value );
-					if (ipcRenderer)
-						ipcRenderer.send('progressUpdate', Math.min(value, 1));
-				},
-				finishCallback: ()=>{
-					$("#progress span").text("100");
-					$("#progress progress").val("1");
-					deskgood.update_round_blocks();
-					deskgood.update_round_blocks();
-					setTimeout(function(){
-						render(); //纹理贴图加载成功后，调用渲染函数执行渲染操作
-						$("#progress").remove();
-						if (ipcRenderer)
-							ipcRenderer.send('progressUpdate', -1); //关闭进度条
-					},0);
+		stepCallback: function(res){
+			console.log("存档read成功", res)
+			
+			deskgood.pos.x = res.pos.x,
+			deskgood.pos.y = res.pos.y,
+			deskgood.pos.z = res.pos.z;
+			
+			deskgood.v.x = res.v.x,
+			deskgood.v.y = res.v.y,
+			deskgood.v.z = res.v.z;
+			
+			deskgood.look.left_right = res.look.left_right,
+			deskgood.look.top_bottom = res.look.top_bottom;
+			deskgood.look_update();
+			
+			for (const [i, v] of Object.entries(res.hold))
+				if (v){ //{id, attr}
+					deskgood.hold[i] = new Block({
+						id: v.id,
+						attr: JSON.parse("{"+v.attr+"}")
+					});
+				}else{ //null
+					deskgood.hold[i] = null;
 				}
-			});
-		}
-	});
-	
-	//type=2：速度：(x,y,z)
-	sql.selectData(TABLE.WORLD, ["x", "y", "z"], "type=2", function(result){
-		console.log("sql read","type=2", result)
-		if (!result.length) return;
-		const res = result[ result.length-1 ];
-		deskgood.v.x = res.x,
-		deskgood.v.y = res.y,
-		deskgood.v.z = res.z;
-	});
-	
-	//type=3&x=0：物品栏：((row, )id, attr)
-	sql.selectData(TABLE.WORLD, ["id", "attr"], "type=3 AND x=0", function(result){ //物品栏
-		console.log("sql read","type=3&x=0", result)
-		for (let i=0; i<result.length; i++){
-			console.log(i, result[i])
-			if (result[i].id == 0){
-				deskgood.hold[i] = null;
-			}else{
-				deskgood.hold[i] = new Block({
-					id: result[i].id,
-					attr: JSON.parse("{"+result[i].attr+"}")
-				});
-			}
-		}
-		deskgood.hold.update();
-	});
-	//type=3&x=1：选中物品：(id)
-	sql.selectData(TABLE.WORLD, ["id"], "type=3 AND x=1", function(result){ //选择物品
-		console.log("sql read","type=3&x=1", result)
-		if (!result.length) return;
-		const res = result[ result.length-1 ];
-		deskgood.choice = res.id;
-		deskgood.hold.update();
-	});
-	
-	//type=4：时间，灵敏度，旋转角&俯仰角：(x, id, attr)
-	sql.selectData(TABLE.WORLD, ["x", "id", "attr"], "type=3 AND x=1", function(result){ //选择物品
-		console.log("sql read","type=4", result)
-		if (!result.length) return;
-		const res = result[ result.length-1 ];
-		time.setTime(res.x);
-		deskgood.sensitivity = res.id;
-		[deskgood.lookAt.left_right, deskgood.lookAt.top_bottom] = res.attr.split(" ").map(Number);
-		deskgood.look_update();
+			deskgood.choice = res.choice;
+			deskgood.hold.update();
+			
+			deskgood.sensitivity = res.sensitivity;
+			
+			time.setTime(res.time);
+			
+			try_start_load(); //加载区块
+			
+			return false; //停止查找
+		},
+		successCallback: try_start_load //没有数据也开始加载
 	});
 }
 
 
 // 保存存档
-function SQL_save(){
-	//type=1：坐标：(x,y,z)
-	sql.deleteData(TABLE.WORLD, "type=1", undefined, function(){
-		sql.insertData(TABLE.WORLD, ["type", "x", "y", "z"], [
-			1,
-			Math.round(deskgood.pos.x),
-			Math.round(deskgood.pos.y),
-			Math.round(deskgood.pos.z)
-		]);
-		console.log("sql save","type=1", {
-			type: 1,
-			x: Math.round(deskgood.pos.x),
-			y: Math.round(deskgood.pos.y),
-			z: Math.round(deskgood.pos.z)
-		});
-	});
+function DB_save(){
+	const data = {
+		type: 1,
+		pos: {
+			x: deskgood.pos.x,
+			y: deskgood.pos.y,
+			z: deskgood.pos.z
+		},
+		v: {
+			x: deskgood.v.x,
+			y: deskgood.v.y,
+			z: deskgood.v.z
+		},
+		look: {
+			left_right: deskgood.look.left_right,
+			top_bottom: deskgood.look.top_bottom
+		},
+		hold: [],
+		choice: deskgood.choice,
+		sensitivity: deskgood.sensitivity,
+		time: time.getTime()
+	};
+	for (let i=0,v=deskgood.hold[i]; i<deskgood.hold.length; v=deskgood.hold[++i]){
+		if (v){ //{id, attr}
+			data.hold[i] = {
+				id: v.id,
+				attr: JSON.stringify(v.attr).slice(1,-1)
+			}
+		}else{
+			data.hold[i] = null;
+		}
+	}
 	
-	//type=2：速度：(x,y,z)
-	sql.deleteData(TABLE.WORLD, "type=2", undefined, function(){
-		sql.insertData(TABLE.WORLD, ["type", "x", "y", "z"], [
-			2,
-			Math.round(deskgood.v.x),
-			Math.round(deskgood.v.y),
-			Math.round(deskgood.v.z)
-		]);
-		console.log("sql save","type=2", {
-			type: 2,
-			x: Math.round(deskgood.v.x),
-			y: Math.round(deskgood.v.y),
-			z: Math.round(deskgood.v.z)
-		});
-	});
-	
-	/*type=3：{
-		x=0：物品栏：((row, )id, attr)，
-		x=1：选中物品：(id)
-	}*/
-	sql.deleteData(TABLE.WORLD, "type=3", undefined, function(){
-		for (const i of deskgood.hold){
-			console.log(
-				(i? JSON.stringify(i.attr).slice(1,-1): "")+
-				"\n"+
-				(i? `"${JSON.stringify(i.attr).slice(1,-1)}"`: '""')
-			)
-			sql.insertData(TABLE.WORLD, ["type", "x", "id", "attr"], [
-				3,
-				0, //x=0：物品栏
-				i? i.id: 0,
-				i? `"${JSON.stringify(i.attr).slice(1,-1)}"`: '""'
-			]);
-			console.log("sql save","type=3&x=0", {
-				type: 3,
-				x: 0, //x=0：物品栏
-				id: i? i.id: 0,
-				attr: i? `"${JSON.stringify(i.attr).slice(1,-1)}"`: '""'
+	db.addData(TABLE.WORLD, data, {
+		successCallback: function(){
+			console.log("存档save成功", data);
+			
+			let find = false;
+			db.readStep(TABLE.WORLD, {
+				index: "type",
+				range: ["only", 1],
+				dirt: "prev",
+				stepCallback: function(res){
+					if (find){
+						console.log("DB 删除多余", res.key, res);
+						db.remove(TABLE.WORLD, res.key);
+					}else{
+						find = true;
+					}
+				}
 			});
 		}
-		
-		sql.insertData(TABLE.WORLD, ["type", "x", "id"], [
-			3,
-			1, //x=1：选择物品
-			deskgood.choice
-		]);
-		console.log("sql save","type=3&x=1", {
-			type: 3,
-			x: 1, //x=1：选择物品
-			id: deskgood.choice
-		});
 	});
 	
-	//type=4：时间，灵敏度，旋转角&俯仰角：(x, id, attr)
-	sql.deleteData(TABLE.WORLD, "type=4", undefined, function(){
-		sql.insertData(TABLE.WORLD, ["type", "x", "id", "attr"], [
-			4,
-			+time.getTime(),
-			deskgood.sensitivity,
-			`"${deskgood.lookAt.left_right} ${deskgood.lookAt.top_bottom}"`
-		]);
-		console.log("sql save","type=4", {
-			type: 4,
-			x: +time.getTime(),
-			id: deskgood.sensitivity,
-			attr: `"${deskgood.lookAt.left_right} ${deskgood.lookAt.top_bottom}"`
-		});
-	});
-	
-	console.log("存档+1中……");
 }
 
-setInterval(SQL_save, 10*1000); // 10s/time
-document.addEventListener("background", SQL_save, false); //plus切换到后台时自动保存
+setInterval(DB_save, 10*1000); // 10s/time
+document.addEventListener("background", DB_save, false); //plus切换到后台时自动保存

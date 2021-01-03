@@ -15,7 +15,7 @@ if (DEBUG){
 	gui.add({f:function(){
 		run(prompt("请输入命令：","deskgood.goY(3000*100);"))
 	}}, "f").name("运行(run)命令");
-	gui.add(window, "SQL_save").name("保存(save)");
+	gui.add(window, "DB_save").name("保存(save)");
 	gui.add(location, "reload").name("刷新(reload)");
 	/* window.addEventListener("beforeunload", function(event){
 		event.preventDefault();
@@ -23,20 +23,20 @@ if (DEBUG){
 		return "未保存！";
 	}); */
 	
-	let time_folder = gui.addFolder("时光(Time)");
-		let time_now_folder = time_folder.addFolder("当前时间(time)");
+	const time_folder = gui.addFolder("时光(Time)");
+		const time_now_folder = time_folder.addFolder("当前时间(time)");
 			time_now_folder.open();
 			time_now_folder.add({
 				get t(){ return +time.getTime(); }
 			}, "t").name("时间戳/ms(time)").listen();
-			/* time_now_folder.add({
+			/*time_now_folder.add({
 				get t(){ return time.getTime().getYear()+1900; }
 			}, "t", 2000, 10000, 1).name("年").listen();
 			time_now_folder.add({
 				get t(){ return time.getTime().getMonth()+1; }
 			}, "t", 1, 12, 1).name("月").listen();
 			time_now_folder.add({
-				get t(){ return time.getTime().getDay(); }
+				get t(){ return time.getTime().getDate(); }
 			}, "t", 1, 31, 1).name("日").listen();
 			time_now_folder.add({
 				get t(){ return time.getTime().getHours(); }
@@ -46,7 +46,7 @@ if (DEBUG){
 			}, "t", 0, 59, 1).name("分").listen();
 			time_now_folder.add({
 				get t(){ return time.getTime().getSeconds(); }
-			}, "t", 0, 59, 1).name("秒").listen(); */
+			}, "t", 0, 59, 1).name("秒").listen();*/
 			time_now_folder.add({
 				get t(){ return String(time.getTime()); }
 			}, "t").name("描述字符串").listen();

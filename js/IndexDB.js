@@ -1,21 +1,25 @@
 class IndexDB{
 	//打开/创建数据库
-	constructor(dbName, version, updateCallback, errorCallback){
+	constructor(dbName, version, opt={}){
+		const {updateCallback, successCallback, errorCallback} = opt;
+		
 		const request = indexedDB.open(dbName, version);
-		request.onerror = errorCallback || function(e){
+		request.onerror = errorCallback || this.errCallback || function(e){
 			console.error("数据库打开出错", e);
 		};
 		let update = false;
 		request.onsuccess = (e)=>{
 			if (!update)
 				this.db = request.result;
+			if (successCallback) successCallback();
 			console.log("数据库打开success")
 		};
-		request.onupgradeneeded = updateCallback || ((e)=>{
+		request.onupgradeneeded = (e)=>{
 			this.db = e.target.result;
 			update = true;
+			if (updateCallback) updateCallback();
 			console.log("数据库update");
-		});
+		};
 	}
 	
 	//设置错误回调
@@ -60,7 +64,8 @@ class IndexDB{
 				.objectStore( tableName )
 				.add( data );
 		
-		request.oncomplete = successCallback || this.successCallback;
+		//request.oncomplete = successCallback || this.successCallback;
+		request.onsuccess = successCallback || this.successCallback;
 		request.onerror = errorCallback || this.errCallback || function (e) {
 			console.error("数据add失败", e);
 		};

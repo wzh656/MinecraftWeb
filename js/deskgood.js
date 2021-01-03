@@ -22,7 +22,7 @@ const deskgood = {
 	},*/
 	jump_v: 5,
 	up: camera.up,
-	lookAt: {
+	look: {
 		left_right: 0,
 		top_bottom: -10,
 		/* _left_right: 0,
@@ -42,7 +42,7 @@ const deskgood = {
 			deskgood.look_update();
 		} */
 	},
-	look: {
+	lookAt: {
 		x: 1,
 		y: 0,
 		z: 0
@@ -225,26 +225,26 @@ const deskgood = {
 	// 旋转角&仰俯角更新
 	look_update(x,y,z){
 		if (x !== undefined || y !== undefined || z !== undefined){ //有不为undefined的值
-			x = x||deskgood.look.x,
-			y = y||deskgood.look.y,
-			z = z||deskgood.look.z;
+			x = x||deskgood.lookAt.x,
+			y = y||deskgood.lookAt.y,
+			z = z||deskgood.lookAt.z;
 			const v = new THREE.Vector3(x,y,z).setLength(1); //单位向量（标准化）
 			camera.lookAt(deskgood.pos.x+v.x, deskgood.pos.y+v.y, deskgood.pos.z+v.z);
-			deskgood.look.x = v.x,
-			deskgood.look.y = v.y,
-			deskgood.look.z = v.z;
+			deskgood.lookAt.x = v.x,
+			deskgood.lookAt.y = v.y,
+			deskgood.lookAt.z = v.z;
 		}else{ //无参数调用
 			const x =
-					Math.cos(deskgood.lookAt.left_right/180*Math.PI)*
-					Math.cos(deskgood.lookAt.top_bottom/180*Math.PI),
+					Math.cos(deskgood.look.left_right/180*Math.PI)*
+					Math.cos(deskgood.look.top_bottom/180*Math.PI),
 				z =
-					Math.sin(deskgood.lookAt.left_right/180*Math.PI)*
-					Math.cos(deskgood.lookAt.top_bottom/180*Math.PI),
-				y = Math.sin(deskgood.lookAt.top_bottom/180*Math.PI);
+					Math.sin(deskgood.look.left_right/180*Math.PI)*
+					Math.cos(deskgood.look.top_bottom/180*Math.PI),
+				y = Math.sin(deskgood.look.top_bottom/180*Math.PI);
 			camera.lookAt(deskgood.pos.x+x, deskgood.pos.y+y, deskgood.pos.z+z);
-			deskgood.look.x = x,
-			deskgood.look.y = y,
-			deskgood.look.z = z;
+			deskgood.lookAt.x = x,
+			deskgood.lookAt.y = y,
+			deskgood.lookAt.z = z;
 		}
 	},
 	update_round_blocks(dx=1, dy=1, dz=1){
@@ -706,8 +706,34 @@ const deskgood = {
 		x = Math.round(x),
 		y = Math.round(y),
 		z = Math.round(z); //存储必须整数
-		//SQL
-		sql.deleteData(tableName, `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, ()=>{
+		//DB
+		db.addData(TABLE.WORLD, {
+			type: 0,
+			x,
+			y,
+			z,
+			id: block.id,
+			attr
+		}, {
+			successCallback: function(){
+				let find = false;
+				db.readStep(TABLE.WORLD, {
+					index: "type",
+					range: ["only", 0],
+					dirt: "prev",
+					stepCallback: function(res){
+						if (res.x!=x || res.y!=y || res.z!=z) return;
+						if (find){
+							console.log("DB 删除多余", res.key, res);
+							db.remove(TABLE.WORLD, res.key);
+						}else{
+							find = true;
+						}
+					}
+				});
+			}
+		});
+		/*db.deleteData(tableName, `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, ()=>{
 			sql.insertData(tableName, ["type", "x", "y", "z", "id", "attr"], [
 				0,
 				x,
@@ -716,7 +742,7 @@ const deskgood = {
 				block.id,
 				attr
 			])
-		});
+		});*/
 	},
 	
 	// 移除方块
@@ -758,8 +784,33 @@ const deskgood = {
 		x = Math.round(x),
 		y = Math.round(y),
 		z = Math.round(z); //存储必须整数
-		//SQL
-		sql.deleteData(tableName, `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
+		//DB
+		db.addData(TABLE.WORLD, {
+			type: 0,
+			x,
+			y,
+			z,
+			id: 0
+		}, {
+			successCallback: function(){
+				let find = false;
+				db.readStep(TABLE.WORLD, {
+					index: "type",
+					range: ["only", 0],
+					dirt: "prev",
+					stepCallback: function(res){
+						if (res.x!=x || res.y!=y || res.z!=z) return;
+						if (find){
+							console.log("DB 删除多余", res.key, res);
+							db.remove(TABLE.WORLD, res.key);
+						}else{
+							find = true;
+						}
+					}
+				});
+			}
+		});
+		/*sql.deleteData(tableName, `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
 			sql.insertData(tableName, ["type", "x", "y", "z", "id"], [
 				0,
 				x,
@@ -767,7 +818,7 @@ const deskgood = {
 				z,
 				0
 			]);
-		});
+		});*/
 	}
 }
 deskgood.moveTo = deskgood.move;
@@ -778,9 +829,7 @@ deskgood.goX = x=>deskgood.go(x);
 deskgood.goY = y=>deskgood.go(0,y);
 deskgood.goZ = z=>deskgood.go(0,0,z);
 
-SQL_read(); //读取存档
-
-//初始化
+DB_read(); //读取存档
 
 
 //gui
@@ -826,13 +875,13 @@ if (DEBUG){
 				deskgood.v.y = (value/100)**3 *100;
 			});
 			deskgood_v_folder.add(deskgood.v, "z", -10, 10, 1e-3).listen();
-		const deskgood_lookAt_folder = deskgood_folder.addFolder("朝向（球坐标系）");
-			deskgood_lookAt_folder.add(deskgood.lookAt, "left_right", 0, 360).listen().name("左右（水平）");
-			deskgood_lookAt_folder.add(deskgood.lookAt, "top_bottom", -90, 90).listen().name("上下（竖直）");
-		const deskgood_look_folder = deskgood_folder.addFolder("朝向（笛卡尔坐标系）");
-			deskgood_look_folder.add(deskgood.look, "x", -1, 1, 0.01).listen().onChange(x => deskgood.look_update(x));
-			deskgood_look_folder.add(deskgood.look, "y", -1, 1, 0.01).listen().onChange(y => deskgood.look_update(undefined, y));
-			deskgood_look_folder.add(deskgood.look, "z", -1, 1, 0.01).listen().onChange(z => deskgood.look_update(undefined, undefined, z));
+		const deskgood_look_folder = deskgood_folder.addFolder("朝向（球坐标系）");
+			deskgood_look_folder.add(deskgood.look, "left_right", 0, 360).name("左右（水平）").listen().onChange( deskgood.look_update );
+			deskgood_look_folder.add(deskgood.look, "top_bottom", -90, 90).name("上下（竖直）").listen().onChange( deskgood.look_update );
+		const deskgood_lookAt_folder = deskgood_folder.addFolder("朝向（笛卡尔坐标系）");
+			deskgood_lookAt_folder.add(deskgood.lookAt, "x", -1, 1, 0.01).listen().onChange(x => deskgood.look_update(x));
+			deskgood_lookAt_folder.add(deskgood.lookAt, "y", -1, 1, 0.01).listen().onChange(y => deskgood.look_update(undefined, y));
+			deskgood_lookAt_folder.add(deskgood.lookAt, "z", -1, 1, 0.01).listen().onChange(z => deskgood.look_update(undefined, undefined, z));
 		const deskgood_up_folder = deskgood_folder.addFolder("天旋地转（小心头晕）");
 			deskgood_up_folder.add(deskgood.up, "x", -1, 1, 0.01).onChange(function(){
 				print("头晕", "<font style='font-size: 16px;'>头晕别怪我</font>", 3);

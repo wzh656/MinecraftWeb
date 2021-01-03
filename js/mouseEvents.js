@@ -21,7 +21,7 @@ if (DEBUG){
 }
 
 /* $(document).on("click", function (e){
-	console.log( ray3D({},deskgood.look)[0] );
+	console.log( ray3D({},deskgood.lookAt)[0] );
 }); */
 document.addEventListener("mousemove", function (e){
 	if (stop)
@@ -30,7 +30,7 @@ document.addEventListener("mousemove", function (e){
 	if (e.path[0] != document.body)
 		return;
 	
-	let dx =
+	const dx =
 		e.movementX ||
 		e.mozMovementX ||
 		e.webkitMovementX ||
@@ -41,25 +41,25 @@ document.addEventListener("mousemove", function (e){
 		e.webkitMovementY ||
 		0;
 	
-	let x = dx/$("#game")[0].offsetWidth*360*deskgood.sensitivity,
+	const x = dx/$("#game")[0].offsetWidth*360*deskgood.sensitivity,
 		y = dy/$("#game")[0].offsetHeight*360*deskgood.sensitivity;
 	
 	if (Math.sqrt(x**2 + y**2) > 15) return; //消除取消锁定前自动移动
 	
-	deskgood.lookAt.left_right += dx/$("#game")[0].offsetWidth*360*deskgood.sensitivity;
-	deskgood.lookAt.top_bottom -= dy/$("#game")[0].offsetHeight*360*deskgood.sensitivity;
+	deskgood.look.left_right += dx/$("#game")[0].offsetWidth*360*deskgood.sensitivity;
+	deskgood.look.top_bottom -= dy/$("#game")[0].offsetHeight*360*deskgood.sensitivity;
 	
-	if (deskgood.lookAt.left_right > 360)
-		while (deskgood.lookAt.left_right > 360)
-			deskgood.lookAt.left_right -= 360;
-	if (deskgood.lookAt.left_right < 0)
-		while (deskgood.lookAt.left_right < 0)
-			deskgood.lookAt.left_right += 360;
+	if (deskgood.look.left_right > 360)
+		while (deskgood.look.left_right > 360)
+			deskgood.look.left_right -= 360;
+	if (deskgood.look.left_right < 0)
+		while (deskgood.look.left_right < 0)
+			deskgood.look.left_right += 360;
 	
-	if (deskgood.lookAt.top_bottom > 89.9)
-		deskgood.lookAt.top_bottom = 89.9;
-	if (deskgood.lookAt.top_bottom < -89.9)
-		deskgood.lookAt.top_bottom = -89.9;
+	if (deskgood.look.top_bottom > 89.9)
+		deskgood.look.top_bottom = 89.9;
+	if (deskgood.look.top_bottom < -89.9)
+		deskgood.look.top_bottom = -89.9;
 	
 	deskgood.look_update(); //刷新
 	
@@ -71,7 +71,7 @@ document.addEventListener("mousemove", function (e){
 	}
 	
 	try{
-		let get = ray3D({},deskgood.look)[0];
+		const get = ray3D({},deskgood.lookAt)[0];
 		mouse_choice.x = get.object.position.x;
 		mouse_choice.y = get.object.position.y;
 		mouse_choice.z = get.object.position.z;
@@ -83,18 +83,19 @@ document.addEventListener("mousemove", function (e){
 		).id;
 		
 		if (mouse_choice.view){
-			let geometry1 = new THREE.BoxBufferGeometry(100, 100, 100);
-			let material1 = new THREE.MeshBasicMaterial({
-				color: "blue",
-				transparent: true,
-				opacity: 0.3
-			});
-			let material2 = new THREE.MeshBasicMaterial({
-				color: "red",
-				wireframe: true //只显示框架
-			});
-			let mesh1 = new THREE.Mesh(geometry1, material1);
-			let mesh2 = new THREE.Mesh(geometry1, material2);
+			const geometry1 = new THREE.BoxBufferGeometry(100, 100, 100),
+				material1 = new THREE.MeshBasicMaterial({
+					color: "blue",
+					transparent: true,
+					opacity: 0.3
+				}),
+				material2 = new THREE.MeshBasicMaterial({
+					color: "red",
+					wireframe: true //只显示框架
+				}),
+				mesh1 = new THREE.Mesh(geometry1, material1),
+				mesh2 = new THREE.Mesh(geometry1, material2);
+			
 			mesh1.position.x = mesh2.position.x = get.object.position.x;
 			mesh1.position.y = mesh2.position.y = get.object.position.y;
 			mesh1.position.z = mesh2.position.z = get.object.position.z;

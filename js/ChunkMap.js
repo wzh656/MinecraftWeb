@@ -1580,7 +1580,22 @@ class ChunkMap{
 		if (breakPoint && breakPoint.edit){
 			func(breakPoint.edit);
 		}else{
-			sql.selectData(tableName, ["x", "y", "z", "id", "attr"],
+			const edit = [];
+			db.readStep(TABLE.WORLD, {
+				index: "type",
+				range: ["only", 0],
+				stepCallback: (res)=>{
+					if (
+						res.x >= ox+this.size[0].x && res.x <= ox+this.size[1].x &&
+						res.z >= oz+this.size[0].z && res.z <= oz+this.size[1].z
+					) data.push(res);
+				},
+				successCallback: ()=>{
+					console.log("edit(DB):", edit);
+					func(edit);
+				}
+			});
+			/*sql.selectData(tableName, ["x", "y", "z", "id", "attr"],
 				`type=0 AND`+
 				` (x BETWEEN ${ ox+this.size[0].x } AND ${ ox+this.size[1].x }) AND`+
 				` (z BETWEEN ${ oz+this.size[0].z } AND ${ oz+this.size[1].z })`,
@@ -1588,7 +1603,7 @@ class ChunkMap{
 					console.log("edit(sql):", edit);
 					func(new Array(...edit));
 				}
-			);
+			);*/
 		}
 	}
 	

@@ -19,21 +19,19 @@ if (!String.prototype.padStart) {
 }
 
 // 小数点前后补位
-Number.prototype.padding = function(padEnd, padAll){
-	var f_x = parseFloat(this);
-	if (isNaN(f_x)) {
-		return 0;
+Number.prototype.padding = function(start, end){
+	var part = String(this).split(".");
+	var symbol = "";
+	if (isNaN( Number(part[0].charAt(0)) )){
+		symbol = part[0].charAt(0);
+		part[0] = part[0].slice(1);
 	}
-	var s_x = this.toString();
-	var pos_decimal = s_x.indexOf('.');
-	if (pos_decimal < 0) {
-		pos_decimal = s_x.length;
-		s_x += '.';
-	}
-	while (s_x.length <= pos_decimal + padEnd){
-		s_x += '0';
-	}
-	return s_x.padStart(padAll, "0");
+	while (part[0].length+symbol.length < start)
+		part[0] = "0"+part[0];
+	part[1] = part[1] || "";
+	while (part[1].length < end)
+		part[1] += "0";
+	return symbol + part[0] + (part[1] ?"." + part[1] :"");
 }
 
 // 保留小数位数
