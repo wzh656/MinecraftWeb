@@ -143,11 +143,13 @@ class ChunkMap{
 	get(x, y, z){  // 没有方块:null,不在范围:undefined,加载中:false
 		x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 		
-		if (this.map[x] && this.map[x][y]){
+		return this.map[x] && this.map[x][y] && this.map[x][y][z];
+		
+		/*if (this.map[x] && this.map[x][y]){
 			return this.map[x][y][z];
 		}else{
 			return undefined;
-		}
+		}*/
 		
 		/*try{
 			return this.map[x][y][z];
@@ -166,17 +168,17 @@ class ChunkMap{
 	}
 	
 	//添加方块
-	add(thing, pos, type=true){
+	add(block, pos, type=true){
 		// let {type=true} = opt;
-		[pos.x, pos.y, pos.z] = [Math.round(pos.x), Math.round(pos.y), Math.round(pos.z)]; //规范化
+		pos.x=Math.round(pos.x), pos.y=Math.round(pos.y), pos.z=Math.round(pos.z); //规范化
 		
 		// if (this.get(pos.x, pos.y, pos.z) === undefined) return;
 		if ( this.get(pos.x, pos.y, pos.z) ){ //有方块
-			if (type){ //替换
-				for (let i of this.map[pos.x][pos.y][pos.z].block.mesh.material)
+			if (type){ //强制替换
+				for (const i of this.map[pos.x][pos.y][pos.z].block.mesh.material)
 					i.dispose();
 				this.map[pos.x][pos.y][pos.z].block.mesh.geometry.dispose(); //清除内存
-				scene.remove(this.map[pos.x][pos.y][pos.z].block.mesh);
+				scene.remove( this.map[pos.x][pos.y][pos.z].block.mesh );
 				// this.map[pos.x][pos.y][pos.z] = null;
 				delete this.map[pos.x][pos.y][pos.z];
 				/*if (this.map[pos.x][pos.y].every(v => !v))
@@ -188,26 +190,26 @@ class ChunkMap{
 			}
 		}
 		
-		thing.block.mesh.position.x = pos.x*100;
-		thing.block.mesh.position.y = pos.y*100;
-		thing.block.mesh.position.z = pos.z*100;
+		block.block.mesh.position.x = pos.x*100;
+		block.block.mesh.position.y = pos.y*100;
+		block.block.mesh.position.z = pos.z*100;
 		
-		this.set(pos.x, pos.y, pos.z, thing);
-		scene.add(thing.block.mesh); //网格模型添加到场景中
-		thing.block.addTo = true;
+		this.set(pos.x, pos.y, pos.z, block);
+		scene.add(block.block.mesh); //网格模型添加到场景中
+		block.block.addTo = true;
 	}
 	
 	//根据 模板和ID 添加方块
 	addID(id, pos, template, opt={}){
-		let {type=true, attr={}} = opt;
+		const {type=true, attr={}} = opt;
 		/* if (typeof type != "boolean"){
 			[type, attr] = [undefined, type];
 		} */
 		// if (!attr.block) attr.block = {};
-		if (id == 0){
-			[pos.x, pos.y, pos.z] = [Math.round(pos.x), Math.round(pos.y), Math.round(pos.z)]; //规范化
-			if (this.get(pos.x, pos.y, pos.z)){ //有方块
-				for (let i of this.map[pos.x][pos.y][pos.z].block.mesh.material)
+		if (id == 0){ //添加空气
+			pos.x=Math.round(pos.x), pos.y=Math.round(pos.y), pos.z=Math.round(pos.z); //规范化
+			if ( this.get(pos.x, pos.y, pos.z) ){ //有方块（强制移除）
+				for (const i of this.map[pos.x][pos.y][pos.z].block.mesh.material)
 					i.dispose();
 				this.map[pos.x][pos.y][pos.z].block.mesh.geometry.dispose(); //清除内存
 				scene.remove(this.map[pos.x][pos.y][pos.z].block.mesh);
@@ -222,16 +224,16 @@ class ChunkMap{
 			return;
 		}
 		
-		let thing = new Block({
+		const block = new Block({
 			id,
 			attr
 		}).makeMesh();
 		this.add(
-			thing,
+			block,
 			{
-				x:pos.x,
-				y:pos.y,
-				z:pos.z,
+				x: pos.x,
+				y: pos.y,
+				z: pos.z,
 			},
 			type
 		); //以模板建立
@@ -244,10 +246,12 @@ class ChunkMap{
 		if (!this.get(x,y,z)) // 没有方块(null)/不在范围(undefined)/加载中(false)
 			return;
 		
-		for (let i of this.map[x][y][z].block.mesh.material)
+		for (const i of this.map[x][y][z].block.mesh.material)
 			i.dispose();
 		this.map[x][y][z].block.mesh.geometry.dispose(); //清除内存
+		
 		scene.remove(this.map[x][y][z].block.mesh);
+		
 		delete this.map[x][y][z];
 		if (this.map[x][y].every(v => !v))
 			delete this.map[x][y];
@@ -398,8 +402,8 @@ class ChunkMap{
 		const ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
-		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
-			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
+		for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
+			for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
 				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
 					this.update(ox+dx, dy, oz+dz);
 				}
@@ -408,6 +412,7 @@ class ChunkMap{
 	}
 	//更新区块内所有方块（异步）
 	updateChunkAsync(x, z, opt={}){
+		console.log("updateChunkAsync", x, z)
 		let {
 			finishCallback,
 			progressCallback,
@@ -1022,51 +1027,63 @@ class ChunkMap{
 		
 		for (let y=this.size[0].y; y<=this.size[1].y; y++){
 			if (columns[dx][dz][y].id){ //有方块
-				if (!(
-					//y != this.size[0].y && //不在最底层
-					y != this.size[1].y && //不在最顶层
-					columns[dx][dz][y+1].id &&
-					(y == this.size[0].y || columns[dx][dz][y-1].id) &&
-					columns[dx+1] && columns[dx+1][dz] && columns[dx+1][dz][y].id &&
-					columns[dx-1] && columns[dx-1][dz] && columns[dx-1][dz][y].id &&
-					columns[dx][dz+1] && columns[dx][dz+1][y].id &&
-					columns[dx][dz-1] && columns[dx][dz-1][y].id
-				)){ //不是都没有方块
+				
+				const visibleValue = [];
+				let needLoad = false;
+				for (const [ddx,ddy,ddz] of [
+					[1,0,0],
+					[-1,0,0],
+					[0,1,0],
+					[0,-1,0],
+					[0,0,1],
+					[0,0,-1]
+				]){
+					const px=dx+ddx, py=y+ddy, pz=dz+ddz;
+					//if (dx==4 && y==2 && dz==4) console.log({px,py,pz}, columns[px][pz][py], columns[px] && columns[px][pz] && columns[px][pz][py] && columns[px][pz][py].id)
+					if (py < map.size[0].y){ //最下面有方块
+						visibleValue.push(false);
+					}else if ( !(columns[px] && columns[px][pz] && columns[px][pz][py] && columns[px][pz][py].id) ){ //无方块 显示
+						needLoad = true;
+						visibleValue.push(true);
+					}else if ( columns[px][pz][py].attr && columns[px][pz][py].attr.block ){ //有属性
+						const visible = columns[px][pz][py].attr.block.transparent
+						needLoad = visible || needLoad;
+						visibleValue.push( needLoad ); //方块透明 显示
+					}else{ //继承模板
+						const visible = TEMPLATES[columns[px][pz][py].id].attr.block.transparent;
+						needLoad = visible || needLoad;
+						visibleValue.push( visible ); //方块透明 显示
+					}
+				}
+				
+				if ( needLoad ){ //有面需显示
 					const thisBlock = new Block(columns[dx][dz][y]);
+					
 					this.add(
 						thisBlock.makeMesh(),
 						{x, y, z}
 					);
 					
-					const noTransparent = thisBlock.get("attr", "block", "noTransparent"),
-						visibleValue = [],
-						material = thisBlock.block.material;
-					for (const x of [1,-1,0,0,0,0]){
-						for (const y of [0,0,1,-1,0,0]){
-							for (const z of [0,0,0,0,1,-1]){
-								if (!columns[x] || !columns[x][y] || !columns[x][y][z] || !columns[x][y][z].id || !columns[x][y][z].attr){
-									visibleValue.push(true);
-								}else{
-									visibleValue.push(
-										( columns[x][y][z].attr.transparent || TEMPLATES[columns[x][y][z].id].attr.transparent ) || noTransparent,
-										// 没有方块 或 有方块非透明 则显示  或  自身透明 也显示
-									);
-								}
-							}
-						}
-					}
-						/* [
-							
-							!( columns[x-1] && columns[x-1][y] && columns[x-1][y][z] && columns[x-1][y][z].id && !( columns[x-1][y][z].attr.transparent||TEMPLATES[columns[x-1][y][z].id].attr.transparent ) || noTransparent,
-							!( columns[x] && columns[x][y+1] && columns[x][y+1][z] && columns[x][y+1][z].id && !( columns[x][y+1][z].attr.transparent||TEMPLATES[columns[x][y+1][z].id].attr.transparent ) || noTransparent,
-							!( columns[x] && columns[x][y-1] &&  columns[x][y-1][z] && columns[x][y-1][z].id && !( columns[x][y-1][z].attr.transparent||TEMPLATES[columns[x][y-1][z].id].attr.transparent ) || noTransparent,
-							!( columns[x] && columns[x][y] && columns[x][y][z+1] && columns[x][y][z+1].id && !( columns[x][y][z+1].attr.transparent||TEMPLATES[columns[x][y][z+1].id].attr.transparent ) || noTransparent,
-							!( columns[x] && columns[x][y] && columns[x][y][z-1] && columns[x][y][z-1].id && !( columns[x][y][z-1].attr.transparent||TEMPLATES[columns[x][y][z-1].id].attr.transparent ) || noTransparent
-						],
-						; */
-					for (const i in material)
-						material[i].visible = visibleValue[i];
+					const material = thisBlock.block.material;
+					if ( !thisBlock.get("attr", "block", "noTransparent") ) //允许透明
+						for (const i in material)
+							material[i].visible = visibleValue[i];
+					// x,z,y
+					/*const noTransparent =  thisBlock.get("attr", "block", "noTransparent"),
+						visibleValue = [
+							!( columns[dx+1] && columns[dx+1][y] && columns[dx+1][y][dz] && columns[dx+1][y][dz].id && !((columns[dx+1][y][dz].attr&&columns[dx+1][y][dz].attr.block.transparent)||TEMPLATES[columns[dx+1][y][dz].id].attr.block.transparent)) || noTransparent,
+							!( columns[dx-1] && columns[dx-1][y] && columns[dx-1][y][dz] && columns[dx-1][y][dz].id && !((columns[dx-1][y][dz].attr&&columns[dx-1][y][dz].attr.block.transparent)||TEMPLATES[columns[dx-1][y][dz].id].attr.block.transparent)) || noTransparent,
+							!( columns[dx] && columns[dx][y+1] && columns[dx][y+1][dz] && columns[dx][y+1][dz].id && !((columns[dx][y+1][dz].attr&&columns[dx][y+1][dz].attr.block.transparent)||TEMPLATES[columns[dx][y+1][dz].id].attr.block.transparent)) || noTransparent,
+							!( columns[dx] && columns[dx][y-1] &&  columns[dx][y-1][dz] && columns[dx][y-1][dz].id && !((columns[dx][y-1][dz].attr&&columns[dx][y-1][dz].attr.block.transparent)||TEMPLATES[columns[dx][y-1][dz].id].attr.block.transparent)) || noTransparent,
+							!( columns[dx] && columns[dx][y] && columns[dx][y][dz+1] && columns[dx][y][dz+1].id && !((columns[dx][y][dz+1].attr&&columns[dx][y][dz+1].attr.block.transparent)||TEMPLATES[columns[dx][y][dz+1].id].attr.block.transparent)) || noTransparent,
+							!( columns[dx] && columns[dx][y] && columns[dx][y][dz-1] && columns[dx][y][dz-1].id && !((columns[dx][y][dz-1].attr&&columns[dx][y][dz-1].attr.block.transparent)||TEMPLATES[columns[dx][y][dz-1].id].attr.block.transparent)) || noTransparent
+							// 没有方块 或 有方块非透明 则显示  或  自身透明 也显示
+						],*/
+					
+					// if (dx == 4 && y == 1 && dz == -3) debugger
+					
 				}
+				
 			}else{ //空气
 				this.addID(0, {
 					x,
@@ -1082,14 +1099,19 @@ class ChunkMap{
 		x = Math.round(x), z = Math.round(z); //规范化
 		const ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
-			
-		sql.selectData(tableName, ["x", "y", "z", "id", "attr"],
-			`type=0 AND`+
-			` (x BETWEEN ${ ox+this.size[0].x } AND ${ ox+this.size[1].x }) AND`+
-			` (z BETWEEN ${ oz+this.size[0].z } AND ${ oz+this.size[1].z })`,
-			(edit)=>{
-				console.log("edit(sql):", edit);
-				
+		
+		const edit = [];
+		db.readStep(TABLE.WORLD, {
+			index: "type",
+			range: ["only", 0],
+			stepCallback: (res)=>{
+				if (
+					res.x >= ox+this.size[0].x && res.x <= ox+this.size[1].x &&
+					res.z >= oz+this.size[0].z && res.z <= oz+this.size[1].z
+				) edit.push(res);
+			},
+			successCallback: ()=>{
+				console.log("edit(DB):", edit);
 				//保存edit
 				this.chunks[x][z].edit = edit;
 				
@@ -1105,7 +1127,7 @@ class ChunkMap{
 						for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
 							this.loadColumn(ox+dx, oz+dz, columns, edit);
 			}
-		);
+		});
 	}
 	//加载区块（异步）
 	loadChunkAsync(x, z, opt={}){
@@ -1120,7 +1142,7 @@ class ChunkMap{
 		} = opt;
 		
 		[x, z] = [Math.round(x), Math.round(z)]; //规范化
-		let ox = x*this.size.x,
+		const ox = x*this.size.x,
 			oz = z*this.size.z, //区块中心坐标
 			t = this.seed; //临时变量
 		
@@ -1129,7 +1151,7 @@ class ChunkMap{
 		})) //每个都不一样（不存在）
 			this.initedChunk.push([x,z]);
 		
-		let func = (edit)=>{
+		const func = (edit)=>{
 			//保存edit
 			this.chunks[x][z].edit = edit;
 			// console.log("save edit", x, z, edit)
@@ -1566,7 +1588,22 @@ class ChunkMap{
 		if (breakPoint && breakPoint.edit){
 			func(breakPoint.edit);
 		}else{
-			sql.selectData(tableName, ["x", "y", "z", "id", "attr"],
+			const edit = [];
+			db.readStep(TABLE.WORLD, {
+				index: "type",
+				range: ["only", 0],
+				stepCallback: (res)=>{
+					if (
+						res.x >= ox+this.size[0].x && res.x <= ox+this.size[1].x &&
+						res.z >= oz+this.size[0].z && res.z <= oz+this.size[1].z
+					) edit.push(res);
+				},
+				successCallback: ()=>{
+					console.log("edit(DB):", edit);
+					func(edit);
+				}
+			});
+			/*sql.selectData(tableName, ["x", "y", "z", "id", "attr"],
 				`type=0 AND`+
 				` (x BETWEEN ${ ox+this.size[0].x } AND ${ ox+this.size[1].x }) AND`+
 				` (z BETWEEN ${ oz+this.size[0].z } AND ${ oz+this.size[1].z })`,
@@ -1574,7 +1611,7 @@ class ChunkMap{
 					console.log("edit(sql):", edit);
 					func(new Array(...edit));
 				}
-			);
+			);*/
 		}
 	}
 	
@@ -1850,7 +1887,7 @@ class ChunkMap{
 						
 						//更新区块
 						this.updateChunkAsync(cX, cZ, {
-							breakTime: 36
+							breakTime: 16
 						});
 						if (loading < 1e-6 && finishCallback){ //完成所有
 							finishCallback();
@@ -1862,7 +1899,7 @@ class ChunkMap{
 			}
 		}
 		
-		for (let i of this.activeChunk)
+		for (const i of this.activeChunk)
 			if (
 				// (i[0] != 0 || i[1] != 0)&& //不是出生区块
 				chunks.every((value, index, arr)=>{

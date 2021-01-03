@@ -1,0 +1,44 @@
+/**
+ * String.padStart()
+ * version 1.0.1
+ */
+if (!String.prototype.padStart) {
+  String.prototype.padStart = function padStart(targetLength, padString) {
+    targetLength = targetLength >> 0; //floor if number or convert non-number to 0;
+    padString = String(typeof padString !== 'undefined' ? padString : ' ');
+    if (this.length > targetLength) {
+      return String(this);
+    } else {
+      targetLength = targetLength - this.length;
+      if (targetLength > padString.length) {
+        padString += padString.repeat(targetLength / padString.length); //append to original to ensure we are longer than needed
+      }
+      return padString.slice(0, targetLength) + String(this);
+    }
+  };
+}
+
+// 小数点前后补位
+Number.prototype.padding = function(start, end){
+	var part = String(this).split(".");
+	var symbol = "";
+	if (isNaN( Number(part[0].charAt(0)) )){
+		symbol = part[0].charAt(0);
+		part[0] = part[0].slice(1);
+	}
+	while (part[0].length+symbol.length < start)
+		part[0] = "0"+part[0];
+	part[1] = part[1] || "";
+	while (part[1].length < end)
+		part[1] += "0";
+	return symbol + part[0] + (part[1] ?"." + part[1] :"");
+}
+
+// 保留小数位数
+{
+	const round = Math.round;
+	Math.round = function (n, s){
+		if (s) return round(n*10**s)/10**s;
+		return round(n);
+	};
+}

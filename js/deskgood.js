@@ -22,7 +22,7 @@ const deskgood = {
 	},*/
 	jump_v: 5,
 	up: camera.up,
-	lookAt: {
+	look: {
 		left_right: 0,
 		top_bottom: -10,
 		/* _left_right: 0,
@@ -42,7 +42,7 @@ const deskgood = {
 			deskgood.look_update();
 		} */
 	},
-	look: {
+	lookAt: {
 		x: 1,
 		y: 0,
 		z: 0
@@ -203,44 +203,58 @@ const deskgood = {
 	}),
 	// 死亡
 	die(reason="使用命令自杀"){
-		sql.deleteTable(tableName, undefined, function(){
-			localStorage.removeItem("我的世界_seed");
-			
-			document.exitPointerLock(); //取消鼠标锁定
-			gui.close(); //隐藏gui
-			$("#help, #warn").hide(); //隐藏 遮罩、横屏提示
-			$("#die")
-				.css("display", "block")
-				.children(".resaon").html(reason);
-			$("#die").hide().fadeIn("slow");
-			
-			const bgm = $("#bgm")[0];
-			bgm.volume = 1;
-			bgm.src = "./music/凉凉.mp3";
-			bgm.play();
-			
-			console.warn("deskgood死亡");
-		});
+		DB.clearTable(TABLE.WORLD); //删表
+		DB.remove(); //删库
+		localStorage.removeItem("我的世界_seed");
+		localStorage.removeItem("我的世界_seed");
+		localStorage.removeItem("我的世界_time");
+		localStorage.removeItem("我的世界_position");
+		localStorage.removeItem("我的世界_height");
+		localStorage.removeItem("我的世界_dirt");
+		localStorage.removeItem("我的世界_type");
+		localStorage.removeItem("我的世界_treeHeight");
+		localStorage.removeItem("我的世界_leavesScale");
+		localStorage.removeItem("我的世界_openStone");
+		localStorage.removeItem("我的世界_weatherRain");
+		
+		document.exitPointerLock(); //取消鼠标锁定
+		gui.close(); //隐藏gui
+		$("#help, #warn").hide(); //隐藏 遮罩、横屏提示
+		$("#die")
+			.css("display", "block")
+			.children(".resaon").html(reason);
+		$("#die").hide().fadeIn("slow");
+		
+		const bgm = $("#bgm")[0];
+		bgm.volume = 1;
+		bgm.src = "./music/凉凉.mp3";
+		bgm.play();
+		
+		console.warn("deskgood死亡");
 	},
-	// 视角更新
+	// 旋转角&仰俯角更新
 	look_update(x,y,z){
-		if (x !== undefined || y !== undefined || z !== undefined){
-			x = x||deskgood.look.x,
-			y = y||deskgood.look.y,
-			z = z||deskgood.look.z;
+		if (x !== undefined || y !== undefined || z !== undefined){ //有不为undefined的值
+			x = x||deskgood.lookAt.x,
+			y = y||deskgood.lookAt.y,
+			z = z||deskgood.lookAt.z;
 			const v = new THREE.Vector3(x,y,z).setLength(1); //单位向量（标准化）
 			camera.lookAt(deskgood.pos.x+v.x, deskgood.pos.y+v.y, deskgood.pos.z+v.z);
-			[deskgood.look.x, deskgood.look.y, deskgood.look.z] = [v.x, v.y, v.z];
-		}else{
+			deskgood.lookAt.x = v.x,
+			deskgood.lookAt.y = v.y,
+			deskgood.lookAt.z = v.z;
+		}else{ //无参数调用
 			const x =
-					Math.cos(deskgood.lookAt.left_right/180*Math.PI)*
-					Math.cos(deskgood.lookAt.top_bottom/180*Math.PI),
+					Math.cos(deskgood.look.left_right/180*Math.PI)*
+					Math.cos(deskgood.look.top_bottom/180*Math.PI),
 				z =
-					Math.sin(deskgood.lookAt.left_right/180*Math.PI)*
-					Math.cos(deskgood.lookAt.top_bottom/180*Math.PI),
-				y = Math.sin(deskgood.lookAt.top_bottom/180*Math.PI);
+					Math.sin(deskgood.look.left_right/180*Math.PI)*
+					Math.cos(deskgood.look.top_bottom/180*Math.PI),
+				y = Math.sin(deskgood.look.top_bottom/180*Math.PI);
 			camera.lookAt(deskgood.pos.x+x, deskgood.pos.y+y, deskgood.pos.z+z);
-			[deskgood.look.x, deskgood.look.y, deskgood.look.z] = [x,y,z];
+			deskgood.lookAt.x = x,
+			deskgood.lookAt.y = y,
+			deskgood.lookAt.z = z;
 		}
 	},
 	update_round_blocks(dx=1, dy=1, dz=1){
@@ -702,8 +716,34 @@ const deskgood = {
 		x = Math.round(x),
 		y = Math.round(y),
 		z = Math.round(z); //存储必须整数
-		//SQL
-		sql.deleteData(tableName, `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, ()=>{
+		//DB
+		db.addData(TABLE.WORLD, {
+			type: 0,
+			x,
+			y,
+			z,
+			id: block.id,
+			attr
+		}, {
+			successCallback: function(){
+				let find = false;
+				db.readStep(TABLE.WORLD, {
+					index: "type",
+					range: ["only", 0],
+					dirt: "prev",
+					stepCallback: function(res){
+						if (res.x!=x || res.y!=y || res.z!=z) return;
+						if (find){
+							// console.log("DB 删除多余", res.key, res);
+							db.remove(TABLE.WORLD, res.key);
+						}else{
+							find = true;
+						}
+					}
+				});
+			}
+		});
+		/*db.deleteData(tableName, `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, ()=>{
 			sql.insertData(tableName, ["type", "x", "y", "z", "id", "attr"], [
 				0,
 				x,
@@ -712,7 +752,7 @@ const deskgood = {
 				block.id,
 				attr
 			])
-		});
+		});*/
 	},
 	
 	// 移除方块
@@ -754,8 +794,33 @@ const deskgood = {
 		x = Math.round(x),
 		y = Math.round(y),
 		z = Math.round(z); //存储必须整数
-		//SQL
-		sql.deleteData(tableName, `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
+		//DB
+		db.addData(TABLE.WORLD, {
+			type: 0,
+			x,
+			y,
+			z,
+			id: 0
+		}, {
+			successCallback: function(){
+				let find = false;
+				db.readStep(TABLE.WORLD, {
+					index: "type",
+					range: ["only", 0],
+					dirt: "prev",
+					stepCallback: function(res){
+						if (res.x!=x || res.y!=y || res.z!=z) return;
+						if (find){
+							// console.log("DB 删除多余", res.key, res);
+							db.remove(TABLE.WORLD, res.key);
+						}else{
+							find = true;
+						}
+					}
+				});
+			}
+		});
+		/*sql.deleteData(tableName, `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
 			sql.insertData(tableName, ["type", "x", "y", "z", "id"], [
 				0,
 				x,
@@ -763,7 +828,7 @@ const deskgood = {
 				z,
 				0
 			]);
-		});
+		});*/
 	}
 }
 deskgood.moveTo = deskgood.move;
@@ -774,13 +839,44 @@ deskgood.goX = x=>deskgood.go(x);
 deskgood.goY = y=>deskgood.go(0,y);
 deskgood.goZ = z=>deskgood.go(0,0,z);
 
-SQL_read(); //读取存档
-
-//初始化
+DB_read(); //读取存档
 
 
 //gui
 if (DEBUG){
+	const scene_chunk_folder = gui.__folders["场景(scene)"].__folders["区块(chunk)"];
+		scene_chunk_folder.add({
+			get x(){ return Math.round(deskgood.pos.x/100/map.size.x); },
+			set x(v){ deskgood.pos.x = v*100*map.size.x; }
+		}, "x", -16, 16, 1).listen();
+		scene_chunk_folder.add({
+			get z(){ return Math.round(deskgood.pos.z/100/map.size.z); },
+			set z(v){ deskgood.pos.z = v*100*map.size.z; }
+		}, "z", -16, 16, 1).listen();
+		scene_chunk_folder.add({
+			f(){
+				cX = Math.round(deskgood.pos.x/100/map.size.x),
+				cZ = Math.round(deskgood.pos.z/100/map.size.z);
+				map.updateChunkAsync(cX, cZ, {
+					breakTime: 16
+				});
+			}
+		}, "f").name("更新区块(update)");
+	const scene_chunk_weather_folder = gui.__folders["场景(scene)"].__folders["区块(chunk)"].__folders["天气"];
+		scene_chunk_weather_folder.add({
+			get r(){
+				cX = Math.round(deskgood.pos.x/100/map.size.x),
+				cZ = Math.round(deskgood.pos.z/100/map.size.z);
+				return (map.chunks[cX] && map.chunks[cX][cZ] && map.chunks[cX][cZ].weather && map.chunks[cX][cZ].weather.rain)||0;
+			},
+			set r(v){
+				cX = Math.round(deskgood.pos.x/100/map.size.x),
+				cZ = Math.round(deskgood.pos.z/100/map.size.z);
+				if ( map.chunks[cX] && map.chunks[cX][cZ] && map.chunks[cX][cZ].weather )
+					map.chunks[cX][cZ].weather.rain = v;
+			}
+		}, "r", 0, 0.333, 1e-6).name("降水(rain)").listen();
+	
 	const deskgood_folder = gui.addFolder("玩家/观察者(deskgood)");
 	deskgood_folder.open();
 		deskgood_folder.add(window, "stop").listen();
@@ -792,29 +888,19 @@ if (DEBUG){
 			deskgood_position_folder.add(deskgood.pos, "x", map.size[0].x*100, map.size[1].x*100, 0.01).listen();
 			deskgood_position_folder.add(deskgood.pos, "y", map.size[0].y*100, map.size[1].y*100, 0.01).listen();
 			deskgood_position_folder.add(deskgood.pos, "z", map.size[0].z*100, map.size[1].z*100, 0.01).listen();
-			const deskgood_position_zone_folder = deskgood_position_folder.addFolder("区块(Chunk)");
-			deskgood_position_zone_folder.open();
-				deskgood_position_folder.add({
-					get x(){ return Math.round(deskgood.pos.x/100/map.size.x) },
-					set x(v){ deskgood.pos.x = v*100*map.size.x }
-				}, "x", -100, 100, 1).listen();
-				deskgood_position_folder.add({
-					get z(){ return Math.round(deskgood.pos.z/100/map.size.z) },
-					set z(v){ deskgood.pos.z = v*100*map.size.z }
-				}, "z", -100, 100, 1).listen();
 		const deskgood_v_folder = deskgood_folder.addFolder("速度/(m/s)");
 			deskgood_v_folder.add(deskgood.v, "x", -10, 10, 1e-3).listen();
 			deskgood_v_folder.add(deskgood.v, "y", -100, 100, 1e-3).listen().onChange((value) => {
 				deskgood.v.y = (value/100)**3 *100;
 			});
 			deskgood_v_folder.add(deskgood.v, "z", -10, 10, 1e-3).listen();
-		const deskgood_lookAt_folder = deskgood_folder.addFolder("朝向（球坐标系）");
-			deskgood_lookAt_folder.add(deskgood.lookAt, "left_right", 0, 360).listen().name("左右（水平）");
-			deskgood_lookAt_folder.add(deskgood.lookAt, "top_bottom", -90, 90).listen().name("上下（竖直）");
-		const deskgood_look_folder = deskgood_folder.addFolder("朝向（笛卡尔坐标系）");
-			deskgood_look_folder.add(deskgood.look, "x", -1, 1, 0.01).listen().onChange(x => deskgood.look_update(x));
-			deskgood_look_folder.add(deskgood.look, "y", -1, 1, 0.01).listen().onChange(y => deskgood.look_update(undefined, y));
-			deskgood_look_folder.add(deskgood.look, "z", -1, 1, 0.01).listen().onChange(z => deskgood.look_update(undefined, undefined, z));
+		const deskgood_look_folder = deskgood_folder.addFolder("朝向（球坐标系）");
+			deskgood_look_folder.add(deskgood.look, "left_right", 0, 360).name("左右（水平）").listen().onChange( deskgood.look_update );
+			deskgood_look_folder.add(deskgood.look, "top_bottom", -90, 90).name("上下（竖直）").listen().onChange( deskgood.look_update );
+		const deskgood_lookAt_folder = deskgood_folder.addFolder("朝向（笛卡尔坐标系）");
+			deskgood_lookAt_folder.add(deskgood.lookAt, "x", -1, 1, 0.01).listen().onChange(x => deskgood.look_update(x));
+			deskgood_lookAt_folder.add(deskgood.lookAt, "y", -1, 1, 0.01).listen().onChange(y => deskgood.look_update(undefined, y));
+			deskgood_lookAt_folder.add(deskgood.lookAt, "z", -1, 1, 0.01).listen().onChange(z => deskgood.look_update(undefined, undefined, z));
 		const deskgood_up_folder = deskgood_folder.addFolder("天旋地转（小心头晕）");
 			deskgood_up_folder.add(deskgood.up, "x", -1, 1, 0.01).onChange(function(){
 				print("头晕", "<font style='font-size: 16px;'>头晕别怪我</font>", 3);
@@ -859,6 +945,73 @@ if (DEBUG){
 				deskgood_hold_things_folder.add(deskgood.hold[2] || {id:0}, "id").name("2").listen().onChange(deskgood.hold.update);
 				deskgood_hold_things_folder.add(deskgood.hold[3] || {id:0}, "id").name("3").listen().onChange(deskgood.hold.update);
 }
+
+
+/*
+* 卡住检测
+*/
+setInterval(()=>{
+	const warn = [];
+	if (map.get(deskgood.pos.x/100,
+			deskgood.pos.y/100,
+			deskgood.pos.z/100) &&
+		!map.get(deskgood.pos.x/100,
+			deskgood.pos.y/100,
+			deskgood.pos.z/100).get("attr", "block", "through")
+	){ //头被卡住
+		warn.push("头被卡住？");
+		if (
+			!map.get(deskgood.pos.x/100,
+				deskgood.pos.y/100,
+				deskgood.pos.z/100).get("attr", "block", "transparent") //不透明
+		) print("窒息提示", "你的头竟然卡到方块里了，想窒息吗？看你怎么出来", 1, "#f68");
+		/* try{
+			plus.nativeUI.toast(
+				"<font size=\"16\">想窒息吗？还往头上放方块，看你怎么出来！</font>",
+				{
+					type:"richtext",
+					verticalAlign: "top",
+					richTextStyle:{align:"center"}
+				}
+			);
+		}catch(err){} */
+		/*setTimeout(function(){
+			try{ plus.nativeUI.closeToast(); }catch(err){}
+		},1);*/
+	}
+	if (map.get(deskgood.pos.x/100,
+			deskgood.pos.y/100-1,
+			deskgood.pos.z/100) &&
+		!map.get(deskgood.pos.x/100,
+			deskgood.pos.y/100-1,
+			deskgood.pos.z/100).get("attr", "block", "through")
+	){ //脚被卡住
+		warn.push("脚被卡住？");
+	}
+	
+	if (warn.length && !stop){
+		if (!map.get(deskgood.pos.x/100,
+				deskgood.pos.y/100,
+				deskgood.pos.z/100
+			) &&
+			!map.get(deskgood.pos.x/100,
+				deskgood.pos.y/100+1,
+				deskgood.pos.z/100
+			) &&
+			+time.getTime()-last_jump >= 1000
+		){
+			last_jump = +time.getTime();
+			deskgood.v.y += deskgood.jump_v*rnd_error(); //自动跳跃
+		}
+		
+		if (warn[0] & warn[1]){
+			console.warn(warn[0], warn[1]);
+		}else{
+			console.warn(warn[0]);
+		}
+	}
+}, 36);
+
 
 /*
 * 天堂、地狱

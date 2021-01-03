@@ -658,7 +658,7 @@ Copyright © 2020~2021 by wzh
 		<script src="./js/modules/simplex-noise.js"></script>
 		<script src="./js/modules/dat.gui.min.js"></script>
 		<script src="./js/modules/stats.min.js"></script>
-		<script src="./js/SQL.js"></script>
+		<script src="./js/modules/js+.js"></script>
 		
 	</head>
 	
@@ -916,7 +916,7 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 			if (!time.stop) //false
 				time.stopTime();
 			$("#help").css("display", "inline-block");
-			SQL_save();
+			DB_save();
 		}
 	};
 	
@@ -1031,49 +1031,6 @@ function rnd_error(){
 	return Math.random()*0.2+0.9;
 }
 
-/**
- * String.padStart()
- * version 1.0.1
- */
-if (!String.prototype.padStart) {
-  String.prototype.padStart = function padStart(targetLength, padString) {
-    targetLength = targetLength >> 0; //floor if number or convert non-number to 0;
-    padString = String(typeof padString !== 'undefined' ? padString : ' ');
-    if (this.length > targetLength) {
-      return String(this);
-    } else {
-      targetLength = targetLength - this.length;
-      if (targetLength > padString.length) {
-        padString += padString.repeat(targetLength / padString.length); //append to original to ensure we are longer than needed
-      }
-      return padString.slice(0, targetLength) + String(this);
-    }
-  };
-}
-// 小数点后补位
-Number.prototype.changeDecimalBuZero = function(padEnd, padStart){
-	var f_x = parseFloat(this);
-	if (isNaN(f_x)) {
-		return 0;
-	}
-	var s_x = this.toString();
-	var pos_decimal = s_x.indexOf('.');
-	if (pos_decimal < 0) {
-		pos_decimal = s_x.length;
-		s_x += '.';
-	}
-	while (s_x.length <= pos_decimal + padEnd){
-		s_x += '0';
-	}
-	return s_x.padStart(padStart, "0");
-}
-// 保存小数位数
-let round = Math.round;
-Math.round = function (n, s){
-	if (s) return round(n*10**s)/10**s;
-	return round(n);
-};
-
 
 function record(canvas, time, opt={}){
 	const {fps=30, audioBitsPerSecond=128000, videoBitsPerSecond=8500000} = opt,
@@ -1107,7 +1064,11 @@ function record(canvas, time, opt={}){
 		<!-- <script src="./js/sendMessage.js"></script> -->
 		<script src="./js/playBGM.js"></script>
 		
-		<script src="./js/sql_init.js"></script>
+		<!--<script src="./js/SQL.js"></script>
+		<script src="./js/sql_init.js"></script>-->
+		<script src="./js/IndexDB.js"></script>
+		<script src="./js/indexDB_init.js"></script>
+		
 		<script src="./js/dat.gui.js"></script>
 		<script src="./js/stats.js"></script>
 		

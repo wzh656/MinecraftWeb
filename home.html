@@ -549,7 +549,6 @@ if (localStorage.getItem("我的世界_seed") !== null){
 	getGeolocationPosition();
 }
 
-
 //新的世界
 $(".init > button:eq(0)")[0].onclick = function(){
 	console.log("new_world", $(".init").css("display"), $(".new_world").css("display"));
@@ -576,6 +575,13 @@ $(".init > button:eq(0)")[0].onclick = function(){
 	
 	console.log("new_world", "animate start", $(".init").css("display"), $(".new_world").css("display"));
 };
+//已有存档
+if (localStorage.getItem("我的世界_seed") !== null){
+	$(".init > button:eq(0)")[0].innerHTML = "开始游戏<p>START PLAYING</p>"
+	$(".init > button:eq(0)")[0].onclick = ()=>open();
+}else{ //无存档
+	getGeolocationPosition();
+}
 
 //新的世界 取消
 $(".new_world > button:eq(0)").click(function(){
@@ -589,19 +595,19 @@ $(".new_world > button:eq(0)").click(function(){
 			left: "0%",
 			opacity: 1
 		}, 1000);
-	$(".new_world")
+	$(".about")
 		.css("top", "0%")
 		.css("opacity", "1")
 		.animate({
 			top: (Math.round(Math.random())?"-":"") + "100%", //正负100%
 			opacity: 0
 		}, 1000, ()=>{
-			$(".new_world").css("display", "none");
-			console.log("init", "animate end", $(".init").css("display"), $(".new_world").css("display"));
+			$(".about").css("display", "none");
+			console.log("init", "animate end", $(".init").css("display"), $(".about").css("display"));
 		});
 	$(".more").removeAttr("open");
 	
-	console.log("init", "animate start", $(".init").css("display"), $(".new_world").css("display"));
+	console.log("init", "animate start", $(".init").css("display"), $(".about").css("display"));
 });
 
 //关于
