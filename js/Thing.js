@@ -179,7 +179,7 @@ class Block extends Thing{
 		/* if (material)
 			return this.set("block", "material", material.map( v => v.clone() )); */
 		
-		let textures = this.get("block", "texture"),
+		const textures = this.get("block", "texture"),
 			transparent = this.get("attr", "block", "transparent") || false;
 		this.set("block", "material", [
 			new THREE.MeshLambertMaterial({ map:textures[0], transparent }),
@@ -212,9 +212,9 @@ class Block extends Thing{
 	//mesh
 	makeMesh( geometry=this.get("block", "geometry") ){
 		if (!this.have("block", "material")){
-			let template = this.get("block", "material");
+			const template = this.get("block", "material");
 			this.block.material = [];
-			for (let i in template)
+			for (const i in template)
 				this.block.material[i] = template[i].clone();
 		}
 		if (geometry){

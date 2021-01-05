@@ -140,7 +140,7 @@ class ChunkMap{
 	
 	
 	//获取方块（不可编辑）
-	get(x, y, z){  // 没有方块:null,不在范围:undefined,加载中:false
+	get(x, y, z){
 		x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 		
 		return this.map[x] && this.map[x][y] && this.map[x][y][z];
@@ -195,7 +195,7 @@ class ChunkMap{
 		block.block.mesh.position.z = pos.z*100;
 		
 		this.set(pos.x, pos.y, pos.z, block);
-		scene.add(block.block.mesh); //网格模型添加到场景中
+		scene.add( block.block.mesh ); //网格模型添加到场景中
 		block.block.addTo = true;
 	}
 	
@@ -261,7 +261,7 @@ class ChunkMap{
 	
 	
 	//更新方块
-	update(x, y, z, b){
+	update(x, y, z){
 		x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 		
 		let thisBlock = this.get(x,y,z);
@@ -283,7 +283,7 @@ class ChunkMap{
 				!( this.get(x, y, z-1) && !this.get(x, y, z-1).get("attr", "block", "transparent")) || noTransparent
 				// 没有方块 或 有方块非透明 则显示  或  自身透明 也显示
 			];
-			if (b) console.warn(thisBlock,visibleValue)
+			
 			if (visibleValue.some(v => v) && this.initedChunk.some(v => v[0]==cX && v[1]==cZ)){ //不可隐藏（有面true） and 在加载区块内
 				this.addID(get.id, {
 					x,
@@ -307,7 +307,6 @@ class ChunkMap{
 				!( this.get(x, y, z-1) && !this.get(x, y, z-1).get("attr", "block", "transparent")) || noTransparent
 				// 没有方块 或 有方块非透明 则显示  或  自身透明 也显示
 			];
-			if (b) console.warn(thisBlock,visibleValue)
 		}
 		
 		/*if (thisBlock === undefined){ //未加载
@@ -412,15 +411,18 @@ class ChunkMap{
 	}
 	//更新区块内所有方块（异步）
 	updateChunkAsync(x, z, opt={}){
-		console.log("updateChunkAsync", x, z)
 		let {
-			finishCallback,
-			progressCallback,
-			breakTime, // 最大执行时间/ms
-			mostSpeed, // 最大速度/次
-			breakPoint
-		} = opt;
-		// console.log("update", x, z, finishCallback, progressCallback)
+				finishCallback,
+				progressCallback,
+				breakTime, // 最大执行时间/ms
+				mostSpeed, // 最大速度/次
+				breakPoint={}
+			} = opt,
+			{
+				dx = this.size[0].x,
+				dz = this.size[0].z
+			} = breakPoint;
+		console.log("update", x, z, dx, dz)
 		
 		const ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
@@ -431,23 +433,25 @@ class ChunkMap{
 			let t0 = new Date(),
 				num = 0;
 			
-			let dx;
+			/*let dx;
 			if (breakPoint){
-				dx = breakPoint.dx==undefined? this.size[0].x: breakPoint.dx;
+				dx = breakPoint.dx===undefined? this.size[0].x: breakPoint.dx;
 				delete breakPoint.dx;
 			}else{
 				dx = this.size[0].x;
-			}
-			for (; dx<=this.size[1].x; dx++){
+			}*/
+			for (let i=dx; i<=this.size[1].x; i++){
 				
-				let dz;
+				/*let dz;
 				if (breakPoint){
-					dz = breakPoint.dz==undefined? this.size[0].z: breakPoint.dz;
+					dz = breakPoint.dz===undefined? this.size[0].z: breakPoint.dz;
 					delete breakPoint.dz;
 				}else{
 					dz = this.size[0].z;
-				}
-				for (; dz<=this.size[1].z; dz++){
+				}*/
+				for (let j=dz; j<=this.size[1].z; j++){
+					for (let dy=this.size[0].y; dy<=this.size[1].y; dy++)
+						this.update(ox+i, dy, oz+j);
 					
 					if (new Date()-t0 > breakTime) //超时
 						return setTimeout(()=>{
@@ -455,23 +459,20 @@ class ChunkMap{
 								finishCallback,
 								progressCallback,
 								breakTime,
-								breakPoint: {dx, dz}
+								breakPoint: {dx:i, dz:j+1}
 							});
 						},0);
-					for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
-						this.update(ox+dx, dy, oz+dz);
-					}
-					
 				}
+				dz = this.size[0].z;
 				if (progressCallback)
-					progressCallback((dx-this.size[0].x)/(this.size[1].x-this.size[0].x));
+					progressCallback( (i-this.size[0].x) / (this.size[1].x-this.size[0].x) );
 				if (++num >= mostSpeed) //超数
 					return setTimeout(()=>{
 						this.updateChunkAsync(x, z, {
 							finishCallback,
 							progressCallback,
 							breakTime,
-							breakPoint: {dx:dx+1, dz:0}
+							breakPoint: {dx:i+1}
 						});
 					},0);
 			}
@@ -1023,51 +1024,65 @@ class ChunkMap{
 		const ox = Math.round(x/map.size.x)*map.size.x,
 			oz = Math.round(z/map.size.z)*map.size.z,
 			dx = x-ox,
-			dz = z-oz;
+			dz = z-oz,
+			arr = [
+				[1,0,0],
+				[-1,0,0],
+				[0,1,0],
+				[0,-1,0],
+				[0,0,1],
+				[0,0,-1]
+			];
 		
 		for (let y=this.size[0].y; y<=this.size[1].y; y++){
 			if (columns[dx][dz][y].id){ //有方块
 				
 				const visibleValue = [];
 				let needLoad = false;
-				for (const [ddx,ddy,ddz] of [
-					[1,0,0],
-					[-1,0,0],
-					[0,1,0],
-					[0,-1,0],
-					[0,0,1],
-					[0,0,-1]
-				]){
+				for (const [ddx,ddy,ddz] of arr){
 					const px=dx+ddx, py=y+ddy, pz=dz+ddz;
-					//if (dx==4 && y==2 && dz==4) console.log({px,py,pz}, columns[px][pz][py], columns[px] && columns[px][pz] && columns[px][pz][py] && columns[px][pz][py].id)
-					if (py < map.size[0].y){ //最下面有方块
+					//if (ddy && y == 0) console.warn([...visibleValue])
+					if (
+						py < map.size[0].y ||
+						px < map.size[0].x || px > map.size[1].x ||
+						pz < map.size[0].z || px > map.size[1].z
+					){ //最底层 或 超出边缘 则不显示
 						visibleValue.push(false);
+						
+						//if (y == 0) console.log(px, py, pz, false, "up")
 					}else if ( !(columns[px] && columns[px][pz] && columns[px][pz][py] && columns[px][pz][py].id) ){ //无方块 显示
 						needLoad = true;
 						visibleValue.push(true);
+						
+						//if (y == 0) console.log(px, py, pz, true, "no Block")
 					}else if ( columns[px][pz][py].attr && columns[px][pz][py].attr.block ){ //有属性
-						const visible = columns[px][pz][py].attr.block.transparent
-						needLoad = visible || needLoad;
-						visibleValue.push( needLoad ); //方块透明 显示
+						const visible = columns[px][pz][py].attr.block.transparent;
+						needLoad = needLoad || visible;
+						visibleValue.push( visible ); //方块透明 显示
+						
+						//if (y == 0) console.log(px, py, pz, visible, columns[px][pz][py], "self")
 					}else{ //继承模板
 						const visible = TEMPLATES[columns[px][pz][py].id].attr.block.transparent;
-						needLoad = visible || needLoad;
+						needLoad = needLoad || visible;
 						visibleValue.push( visible ); //方块透明 显示
+						
+						//if (y == 0) console.log(px, py, pz, visible, columns[px][pz][py].id, "parent")
 					}
 				}
 				
 				if ( needLoad ){ //有面需显示
-					const thisBlock = new Block(columns[dx][dz][y]);
+					//console.log(y, needLoad, visibleValue)
+					const thisBlock = new Block(columns[dx][dz][y]).makeMesh(),
+						material = thisBlock.block.material;
+					if ( !thisBlock.get("attr", "block", "noTransparent") ) //允许透明
+						for (let i=material.length-1; i>=0; i--)
+							material[i].visible = visibleValue[i];
 					
 					this.add(
-						thisBlock.makeMesh(),
+						thisBlock,
 						{x, y, z}
 					);
 					
-					const material = thisBlock.block.material;
-					if ( !thisBlock.get("attr", "block", "noTransparent") ) //允许透明
-						for (const i in material)
-							material[i].visible = visibleValue[i];
 					// x,z,y
 					/*const noTransparent =  thisBlock.get("attr", "block", "noTransparent"),
 						visibleValue = [
@@ -1131,17 +1146,21 @@ class ChunkMap{
 	}
 	//加载区块（异步）
 	loadChunkAsync(x, z, opt={}){
+		//console.log("loadChunk", x, z, opt.dir, opt.breakPoint)
 		let {
-			finishCallback,
-			progressCallback,
-			breakTime=66, // 最大执行时间/ms
-			mostSpeed=2, // 最大速度/次
-			dir="", //方向
-			breakPoint,
-			columns
-		} = opt;
+				finishCallback,
+				progressCallback,
+				breakTime=66, // 最大执行时间/ms
+				mostSpeed=2, // 最大速度/次
+				dir="", //方向
+				breakPoint={}
+			} = opt,
+			{
+				dx = dir=="x-"? this.size[1].x: this.size[0].x,
+				dz = dir=="z-"? this.size[1].z: this.size[0].z
+			} = breakPoint;
 		
-		[x, z] = [Math.round(x), Math.round(z)]; //规范化
+		x=Math.round(x), z=Math.round(z); //规范化
 		const ox = x*this.size.x,
 			oz = z*this.size.z, //区块中心坐标
 			t = this.seed; //临时变量
@@ -1151,13 +1170,7 @@ class ChunkMap{
 		})) //每个都不一样（不存在）
 			this.initedChunk.push([x,z]);
 		
-		const func = (edit)=>{
-			//保存edit
-			this.chunks[x][z].edit = edit;
-			// console.log("save edit", x, z, edit)
-			
-			if (!columns)
-				columns = this.perGetChunk(x, z, edit)
+		const func = (edit, columns)=>{
 			
 			switch (dir.substr(0,2)){
 				case "x-":
@@ -1165,64 +1178,63 @@ class ChunkMap{
 						let t0 = +new Date(),
 							num = 0;
 						
-						let dx;
+						/*let dx;
 						if (breakPoint){
 							dx = breakPoint.dx==undefined? this.size[1].x: breakPoint.dx;
 							delete breakPoint.dx;
 						}else{
 							dx = this.size[1].x;
-						}
-						for (; dx>=this.size[0].x; dx--){
+						}*/
+						for (let i=dx; i>=this.size[0].x; i--){
 							
-							let dz;
+							/*let dz;
 							if (breakPoint){
 								dz = breakPoint.dz==undefined? this.size[0].z: breakPoint.dz;
 								delete breakPoint.dz;
 							}else{
 								dz = this.size[0].z;
-							}
-							for (; dz<=this.size[1].z; dz++){
-								if (new Date-t0 > breakTime) //超时
-									return setTimeout(()=>{
+							}*/
+							for (let j=dz; j<=this.size[1].z; j++){
+								this.loadColumn(ox+i, oz+j, columns, edit);
+								if (new Date()-t0 > breakTime) //超时
+									return setTimeout(()=>
 										this.loadChunkAsync(x, z, {
 											finishCallback,
 											progressCallback,
 											breakTime,
 											mostSpeed,
 											dir,
-											breakPoint: {dx, dz, edit},
-											columns
-										});
-									},0);
-								this.loadColumn(ox+dx, oz+dz, columns, edit);
+											breakPoint: {dx:i, dz:j+1, columns, edit},
+										}), 0);
 							}
+							dz = this.size[0].z;
 							
-							setTimeout(()=>{ //更新
+							/*setTimeout(()=>{ //更新
 								this.updateColumn(ox+dx, oz+this.size[0].z-1);
 								this.updateColumn(ox+dx, oz+this.size[1].z+1);
 								for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
 									this.updateColumn(ox+dx+1, dz);
-							}, 0);
+							}, 0);*/
 							if (progressCallback)
-								progressCallback( (dx-this.size[1].x)/(this.size[0].x-this.size[1].x) );
+								progressCallback( (i-this.size[1].x)/(this.size[0].x-this.size[1].x) );
+							
 							if (++num >= mostSpeed) //超数
-								return setTimeout(()=>{
+								return setTimeout(()=>
 									this.loadChunkAsync(x, z, {
 										finishCallback,
 										progressCallback,
 										breakTime,
 										mostSpeed,
 										dir,
-										breakPoint: {dx:dx-1, edit}
-									});
-								},0);
+										breakPoint: {dx:i-1, columns, edit}
+									}), 0);
 						}
-						setTimeout(()=>{ //更新
+						/*setTimeout(()=>{ //更新
 							for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
 								this.updateColumn(ox+this.size[0].x, oz+dz);
 								this.updateColumn(ox+this.size[0].x-1, oz+dz);
 							}
-						},0);
+						},0);*/
 						
 						if (this.activeChunk.every(function(value, index, arr){ //添加
 							return value[0] != x || value[1] != z;
@@ -1265,64 +1277,64 @@ class ChunkMap{
 						let t0 = +new Date(),
 							num = 0;
 						
-						let dz;
+						/*let dz;
 						if (breakPoint){
 							dz = breakPoint.dz==undefined? this.size[0].z: breakPoint.dz;
 							delete breakPoint.dz;
 						}else{
 							dz = this.size[0].z;
-						}
-						for (; dz<=this.size[1].z; dz++){
+						}*/
+						for (let j=dz; j<=this.size[1].z; j++){
 							
-							let dx;
+							/*let dx;
 							if (breakPoint){
 								dx = breakPoint.dx==undefined? this.size[0].x: breakPoint.dx;
 								delete breakPoint.dx;
 							}else{
 								dx = this.size[0].x;
-							}
-							for (; dx<=this.size[1].z; dx++){
-								if (new Date-t0 > breakTime) //超时
-									return setTimeout(()=>{
+							}*/
+							for (let i=dx; i<=this.size[1].x; i++){
+								this.loadColumn(ox+i, oz+j, columns, edit);
+								
+								if (new Date()-t0 > breakTime) //超时
+									return setTimeout(()=>
 										this.loadChunkAsync(x, z, {
 											finishCallback,
 											progressCallback,
 											breakTime,
 											mostSpeed,
 											dir,
-											breakPoint: {dx, dz, edit},
-											columns
-										});
-									},0);
-								this.loadColumn(ox+dx, oz+dz, columns, edit);
+											breakPoint: {dx:i+1, dz:j, columns, edit},
+										}), 0);
 							}
+							dx = this.size[0].x;
 							
-							setTimeout(()=>{ //更新
+							/*setTimeout(()=>{ //更新
 								this.updateColumn(ox+this.size[0].x-1, oz+dz);
 								this.updateColumn(ox+this.size[1].x+1, oz+dz);
 								for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
 									this.updateColumn(dx, oz+dz-1);
-							}, 0);
+							}, 0);*/
 							if (progressCallback)
-								progressCallback( (dz-this.size[0].z)/(this.size[0].z-this.size[1].z) );
+								progressCallback( (j-this.size[0].z)/(this.size[0].z-this.size[1].z) );
+							
 							if (++num >= mostSpeed) //超数
-								return setTimeout(()=>{
+								return setTimeout(()=>
 									this.loadChunkAsync(x, z, {
 										finishCallback,
 										progressCallback,
 										breakTime,
 										mostSpeed,
 										dir,
-										breakPoint: {dz:dz+1, edit}
-									});
-								},0);
+										breakPoint: {dz:j+1, columns, edit}
+									}), 0);
 						}
-						setTimeout(()=>{ //更新
+						/*setTimeout(()=>{ //更新
 							for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
 								this.updateColumn(ox+dx, oz+this.size[1].z);
 								this.updateColumn(ox+dx, oz+this.size[1].z+1);
 							}
-						},0);
+						},0);*/
 						
 						if (this.activeChunk.every(function(value, index, arr){ //添加
 							return value[0] != x || value[1] != z;
@@ -1373,64 +1385,64 @@ class ChunkMap{
 						let t0 = +new Date(),
 							num = 0;
 						
-						let dz;
+						/*let dz;
 						if (breakPoint){
 							dz = breakPoint.dz==undefined? this.size[1].z: breakPoint.dz;
 							delete breakPoint.dz;
 						}else{
 							dz = this.size[1].z;
-						}
-						for (; dz>=this.size[0].z; dz--){
+						}*/
+						for (let j=dz; j>=this.size[0].z; j--){
 							
-							let dx;
+							/*let dx;
 							if (breakPoint){
 								dx = breakPoint.dx==undefined? this.size[0].x: breakPoint.dx;
 								delete breakPoint.dx;
 							}else{
 								dx = this.size[0].x;
-							}
-							for (; dx<=this.size[1].z; dx++){
-								if (new Date-t0 > breakTime) //超时
-									return setTimeout(()=>{
-										return this.loadChunkAsync(x, z, {
+							}*/
+							for (let i=dx; i<=this.size[1].z; i++){
+								this.loadColumn(ox+i, oz+j, columns, edit);
+								
+								if (new Date()-t0 > breakTime) //超时
+									return setTimeout(()=>
+										this.loadChunkAsync(x, z, {
 											finishCallback,
 											progressCallback,
 											breakTime,
 											mostSpeed,
 											dir,
-											breakPoint: {dx, dz, edit},
-											columns
-										});
-									},0);
-								this.loadColumn(ox+dx, oz+dz, columns, edit);
+											breakPoint: {dx:i+1, dz:j, columns, edit},
+										}), 0);
 							}
+							dx = this.size[0].x;
 							
-							setTimeout(()=>{ //更新
+							/*setTimeout(()=>{ //更新
 								this.updateColumn(ox+this.size[0].x-1, oz+dz);
 								this.updateColumn(ox+this.size[1].x+1, oz+dz);
 								for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
 									this.updateColumn(dx, oz+dz-1);
-							}, 0);
+							}, 0);*/
 							if (progressCallback)
-								progressCallback( (dz-this.size[1].dz)/(this.size[0].z-this.size[1].z) );
+								progressCallback( (j-this.size[1].dz)/(this.size[0].z-this.size[1].z) );
+							
 							if (++num >= mostSpeed) //超数
-								return setTimeout(()=>{
+								return setTimeout(()=>
 									this.loadChunkAsync(x, z, {
 										finishCallback,
 										progressCallback,
 										breakTime,
 										mostSpeed,
 										dir,
-										breakPoint: {dz:dz-1, edit}
-									});
-								},0);
+										breakPoint: {dz:j-1, columns, edit}
+									}), 0);
 						}
-						setTimeout(()=>{ //更新
+						/*setTimeout(()=>{ //更新
 							for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
 								this.updateColumn(ox+dx, oz+this.size[1].z);
 								this.updateColumn(ox+dx, oz+this.size[1].z+1);
 							}
-						},0);
+						},0);*/
 						
 						if (this.activeChunk.every(function(value, index, arr){ //添加
 							return value[0] != x || value[1] != z;
@@ -1481,64 +1493,64 @@ class ChunkMap{
 						let t0 = +new Date(),
 							num = 0;
 						
-						let dx;
+						/*let dx;
 						if (breakPoint){
 							dx = breakPoint.dx==undefined? this.size[0].x: breakPoint.dx;
 							delete breakPoint.dx;
 						}else{
 							dx = this.size[0].x;
-						}
-						for (; dx<=this.size[1].x; dx++){
+						}*/
+						for (let i=dx; i<=this.size[1].x; i++){
 							
-							let dz;
+							/*let dz;
 							if (breakPoint){
 								dz = breakPoint.dz==undefined? this.size[0].z: breakPoint.dz;
 								delete breakPoint.dz;
 							}else{
 								dz = this.size[0].z;
-							}
-							for (; dz<=this.size[1].z; dz++){
-								if (new Date-t0 > breakTime) //超时
-									return setTimeout(()=>{
+							}*/
+							for (let j=dz; dz<=this.size[1].z; j++){
+								this.loadColumn(ox+i, oz+j, columns, edit);
+								
+								if (new Date()-t0 > breakTime) //超时
+									return setTimeout(()=>
 										this.loadChunkAsync(x, z, {
 											finishCallback,
 											progressCallback,
 											breakTime,
 											mostSpeed,
 											dir,
-											breakPoint: {dx, dz, edit},
-											columns
-										});
-									},0);
-								this.loadColumn(ox+dx, oz+dz, columns, edit);
+											breakPoint: {dx:i, dz:j+1, columns, edit},
+										}), 0);
 							}
+							dz = this.size[0].z;
 							
-							setTimeout(()=>{ //更新
+							/*setTimeout(()=>{ //更新
 								this.updateColumn(ox+dx, oz+this.size[0].z-1);
 								this.updateColumn(ox+dx, oz+this.size[1].z+1);
 								for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
 									this.updateColumn(ox+dx+1, dz);
-							}, 0);
+							}, 0);*/
 							if (progressCallback)
-								progressCallback( (dx-this.size[0].x)/(this.size[1].x-this.size[0].x) );
+								progressCallback( (i-this.size[0].x)/(this.size[1].x-this.size[0].x) );
+							
 							if (++num >= mostSpeed) //超数
-								return setTimeout(()=>{
+								return setTimeout(()=>
 									this.loadChunkAsync(x, z, {
 										finishCallback,
 										progressCallback,
 										breakTime,
 										mostSpeed,
 										dir,
-										breakPoint: {dx:dx+1, edit}
-									});
-								},0);
+										breakPoint: {dx:i+1, columns, edit}
+									}), 0);
 						}
-						setTimeout(()=>{ //更新
+						/*setTimeout(()=>{ //更新
 							for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
 								this.updateColumn(ox+this.size[0].x, oz+dz);
 								this.updateColumn(ox+this.size[0].x-1, oz+dz);
 							}
-						},0);
+						},0);*/
 						
 						if (this.activeChunk.every(function(value, index, arr){ //添加
 							return value[0] != x || value[1] != z;
@@ -1585,8 +1597,8 @@ class ChunkMap{
 				
 			}
 		};
-		if (breakPoint && breakPoint.edit){
-			func(breakPoint.edit);
+		if (breakPoint.edit && breakPoint.columns){
+			func( breakPoint.edit, breakPoint.columns );
 		}else{
 			const edit = [];
 			db.readStep(TABLE.WORLD, {
@@ -1600,7 +1612,8 @@ class ChunkMap{
 				},
 				successCallback: ()=>{
 					console.log("edit(DB):", edit);
-					func(edit);
+					this.chunks[x][z].edit = edit; //保存edit
+					func( edit, this.perGetChunk(x, z, edit) );
 				}
 			});
 			/*sql.selectData(tableName, ["x", "y", "z", "id", "attr"],

@@ -4,8 +4,8 @@ if (localStorage.getItem("我的世界_seed") === null){
 }
 
 const map = new ChunkMap([
-	{x: -16, y: 0, z: -16},
-	{x: 16, y: 256, z: 16}
+	{x: -8, y: 0, z: -8},
+	{x: 8, y: 256, z: 8}
 ],{
 	seed: localStorage.getItem("我的世界_seed"),
 	height: JSON.parse(localStorage.getItem("我的世界_height")) || {

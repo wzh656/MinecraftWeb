@@ -3,12 +3,12 @@
 */
 let TEXTURES;
 (async function(){
-	let keys = Object.keys(TEMPLATES);
+	const keys = Object.keys(TEMPLATES);
 	TEXTURES = Img.grid(await Img.get("./img/textures/textures.png"), 16, 16);
-	for (let i of keys.slice(1)){ //除去空气
-		let block = TEMPLATES[i];
-		for (let j in block.block.face){
-			let face = block.block.face[j];
+	for (const i of keys.slice(1)){ //除去空气
+		const block = TEMPLATES[i];
+		for (const j in block.block.face){
+			const face = block.block.face[j];
 			block.setTexture(
 				new THREE.TextureLoader().load(
 					Img.scale(
