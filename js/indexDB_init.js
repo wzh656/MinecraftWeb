@@ -43,9 +43,9 @@ function DB_read(){
 			deskgood.v.y = res.v.y,
 			deskgood.v.z = res.v.z;
 			
-			deskgood.look.left_right = res.look.left_right,
-			deskgood.look.top_bottom = res.look.top_bottom;
-			deskgood.look_update();
+			deskgood.look.x = res.look.x,
+			deskgood.look.y = res.look.y;
+			//deskgood.look_update();
 			
 			for (const [i, v] of Object.entries(res.hold))
 				if (v){ //{id, attr}
@@ -86,8 +86,8 @@ function DB_save(){
 			z: deskgood.v.z
 		},
 		look: {
-			left_right: deskgood.look.left_right,
-			top_bottom: deskgood.look.top_bottom
+			x: deskgood.look.x,
+			y: deskgood.look.y
 		},
 		hold: [],
 		choice: deskgood.choice,

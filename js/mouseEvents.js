@@ -46,24 +46,23 @@ document.addEventListener("mousemove", function (e){
 	
 	if (Math.sqrt(x**2 + y**2) > 15) return; //消除取消锁定前自动移动
 	
-	deskgood.look.left_right += dx/$("#game")[0].offsetWidth*360*deskgood.sensitivity;
-	deskgood.look.top_bottom -= dy/$("#game")[0].offsetHeight*360*deskgood.sensitivity;
+	deskgood.look.y -= dx/$("#game")[0].offsetWidth*360*deskgood.sensitivity,
+	deskgood.look.x -= dy/$("#game")[0].offsetHeight*360*deskgood.sensitivity;
 	
-	if (deskgood.look.left_right > 360)
-		while (deskgood.look.left_right > 360)
-			deskgood.look.left_right -= 360;
-	if (deskgood.look.left_right < 0)
-		while (deskgood.look.left_right < 0)
-			deskgood.look.left_right += 360;
+	deskgood.look.x = THREE.Math.clamp(deskgood.look.x, -89.9, 89.9);
+	/*if (deskgood.look.x > 89.9)
+		deskgood.look.x = 89.9;
+	if (deskgood.look.x < -89.9)
+		deskgood.look.x = -89.9;*/
 	
-	if (deskgood.look.top_bottom > 89.9)
-		deskgood.look.top_bottom = 89.9;
-	if (deskgood.look.top_bottom < -89.9)
-		deskgood.look.top_bottom = -89.9;
+	if (deskgood.look.y > 360)
+		deskgood.look.y %= 360;
+	if (deskgood.look.y < 0)
+		deskgood.look.y = deskgood.look.y%360 + 360;
 	
-	deskgood.look_update(); //刷新
+	//deskgood.look_update(); //刷新
 	
-	for (let i in mouse_choice.obj){
+	for (const i in mouse_choice.obj){
 		mouse_choice.obj[i].material.dispose();
 		mouse_choice.obj[i].geometry.dispose(); //清除内存
 		scene.remove(mouse_choice.obj[i]); //删除
@@ -71,7 +70,7 @@ document.addEventListener("mousemove", function (e){
 	}
 	
 	try{
-		const get = ray3D({},deskgood.lookAt)[0];
+		const get = ray2D()[0];
 		mouse_choice.x = get.object.position.x;
 		mouse_choice.y = get.object.position.y;
 		mouse_choice.z = get.object.position.z;
@@ -136,7 +135,7 @@ $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind�
 	if (stop && stop != "bag")
 		return;
 	//Chorme
-	let wheel = event.originalEvent.wheelDelta || event.originalEvent.detail; //判断浏览器IE,谷歌滚轮事件 Firefox滚轮事件
+	const wheel = event.originalEvent.wheelDelta || event.originalEvent.detail; //判断浏览器IE,谷歌滚轮事件 Firefox滚轮事件
 	if (wheel){
 		if (wheel > 0) { //当滑轮向上滚动时
 			console.log("上滚轮");
@@ -205,11 +204,10 @@ document.addEventListener("mousedown", function (e){
 		return;
 	
 	if (e.button == 0){ //左键（删除）
-		let click = ray2D();
-		for (let i in click){
-			if (click[i].faceIndex){
-				if (click[i].object instanceof THREE.Mesh){
-					let {x,y,z} = click[i].object.position; //单位 px=cm
+		for (const obj of ray2D()){
+			if (obj.faceIndex){
+				if (obj.object instanceof THREE.Mesh){
+					let {x,y,z} = obj.object.position; //单位 px=cm
 					
 					x = x/100, y = y/100, z = z/100; //单位 m
 					
@@ -238,10 +236,9 @@ document.addEventListener("mousedown", function (e){
 			}
 		}
 	}else if (e.button == 2){ //右键（放置）
-		let click = ray2D();
-		for (let i in click){
-			if (click[i].object instanceof THREE.Mesh){
-				let {x,y,z} = click[i].object.position; //单位 px=cm
+		for (const obj of ray2D()){
+			if (obj.object instanceof THREE.Mesh){
+				let {x,y,z} = obj.object.position; //单位 px=cm
 				
 				x = x/100, y = y/100, z = z/100; //单位 m
 				if (
@@ -249,7 +246,7 @@ document.addEventListener("mousedown", function (e){
 					eval(map.get(x, y, z).get("attr", "block", "onRightMouseDown")) === false
 				) return;
 				
-				switch (click[i].faceIndex){
+				switch (obj.faceIndex){
 					case 0:
 					case 1:
 						x++;
@@ -275,7 +272,7 @@ document.addEventListener("mousedown", function (e){
 						z--;
 						break;
 					default:
-						throw ["faceIndex wrong:", click[i].faceIndex];
+						throw ["faceIndex wrong:", obj.faceIndex];
 				}
 				
 				if (Math.sqrt(
@@ -312,11 +309,10 @@ document.addEventListener("mousedown", function (e){
 		return;
 	
 	if (e.button == 0){ //左键(onLeftMouseUp)
-		let click = ray2D();
-		for (let i in click){
-			if (click[i].faceIndex){
-				if (click[i].object instanceof THREE.Mesh){
-					let {x,y,z} = click[i].object.position; //单位 px=cm
+		for (const obj of ray2D()){
+			if (obj.faceIndex){
+				if (obj.object instanceof THREE.Mesh){
+					let {x,y,z} = obj.object.position; //单位 px=cm
 					
 					x = x/100, y = y/100, z = z/100; //单位 m
 					
@@ -330,14 +326,13 @@ document.addEventListener("mousedown", function (e){
 			}
 		}
 	}else if (e.button == 2){ //右键(onRightMouseDown)
-		let click = ray2D();
-		for (let i in click){
-			if (click[i].object instanceof THREE.Mesh){
-				let {x,y,z} = click[i].object.position; //单位 px=cm
+		for (const obj of ray2D()){
+			if (obj.object instanceof THREE.Mesh){
+				let {x,y,z} = obj.object.position; //单位 px=cm
 				
 				x = x/100, y = y/100, z = z/100; //单位 m
 				
-				switch (click[i].faceIndex){
+				switch (obj.faceIndex){
 					case 0:
 					case 1:
 						x++;
@@ -363,7 +358,7 @@ document.addEventListener("mousedown", function (e){
 						z--;
 						break;
 					default:
-						throw ["faceIndex wrong:", click[i].faceIndex];
+						throw ["faceIndex wrong:", obj.faceIndex];
 				}
 				
 				if (

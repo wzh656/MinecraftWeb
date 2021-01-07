@@ -1,7 +1,7 @@
 /**
 * Touch
 */
-let touch_control = {
+const touch_control = {
 	x0: null,
 	y0: null,
 	x: null,
@@ -13,11 +13,13 @@ $("#control").on("touchstart", function(e){
 	if (stop)
 		return;
 	
-	let x = e.originalEvent.targetTouches[0].clientX,
+	const x = e.originalEvent.targetTouches[0].clientX,
 		y = e.originalEvent.targetTouches[0].clientY;
 	//console.log("touchstart(control):", x, y);
 	
-	[touch_control.x0, touch_control.y0, touch_control.t0] = [x, y, +time.getTime()];
+	touch_control.x0 = x,
+	touch_control.y0 = y,
+	touch_control.t0 = +time.getTime();
 	
 	touch_control.loop = setInterval(function(){
 		if (touch_control.x0 !== null &
@@ -25,25 +27,25 @@ $("#control").on("touchstart", function(e){
 			touch_control.x !== null &
 			touch_control.y !== null
 		){
-			let t = +time.getTime()-touch_control.t0;
+			const t = +time.getTime()-touch_control.t0;
 			touch_control.t0 = +time.getTime();
-			let dx = touch_control.x-touch_control.x0,
+			
+			const dx = touch_control.x-touch_control.x0,
 				dy = touch_control.y-touch_control.y0;
-			let r = (
-				dx>0? Math.atan(dy/dx)+Math.PI/2:
-				dx<0? Math.atan(dy/dx)-Math.PI/2:
-					dy>0? 0:
-					dy<0? 180:
-					0
-			);
+			
+			const θ = new THREE.Vector2(dx, dy).angle();
+			
 			let l = Math.sqrt(dx**2 + dy**2);
 			l = l>100? 0.26*t: l*t/866;
-			const x = Math.cos( deskgood.look.left_right/180*Math.PI+r )*l,
-				z = Math.sin( deskgood.look.left_right/180*Math.PI+r )*l;
+			
+			const look = new THREE.Vector2(0, l)
+				.rotateAround( new THREE.Vector2(0,0), -THREE.Math.degToRad(deskgood.look.y)-Math.PI/2+θ );
+			/*const gX = Math.cos( deskgood.look.y/180*Math.PI+r )*l,
+				gZ = Math.sin( deskgood.look.y/180*Math.PI+r )*l;*/
 			
 			//console.log("touch control to move:", x, z);
 			
-			deskgood.go(x, 0, z);
+			deskgood.go(look.x, 0, look.y);
 			
 			/*x += x>0? 10: x<0? -10: 0;
 			z += z>0? 10: z<0? -10: 0;
@@ -152,16 +154,17 @@ $("#control").on("touchmove", function(e){
 	if (stop)
 		return;
 	
-	let x = e.originalEvent.targetTouches[0].clientX,
+	const x = e.originalEvent.targetTouches[0].clientX,
 		y = e.originalEvent.targetTouches[0].clientY;
 	//console.log("touchmove(control):", x, y);
 	
-	[touch_control.x, touch_control.y] = [x, y];
+	touch_control.x = x,
+	touch_control.y = y;
 	
 	return false;
 });
 $("#control").on("touchend", function(e){
-	let x = e.originalEvent.changedTouches[0].clientX,
+	const x = e.originalEvent.changedTouches[0].clientX,
 		y = e.originalEvent.changedTouches[0].clientY;
 	//console.log("touchend(control):", x, y);
 	
@@ -171,7 +174,7 @@ $("#control").on("touchend", function(e){
 	return false;
 });
 $("#control").on("touchcancel", function(e){
-	let x = e.originalEvent.changedTouches[0].clientX,
+	const x = e.originalEvent.changedTouches[0].clientX,
 		y = e.originalEvent.changedTouches[0].clientY;
 	//console.log("touchcancel(control):", x, y);
 	
@@ -203,7 +206,7 @@ $("#jump").on("touchstart", function(){
 });
 
 
-let touch_screen = {
+const touch_screen = {
 	t: null,
 	x: null,
 	y: null,
@@ -230,11 +233,10 @@ $("#game").on("touchstart", function (e){
 				(touch_screen.y0 - touch_screen.y) **2
 			) < 36
 		){ //误差36px
-			let click = ray2D(true, x, y);
-			for (let i in click){
-				if (click[i].faceIndex){
-					if (click[i].object instanceof THREE.Mesh){
-						let {x,y,z} = click[i].object.position; //单位 px=cm
+			for (const obj of ray2D(true, x, y) ){
+				if (obj.faceIndex){
+					if (obj.object instanceof THREE.Mesh){
+						let {x,y,z} = obj.object.position; //单位 px=cm
 						
 						x = x/100, y = y/100, z = z/100; //单位 m
 						
@@ -286,22 +288,21 @@ $("#game").on("touchmove", function (e){
 	//[x0, y0] = [x, y];
 	
 	//console.log("moved(screen):", dx, dy);
-	deskgood.look.left_right += dx/$("#game")[0].offsetWidth*90*deskgood.sensitivity;
-	deskgood.look.top_bottom -= dy/$("#game")[0].offsetHeight*90*deskgood.sensitivity;
+	deskgood.look.y -= dx/$("#game")[0].offsetWidth*90*deskgood.sensitivity;
+	deskgood.look.x -= dy/$("#game")[0].offsetHeight*90*deskgood.sensitivity;
 	
-	if (deskgood.look.left_right > 360)
-		while (deskgood.look.left_right > 360)
-			deskgood.look.left_right -= 360;
-	if (deskgood.look.left_right < 0)
-		while (deskgood.look.left_right < 0)
-			deskgood.look.left_right += 360;
+	deskgood.look.x = THREE.Math.clamp(deskgood.look.x, -89.9, 89.9);
+	/*if (deskgood.look.x > 89.9)
+		deskgood.look.x = 89.9;
+	if (deskgood.look.x < -89.9)
+		deskgood.look.x = -89.9;*/
 	
-	if (deskgood.look.top_bottom > 89.9)
-		deskgood.look.top_bottom = 89.9;
-	if (deskgood.look.top_bottom < -89.9)
-		deskgood.look.top_bottom = -89.9;
+	if (deskgood.look.y > 360)
+		deskgood.look.y %= 360;
+	if (deskgood.look.y < 0)
+		deskgood.look.y = deskgood.look.y%360 + 360;
 	
-	deskgood.look_update(); //刷新俯仰角
+	//deskgood.look_update(); //刷新俯仰角
 	
 	if (Math.sqrt( dx**2 + dy**2 ) >= 16){ //误差16px
 		touch_screen.x0 = -666;
@@ -327,10 +328,9 @@ $("#game").on("touchend", function (e){
 			(touch_screen.y0 - touch_screen.y) **2)
 			< 36
 		){ //误差36px
-			let click = ray2D(true, x, y);
-			for (let i in click){
-				if (click[i].object instanceof THREE.Mesh){
-					let {x,y,z} = click[i].object.position; //单位 px=cm
+			for (const obj of ray2D(true, x, y) ){
+				if (obj.object instanceof THREE.Mesh){
+					let {x,y,z} = obj.object.position; //单位 px=cm
 					
 					x = x/100, y = y/100, z = z/100; //单位 m
 					
@@ -339,7 +339,7 @@ $("#game").on("touchend", function (e){
 						eval(map.get(x, y, z).get("attr", "block", "onShortTouch")) === false
 					) return;
 					
-					switch (click[i].faceIndex){
+					switch (obj.faceIndex){
 						case 0:
 						case 1:
 							x++;
@@ -365,7 +365,7 @@ $("#game").on("touchend", function (e){
 							z--;
 							break;
 						default:
-							throw ["faceIndex wrong:", click[i].faceIndex];
+							throw ["faceIndex wrong:", obj.faceIndex];
 					}
 					
 					if (Math.sqrt(

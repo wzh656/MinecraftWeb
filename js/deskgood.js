@@ -23,30 +23,16 @@ const deskgood = {
 	jump_v: 5,
 	up: camera.up,
 	look: {
-		left_right: 0,
-		top_bottom: -10,
-		/* _left_right: 0,
-		_top_bottom: -10,
-		get left_right(){
-			return this._left_right;
-		},
-		set left_right(value){
-			this._left_right = value;
-			deskgood.look_update();
-		},
-		get top_bottom(){
-			return this._top_bottom;
-		},
-		set top_bottom(value){
-			this._top_bottom = value;
-			deskgood.look_update();
-		} */
+		get x(){ return THREE.Math.radToDeg(camera.rotation.x); },
+		set x(v){ camera.rotation.x = THREE.Math.degToRad(v); },
+		
+		get y(){ return THREE.Math.radToDeg(camera.rotation.y); },
+		set y(v){ camera.rotation.y = THREE.Math.degToRad(v); },
+		
+		get z(){ return THREE.Math.radToDeg(camera.rotation.z); },
+		set z(v){ camera.rotation.z = THREE.Math.degToRad(v); }
 	},
-	lookAt: {
-		x: 1,
-		y: 0,
-		z: 0
-	},
+	VR: false,
 	sensitivity: device? 2.6: 1, //灵敏度：手机2，电脑1
 	handLength: 360, //手长（谐音手残）
 	choice: 0,
@@ -232,7 +218,7 @@ const deskgood = {
 		
 		console.warn("deskgood死亡");
 	},
-	// 旋转角&仰俯角更新
+	/*// 旋转角&仰俯角更新
 	look_update(x,y,z){
 		if (x !== undefined || y !== undefined || z !== undefined){ //有不为undefined的值
 			x = x||deskgood.lookAt.x,
@@ -245,18 +231,18 @@ const deskgood = {
 			deskgood.lookAt.z = v.z;
 		}else{ //无参数调用
 			const x =
-					Math.cos(deskgood.look.left_right/180*Math.PI)*
-					Math.cos(deskgood.look.top_bottom/180*Math.PI),
+					Math.cos(deskgood.look.y/180*Math.PI)*
+					Math.cos(deskgood.look.x/180*Math.PI),
 				z =
-					Math.sin(deskgood.look.left_right/180*Math.PI)*
-					Math.cos(deskgood.look.top_bottom/180*Math.PI),
-				y = Math.sin(deskgood.look.top_bottom/180*Math.PI);
+					Math.sin(deskgood.look.y/180*Math.PI)*
+					Math.cos(deskgood.look.x/180*Math.PI),
+				y = Math.sin(deskgood.look.x/180*Math.PI);
 			camera.lookAt(deskgood.pos.x+x, deskgood.pos.y+y, deskgood.pos.z+z);
 			deskgood.lookAt.x = x,
 			deskgood.lookAt.y = y,
 			deskgood.lookAt.z = z;
 		}
-	},
+	},*/
 	update_round_blocks(dx=1, dy=1, dz=1){
 		for (const i of body_blocks)
 			if (i)
@@ -839,6 +825,17 @@ deskgood.goX = x=>deskgood.go(x);
 deskgood.goY = y=>deskgood.go(0,y);
 deskgood.goZ = z=>deskgood.go(0,0,z);
 
+
+/*window.addEventListener("deviceorientation", function(e){
+	/* e.alpha：左右旋转（度）
+	e.beta：前后旋转（度）
+	e.gamma：扭转设备（度） *//*
+	deskgood.look.y = -e.alpha;
+	deskgood.look.x = e.gamma-90;
+	console.log(e, deskgood.look);
+	deskgood.look_update();
+}); */
+
 DB_read(); //读取存档
 
 
@@ -894,13 +891,11 @@ if (DEBUG){
 				deskgood.v.y = (value/100)**3 *100;
 			});
 			deskgood_v_folder.add(deskgood.v, "z", -10, 10, 1e-3).listen();
-		const deskgood_look_folder = deskgood_folder.addFolder("朝向（球坐标系）");
-			deskgood_look_folder.add(deskgood.look, "left_right", 0, 360).name("左右（水平）").listen().onChange( deskgood.look_update );
-			deskgood_look_folder.add(deskgood.look, "top_bottom", -90, 90).name("上下（竖直）").listen().onChange( deskgood.look_update );
-		const deskgood_lookAt_folder = deskgood_folder.addFolder("朝向（笛卡尔坐标系）");
-			deskgood_lookAt_folder.add(deskgood.lookAt, "x", -1, 1, 0.01).listen().onChange(x => deskgood.look_update(x));
-			deskgood_lookAt_folder.add(deskgood.lookAt, "y", -1, 1, 0.01).listen().onChange(y => deskgood.look_update(undefined, y));
-			deskgood_lookAt_folder.add(deskgood.lookAt, "z", -1, 1, 0.01).listen().onChange(z => deskgood.look_update(undefined, undefined, z));
+		const deskgood_look_folder = deskgood_folder.addFolder("朝向(rotation)");
+			deskgood_look_folder.add(deskgood.look, "x", -90, 90, 0.1).listen();
+			deskgood_look_folder.add(deskgood.look, "y", 0, 360, 0.1).listen();
+			deskgood_look_folder.add(deskgood.look, "z", -180, 180, 0.1).listen();
+			deskgood_look_folder.add(deskgood, "VR").name("VR模式").listen();
 		const deskgood_up_folder = deskgood_folder.addFolder("天旋地转（小心头晕）");
 			deskgood_up_folder.add(deskgood.up, "x", -1, 1, 0.01).onChange(function(){
 				print("头晕", "<font style='font-size: 16px;'>头晕别怪我</font>", 3);

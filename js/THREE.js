@@ -141,9 +141,9 @@ const camera = new THREE.PerspectiveCamera(45, WIDTH/HEIGHT, 1, 1000*100);
 //								 view_angle, aspect, near, far(1km)
 camera.position.set(0, ( Math.floor(sNoise.height(map.seed.noise, map.seed.h, 0, 0))+2 )*100, 0); //设置相机位置
 camera.lookAt(scene.position); //设置相机方向(指向的场景对象)
-/*setTimeout(function(){
-	console.info(camera);
-},1000);*/
+
+// 陀螺仪控制相机
+const controls = new THREE.DeviceOrientationControls(camera);
 
 /**
 * 创建渲染器对象
@@ -406,9 +406,12 @@ function render(){
 	T0 = time.getTime(); //把本次时间赋值给上次时间
 	requestAnimationFrame(render);
 	renderer.render(scene, camera); //执行渲染操作
-	stats.update();
 	
-	if (!stop){
+	if (deskgood.VR)
+		controls.update(); //陀螺仪更新
+	stats.update(); //state.js更新
+	
+	if (!stop){ //重力加速度
 		const ρ = 1.25*rnd_error(), //空气密度/(kg/m³)
 			c = 0.4*rnd_error(), //空气阻力系数
 			s = [0.5, 0.2, 0.5], //面积/m²
