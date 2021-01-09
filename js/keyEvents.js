@@ -110,11 +110,14 @@ document.addEventListener("keydown", function (e){
 		
 		return false;
 	}
-	if (e.keyCode == 87 | e.keyCode == 38){
-		if (keydown.double_run.length == 0){
-			keydown.double_run[0] = +time.getTime();
-		}else if (keydown.double_run.length == 2 && +time.getTime()-keydown.double_run[1] < 500){ //连按
-			keydown.double_run = true;
+	
+	if (e.keyCode == 87 | e.keyCode == 38){ //W
+		if (keydown.double_run.length == 0){ //第一次按下W
+			keydown.double_run[0] = +new Date();
+		}else if (keydown.double_run.length == 2 &&
+			new Date()-keydown.double_run[1] < 500
+		){ //松开后0.5s内再次按下W
+			keydown.double_run = true; //疾跑
 			console.log("run");
 		}
 	}
@@ -126,9 +129,11 @@ document.addEventListener("keydown", function (e){
 document.addEventListener("keyup", function (e){
 	keydown.key.delete(e.keyCode);
 	
-	if (e.keyCode == 87 | e.keyCode == 38){
-		if (keydown.double_run.length == 1 && +time.getTime()-keydown.double_run[0] < 500){
-			keydown.double_run[1] = +time.getTime();
+	if (e.keyCode == 87 | e.keyCode == 38){ //W
+		if (keydown.double_run.length == 1 &&
+			new Date()-keydown.double_run[0] < 500
+		){ //0.5s内松开第一次按键
+			keydown.double_run[1] = +new Date();
 		}else{
 			keydown.double_run = [];
 		}
@@ -152,7 +157,7 @@ setInterval(function(){
 		return;
 	}
 	
-	let x=0, y=0, z=0;
+	let x = y = z = 0; //单位：m/s
 	
 	/* if (keydown.key.size)
 		console.log("keydown:", keydown.key); */
@@ -164,23 +169,31 @@ setInterval(function(){
 	
 	if (keydown.key.has(87) | keydown.key.has(38)){ //前
 		console.log("front:", keydown.key);
-		x += Math.cos( (deskgood.look.y+90) /180*Math.PI) *(keydown.double_run==true?3:1) *rnd_error();
-		z += Math.sin( (deskgood.look.y+90) /180*Math.PI) *(keydown.double_run==true?3:1) *rnd_error();
+		const vec = new THREE.Vector2(0, (keydown.double_run==true?3:1))
+			.rotateAround( new Three.Vector2(0,0), deskgood.look.y );
+		x += vec.x*rnd_error(),
+		z += vec.y*rnd_error();
 	}
 	if (keydown.key.has(83) | keydown.key.has(40)){ //后
 		console.log("behind:", keydown.key);
-		x += Math.cos( (deskgood.look.y-90) /180*Math.PI) *rnd_error();
-		z += Math.sin( (deskgood.look.y-90) /180*Math.PI) *rnd_error();
+		const vec = new THREE.Vector2(0, -(keydown.double_run==true?3:1))
+			.rotateAround( new Three.Vector2(0,0), deskgood.look.y );
+		x += vec.x*rnd_error(),
+		z += vec.y*rnd_error();
 	}
 	if (keydown.key.has(65) | keydown.key.has(37)){ //左
 		console.log("left:", keydown.key);
-		x += Math.cos( (deskgood.look.y+0) /180*Math.PI) *rnd_error();
-		z += Math.sin( (deskgood.look.y+0) /180*Math.PI) *rnd_error();
+		const vec = new THREE.Vector2((keydown.double_run==true?3:1), 0)
+			.rotateAround( new Three.Vector2(0,0), deskgood.look.y );
+		x += vec.x*rnd_error(),
+		z += vec.y*rnd_error();
 	}
 	if (keydown.key.has(68) | keydown.key.has(39)){ //右
 		console.log("right:", keydown.key);
-		x += Math.cos( (deskgood.look.y+180) /180*Math.PI) *rnd_error();
-		z += Math.sin( (deskgood.look.y+180) /180*Math.PI) *rnd_error();
+		const vec = new THREE.Vector2(-(keydown.double_run==true?3:1), 0)
+			.rotateAround( new Three.Vector2(0,0), deskgood.look.y );
+		x += vec.x*rnd_error(),
+		z += vec.y*rnd_error();
 	}
 	if (keydown.key.has(32)){ //上
 		console.log("up:", keydown.key);
@@ -244,17 +257,18 @@ setInterval(function(){
 	deskgood.pos.x += x*rnd_error();
 	deskgood.pos.z += z*rnd_error(); */
 	
-	if (x && z)
-		console.log("go",x,z);
+	/*if (x && z)
+		console.log("go",x,z)*/
 	
-	if (x || y || z)
+	if (x || z)
 		deskgood.go(x*t*0.1, 0, z*t*0.1); // 1m/s = 100px/s = 0.1px/ms
 	
-	if (map.get(deskgood.pos.x/100,
+	if (y &&
+		map.get(deskgood.pos.x/100,
 			deskgood.pos.y/100-2,
 			deskgood.pos.z/100)
 	){ //脚下有方块
-		if (time.getTime()-last_jump >= 1000 & y != 0){
+		if (time.getTime()-last_jump >= 1000*rnd_error()){
 			console.log("jump");
 			deskgood.v.y += y * deskgood.jump_v*rnd_error();
 			last_jump = +time.getTime();

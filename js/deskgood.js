@@ -5,7 +5,7 @@ const delay_id = {
 	update_block: null,
 	perloadChunk: null
 }, body_blocks = [];
-const deskgood = {
+const deskgood = { //桌子好
 	v: {
 		x: 0,
 		y: 0,
@@ -26,15 +26,16 @@ const deskgood = {
 		get x(){ return THREE.Math.radToDeg(camera.rotation.x); },
 		set x(v){ camera.rotation.x = THREE.Math.degToRad(v); },
 		
-		get y(){ return THREE.Math.radToDeg(camera.rotation.y); },
-		set y(v){ camera.rotation.y = THREE.Math.degToRad(v); },
+		// y修正：0° X+, 90° Z+, 180° X-, 270° Z-
+		get y(){ return -THREE.Math.radToDeg(camera.rotation.y)+270; },
+		set y(v){ camera.rotation.y = THREE.Math.degToRad(-v+270); },
 		
 		get z(){ return THREE.Math.radToDeg(camera.rotation.z); },
 		set z(v){ camera.rotation.z = THREE.Math.degToRad(v); }
 	},
 	VR: false,
 	sensitivity: device? 2.6: 1, //灵敏度：手机2，电脑1
-	handLength: 360, //手长（谐音手残）
+	handLength: 360, //手长（谐音360°全方位手残）
 	choice: 0,
 	hold: new ThingGroup($("#tools")[0], {
 		fixedLength: 4,
@@ -201,7 +202,7 @@ const deskgood = {
 		localStorage.removeItem("我的世界_treeHeight");
 		localStorage.removeItem("我的世界_leavesScale");
 		localStorage.removeItem("我的世界_openStone");
-		localStorage.removeItem("我的世界_weatherRain");
+		localStorage.removeItem("我的世界_weatherRain"); //删存储
 		
 		document.exitPointerLock(); //取消鼠标锁定
 		gui.close(); //隐藏gui
@@ -281,7 +282,7 @@ const deskgood = {
 		
 		if (
 			map.get(x/100, y/100, z/100) !== undefined && //不能移动到未加载的方块
-			map.initedChunk.some((item, index, value)=>{
+			map.initedChunk.some((item)=>{
 				return item[0] == Math.round(x/100/map.size.x) &&
 					item[1] == Math.round(z/100/map.size.z);
 			}) //含有（已加载和加载中的区块）
@@ -298,25 +299,22 @@ const deskgood = {
 				const changed_x_z = deskgood.pos.x != x || deskgood.pos.z != z, //改变了x|z坐标
 					changed = changed_x_z || deskgood.pos.y != y;
 				
-				[deskgood.pos.x, deskgood.pos.y, deskgood.pos.z] = [x,y,z];
+				deskgood.pos.x = x,
+				deskgood.pos.y = y,
+				deskgood.pos.z = z;
 				
 				//perloadChunk
-				if (changed_x_z){
-					if (!delay_id.perloadChunk)
-						delay_id.perloadChunk =  setTimeout(()=>{
-							map.perloadChunk();
-							delay_id.perloadChunk = null;
-						}, 100);
-				}
+				if (changed_x_z && !delay_id.perloadChunk)
+					delay_id.perloadChunk =  setTimeout(()=>{
+						map.perloadChunk();
+						delay_id.perloadChunk = null;
+					}, 100);
 				//更新周围方块
-				if (changed){
-					if (!delay_id.update_block){
-						delay_id.update_block = setTimeout(()=>{
-							deskgood.update_round_blocks();
-							delay_id.update_block = null;
-						}, 36);
-					}
-				}
+				if (changed && !delay_id.update_block)
+					delay_id.update_block = setTimeout(()=>{
+						deskgood.update_round_blocks();
+						delay_id.update_block = null;
+					}, 36);
 			/* }else{
 				deskgood.v.y = 0;
 				throw "";
@@ -674,7 +672,9 @@ const deskgood = {
 		
 		console.log("deskgood.place", {x,y,z}, block.id, block.attr)
 		
-		map.addID(block.id, {x,y,z}, TEMPLATES);
+		map.addID(block.id, {x,y,z}, TEMPLATES, {
+			attr: block.attr
+		});
 		
 		const attr = `'${JSON.stringify(map.get(x, y, z).attr).slice(1,-1)}'`,
 			cX = Math.round(x/map.size.x),
@@ -759,9 +759,7 @@ const deskgood = {
 		const cX = Math.round(x/map.size.x),
 			cZ = Math.round(z/map.size.z);
 		map.chunks[cX][cZ].edit = map.chunks[cX][cZ].edit.filter(v =>
-			v.x != x &&
-			v.y != y &&
-			v.z != z
+			v.x != x && v.y != y && v.z != z
 		); //删除重复
 		/*for (const [i, item] of Object.entries(map.chunks[cX][cZ].edit) )
 			if (
@@ -895,7 +893,7 @@ if (DEBUG){
 			deskgood_look_folder.add(deskgood.look, "x", -90, 90, 0.1).listen();
 			deskgood_look_folder.add(deskgood.look, "y", 0, 360, 0.1).listen();
 			deskgood_look_folder.add(deskgood.look, "z", -180, 180, 0.1).listen();
-			deskgood_look_folder.add(deskgood, "VR").name("VR模式").listen();
+			deskgood_look_folder.add(deskgood, "VR").name("VR模式").onChange(v =>{ if (!v) deskgood.look.z=0; });
 		const deskgood_up_folder = deskgood_folder.addFolder("天旋地转（小心头晕）");
 			deskgood_up_folder.add(deskgood.up, "x", -1, 1, 0.01).onChange(function(){
 				print("头晕", "<font style='font-size: 16px;'>头晕别怪我</font>", 3);

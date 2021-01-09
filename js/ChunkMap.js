@@ -168,58 +168,58 @@ class ChunkMap{
 	}
 	
 	//添加方块
-	add(block, pos, type=true){
+	add(block, {x,y,z}, type=true){
 		// let {type=true} = opt;
-		pos.x=Math.round(pos.x), pos.y=Math.round(pos.y), pos.z=Math.round(pos.z); //规范化
+		x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 		
-		// if (this.get(pos.x, pos.y, pos.z) === undefined) return;
-		if ( this.get(pos.x, pos.y, pos.z) ){ //有方块
+		// if (this.get(x, y, z) === undefined) return;
+		if ( this.get(x, y, z) ){ //有方块
 			if (type){ //强制替换
-				for (const i of this.map[pos.x][pos.y][pos.z].block.mesh.material)
+				for (const i of this.map[x][y][z].block.mesh.material)
 					i.dispose();
-				this.map[pos.x][pos.y][pos.z].block.mesh.geometry.dispose(); //清除内存
-				scene.remove( this.map[pos.x][pos.y][pos.z].block.mesh );
-				// this.map[pos.x][pos.y][pos.z] = null;
-				delete this.map[pos.x][pos.y][pos.z];
-				/*if (this.map[pos.x][pos.y].every(v => !v))
-					delete this.map[pos.x][pos.y];
-				if (this.map[pos.x].every(v => !v))
-					delete this.map[pos.x];*/
+				this.map[x][y][z].block.mesh.geometry.dispose(); //清除内存
+				scene.remove( this.map[x][y][z].block.mesh );
+				// this.map[x][y][z] = null;
+				delete this.map[x][y][z];
+				/*if (this.map[x][y].every(v => !v))
+					delete this.map[x][y];
+				if (this.map[x].every(v => !v))
+					delete this.map[x];*/
 			}else{ //不替换
 				return;
 			}
 		}
 		
-		block.block.mesh.position.x = pos.x*100;
-		block.block.mesh.position.y = pos.y*100;
-		block.block.mesh.position.z = pos.z*100;
+		block.block.mesh.position.x = x*100;
+		block.block.mesh.position.y = y*100;
+		block.block.mesh.position.z = z*100;
 		
-		this.set(pos.x, pos.y, pos.z, block);
+		this.set(x, y, z, block);
 		scene.add( block.block.mesh ); //网格模型添加到场景中
 		block.block.addTo = true;
 	}
 	
 	//根据 模板和ID 添加方块
-	addID(id, pos, template, opt={}){
+	addID(id, {x,y,z}, template, opt={}){
 		const {type=true, attr={}} = opt;
 		/* if (typeof type != "boolean"){
 			[type, attr] = [undefined, type];
 		} */
 		// if (!attr.block) attr.block = {};
 		if (id == 0){ //添加空气
-			pos.x=Math.round(pos.x), pos.y=Math.round(pos.y), pos.z=Math.round(pos.z); //规范化
-			if ( this.get(pos.x, pos.y, pos.z) ){ //有方块（强制移除）
-				for (const i of this.map[pos.x][pos.y][pos.z].block.mesh.material)
+			x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
+			if ( this.get(x, y, z) ){ //有方块（强制移除）
+				for (const i of this.map[x][y][z].block.mesh.material)
 					i.dispose();
-				this.map[pos.x][pos.y][pos.z].block.mesh.geometry.dispose(); //清除内存
-				scene.remove(this.map[pos.x][pos.y][pos.z].block.mesh);
+				this.map[x][y][z].block.mesh.geometry.dispose(); //清除内存
+				scene.remove(this.map[x][y][z].block.mesh);
 			}
-			// this.map[pos.x][pos.y][pos.z] = null; //空气
-			this.set(pos.x, pos.y, pos.z, null);
-			/* if (this.map[pos.x][pos.y].every(v => !v))
-				delete this.map[pos.x][pos.y];
-			if (this.map[pos.x].every(v => !v))
-				delete this.map[pos.x]; */
+			// this.map[x][y][z] = null; //空气
+			this.set(x, y, z, null);
+			/* if (this.map[x][y].every(v => !v))
+				delete this.map[x][y];
+			if (this.map[x].every(v => !v))
+				delete this.map[x]; */
 			
 			return;
 		}
@@ -230,11 +230,7 @@ class ChunkMap{
 		}).makeMesh();
 		this.add(
 			block,
-			{
-				x: pos.x,
-				y: pos.y,
-				z: pos.z,
-			},
+			{x, y, z},
 			type
 		); //以模板建立
 	}
@@ -284,7 +280,7 @@ class ChunkMap{
 				// 没有方块 或 有方块非透明 则显示  或  自身透明 也显示
 			];
 			
-			if (visibleValue.some(v => v) && this.initedChunk.some(v => v[0]==cX && v[1]==cZ)){ //不可隐藏（有面true） and 在加载区块内
+			if (visibleValue.some(v => v) && this.initedChunk.some(v => v[0]==cX && v[1]==cZ)){ //不可隐藏（有面true） 且 在加载区块内
 				this.addID(get.id, {
 					x,
 					y,
@@ -292,11 +288,11 @@ class ChunkMap{
 				}, TEMPLATES, {
 					attr: get.attr
 				});
-				thisBlock = this.get(x,y,z);
+				thisBlock = this.get(x,y,z); //加载后的this方块
 			}
-			if (!thisBlock) //undefined（无需加载） or null（加载为空气）
+			if (!thisBlock) //undefined（无需加载） 或 null（加载为空气）
 				return;
-		}else{
+		}else{ //已加载
 			const noTransparent =  thisBlock.get("attr", "block", "noTransparent");
 			visibleValue = [
 				!( this.get(x+1, y, z) && !this.get(x+1, y, z).get("attr", "block", "transparent")) || noTransparent,

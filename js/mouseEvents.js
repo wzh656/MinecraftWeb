@@ -46,7 +46,7 @@ document.addEventListener("mousemove", function (e){
 	
 	if (Math.sqrt(x**2 + y**2) > 15) return; //消除取消锁定前自动移动
 	
-	deskgood.look.y -= dx/$("#game")[0].offsetWidth*360*deskgood.sensitivity,
+	deskgood.look.y += dx/$("#game")[0].offsetWidth*360*deskgood.sensitivity,
 	deskgood.look.x -= dy/$("#game")[0].offsetHeight*360*deskgood.sensitivity;
 	
 	deskgood.look.x = THREE.Math.clamp(deskgood.look.x, -89.9, 89.9);
@@ -205,34 +205,35 @@ document.addEventListener("mousedown", function (e){
 	
 	if (e.button == 0){ //左键（删除）
 		for (const obj of ray2D()){
-			if (obj.faceIndex){
-				if (obj.object instanceof THREE.Mesh){
-					let {x,y,z} = obj.object.position; //单位 px=cm
-					
-					x = x/100, y = y/100, z = z/100; //单位 m
-					
-					if (
-						map.get(x, y, z) &&
-						eval(map.get(x, y, z).get("attr", "block", "onLeftMouseDown")) === false
-					) return;
-					
-					if (Math.sqrt(
-						(x*100 - deskgood.pos.x) **2+
-						(y*100 - deskgood.pos.y) **2+
-						(z*100 - deskgood.pos.z) **2
-					) >= deskgood.handLength) return; //距离>=手长
-					
-					let free = !deskgood.hold[deskgood.choice]? deskgood.choice: deskgood.hold.indexOf(null);
-					if (free == -1){
-						console.warn("not free!")
-						return print("拿不下方块", "两只手拿4m³方块已经够多了，反正我是拿不下了", 3);
-					}
-					deskgood.hold.addOne(new Block(map.get(x, y, z)), free); //放在手中
-					
-					deskgood.remove( {x,y,z} ); //删除方块
-					
-					break;//跳出 寻找有效放置的 循环
+			if (obj.object instanceof THREE.Mesh){
+				let {x,y,z} = obj.object.position; //单位 px=cm
+				
+				x = x/100, y = y/100, z = z/100; //单位 m
+				
+				if ( map.get(x, y, z) &&
+					eval(map.get(x, y, z).get("attr", "block", "onLeftMouseDown")) === false
+				) return;
+				
+				if ( Math.sqrt(
+					(x*100 - deskgood.pos.x) **2+
+					(y*100 - deskgood.pos.y) **2+
+					(z*100 - deskgood.pos.z) **2
+				) >= deskgood.handLength) return; //距离>=手长
+				
+				const free = !deskgood.hold[deskgood.choice]? deskgood.choice: deskgood.hold.indexOf(null);
+				if (free == -1){
+					console.warn("not free!")
+					return print("拿不下方块", "两只手拿4m³方块已经够多了，反正我是拿不下了", 3);
 				}
+				const block = map.get(x, y, z);
+				deskgood.hold.addOne(new Block({
+					id: block.id,
+					attr: block.attr
+				}), free); //放在手中
+				
+				deskgood.remove( {x,y,z} ); //删除方块
+				
+				break;//跳出 寻找有效放置的 循环
 			}
 		}
 	}else if (e.button == 2){ //右键（放置）

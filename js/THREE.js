@@ -407,7 +407,7 @@ function render(){
 	requestAnimationFrame(render);
 	renderer.render(scene, camera); //执行渲染操作
 	
-	if (deskgood.VR)
+	if (deskgood.VR && !stop)
 		controls.update(); //陀螺仪更新
 	stats.update(); //state.js更新
 	

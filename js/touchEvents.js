@@ -1,5 +1,5 @@
 /**
-* Touch
+* Touch Control
 */
 const touch_control = {
 	x0: null,
@@ -39,13 +39,16 @@ $("#control").on("touchstart", function(e){
 			l = l>100? 0.26*t: l*t/866;
 			
 			const look = new THREE.Vector2(0, l)
-				.rotateAround( new THREE.Vector2(0,0), -THREE.Math.degToRad(deskgood.look.y)-Math.PI/2+θ );
+				.rotateAround(
+					new THREE.Vector2(0,0),
+					THREE.Math.degToRad(deskgood.look.y)+θ
+				);
 			/*const gX = Math.cos( deskgood.look.y/180*Math.PI+r )*l,
 				gZ = Math.sin( deskgood.look.y/180*Math.PI+r )*l;*/
 			
 			//console.log("touch control to move:", x, z);
 			
-			deskgood.go(look.x, 0, look.y);
+			deskgood.go(look.x*rnd_error(), 0, look.y*rnd_error());
 			
 			/*x += x>0? 10: x<0? -10: 0;
 			z += z>0? 10: z<0? -10: 0;
@@ -185,6 +188,9 @@ $("#control").on("touchcancel", function(e){
 });
 
 
+/**
+* Touch Jump
+*/
 $("#jump").on("touchstart", function(){
 	if (stop)
 		return;
@@ -206,6 +212,9 @@ $("#jump").on("touchstart", function(){
 });
 
 
+/**
+* Touch Screen
+*/
 const touch_screen = {
 	t: null,
 	x: null,
@@ -234,34 +243,35 @@ $("#game").on("touchstart", function (e){
 			) < 36
 		){ //误差36px
 			for (const obj of ray2D(true, x, y) ){
-				if (obj.faceIndex){
-					if (obj.object instanceof THREE.Mesh){
-						let {x,y,z} = obj.object.position; //单位 px=cm
-						
-						x = x/100, y = y/100, z = z/100; //单位 m
-						
-						if (
-							map.get(x, y, z) &&
-							eval(map.get(x, y, z).get("attr", "block", "onLongTouch")) === false
-						) return;
-						
-						if (Math.sqrt(
-							(x*100 - deskgood.pos.x) **2+
-							(y*100 - deskgood.pos.y) **2+
-							(z*100 - deskgood.pos.z) **2
-						) >= deskgood.handLength) return; //距离>=手长
-						
-						let free = !deskgood.hold[deskgood.choice]? deskgood.choice: deskgood.hold.indexOf(null);
-						if (free == -1){
-							console.warn("not free!")
-							return print("拿不下方块", "两只手拿4m³方块已经够多了，反正我是拿不下了", 3);
-						}
-						deskgood.hold.addOne(new Block(map.get(x, y, z)), free); //放在手中
-						
-						deskgood.remove({x,y,z}); //删除方块
-						
-						break; //跳出 寻找有效放置的 循环
+				if (obj.object instanceof THREE.Mesh){
+					let {x,y,z} = obj.object.position; //单位 px=cm
+					
+					x = x/100, y = y/100, z = z/100; //单位 m
+					
+					if ( map.get(x, y, z) &&
+						eval(map.get(x, y, z).get("attr", "block", "onLongTouch")) === false
+					) return;
+					
+					if ( Math.sqrt(
+						(x*100 - deskgood.pos.x) **2+
+						(y*100 - deskgood.pos.y) **2+
+						(z*100 - deskgood.pos.z) **2
+					) >= deskgood.handLength) return; //距离>=手长
+					
+					const free = !deskgood.hold[deskgood.choice]? deskgood.choice: deskgood.hold.indexOf(null);
+					if (free == -1){
+						console.warn("not free!")
+						return print("拿不下方块", "两只手拿4m³方块已经够多了，反正我是拿不下了", 3);
 					}
+					const block = map.get(x, y, z);
+					deskgood.hold.addOne(new Block({
+						id: block.id,
+						attr: block.attr
+					}), free); //放在手中
+					
+					deskgood.remove({x,y,z}); //删除方块
+					
+					break; //跳出 寻找有效放置的 循环
 				}
 			}
 		}
@@ -288,7 +298,7 @@ $("#game").on("touchmove", function (e){
 	//[x0, y0] = [x, y];
 	
 	//console.log("moved(screen):", dx, dy);
-	deskgood.look.y -= dx/$("#game")[0].offsetWidth*90*deskgood.sensitivity;
+	deskgood.look.y += dx/$("#game")[0].offsetWidth*90*deskgood.sensitivity;
 	deskgood.look.x -= dy/$("#game")[0].offsetHeight*90*deskgood.sensitivity;
 	
 	deskgood.look.x = THREE.Math.clamp(deskgood.look.x, -89.9, 89.9);
@@ -315,7 +325,7 @@ $("#game").on("touchend", function (e){
 	if (stop)
 		return false;
 	
-	let x = e.originalEvent.changedTouches[0].pageX,
+	const x = e.originalEvent.changedTouches[0].pageX,
 		y = e.originalEvent.changedTouches[0].pageY;
 	
 	//console.log("touchend(screen):", {x, y}, touch_screen);
