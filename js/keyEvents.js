@@ -164,23 +164,23 @@ setInterval(function(){
 	
 	if (keydown.key.has(87) | keydown.key.has(38)){ //前
 		console.log("front:", keydown.key);
-		x += Math.cos( (deskgood.look.y+0) /180*Math.PI) *(keydown.double_run==true?3:1) *rnd_error();
-		z += Math.sin( (deskgood.look.y+0) /180*Math.PI) *(keydown.double_run==true?3:1) *rnd_error();
+		x += Math.cos( (deskgood.look.y+90) /180*Math.PI) *(keydown.double_run==true?3:1) *rnd_error();
+		z += Math.sin( (deskgood.look.y+90) /180*Math.PI) *(keydown.double_run==true?3:1) *rnd_error();
 	}
 	if (keydown.key.has(83) | keydown.key.has(40)){ //后
 		console.log("behind:", keydown.key);
-		x += Math.cos( (deskgood.look.y+180) /180*Math.PI) *rnd_error();
-		z += Math.sin( (deskgood.look.y+180) /180*Math.PI) *rnd_error();
-	}
-	if (keydown.key.has(65) | keydown.key.has(37)){ //左
-		console.log("left:", keydown.key);
 		x += Math.cos( (deskgood.look.y-90) /180*Math.PI) *rnd_error();
 		z += Math.sin( (deskgood.look.y-90) /180*Math.PI) *rnd_error();
 	}
+	if (keydown.key.has(65) | keydown.key.has(37)){ //左
+		console.log("left:", keydown.key);
+		x += Math.cos( (deskgood.look.y+0) /180*Math.PI) *rnd_error();
+		z += Math.sin( (deskgood.look.y+0) /180*Math.PI) *rnd_error();
+	}
 	if (keydown.key.has(68) | keydown.key.has(39)){ //右
 		console.log("right:", keydown.key);
-		x += Math.cos( (deskgood.look.y+90) /180*Math.PI) *rnd_error();
-		z += Math.sin( (deskgood.look.y+90) /180*Math.PI) *rnd_error();
+		x += Math.cos( (deskgood.look.y+180) /180*Math.PI) *rnd_error();
+		z += Math.sin( (deskgood.look.y+180) /180*Math.PI) *rnd_error();
 	}
 	if (keydown.key.has(32)){ //上
 		console.log("up:", keydown.key);
