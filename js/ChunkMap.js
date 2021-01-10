@@ -418,7 +418,6 @@ class ChunkMap{
 				dx = this.size[0].x,
 				dz = this.size[0].z
 			} = breakPoint;
-		console.log("update", x, z, dx, dz)
 		
 		const ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
@@ -1032,6 +1031,8 @@ class ChunkMap{
 		
 		for (let y=this.size[0].y; y<=this.size[1].y; y++){
 			if (columns[dx][dz][y].id){ //有方块
+			
+				if (x == 9 && z == 15 && y == 2) debugger
 				
 				const visibleValue = [];
 				let needLoad = false;
@@ -1142,7 +1143,7 @@ class ChunkMap{
 	}
 	//加载区块（异步）
 	loadChunkAsync(x, z, opt={}){
-		//console.log("loadChunk", x, z, opt.dir, opt.breakPoint)
+		// console.log("loadChunk", x, z)
 		let {
 				finishCallback,
 				progressCallback,
@@ -1505,9 +1506,9 @@ class ChunkMap{
 							}else{
 								dz = this.size[0].z;
 							}*/
-							for (let j=dz; dz<=this.size[1].z; j++){
+							for (let j=dz; j<=this.size[1].z; j++){
 								this.loadColumn(ox+i, oz+j, columns, edit);
-								
+								console.log("    loadColumn", ox+i, oz+j);
 								if (new Date()-t0 > breakTime) //超时
 									return setTimeout(()=>
 										this.loadChunkAsync(x, z, {
@@ -1519,7 +1520,6 @@ class ChunkMap{
 											breakPoint: {dx:i, dz:j+1, columns, edit},
 										}), 0);
 							}
-							dz = this.size[0].z;
 							
 							/*setTimeout(()=>{ //更新
 								this.updateColumn(ox+dx, oz+this.size[0].z-1);
@@ -1895,9 +1895,10 @@ class ChunkMap{
 						this.chunks[cX][cZ].weather.start_rain();
 						
 						//更新区块
-						this.updateChunkAsync(cX, cZ, {
+						/* this.updateChunkAsync(cX, cZ, {
 							breakTime: 16
-						});
+						}); */
+						
 						if (loading < 1e-6 && finishCallback){ //完成所有
 							finishCallback();
 						}else if (progressCallback){

@@ -665,8 +665,7 @@ const deskgood = { //桌子好
 		y = Math.round(y),
 		z = Math.round(z);
 		
-		if (
-			map.get(x, y, z) &&
+		if ( map.get(x, y, z) &&
 			eval(map.get(x, y, z).get("attr", "block", "onPut")) === false
 		) return;
 		
