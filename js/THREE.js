@@ -28,10 +28,10 @@ floor_mesh.position.y = -10;
 scene.add(floor_mesh); */
 
 
-/* // 改变AxesHelper构造函数的参数，可以改变三维坐标轴的大小
+// 改变AxesHelper构造函数的参数，可以改变三维坐标轴的大小
 // 参数设置坐标轴大小:1000
 const axesHelper = new THREE.AxesHelper(1666);
-scene.add(axesHelper); */
+scene.add(axesHelper);
 
 
 /**
