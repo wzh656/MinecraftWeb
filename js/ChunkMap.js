@@ -1050,7 +1050,6 @@ class ChunkMap{
 						needLoad = needLoad || visible;
 						visibleValue.push( visible ); //方块透明 显示
 					}
-					if (x == 10&& y== 2 && z ==20) console.log([...visibleValue])
 				}
 				
 				if ( needLoad ){ //有面需显示
@@ -1880,9 +1879,9 @@ class ChunkMap{
 						this.chunks[cX][cZ].weather.start_rain();
 						
 						//更新区块
-						/* this.updateChunkAsync(cX, cZ, {
+						this.updateChunkAsync(cX, cZ, {
 							breakTime: 16
-						}); */
+						});
 						
 						if (loading < 1e-6 && finishCallback){ //完成所有
 							finishCallback();

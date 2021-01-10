@@ -190,9 +190,8 @@ const deskgood = { //桌子好
 	}),
 	// 死亡
 	die(reason="使用命令自杀"){
-		db.clearTable(TABLE.WORLD); //删表
-		indexedDB.deleteDatabase( db.db.name );
-		//db.remove(); //删库
+		DB.clearTable(TABLE.WORLD); //删表
+		DB.remove(); //删库
 		localStorage.removeItem("我的世界_seed");
 		localStorage.removeItem("我的世界_seed");
 		localStorage.removeItem("我的世界_time");
