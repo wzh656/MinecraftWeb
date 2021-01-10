@@ -1031,44 +1031,29 @@ class ChunkMap{
 		
 		for (let y=this.size[0].y; y<=this.size[1].y; y++){
 			if (columns[dx][dz][y].id){ //有方块
-			
-				if (x == 9 && z == 15 && y == 2) debugger
 				
 				const visibleValue = [];
 				let needLoad = false;
 				for (const [ddx,ddy,ddz] of arr){
 					const px=dx+ddx, py=y+ddy, pz=dz+ddz;
-					//if (ddy && y == 0) console.warn([...visibleValue])
-					if (
-						py < map.size[0].y ||
-						px < map.size[0].x || px > map.size[1].x ||
-						pz < map.size[0].z || px > map.size[1].z
-					){ //最底层 或 超出边缘 则不显示
+					if ( py < map.size[0].y ){ //最底层 则不显示
 						visibleValue.push(false);
-						
-						//if (y == 0) console.log(px, py, pz, false, "up")
 					}else if ( !(columns[px] && columns[px][pz] && columns[px][pz][py] && columns[px][pz][py].id) ){ //无方块 显示
 						needLoad = true;
 						visibleValue.push(true);
-						
-						//if (y == 0) console.log(px, py, pz, true, "no Block")
 					}else if ( columns[px][pz][py].attr && columns[px][pz][py].attr.block ){ //有属性
 						const visible = columns[px][pz][py].attr.block.transparent;
 						needLoad = needLoad || visible;
 						visibleValue.push( visible ); //方块透明 显示
-						
-						//if (y == 0) console.log(px, py, pz, visible, columns[px][pz][py], "self")
 					}else{ //继承模板
-						const visible = TEMPLATES[columns[px][pz][py].id].attr.block.transparent;
+						const visible = TEMPLATES[ columns[px][pz][py].id ].attr.block.transparent;
 						needLoad = needLoad || visible;
 						visibleValue.push( visible ); //方块透明 显示
-						
-						//if (y == 0) console.log(px, py, pz, visible, columns[px][pz][py].id, "parent")
 					}
+					if (x == 10&& y== 2 && z ==20) console.log([...visibleValue])
 				}
 				
 				if ( needLoad ){ //有面需显示
-					//console.log(y, needLoad, visibleValue)
 					const thisBlock = new Block(columns[dx][dz][y]).makeMesh(),
 						material = thisBlock.block.material;
 					if ( !thisBlock.get("attr", "block", "noTransparent") ) //允许透明
@@ -1508,7 +1493,6 @@ class ChunkMap{
 							}*/
 							for (let j=dz; j<=this.size[1].z; j++){
 								this.loadColumn(ox+i, oz+j, columns, edit);
-								console.log("    loadColumn", ox+i, oz+j);
 								if (new Date()-t0 > breakTime) //超时
 									return setTimeout(()=>
 										this.loadChunkAsync(x, z, {
@@ -1520,6 +1504,7 @@ class ChunkMap{
 											breakPoint: {dx:i, dz:j+1, columns, edit},
 										}), 0);
 							}
+							dz = map.size[0].z;
 							
 							/*setTimeout(()=>{ //更新
 								this.updateColumn(ox+dx, oz+this.size[0].z-1);
