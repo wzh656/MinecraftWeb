@@ -446,58 +446,76 @@ $(".more > .time-position > input[name='time']")
 //position
 function getGeolocationPosition(){
 	return new Promise((resolve, reject)=>{
-		if (navigator.geolocation){
-			navigator.geolocation.getCurrentPosition(function(position){
-				const {latitude, longitude} = position.coords;
-				console.log(pos, latitude, longitude)
+		const successCallback = (latitude, longitude)=>{
+				console.log(latitude, longitude)
 				$(".more > .time-position > input[name='latitude']").val( latitude ).next().val( latitude );
 				$(".more > .time-position > input[name='longitude']").val( longitude ).next().val( longitude );
-			}, function (err) {
-				switch (err.code) {
+				resolve(["获取成功！", {latitude, longitude}])
+			},
+			errCallback = (err)=>{
+				switch (err.code){
 					case 1:
-						resolve(["地理位置服务被拒绝", err]);
+						reject(["地理位置服务被拒绝", err]);
 						break;
 					case 2:
-						resolve(["暂时获取不到地理位置信息", err]);
+						reject(["暂时获取不到地理位置信息", err]);
 						break;
 					case 3:
-						resolve(["获取地理位置信息超时", err]);
+						reject(["获取地理位置信息超时", err]);
 						break;
 					default:
-						resolve(["未知错误", err]);
+						reject(["未知错误", err]);
 						break;
 				}
-			});
-		}else{
-			resolve(["浏览器不支持获取地理位置"]);
-		}
-		if (typeof plus == "undefined"){ //网页版 或 未加载完毕
-			document.addEventListener("plusready", function(){
+			};
+		if ( navigator.userAgent.toLowerCase().indexOf("html5plus") != -1 ){ //html5+
+			const plusGetPosition = function(){
 				plus.geolocation.getCurrentPosition(function(position){
-					const {latitude, longitude} = position.coords;
-					console.log(position, latitude, longitude)
-					$(".more > .time-position > input[name='latitude']").val( latitude ).next().val( latitude );
-					$(".more > .time-position > input[name='longitude']").val( longitude ).next().val( longitude );
-				}, function(err){
-					resolve(["获取地理位置错误", err]);
-				});
-			});
-		}else{ //手机版plus
-			plus.geolocation.getCurrentPosition(function(position){
-				const {latitude, longitude} = position.coords;
-				console.log(position, latitude, longitude)
-				$(".more > .time-position > input[name='latitude']").val( latitude ).next().val( latitude );
-				$(".more > .time-position > input[name='longitude']").val( longitude ).next().val( longitude );
-			}, function(err){
-				resolve(["获取地理位置错误", err]);
+					console.log("plus", position);
+					successCallback(position.coords.latitude, position.coords.longitude);
+				}, errCallback);
+			};
+			if (typeof plus == "undefined"){ //未加载完毕
+				console.log("html5+ hasn't ready")
+				document.addEventListener("plusready", plusGetPosition);
+			}else{ //手机版plus
+				console.log("html5+ ready")
+				plusGetPosition();
+			}
+		}else{ //网页版
+			console.log("api")
+			$.get("https://api.vvhan.com/api/getIpInfo",function(data, status, xhr){ //API
+				if (status == "success" && data.info && data.info.lat && data.info.lng){
+					console.log("api", data);
+					successCallback(data.info.lat, data.info.lng);
+				}else{ //退用navigator
+					console.log("api fail")
+					if (navigator.geolocation){ //支持获取地理位置
+						console.log("navigator")
+						navigator.geolocation.getCurrentPosition(function(position){
+							console.log("navigator", position);
+							successCallback(position.coords.latitude, position.coords.longitude);
+						}, errCallback);
+					}else{ //不支持获取地理位置
+						reject(["不支持获取地理位置", navigator.geolocation])
+					}
+				}
 			});
 		}
 	});
 }
 $(".more > .time-position > button").click(async function(){
-	const res = await getGeolocationPosition();
-	if (res && res[0]){
-		$(".more > .time-position > p").val( res[0] )
+	let res = [];
+	try{
+		res = await getGeolocationPosition();
+		if (res && res[0]){
+			$(".more > .time-position > button > p").html( res[0] );
+		}
+	}catch(err){
+		if (res && res[0]){
+			console.error( res[1] );
+			$(".more > .time-position > button > p").html( res[0] )
+		}
 	}
 });
 
