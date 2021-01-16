@@ -283,7 +283,7 @@ const deskgood = { //桌子好
 		
 		if (
 			map.get(x/100, y/100, z/100) !== undefined && //不能移动到未加载的方块
-			map.initedChunk.some((item)=>{
+			map.getInitedChunks().some((item)=>{
 				return item[0] == Math.round(x/100/map.size.x) &&
 					item[1] == Math.round(z/100/map.size.z);
 			}) //含有（已加载和加载中的区块）
@@ -834,7 +834,7 @@ deskgood.goZ = z=>deskgood.go(0,0,z);
 	deskgood.look_update();
 }); */
 
-DB_read(); //读取存档
+DB.read(); //读取存档
 
 
 //gui

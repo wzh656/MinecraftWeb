@@ -15,7 +15,7 @@ if (DEBUG){
 	gui.add({f:function(){
 		run(prompt("请输入命令：","deskgood.goY(3000*100);"))
 	}}, "f").name("运行(run)命令");
-	gui.add(window, "DB_save").name("保存(save)");
+	gui.add(DB, "save").name("保存(save)");
 	gui.add(location, "reload").name("刷新(reload)");
 	/* window.addEventListener("beforeunload", function(event){
 		event.preventDefault();

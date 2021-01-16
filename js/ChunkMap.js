@@ -157,6 +157,7 @@ class ChunkMap{
 			return undefined;
 		}*/
 	}
+	//设置方块
 	set(x, y, z, value){
 		x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 		
@@ -166,6 +167,33 @@ class ChunkMap{
 			this.map[x][y] = [];
 		this.map[x][y][z] = value;
 	}
+	
+	//获取已初始化的区块
+	getInitedChunks(x, z){
+		x=Math.round(x), z=Math.round(z); //规范化
+		
+		const arr = [];
+		for (const i of this.chunks)			
+			for (const j of this.chunks[i])
+				arr.push([i, j])
+		
+		return arr;
+	}
+	
+	//获取已加载的区块
+	getLoadedChunks(x, z){
+		x=Math.round(x), z=Math.round(z); //规范化
+		
+		const arr = [];
+		for (const i of this.chunks)			
+			for (const j of this.chunks[i])
+				if ( this.chunks[i][j].state )
+					arr.push([i, j])
+		
+		return arr;
+	}
+	
+	
 	
 	//添加方块
 	add(block, {x,y,z}, type=true){
@@ -257,7 +285,7 @@ class ChunkMap{
 	
 	
 	//更新方块
-	update(x, y, z){
+	async update(x, y, z){
 		x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 		
 		let thisBlock = this.get(x,y,z);
@@ -267,8 +295,8 @@ class ChunkMap{
 		if (thisBlock === undefined){ //未加载
 			const cX = Math.round(x/map.size.x),
 				cZ = Math.round(z/map.size.z), //所属区块(Chunk)
-				edit = this.chunks[cX] && this.chunks[cX][cZ] && this.chunks[cX][cZ].edit,
-				get = new Block( this.perGet(x, y, z, edit||[]) ),
+				edit = await DB.readChunk(cX, cZ),
+				get = new Block( this.perGet(x, y, z, edit) ),
 				noTransparent = get.id && get.get("attr", "block", "noTransparent");
 			visibleValue = [
 				!( this.get(x+1, y, z) && !this.get(x+1, y, z).get("attr", "block", "transparent")) || noTransparent,
@@ -280,7 +308,7 @@ class ChunkMap{
 				// 没有方块 或 有方块非透明 则显示  或  自身透明 也显示
 			];
 			
-			if (visibleValue.some(v => v) && this.initedChunk.some(v => v[0]==cX && v[1]==cZ)){ //不可隐藏（有面true） 且 在加载区块内
+			if (visibleValue.some(v => v) && this.getInitedChunks().some(v => v[0]==cX && v[1]==cZ)){ //不可隐藏（有面true） 且 在加载区块内
 				this.addID(get.id, {
 					x,
 					y,
@@ -307,7 +335,7 @@ class ChunkMap{
 		
 		/*if (thisBlock === undefined){ //未加载
 			let [cX, cZ] = [x/map.size.x, z/map.size.z].map(Math.round); //所属区块(Chunk)
-			if (visibleValue.some(v => v) && this.initedChunk.some(v => v[0]==cX && v[1]==cZ)){ //不可隐藏（有面true） and 在加载区块内
+			if (visibleValue.some(v => v) && this.getInitedChunks().some(v => v[0]==cX && v[1]==cZ)){ //不可隐藏（有面true） and 在加载区块内
 				let edit = this.edit[cX] && this.edit[cX][cZ];
 				let get = this.perGet(x, y, z, edit||[]);
 				this.addID(get.id, {
@@ -523,7 +551,7 @@ class ChunkMap{
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
-		if (this.initedChunk.every(function(value, index, arr){
+		if (this.getInitedChunks().every(function(value, index, arr){
 			return value[0] != x || value[1] != z;
 		})) //每个都不一样（不存在）
 			this.initedChunk.push([x,z]);
@@ -1014,13 +1042,13 @@ class ChunkMap{
 	}*/
 	
 	//加载列
-	loadColumn(x, z, columns, edit){
+	loadColumn(x, z, columns){
 		x = Math.round(x), z = Math.round(z); //规范化
 		const ox = Math.round(x/map.size.x)*map.size.x,
 			oz = Math.round(z/map.size.z)*map.size.z,
 			dx = x-ox,
 			dz = z-oz,
-			arr = [
+			rule = [
 				[1,0,0],
 				[-1,0,0],
 				[0,1,0],
@@ -1034,8 +1062,9 @@ class ChunkMap{
 				
 				const visibleValue = [];
 				let needLoad = false;
-				for (const [ddx,ddy,ddz] of arr){
+				for (const [ddx,ddy,ddz] of rule){
 					const px=dx+ddx, py=y+ddy, pz=dz+ddz;
+					
 					if ( py < map.size[0].y ){ //最底层 则不显示
 						visibleValue.push(false);
 					}else if ( !(columns[px] && columns[px][pz] && columns[px][pz][py] && columns[px][pz][py].id) ){ //无方块 显示
@@ -1055,6 +1084,7 @@ class ChunkMap{
 				if ( needLoad ){ //有面需显示
 					const thisBlock = new Block(columns[dx][dz][y]).makeMesh(),
 						material = thisBlock.block.material;
+					
 					if ( !thisBlock.get("attr", "block", "noTransparent") ) //允许透明
 						for (let i=material.length-1; i>=0; i--)
 							material[i].visible = visibleValue[i];
@@ -1076,8 +1106,6 @@ class ChunkMap{
 							// 没有方块 或 有方块非透明 则显示  或  自身透明 也显示
 						],*/
 					
-					// if (dx == 4 && y == 1 && dz == -3) debugger
-					
 				}
 				
 			}else{ //空气
@@ -1096,8 +1124,24 @@ class ChunkMap{
 		const ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
-		const edit = [];
-		db.readStep(TABLE.WORLD, {
+		const edit = DB.readChunk(x, z).then((edit)=>{
+			console.log("edit(DB):", edit);
+			//保存edit
+			this.chunks[x][z].edit = edit;
+			
+			const columns = this.perGetChunk(x, z, edit);
+			
+			if (this.getLoadedChunks().every(function(value, index, arr){
+				return value[0] != x || value[1] != z;
+			})) //每个都不一样（不存在）
+				this.activeChunk.push([x,z]);
+			
+			for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
+				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
+					for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
+						this.loadColumn(ox+dx, oz+dz, columns);
+		});
+		/* db.readStep(TABLE.WORLD, {
 			index: "type",
 			range: ["only", 0],
 			stepCallback: (res)=>{
@@ -1107,27 +1151,12 @@ class ChunkMap{
 				) edit.push(res);
 			},
 			successCallback: ()=>{
-				console.log("edit(DB):", edit);
-				//保存edit
-				this.chunks[x][z].edit = edit;
 				
-				const columns = this.perGetChunk(x, z, edit);
-				
-				if (this.activeChunk.every(function(value, index, arr){
-					return value[0] != x || value[1] != z;
-				})) //每个都不一样（不存在）
-					this.activeChunk.push([x,z]);
-				
-				for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
-					for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
-						for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
-							this.loadColumn(ox+dx, oz+dz, columns, edit);
 			}
-		});
+		}); */
 	}
 	//加载区块（异步）
 	loadChunkAsync(x, z, opt={}){
-		// console.log("loadChunk", x, z)
 		let {
 				finishCallback,
 				progressCallback,
@@ -1146,12 +1175,12 @@ class ChunkMap{
 			oz = z*this.size.z, //区块中心坐标
 			t = this.seed; //临时变量
 		
-		if (this.initedChunk.every(function(value, index, arr){ //添加
+		if (this.getInitedChunks().every(function(value, index, arr){ //添加
 			return value[0] != x || value[1] != z;
 		})) //每个都不一样（不存在）
 			this.initedChunk.push([x,z]);
 		
-		const func = (edit, columns)=>{
+		const func = (columns)=>{
 			
 			switch (dir.substr(0,2)){
 				case "x-":
@@ -1176,7 +1205,7 @@ class ChunkMap{
 								dz = this.size[0].z;
 							}*/
 							for (let j=dz; j<=this.size[1].z; j++){
-								this.loadColumn(ox+i, oz+j, columns, edit);
+								this.loadColumn(ox+i, oz+j, columns);
 								if (new Date()-t0 > breakTime) //超时
 									return setTimeout(()=>
 										this.loadChunkAsync(x, z, {
@@ -1185,7 +1214,7 @@ class ChunkMap{
 											breakTime,
 											mostSpeed,
 											dir,
-											breakPoint: {dx:i, dz:j+1, columns, edit},
+											breakPoint: {dx:i, dz:j+1, columns},
 										}), 0);
 							}
 							dz = this.size[0].z;
@@ -1207,7 +1236,7 @@ class ChunkMap{
 										breakTime,
 										mostSpeed,
 										dir,
-										breakPoint: {dx:i-1, columns, edit}
+										breakPoint: {dx:i-1, columns}
 									}), 0);
 						}
 						/*setTimeout(()=>{ //更新
@@ -1217,7 +1246,7 @@ class ChunkMap{
 							}
 						},0);*/
 						
-						if (this.activeChunk.every(function(value, index, arr){ //添加
+						if (this.getLoadedChunks().every(function(value, index, arr){ //添加
 							return value[0] != x || value[1] != z;
 						})) //每个都不一样（不存在）
 							this.activeChunk.push([x,z]);
@@ -1235,7 +1264,7 @@ class ChunkMap{
 								},0);
 								clearInterval(loadChunk_id);
 								
-								if (this.activeChunk.every(function(value, index, arr){
+								if (this.getLoadedChunks().every(function(value, index, arr){
 									return value[0] != x || value[1] != z;
 								})) //每个都不一样（不存在）
 									this.activeChunk.push([x,z]);
@@ -1275,7 +1304,7 @@ class ChunkMap{
 								dx = this.size[0].x;
 							}*/
 							for (let i=dx; i<=this.size[1].x; i++){
-								this.loadColumn(ox+i, oz+j, columns, edit);
+								this.loadColumn(ox+i, oz+j, columns);
 								
 								if (new Date()-t0 > breakTime) //超时
 									return setTimeout(()=>
@@ -1285,7 +1314,7 @@ class ChunkMap{
 											breakTime,
 											mostSpeed,
 											dir,
-											breakPoint: {dx:i+1, dz:j, columns, edit},
+											breakPoint: {dx:i+1, dz:j, columns},
 										}), 0);
 							}
 							dx = this.size[0].x;
@@ -1307,7 +1336,7 @@ class ChunkMap{
 										breakTime,
 										mostSpeed,
 										dir,
-										breakPoint: {dz:j+1, columns, edit}
+										breakPoint: {dz:j+1, columns}
 									}), 0);
 						}
 						/*setTimeout(()=>{ //更新
@@ -1317,7 +1346,7 @@ class ChunkMap{
 							}
 						},0);*/
 						
-						if (this.activeChunk.every(function(value, index, arr){ //添加
+						if (this.getLoadedChunks().every(function(value, index, arr){ //添加
 							return value[0] != x || value[1] != z;
 						})) //每个都不一样（不存在）
 							this.activeChunk.push([x,z]);
@@ -1347,7 +1376,7 @@ class ChunkMap{
 							
 							//正常代码
 							for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
-								this.loadColumn(ox+dx, oz+dz, columns, edit);
+								this.loadColumn(ox+dx, oz+dz, columns);
 							
 							setTimeout(()=>{
 								this.updateColumn(ox+this.size[0].x-1, oz+dz);
@@ -1383,7 +1412,7 @@ class ChunkMap{
 								dx = this.size[0].x;
 							}*/
 							for (let i=dx; i<=this.size[1].z; i++){
-								this.loadColumn(ox+i, oz+j, columns, edit);
+								this.loadColumn(ox+i, oz+j, columns);
 								
 								if (new Date()-t0 > breakTime) //超时
 									return setTimeout(()=>
@@ -1393,7 +1422,7 @@ class ChunkMap{
 											breakTime,
 											mostSpeed,
 											dir,
-											breakPoint: {dx:i+1, dz:j, columns, edit},
+											breakPoint: {dx:i+1, dz:j, columns},
 										}), 0);
 							}
 							dx = this.size[0].x;
@@ -1415,7 +1444,7 @@ class ChunkMap{
 										breakTime,
 										mostSpeed,
 										dir,
-										breakPoint: {dz:j-1, columns, edit}
+										breakPoint: {dz:j-1, columns}
 									}), 0);
 						}
 						/*setTimeout(()=>{ //更新
@@ -1455,7 +1484,7 @@ class ChunkMap{
 							
 							//正常代码
 							for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
-								this.loadColumn(ox+dx, oz+dz, columns, edit);
+								this.loadColumn(ox+dx, oz+dz, columns);
 							
 							setTimeout(()=>{
 								this.updateColumn(ox+this.size[0].x-1, oz+dz);
@@ -1491,7 +1520,7 @@ class ChunkMap{
 								dz = this.size[0].z;
 							}*/
 							for (let j=dz; j<=this.size[1].z; j++){
-								this.loadColumn(ox+i, oz+j, columns, edit);
+								this.loadColumn(ox+i, oz+j, columns);
 								if (new Date()-t0 > breakTime) //超时
 									return setTimeout(()=>
 										this.loadChunkAsync(x, z, {
@@ -1500,7 +1529,7 @@ class ChunkMap{
 											breakTime,
 											mostSpeed,
 											dir,
-											breakPoint: {dx:i, dz:j+1, columns, edit},
+											breakPoint: {dx:i, dz:j+1, columns},
 										}), 0);
 							}
 							dz = map.size[0].z;
@@ -1522,7 +1551,7 @@ class ChunkMap{
 										breakTime,
 										mostSpeed,
 										dir,
-										breakPoint: {dx:i+1, columns, edit}
+										breakPoint: {dx:i+1, columns}
 									}), 0);
 						}
 						/*setTimeout(()=>{ //更新
@@ -1561,7 +1590,7 @@ class ChunkMap{
 							
 							//正常代码
 							for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
-								this.loadColumn(ox+dx, oz+dz, columns, edit);
+								this.loadColumn(ox+dx, oz+dz, columns);
 							
 							setTimeout(()=>{
 								this.updateColumn(ox+dx, oz+this.size[0].z-1);
@@ -1577,11 +1606,17 @@ class ChunkMap{
 				
 			}
 		};
-		if (breakPoint.edit && breakPoint.columns){
-			func( breakPoint.edit, breakPoint.columns );
+		if (breakPoint.columns){
+			func( breakPoint.columns );
+		}else if (this.chunks[x] && this.chunks[x][z] && this.chunks[x][z].edit){
+			const edit = this.chunks[x][z].edit;
+			func( this.perGetChunk(x, z, edit) );
 		}else{
-			const edit = [];
-			db.readStep(TABLE.WORLD, {
+			const edit = DB.readChunk(x, z).then((edit)=>{
+				this.chunks[x][z].edit = edit; //保存edit
+				func( this.perGetChunk(x, z, edit) );
+			});
+			/* db.readStep(TABLE.WORLD, {
 				index: "type",
 				range: ["only", 0],
 				stepCallback: (res)=>{
@@ -1592,10 +1627,9 @@ class ChunkMap{
 				},
 				successCallback: ()=>{
 					console.log("edit(DB):", edit);
-					this.chunks[x][z].edit = edit; //保存edit
-					func( edit, this.perGetChunk(x, z, edit) );
+					
 				}
-			});
+			}); */
 			/*sql.selectData(tableName, ["x", "y", "z", "id", "attr"],
 				`type=0 AND`+
 				` (x BETWEEN ${ ox+this.size[0].x } AND ${ ox+this.size[1].x }) AND`+
@@ -1617,8 +1651,8 @@ class ChunkMap{
 		for (let i in this.activeChunk)
 			if (this.activeChunk[i][0] == x && this.activeChunk[i][1] == z)
 				this.activeChunk.splice(i,1); //从i开始删除一个元素
-		for (let i in this.initedChunk)
-			if (this.initedChunk[i][0] == x && this.initedChunk[i][1] == z)
+		for (const [i, v] of Object.entries(this.initedChunks()) )
+			if (v[0] == x && v[1] == z)
 				this.initedChunk.splice(i,1); //从i开始删除一个元素
 		
 		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
@@ -1647,11 +1681,11 @@ class ChunkMap{
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
-		for (let i in this.activeChunk)
+		for (const i in this.activeChunk)
 			if (this.activeChunk[i][0] == x && this.activeChunk[i][1] == z)
 				this.activeChunk.splice(i,1); //从i开始删除一个元素
-		for (let i in this.initedChunk)
-			if (this.initedChunk[i][0] == x && this.initedChunk[i][1] == z)
+		for (const [i, v] of Object.entries(this.getInitedChunks()) )
+			if (v[0] == x && v[1] == z)
 				this.initedChunk.splice(i,1); //从i开始删除一个元素
 		
 		//if (finishCallback){ //有回调（必须setInterval）
@@ -1835,9 +1869,9 @@ class ChunkMap{
 			return console.warn("chunk_perload chunks:", chunks);
 		}
 		
-		for (let i in chunks){
+		for (const i in chunks){
 			const [cX, cZ] = chunks[i];
-			if (this.initedChunk.every(function(value, index, arr){
+			if (this.getInitedChunks().every(function(value, index, arr){
 				return value[0] != cX || value[1] != cZ;
 			})){ //每个都不一样（不存在 & 不在加载中）
 				// this.initChunk(cX, cZ);
@@ -1858,7 +1892,6 @@ class ChunkMap{
 					},
 					finishCallback: ()=>{
 						this.chunks[cX][cZ].state = true; //加载完毕
-						this.chunks[cX][cZ].edit = [];
 						this.chunks[cX][cZ].weather = new Weather(
 							[
 								cX *map.size.x*100 +map.size[0].x,
