@@ -190,8 +190,9 @@ const deskgood = { //桌子好
 	}),
 	// 死亡
 	die(reason="使用命令自杀"){
-		DB.clearTable(TABLE.WORLD); //删表
-		DB.remove(); //删库
+		db.clearTable(TABLE.WORLD); //删表
+		indexedDB.deleteDatabase( db.db.name );
+		//db.remove(); //删库
 		localStorage.removeItem("我的世界_seed");
 		localStorage.removeItem("我的世界_seed");
 		localStorage.removeItem("我的世界_time");
@@ -282,7 +283,7 @@ const deskgood = { //桌子好
 		
 		if (
 			map.get(x/100, y/100, z/100) !== undefined && //不能移动到未加载的方块
-			map.initedChunk.some((item)=>{
+			map.getInitedChunks().some((item)=>{
 				return item[0] == Math.round(x/100/map.size.x) &&
 					item[1] == Math.round(z/100/map.size.z);
 			}) //含有（已加载和加载中的区块）
@@ -833,7 +834,7 @@ deskgood.goZ = z=>deskgood.go(0,0,z);
 	deskgood.look_update();
 }); */
 
-DB_read(); //读取存档
+DB.read(); //读取存档
 
 
 //gui
@@ -856,6 +857,7 @@ if (DEBUG){
 				});
 			}
 		}, "f").name("更新区块(update)");
+		scene_chunk_folder.add(map, "perloadChunk").name("更新加载区块(perloadChunk)")
 	const scene_chunk_weather_folder = gui.__folders["场景(scene)"].__folders["区块(chunk)"].__folders["天气"];
 		scene_chunk_weather_folder.add({
 			get r(){

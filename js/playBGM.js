@@ -1,17 +1,17 @@
 function playBGM(){
-	let bgm = $("#bgm")[0];
+	const bgm = $("#bgm")[0];
 	if (bgm.paused){
-		let random = Math.random();
+		const random = Math.random();
 		if (random < 0.5){
 			bgm.volume = 1;
 			bgm.src = "./music/1.m4a";
 			bgm.play();
-			console.info("bgm(BackGround Music)", "begin(1.m4a)", "time:"+time.getTime());
+			console.info("bgm(BackGround Music)", "begin(1.m4a)", "time:"+new Date());
 		}else{
 			bgm.volume = 1;
 			bgm.src = "./music/2.m4a";
 			bgm.play();
-			console.info("bgm(BackGround Music)", "begin(2.m4a)", "time:"+time.getTime());
+			console.info("bgm(BackGround Music)", "begin(2.m4a)", "time:"+new Date());
 		}
 		setTimeout(function(){
 			if (DEBUG){
