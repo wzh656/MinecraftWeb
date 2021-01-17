@@ -42,11 +42,11 @@ const sNoise = {
 		return value *t.k +t.b +sNoise.error(noise, t.e, SEED_RANDOM_CONSTANT[3], x, z);
 	},
 	type(noise, t, x, z){
-		let value = Math.abs( noise.noise3D(SEED_RANDOM_CONSTANT[4], x/t.q, z/t.q) );
+		const value = Math.abs( noise.noise3D(SEED_RANDOM_CONSTANT[4], x/t.q, z/t.q) );
 		return value < t.desert?2: value < t.desert+t.grassland?1: 0;
 	},
 	dirt(noise, t, x, z){
-		let value = noise.more3D(SEED_RANDOM_CONSTANT[5], x/t.q, z/t.q, 3) *t.k +t.b+
+		const value = noise.more3D(SEED_RANDOM_CONSTANT[5], x/t.q, z/t.q, 3) *t.k +t.b+
 			sNoise.error(noise, t.e, SEED_RANDOM_CONSTANT[6], x, z);
 		return value<0?0: value>1? 1: value;
 	},
@@ -83,16 +83,16 @@ const sNoise = {
 		return result[0];
 	},
 	leavesScale(noise, t, x, z){
-		let value = noise.more3D(SEED_RANDOM_CONSTANT[10], x/t.q, z/t.q, 3) *t.k +t.b+
+		const value = noise.more3D(SEED_RANDOM_CONSTANT[10], x/t.q, z/t.q, 3) *t.k +t.b+
 			sNoise.error(noise, t.e, SEED_RANDOM_CONSTANT[11], x, z);
 		return value<0?0: value>1?1: value;
 	},
 	openStone(noise, t, x, z){
-		let value = noise.more3D(SEED_RANDOM_CONSTANT[12], x/t.q, z/t.q, 3) *t.k +t.b;
+		const value = noise.more3D(SEED_RANDOM_CONSTANT[12], x/t.q, z/t.q, 3) *t.k +t.b;
 		return value>=0? true: false;
 	},
 	weatherRain(noise, t, x, z, time){
-		let value = noise.more3D(time/t.q, x/t.q, z/t.q, 3) *t.k +t.b+
+		const value = noise.more3D(time/t.q, x/t.q, z/t.q, 3) *t.k +t.b+
 			sNoise.error(noise, t.e, time, x, z);
 		return value<0?0: value>1?1: value;
 	}

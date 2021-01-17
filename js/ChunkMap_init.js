@@ -67,7 +67,7 @@ const map = new ChunkMap([
 	weatherRain: JSON.parse(localStorage.getItem("我的世界_weatherRain")) || {
 		min: -0.6, // 66%不下雨
 		max: 0.3,
-		q: 666,
+		q: 10000, //10000m=10km <=> 86400s=1440min=24h
 		error:{
 			min: -0.1,
 			max: 0.1,

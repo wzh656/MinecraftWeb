@@ -175,7 +175,6 @@ class ChunkMap{
 		
 		return arr;
 	}
-	
 	//获取已加载的区块
 	getLoadedChunks(x, z){
 		x=Math.round(x), z=Math.round(z); //规范化
@@ -1078,7 +1077,7 @@ class ChunkMap{
 				}
 				
 				if ( needLoad ){ //有面需显示
-					if (y == 0) console.log(visibleValue)
+					// if (y == 0) console.log(visibleValue)
 					const thisBlock = new Block(columns[dx][dz][y]).makeMesh(),
 						material = thisBlock.block.material;
 					
@@ -1115,11 +1114,37 @@ class ChunkMap{
 		}
 	}
 	
+	
 	//加载区块（同步）
 	loadChunk(x, z){
 		x = Math.round(x), z = Math.round(z); //规范化
 		const ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
+		
+		//初始化区块
+		if (!this.chunks[x])
+			this.chunks[x] = [];
+		if (!this.chunks[x][z])
+			this.chunks[x][z] = {};
+		
+		this.chunks[x][z].weather = new Weather(
+			[
+				ox + this.size[0].x,
+				oz + this.size[0].z
+			],[
+				ox + this.size[1].x,
+				oz + this.size[1].z
+			],
+			sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime() )
+		);
+		console.log("weather:", sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime()/1000/60 ))
+		time.setInterval((speed)=>{
+			if (!speed) return;
+			console.log("weather:", sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime()/1000/3600 ))
+			this.chunks[x][z].weather.rain =
+				sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime()/1000/3600 );
+		}, 60*1000); //60s更新一次
+		
 		
 		const edit = DB.readChunk(x, z).then((edit)=>{
 			console.log("edit(DB):", edit);
@@ -1132,6 +1157,10 @@ class ChunkMap{
 				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
 					for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
 						this.loadColumn(ox+dx, oz+dz, columns);
+			
+			this.chunks[cX][cZ].state = true; //加载完毕
+			this.chunks[cX][cZ].weather.start_rain(); //开始下雨
+			
 		});
 		/* db.readStep(TABLE.WORLD, {
 			index: "type",
@@ -1167,6 +1196,32 @@ class ChunkMap{
 			oz = z*this.size.z, //区块中心坐标
 			t = this.seed; //临时变量
 		
+		//初始化区块
+		if (!this.chunks[x])
+			this.chunks[x] = [];
+		if (!this.chunks[x][z])
+			this.chunks[x][z] = {};
+		
+		this.chunks[x][z].weather = new Weather(
+			[
+				ox + this.size[0].x,
+				oz + this.size[0].z
+			],[
+				ox + this.size[1].x,
+				oz + this.size[1].z
+			],
+			sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime() )
+		);
+		console.log("weather:", sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime()/1000/60 ))
+		time.setInterval((speed)=>{
+			if (!speed) return;
+			console.log("weather:", sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime()/1000/3600 ))
+			this.chunks[x][z].weather.rain =
+				sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime()/1000/3600 );
+		}, 60*1000); //60s更新一次
+		
+		
+		//回调
 		const func = (columns)=>{
 			
 			switch (dir.substr(0,2)){
@@ -1234,6 +1289,9 @@ class ChunkMap{
 						},0);*/
 						
 						if (finishCallback) finishCallback();
+						
+						this.chunks[cX][cZ].state = true; //加载完毕
+						this.chunks[cX][cZ].weather.start_rain(); //开始下雨
 						
 						/* let dx = this.size[1].x;
 						let loadChunk_id = setInterval(()=>{
@@ -1324,6 +1382,9 @@ class ChunkMap{
 						},0);*/
 						
 						if (finishCallback) finishCallback();
+						
+						this.chunks[cX][cZ].state = true; //加载完毕
+						this.chunks[cX][cZ].weather.start_rain(); //开始下雨
 						
 						/* let dz = this.size[0].z;
 						let loadChunk_id = setInterval(()=>{
@@ -1423,6 +1484,9 @@ class ChunkMap{
 						
 						if (finishCallback) finishCallback();
 						
+						this.chunks[cX][cZ].state = true; //加载完毕
+						this.chunks[cX][cZ].weather.start_rain(); //开始下雨
+						
 						/* let dz = this.size[1].z;
 						let loadChunk_id = setInterval(()=>{
 							if (dz < this.size[0].z){
@@ -1519,6 +1583,9 @@ class ChunkMap{
 						},0);*/
 						
 						if (finishCallback) finishCallback();
+						
+						this.chunks[cX][cZ].state = true; //加载完毕
+						this.chunks[cX][cZ].weather.start_rain(); //开始下雨
 						/* let dx = this.size[0].x;
 						let loadChunk_id = setInterval(()=>{
 							if (dx > this.size[1].x){
@@ -1606,6 +1673,11 @@ class ChunkMap{
 						scene.remove(this.map[ox+dx][dy][oz+dz].block.mesh);
 						delete this.map[ox+dx][dy][oz+dz];
 					}
+		
+		//删除区块
+		this.chunks[cX][cZ].weather.stop_rain();
+		delete this.chunks[cX][cZ].weather;
+		delete this.chunks[cX][cZ];
 	}
 	//卸载区块（异步）
 	unloadChunkAsync(x, z, opt={}){
@@ -1693,6 +1765,12 @@ class ChunkMap{
 					})
 				,0);
 		}
+		if (finishCallback) finishCallback();
+		
+		//删除区块
+		this.chunks[cX][cZ].weather.stop_rain();
+		delete this.chunks[cX][cZ].weather;
+		delete this.chunks[cX][cZ];
 			/* let dx = this.size[0].x;
 			let unloadChunk_id = setInterval(()=>{
 				if (dx > this.size[1].x){
@@ -1817,10 +1895,7 @@ class ChunkMap{
 				// this.initChunk(cX, cZ);
 				loading++;
 				
-				if (!this.chunks[cX])
-					this.chunks[cX] = [];
-				if (!this.chunks[cX][cZ])
-					this.chunks[cX][cZ] = {};
+				this.initChunk(cX, cZ);
 				//用噪声填充区块
 				this.loadChunkAsync(cX, cZ, {
 					breakTime: 16,
@@ -1831,26 +1906,6 @@ class ChunkMap{
 							progressCallback((total-loading) / total); //反馈进度
 					},
 					finishCallback: ()=>{
-						this.chunks[cX][cZ].state = true; //加载完毕
-						this.chunks[cX][cZ].weather = new Weather(
-							[
-								cX *map.size.x*100 +map.size[0].x,
-								cZ *map.size.z*100 +map.size[0].z
-							],[
-								cX *map.size.x*100 +map.size[1].x,
-								cZ *map.size.z*100 +map.size[1].z
-							],
-							sNoise.weatherRain( this.seed.noise, this.seed.wR, cX*map.size.x, cZ*map.size.z, time.getTime() )
-						);
-						console.log("weather:", sNoise.weatherRain( this.seed.noise, this.seed.wR, cX*map.size.x, cZ*map.size.z, time.getTime()/1000/60 ))
-						time.setInterval((speed)=>{
-							if (!speed) return;
-							console.log("weather:", sNoise.weatherRain( this.seed.noise, this.seed.wR, cX*map.size.x, cZ*map.size.z, time.getTime()/1000/3600 ))
-							this.chunks[cX][cZ].weather.rain =
-								sNoise.weatherRain( this.seed.noise, this.seed.wR, cX*map.size.x, cZ*map.size.z, time.getTime()/1000/3600 );
-						}, 60*1000)
-						this.chunks[cX][cZ].weather.start_rain();
-						
 						//更新区块
 						this.updateChunkAsync(cX, cZ, {
 							breakTime: 16
@@ -1884,9 +1939,6 @@ class ChunkMap{
 							progressCallback((total-loading) / total); //反馈进度
 					},
 					finishCallback: ()=>{
-						this.chunks[cX][cZ].weather.stop_rain();
-						delete this.chunks[cX][cZ].weather;
-						delete this.chunks[cX][cZ];
 						if (loading < 1e-6 && finishCallback){ //完成所有
 							finishCallback();
 						}else if (progressCallback){

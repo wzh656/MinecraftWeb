@@ -53,12 +53,12 @@ class Weather{
 				if (Math.random() <= this.rain){
 					//创建精灵模型对象，不需要几何体geometry参数
 					const sprite = new THREE.Sprite(this.rain_material),
-						x = Math.random() *this.size.x*100 + this.size[0].x*100, //[-1000,1000)
-						y = Math.random() *10*100 + deskgood.pos.y +10*100, //[~+10m, ~+20m)
-						z =Math.random() *this.size.z*100 + this.size[0].z*100; //[-1000,1000)
+						x = THREE.Math.randFloat(this.size[0].x*100, this.size[1].x*100),
+						y = THREE.Math.randFloat(0, 10*100) + deskgood.pos.y +10*100, //+0m ~ +10m
+						z = THREE.Math.randFloat(this.size[0].z*100, this.size[1].z*100);
 					
 					sprite.position.set(x, y, z); //设置精灵位置
-					sprite.scale.set(Math.random()*0.4+0.6, Math.random()*0.8+1.2, 1); //只需要设置x、y两个分量就可以 x:[6,10) y:[12,20) //控制精灵大小，比如可视化中精灵大小表征数据大小
+					sprite.scale.set(3*rnd_error(), 6*rnd_error(), 1); //只需要设置x、y两个分量就可以 x:[6,10) y:[12,20) //控制精灵大小，比如可视化中精灵大小表征数据大小
 					
 					scene.add(sprite);
 					this.rain_sys.push(sprite);
