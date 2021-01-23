@@ -164,6 +164,56 @@ class ChunkMap{
 		this.map[x][y][z] = value;
 	}
 	
+	//初始化区块
+	initChunk(x, z, edit){
+		x=Math.round(x), z=Math.round(z); //规范化
+		const ox = x*this.size.x,
+			oz = z*this.size.z; //区块中心坐标
+		
+		console.log("init chunk", x, z)
+		
+		if (!this.chunks[x])
+			this.chunks[x] = [];
+		if (!this.chunks[x][z])
+			this.chunks[x][z] = {};
+		
+		this.chunks[x][z].edit = edit;
+		this.chunks[x][z].weather = new Weather(
+			[
+				ox + this.size[0].x,
+				oz + this.size[0].z
+			],[
+				ox + this.size[1].x,
+				oz + this.size[1].z
+			],
+			sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime() )
+		);
+		console.log("weather:", sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime()/1000/60 ))
+		time.setInterval((speed)=>{
+			if (!speed) return;
+			console.log("weather:", sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime()/1000/3600 ))
+			this.chunks[x][z].weather.rain =
+				sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime()/1000/3600 );
+		}, 60*1000); //60s更新一次
+	}
+	//已加载区块
+	loadedChunk(x, z){
+		console.log("loaded chunk", x, z)
+		
+		this.chunks[x][z].state = true; //加载完毕
+		this.chunks[x][z].weather.start_rain(); //开始下雨
+	}
+	//删除区块
+	deleteChunk(x, z){
+		console.log("delete chunk", x, z)
+		
+		debugger
+		
+		this.chunks[x][z].weather.clear_rain();
+		delete this.chunks[x][z].weather;
+		delete this.chunks[x][z].state; //已卸载
+	}
+	
 	//获取已初始化的区块
 	getInitedChunks(x, z){
 		x=Math.round(x), z=Math.round(z); //规范化
@@ -171,7 +221,8 @@ class ChunkMap{
 		const arr = [];
 		for (const i in this.chunks)			
 			for (const j in this.chunks[i])
-				arr.push([i, j])
+				if ( this.chunks[i][j].state !== undefined )
+					arr.push([i, j])
 		
 		return arr;
 	}
@@ -182,7 +233,7 @@ class ChunkMap{
 		const arr = [];
 		for (const i in this.chunks)			
 			for (const j in this.chunks[i])
-				if ( this.chunks[i][j].state )
+				if ( this.chunks[i][j].state === true )
 					arr.push([i, j])
 		
 		return arr;
@@ -280,7 +331,7 @@ class ChunkMap{
 	
 	
 	//更新方块
-	async update(x, y, z){
+	update(x, y, z){
 		x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 		
 		let thisBlock = this.get(x,y,z);
@@ -290,8 +341,8 @@ class ChunkMap{
 		if (thisBlock === undefined){ //未加载
 			const cX = Math.round(x/map.size.x),
 				cZ = Math.round(z/map.size.z), //所属区块(Chunk)
-				edit = await DB.readChunk(cX, cZ),
-				get = new Block( this.perGet(x, y, z, edit) ),
+				edit = this.chunks[cX] && this.chunks[cX][cZ] && this.chunks[cX][cZ].edit,
+				get = new Block( this.perGet(x, y, z, edit||[]) ),
 				noTransparent = get.id && get.get("attr", "block", "noTransparent");
 			visibleValue = [
 				!( this.get(x+1, y, z) && !this.get(x+1, y, z).get("attr", "block", "transparent")) || noTransparent,
@@ -420,13 +471,10 @@ class ChunkMap{
 		const ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
-		for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
-			for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
-				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+		for (let dy=this.size[0].y; dy<=this.size[1].y; dy++)
+			for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
+				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
 					this.update(ox+dx, dy, oz+dz);
-				}
-			}
-		}
 	}
 	//更新区块内所有方块（异步）
 	updateChunkAsync(x, z, opt={}){
@@ -451,23 +499,9 @@ class ChunkMap{
 			let t0 = new Date(),
 				num = 0;
 			
-			/*let dx;
-			if (breakPoint){
-				dx = breakPoint.dx===undefined? this.size[0].x: breakPoint.dx;
-				delete breakPoint.dx;
-			}else{
-				dx = this.size[0].x;
-			}*/
 			for (let i=dx; i<=this.size[1].x; i++){
-				
-				/*let dz;
-				if (breakPoint){
-					dz = breakPoint.dz===undefined? this.size[0].z: breakPoint.dz;
-					delete breakPoint.dz;
-				}else{
-					dz = this.size[0].z;
-				}*/
 				for (let j=dz; j<=this.size[1].z; j++){
+					
 					for (let dy=this.size[0].y; dy<=this.size[1].y; dy++)
 						this.update(ox+i, dy, oz+j);
 					
@@ -480,6 +514,7 @@ class ChunkMap{
 								breakPoint: {dx:i, dz:j+1}
 							});
 						},0);
+					
 				}
 				dz = this.size[0].z;
 				if (progressCallback)
@@ -494,7 +529,9 @@ class ChunkMap{
 						});
 					},0);
 			}
+			
 			if (finishCallback) finishCallback();
+			
 			/* let dx = this.size[0].x;
 			let updateChunk_id = setInterval(()=>{
 				if (dx > this.size[1].x){
@@ -615,7 +652,7 @@ class ChunkMap{
 			treeHeight = height + sNoise.treeHeight(this.seed.noise, this.seed.tH, x, z),
 			leaves = [+Infinity, -Infinity]; //(min, max]
 		
-		for ( let [dx,dz] of [[1,0], [-1,0], [0,1],[0,-1]] ){
+		for ( const [dx,dz] of [[1,0], [-1,0], [0,1],[0,-1]] ){
 			const tH = sNoise.treeHeight(this.seed.noise, this.seed.tH, x+dx, z+dz);
 			if ( tH &&
 				!sNoise.type(this.seed.noise, this.seed.t, x+dx, z+dz) &&
@@ -999,7 +1036,7 @@ class ChunkMap{
 	}*/
 	
 	perGetChunk(x, z, edit){
-		x = Math.round(x), z = Math.round(z); //规范化
+		x=Math.round(x), z=Math.round(z); //规范化
 		const ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
@@ -1121,32 +1158,9 @@ class ChunkMap{
 		const ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
-		//初始化区块
-		if (!this.chunks[x])
-			this.chunks[x] = [];
-		if (!this.chunks[x][z])
-			this.chunks[x][z] = {};
-		
-		this.chunks[x][z].weather = new Weather(
-			[
-				ox + this.size[0].x,
-				oz + this.size[0].z
-			],[
-				ox + this.size[1].x,
-				oz + this.size[1].z
-			],
-			sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime() )
-		);
-		console.log("weather:", sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime()/1000/60 ))
-		time.setInterval((speed)=>{
-			if (!speed) return;
-			console.log("weather:", sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime()/1000/3600 ))
-			this.chunks[x][z].weather.rain =
-				sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime()/1000/3600 );
-		}, 60*1000); //60s更新一次
-		
-		
 		const edit = DB.readChunk(x, z).then((edit)=>{
+			this.initChunk(x, z); //初始化区块
+			
 			console.log("edit(DB):", edit);
 			//保存edit
 			this.chunks[x][z].edit = edit;
@@ -1158,8 +1172,7 @@ class ChunkMap{
 					for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
 						this.loadColumn(ox+dx, oz+dz, columns);
 			
-			this.chunks[cX][cZ].state = true; //加载完毕
-			this.chunks[cX][cZ].weather.start_rain(); //开始下雨
+			this.loadedChunk(x, z); //区块加载完毕
 			
 		});
 		/* db.readStep(TABLE.WORLD, {
@@ -1193,33 +1206,7 @@ class ChunkMap{
 		
 		x=Math.round(x), z=Math.round(z); //规范化
 		const ox = x*this.size.x,
-			oz = z*this.size.z, //区块中心坐标
-			t = this.seed; //临时变量
-		
-		//初始化区块
-		if (!this.chunks[x])
-			this.chunks[x] = [];
-		if (!this.chunks[x][z])
-			this.chunks[x][z] = {};
-		
-		this.chunks[x][z].weather = new Weather(
-			[
-				ox + this.size[0].x,
-				oz + this.size[0].z
-			],[
-				ox + this.size[1].x,
-				oz + this.size[1].z
-			],
-			sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime() )
-		);
-		console.log("weather:", sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime()/1000/60 ))
-		time.setInterval((speed)=>{
-			if (!speed) return;
-			console.log("weather:", sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime()/1000/3600 ))
-			this.chunks[x][z].weather.rain =
-				sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime()/1000/3600 );
-		}, 60*1000); //60s更新一次
-		
+			oz = z*this.size.z; //区块中心坐标
 		
 		//回调
 		const func = (columns)=>{
@@ -1288,10 +1275,10 @@ class ChunkMap{
 							}
 						},0);*/
 						
-						if (finishCallback) finishCallback();
 						
-						this.chunks[cX][cZ].state = true; //加载完毕
-						this.chunks[cX][cZ].weather.start_rain(); //开始下雨
+						this.loadedChunk(x, z); //区块加载完毕
+						
+						if (finishCallback) finishCallback();
 						
 						/* let dx = this.size[1].x;
 						let loadChunk_id = setInterval(()=>{
@@ -1379,12 +1366,12 @@ class ChunkMap{
 								this.updateColumn(ox+dx, oz+this.size[1].z);
 								this.updateColumn(ox+dx, oz+this.size[1].z+1);
 							}
+						
 						},0);*/
 						
-						if (finishCallback) finishCallback();
+						this.loadedChunk(x, z); //区块加载完毕
 						
-						this.chunks[cX][cZ].state = true; //加载完毕
-						this.chunks[cX][cZ].weather.start_rain(); //开始下雨
+						if (finishCallback) finishCallback();
 						
 						/* let dz = this.size[0].z;
 						let loadChunk_id = setInterval(()=>{
@@ -1480,12 +1467,12 @@ class ChunkMap{
 								this.updateColumn(ox+dx, oz+this.size[1].z);
 								this.updateColumn(ox+dx, oz+this.size[1].z+1);
 							}
+						
 						},0);*/
 						
-						if (finishCallback) finishCallback();
+						this.loadedChunk(x, z); //区块加载完毕
 						
-						this.chunks[cX][cZ].state = true; //加载完毕
-						this.chunks[cX][cZ].weather.start_rain(); //开始下雨
+						if (finishCallback) finishCallback();
 						
 						/* let dz = this.size[1].z;
 						let loadChunk_id = setInterval(()=>{
@@ -1580,12 +1567,13 @@ class ChunkMap{
 								this.updateColumn(ox+this.size[0].x, oz+dz);
 								this.updateColumn(ox+this.size[0].x-1, oz+dz);
 							}
+						
 						},0);*/
+						
+						this.loadedChunk(x, z); //区块加载完毕
 						
 						if (finishCallback) finishCallback();
 						
-						this.chunks[cX][cZ].state = true; //加载完毕
-						this.chunks[cX][cZ].weather.start_rain(); //开始下雨
 						/* let dx = this.size[0].x;
 						let loadChunk_id = setInterval(()=>{
 							if (dx > this.size[1].x){
@@ -1627,7 +1615,7 @@ class ChunkMap{
 			func( this.perGetChunk(x, z, edit) );
 		}else{
 			const edit = DB.readChunk(x, z).then((edit)=>{
-				this.chunks[x][z].edit = edit; //保存edit
+				this.initChunk(x, z, edit); //初始化区块
 				func( this.perGetChunk(x, z, edit) );
 			});
 			/* db.readStep(TABLE.WORLD, {
@@ -1674,10 +1662,7 @@ class ChunkMap{
 						delete this.map[ox+dx][dy][oz+dz];
 					}
 		
-		//删除区块
-		this.chunks[cX][cZ].weather.stop_rain();
-		delete this.chunks[cX][cZ].weather;
-		delete this.chunks[cX][cZ];
+		this.deleteChunk(x, z);	//删除区块
 	}
 	//卸载区块（异步）
 	unloadChunkAsync(x, z, opt={}){
@@ -1698,37 +1683,12 @@ class ChunkMap{
 		const ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
-		//if (finishCallback){ //有回调（必须setInterval）
-		
 		let t0 = +new Date(),
 			num = 0;
-		
-		/*let dx;
-		if (breakPoint){
-			dx = breakPoint.dx==undefined? this.size[0].x: breakPoint.dx;
-			delete breakPoint.dx;
-		}else{
-			dx = this.size[0].x;
-		}*/
 		for (let i=dx; i<=this.size[1].x; i++){
-			
-			/*let dy;
-			if (breakPoint){
-				dy = breakPoint.dy==undefined? this.size[0].y: breakPoint.dy;
-				delete breakPoint.dy;
-			}else{
-				dy = this.size[0].y;
-			}*/
 			for (let j=dy; j<=this.size[1].y; j++){
-				
-				/*let dz;
-				if (breakPoint){
-					dz = breakPoint.dz==undefined? this.size[0].z: breakPoint.dz;
-					delete breakPoint.dz;
-				}else{
-					dz = this.size[0].z;
-				}*/
 				for (let k=dz; k<=this.size[1].z; k++){
+					
 					const block = this.get(ox+i, j, oz+k);
 					if ( block ){ //非空气 & 非未加载
 						block.block.mesh.material.forEach(v => v.dispose())
@@ -1746,7 +1706,8 @@ class ChunkMap{
 								mostSpeed,
 								breakPoint: {dx:i, dy:j, dz:k+1}
 							})
-						,0);
+						, 0);
+					
 				}
 				dz = map.size[0].z;
 			}
@@ -1765,12 +1726,11 @@ class ChunkMap{
 					})
 				,0);
 		}
+		
+		this.deleteChunk(x, z); //删除区块
+		
 		if (finishCallback) finishCallback();
 		
-		//删除区块
-		this.chunks[cX][cZ].weather.stop_rain();
-		delete this.chunks[cX][cZ].weather;
-		delete this.chunks[cX][cZ];
 			/* let dx = this.size[0].x;
 			let unloadChunk_id = setInterval(()=>{
 				if (dx > this.size[1].x){
@@ -1895,7 +1855,6 @@ class ChunkMap{
 				// this.initChunk(cX, cZ);
 				loading++;
 				
-				this.initChunk(cX, cZ);
 				//用噪声填充区块
 				this.loadChunkAsync(cX, cZ, {
 					breakTime: 16,
