@@ -613,19 +613,19 @@ $(".new_world > button:eq(0)").click(function(){
 			left: "0%",
 			opacity: 1
 		}, 1000);
-	$(".about")
+	$(".new_world")
 		.css("top", "0%")
 		.css("opacity", "1")
 		.animate({
 			top: (Math.round(Math.random())?"-":"") + "100%", //正负100%
 			opacity: 0
 		}, 1000, ()=>{
-			$(".about").css("display", "none");
-			console.log("init", "animate end", $(".init").css("display"), $(".about").css("display"));
+			$(".new_world").css("display", "none");
+			console.log("init", "animate end", $(".init").css("display"), $(".new_world").css("display"));
 		});
 	$(".more").removeAttr("open");
 	
-	console.log("init", "animate start", $(".init").css("display"), $(".about").css("display"));
+	console.log("init", "animate start", $(".init").css("display"), $(".new_world").css("display"));
 });
 
 //关于
