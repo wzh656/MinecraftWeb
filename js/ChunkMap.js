@@ -546,6 +546,7 @@ class ChunkMap{
 		console.log("weather:", sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime()/1000/60 ))
 		time.setInterval((speed)=>{
 			if (!speed) return;
+			if (!this.chunks[x][z].weather) return;
 			console.log("weather:", sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime()/1000/3600 ))
 			this.chunks[x][z].weather.rain =
 				sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime()/1000/3600 );
@@ -557,14 +558,25 @@ class ChunkMap{
 		
 		console.log("finish load chunk", x, z)
 		
+		if (!this.chunks[x])
+			this.chunks[x] = [];
+		if (!this.chunks[x][z])
+			this.chunks[x][z] = {};
+		
 		this.chunks[x][z].state = true; //加载完毕
-		this.chunks[x][z].weather.start_rain(); //开始下雨
+		if (this.chunks[x][z].weather)
+			this.chunks[x][z].weather.start_rain(); //开始下雨
 	}
 	//开始卸载区块
 	startUnloadChunk(x, z){
 		x=Math.round(x), z=Math.round(z); //规范化
 		
 		console.log("start unload chunk", x, z)
+		
+		if (!this.chunks[x])
+			this.chunks[x] = [];
+		if (!this.chunks[x][z])
+			this.chunks[x][z] = {};
 		
 		this.chunks[x][z].state = false; //卸载中
 	}
@@ -574,7 +586,13 @@ class ChunkMap{
 		
 		console.log("finish unload chunk", x, z)
 		
-		this.chunks[x][z].weather.clear_rain();
+		if (!this.chunks[x])
+			this.chunks[x] = [];
+		if (!this.chunks[x][z])
+			this.chunks[x][z] = {};
+		
+		if (this.chunks[x][z].weather)
+			this.chunks[x][z].weather.clear_rain();
 		delete this.chunks[x][z].weather;
 		delete this.chunks[x][z].state; //已卸载
 	}

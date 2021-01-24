@@ -440,11 +440,17 @@ Copyright © 2020~2021 by wzh
 			/*
 				1:遮罩
 			*/
-			#help{
+			#setting{
 				opacity: 0.5;
-				font-size: 3vmax;
+				font-size: 6vmax;
 				padding-top: 6vh;
 				height: 94vh;
+			}
+			#setting > button{
+				width: 60vw;
+				height: 10vh;
+				font-size: 3vmax;
+				margin: 3vmax;
 			}
 			
 			
@@ -684,6 +690,8 @@ Copyright © 2020~2021 by wzh
 		</div>
 		
 		<!-- 0:摇杆操作 -->
+		<div id="control" style="display: none;"></div>
+		<div id="jump" style="display: none;"></div>
 		
 		<!-- 1:命令方块 -->
 		<div id="command" style="z-index: 1;">
@@ -745,11 +753,10 @@ deskgood.moveTo(0,10000*100);
 		</div>
 		
 		<!-- 1:遮罩 -->
-		<h1 id="help" style="z-index: 1; display: none;">
-			WSAD/↑↓←→: 前后左右; 空格:跳跃; 连按W/ctrl+W:疾跑;<br/>
-			Esc: 退出锁定鼠标并保存游戏; F2: 截图;<br/>
-			Pause-Break: 暂停切换; F10: 打开/关闭dat.gui;<br/>
-			请先点击任意处锁定鼠标以开始游戏
+		<h1 id="setting" style="z-index: 1; display: none;">
+			<p>已暂停</p>
+			<button>继续游戏</button>
+			<button>设置</button>
 		</h1>
 		
 		<!-- 2:print -->
@@ -841,34 +848,37 @@ function run(code){
 }
 
 var stop = true,
-	device, //设备：true手机，false电脑
+	device = 0, //设备代码
 	perload_condition = 0,
 	time = new GameTime(localStorage.getItem("我的世界_time"), 1);
-/**
-* 判断手机电脑
-*/
+
+// 判断手机电脑
 if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 		navigator.userAgent.toLowerCase()
 	)
-){ //手机
-	device = true;
-	let control = document.createElement("div");
-	let jump = document.createElement("div");
-	
-	control.id = "control";
-	jump.id = "jump";
-	
-	document.body.appendChild(control);
-	document.body.appendChild(jump);
+){ //手机(-)
+	if ( navigator.userAgent.toLowerCase().indexOf("html5plus") != -1 ){ //html5+
+		device = -2
+	}else{ //浏览器
+		device = -1
+	}
+}else{ //电脑(+)
+	if (typeof require != "undefined"){ //electron
+		device = +2
+	}else{ //浏览器
+		device = +1
+	}
+}
+
+if (device < 0){ //手机
+	$("#control, #jump").css("display", "block");
 	
 	stop = false;
-	if (time.stop)
-		time.stopTime();
+	if (time.stop) //被停止
+		time.stopTime(); //开始
 }else{ //电脑
-	device = false;
-	
 	/* 遮罩，指针 */
-	$("#help, #pointer").css("display", "block");
+	$("#setting, #pointer").css("display", "block");
 	
 	//请求指针锁定
 	document.body.requestPointerLock =
@@ -883,20 +893,11 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 		document.webkitExitPointerLock
 	;
 	
-	//遮罩层事件
-	help.addEventListener("click", function (){
-		/* if (stop){ //请求解除指针锁定
-			document.exitPointerLock =
-				document.exitPointerLock ||
-				document.mozExitPointerLock ||
-				document.webkitExitPointerLock
-			;
-			document.exitPointerLock();
-		}else{ */ 
-			document.body.requestPointerLock();
-			stop = false;
-			playBGM();
-		// }
+	//继续游戏
+	$("#setting > button:eq(0)")[0].addEventListener("click", function (){
+		document.body.requestPointerLock();
+		stop = false;
+		playBGM();
 	}, false);
 	
 	//输入锁定改变事件
@@ -913,13 +914,13 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 			stop = false;
 			if (time.stop) //true
 				time.stopTime();
-			$("#help").css("display", "none");
+			$("#setting").css("display", "none");
 		}else{ //未锁定
 			console.warn("pointerLock no");
 			stop = true;
 			if (!time.stop) //false
 				time.stopTime();
-			$("#help").css("display", "inline-block");
+			$("#setting").css("display", "inline-block");
 			DB.save();
 		}
 	};
@@ -942,6 +943,7 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 	document.addEventListener("webkitpointerlockerror", pointerLockErrorEvent, false);
 }
 
+//2维度射线检测
 function ray2D(crosshair, x, y){
 	const raycaster = new THREE.Raycaster(), //光线投射，用于确定鼠标点击位置
 		mouse = new THREE.Vector2(); //创建二维平面
@@ -955,6 +957,7 @@ function ray2D(crosshair, x, y){
 	//选中后进行的操作
 	return objs.filter(obj => obj.faceIndex !== null); //过滤
 }
+//3维度射线检测
 function ray3D(start, end, near, far){
 	if (start.x === undefined) start.x = deskgood.pos.x;
 	if (start.y === undefined) start.y = deskgood.pos.y;
