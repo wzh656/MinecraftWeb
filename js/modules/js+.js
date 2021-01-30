@@ -37,8 +37,17 @@ Number.prototype.padding = function(start, end){
 // 保留小数位数
 {
 	const round = Math.round;
-	Math.round = function (n, s){
-		if (s) return round(n*10**s)/10**s;
+	Math.round = function (n=0, s){
+		if (s !== undefined) return round(n*10**s)/10**s;
 		return round(n);
 	};
+	
+	const random = Math.random;
+	Math.random = function (max=1, min, s){
+		if (min !== undefined){
+			if (s !== undefined) return Math.round( random()*(max-min)+min, s );
+			return random()*(max-min)+min;
+		};
+		return random()*max;
+	}
 }

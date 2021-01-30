@@ -207,7 +207,7 @@ const deskgood = { //桌子好
 		
 		document.exitPointerLock(); //取消鼠标锁定
 		gui.close(); //隐藏gui
-		$("#help, #warn").hide(); //隐藏 遮罩、横屏提示
+		$("#setting, #warn").hide(); //隐藏 遮罩、横屏提示
 		$("#die")
 			.css("display", "block")
 			.children(".resaon").html(reason);

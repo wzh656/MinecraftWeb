@@ -654,9 +654,7 @@ Copyright © 2020~2021 by wzh
 		<script>
 		const DEBUG = localStorage.getItem("debug")=="false"? false: true;
 		if (DEBUG &&
-			/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
-				navigator.userAgent.toLowerCase()
-			)
+			/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test( navigator.userAgent.toLowerCase() )
 		){ //手机
 			eruda.init();
 			new VConsole();

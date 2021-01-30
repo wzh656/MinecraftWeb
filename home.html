@@ -5,7 +5,7 @@
 		<meta charset="UTF-8" />
 		<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
 		<title>我的世界</title>
-
+		
 		<!--icon-->
 		<link href="./img/icon.png" rel="icon" type="image/x-icon"/>
 		
@@ -32,6 +32,7 @@
 		
 		<link href="./css/bootstrap.css" rel="stylesheet" type="text/css" />
 		<style>
+		/* 字体加载完成 */
 		.wf-active *{
 			font-family: zyyt, serif;
 			outline: none;
@@ -51,11 +52,27 @@
 			font-weight: bold;
 		}
 		
+		/* 字体缩放方案 */
+		@media screen and (min-width: 320px){
+			body {font-size: 1rem;}
+		}
+		@media screen and (min-width: 481px) and (max-width:640px){
+			body {font-size: 1.1rem;}
+		}
+		@media screen and (min-width: 641px) and (max-width:800px){
+			body {font-size: 1.2rem;}
+		}
+		@media screen and (min-width: 801px){
+			body {font-size: 1.3rem;}
+		}
+		
+		/* element */
 		html{
 			-moz-user-select: none;
 			-khtml-user-select: none;
 			user-select: none;
 			
+			/* 背景 */
 			min-height: 100%;
 			background: #1b2036 url("./img/background.jpg") no-repeat fixed center;
 			background-size: cover;
@@ -77,7 +94,7 @@
 			cursor: pointer;
 		}
 		dialog{
-			border-radius: 6px;
+			border-radius: 1vw;
 			
 			top: 50%;
 			transform: translateY(-50%);
@@ -91,22 +108,19 @@
 			margin: 0;
 			text-align: center;
 			
-			display: -webkit-flex;
-			display: -moz-box;
-			display: -mz-flexbox;
 			display: flex;
 			flex-direction: column;
 			justify-content: space-around;
 		}
 		.init h1{
 			color: white;
-			font-size: 10vmax;
+			font-size: 4.6em;
 			margin: 0;
 		}
 		.init > button{
-			width: 66%;
-			/* height: 16%; */
-			font-size: 5vmax;
+			width: 66.6vw;
+			/* height: 10vw; */
+			font-size: 3em;
 			margin: 0 auto;
 			/*font-family: zyyt, serif;*/
 		}
@@ -119,20 +133,21 @@
 			top: 100%;
 			left: 0;
 			margin: 0;
+			font-size: 1em;
 			background-color: white;
 			opacity: 0;
 			overflow-y: auto;
 		}
 		.new_world h2{
-			font-size: 6vmax;
+			font-size: 3.6em;
 			text-align: center;
 		}
 		.new_world label{
-			font-size: 3vmax;
+			font-size: 1.6em;
 		}
 		.new_world input{
 			width: 66%;
-			font-size: 2.6vmax;
+			font-size: 1.6em;
 			
 			border: 1px solid #ced4da;
 			border-radius: 0.3em;
@@ -146,7 +161,7 @@
 			width: 46vw;
 			/*height: 6.8%;*/
 			margin: 3px;
-			font-size: 3vmax;
+			font-size: 2em;
 		}
 		
 		/* MORE */
@@ -165,7 +180,7 @@
 			/* clear:both; */
 		}
 		.more > summary{
-			font-size: 3vmax;
+			font-size: 2em;
 			margin-left: 1%;
 			outline: none;
 		}
@@ -182,30 +197,29 @@
 			}
 		}
 		.more > fieldset > legend{
-			font-size: 3vmax;
+			font-size: 1.8em;
 			margin: 0;
 		}
 		.more > fieldset > fieldset > legend{
-			font-size: 2vmax;
+			font-size: 1.6em;
 			margin: 0;
 		}
 		.more input:not([type="range"]){
 			width: 6vw;
-			font-size: 1.6vmax;
+			font-size: 1em;
 		}
 		.more input[type="range"]{
 			width: 16vw;
 		}
-		
-		.more > div[class]{
+		/* .more > div[class]{
 			float: left;
 			padding-top: 2vh;
-			border: 1px solid black;
+			border: 1vmax solid black;
 			border-radius: 1vmax;
 		}
 		.more div{
 			padding-left: 2vw;
-		}
+		} */
 		
 		/* ABOUT */
 		.about{
@@ -214,22 +228,24 @@
 			height: 100%;
 			top: 100%;
 			left: 0;
+			font-size: 1em;
 			margin: 0;
 			background-color: white;
 			opacity: 0;
 			overflow-y: auto;
 		}
 		.about h2{
-			font-size: 6vmax;
+			font-size: 3.6em;
 			text-align: center;
 		}
 		.about button{
 			width: 66vw;
-			font-size: 5vmax;
+			font-size: 2em;
+			margin: 1vmax;
 		}
 		.about > div{
 			padding: 2vmax;
-			margin: 1vmax;
+			margin: 3vmax;
 		}
 		</style>
 		
@@ -242,8 +258,13 @@
 		
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
-		<script>eruda.init();</script>
-		<script>new VConsole();</script>
+		<script>
+		if ( /ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test( navigator.userAgent.toLowerCase() ) ){
+			//手机
+			eruda.init();
+			new VConsole();
+		}
+		</script>
 
 		<!-- DaoVoice -->
 		<script async defer>(function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/cfb04fc0.js","daovoice")</script>
@@ -286,7 +307,6 @@
 					-180°(E)<input type="range" min="-180" max="180" value="116" step="0.00001" name="longitude" />180°(S)
 					<input type="number" min="-180" max="180" step="0.00001" value="116" style="width: 16vw;" />°<br/>
 					<button class="success" style="width: 96%; font-size: 2vmax;">重新获取地理位置<p>注意：请先打开GPS开关</p></button>
-					<p></p>
 				</fieldset>
 				<fieldset class="height">
 					<legend>高度(height)</legend>
@@ -486,7 +506,7 @@ function getGeolocationPosition(){
 			console.log("api")
 			$.get("https://api.vvhan.com/api/getIpInfo",function(data, status, xhr){ //API
 				if (status == "success" && data.info && data.info.lat && data.info.lng){
-					console.log("api", data);
+					console.log("api success", data)
 					successCallback(data.info.lat, data.info.lng);
 				}else{ //退用navigator
 					console.log("api fail")
@@ -569,20 +589,22 @@ if (localStorage.getItem("我的世界_seed") !== null){
 
 //新的世界
 $(".init > button:eq(0)")[0].onclick = function(){
-	console.log("new_world", $(".init").css("display"), $(".new_world").css("display"));
+	console.log("new_world", $(".init").css("display"), $(".new_world").css("display"), $("button").attr("disabled"));
 	
+	$("button").attr("disabled", "true");
 	$(".init")
 		.css("left", "0%")
 		.css("opacity", "1")
 		.animate({
-			left: (Math.round(Math.random())?"-":"") + "100%", //正负100%
+			left: (Math.random(0,1,0)?"-":"") + "100%", //正负100%
 			opacity: 0
 		}, 1000, ()=>{
 			$(".init").css("display", "none");
-			console.log("new_world", "animate end", $(".init").css("display"), $(".new_world").css("display"));
+			$("button").removeAttr("disabled");
+			console.log("new_world", "animate end", $(".init").css("display"), $(".new_world").css("display"), $("button").attr("disabled"));
 		});
 	$(".new_world")
-		.css("top", (Math.round(Math.random())?"-":"") + "100%") //正负100%
+		.css("top", (Math.random(0,1,0)?"-":"") + "100%") //正负100%
 		.css("opacity", "0")
 		.css("display", "block")
 		.animate({
@@ -591,7 +613,7 @@ $(".init > button:eq(0)")[0].onclick = function(){
 		}, 1000);
 	$(".more").removeAttr("open");
 	
-	console.log("new_world", "animate start", $(".init").css("display"), $(".new_world").css("display"));
+	console.log("new_world", "animate start", $(".init").css("display"), $(".new_world").css("display"), $("button").attr("disabled"));
 };
 //已有存档
 if (localStorage.getItem("我的世界_seed") !== null){
@@ -603,10 +625,11 @@ if (localStorage.getItem("我的世界_seed") !== null){
 
 //新的世界 取消
 $(".new_world > button:eq(0)").click(function(){
-	console.log("init", $(".init").css("display"), $(".new_world").css("display"));
+	console.log("init", $(".init").css("display"), $(".new_world").css("display"), $("button").attr("disabled"));
 	
+	$("button").attr("disabled", "true");
 	$(".init")
-		.css("left", (Math.round(Math.random())?"-":"") + "100%") //正负100%
+		.css("left", (Math.random(0,1,0)?"-":"") + "100%") //正负100%
 		.css("opacity", "0")
 		.css("display", "flex")
 		.animate({
@@ -617,33 +640,36 @@ $(".new_world > button:eq(0)").click(function(){
 		.css("top", "0%")
 		.css("opacity", "1")
 		.animate({
-			top: (Math.round(Math.random())?"-":"") + "100%", //正负100%
+			top: (Math.random(0,1,0)?"-":"") + "100%", //正负100%
 			opacity: 0
 		}, 1000, ()=>{
 			$(".new_world").css("display", "none");
-			console.log("init", "animate end", $(".init").css("display"), $(".new_world").css("display"));
+			$("button").removeAttr("disabled");
+			console.log("init", "animate end", $(".init").css("display"), $(".new_world").css("display"), $("button").attr("disabled"));
 		});
 	$(".more").removeAttr("open");
 	
-	console.log("init", "animate start", $(".init").css("display"), $(".new_world").css("display"));
+	console.log("init", "animate start", $(".init").css("display"), $(".new_world").css("display"), $("button").attr("disabled"));
 });
 
 //关于
 $(".init > button:eq(1)").click(function(){
-	console.log("about", $(".init").css("display"), $(".about").css("display"));
+	console.log("about", $(".init").css("display"), $(".about").css("display"), $("button").attr("disabled"));
 	
+	$("button").attr("disabled", "true");
 	$(".init")
 		.css("left", "0%")
 		.css("opacity", "1")
 		.animate({
-			left: (Math.round(Math.random())?"-":"") + "100%", //正负100%
+			left: (Math.random(0,1,0)?"-":"") + "100%", //正负100%
 			opacity: 0
 		}, 1000, ()=>{
 			$(".init").css("display", "none");
-			console.log("about", "animate end", $(".init").css("display"), $(".about").css("display"));
+			$("button").removeAttr("disabled");
+			console.log("about", "animate end", $(".init").css("display"), $(".about").css("display"), $("button").attr("disabled"));
 		});
 	$(".about")
-		.css("top", (Math.round(Math.random())?"-":"") + "100%") //正负100%
+		.css("top", (Math.random(0,1,0)?"-":"") + "100%") //正负100%
 		.css("opacity", "0")
 		.css("display", "block")
 		.animate({
@@ -651,7 +677,7 @@ $(".init > button:eq(1)").click(function(){
 			opacity: 1
 		}, 1000);
 	
-	console.log("about", "animate start", $(".init").css("display"), $(".about").css("display"));
+	console.log("about", "animate start", $(".init").css("display"), $(".about").css("display"), $("button").attr("disabled"));
 	
 	/*try{
 		plus.screen.lockOrientation("portrait-primary");
@@ -662,10 +688,11 @@ $(".init > button:eq(1)").click(function(){
 
 //关于 取消
 $(".about > center > button:eq(0)").click(function(){
-	console.log("init", $(".init").css("display"), $(".about").css("display"));
+	console.log("init", $(".init").css("display"), $(".about").css("display"), $("button").attr("disabled"));
 	
+	$("button").attr("disabled", "true");
 	$(".init")
-		.css("left", (Math.round(Math.random())?"-":"") + "100%") //正负100%
+		.css("left", (Math.random(0,1,0)?"-":"") + "100%") //正负100%
 		.css("opacity", "0")
 		.css("display", "flex")
 		.animate({
@@ -676,15 +703,16 @@ $(".about > center > button:eq(0)").click(function(){
 		.css("top", "0%")
 		.css("opacity", "1")
 		.animate({
-			top: (Math.round(Math.random())?"-":"") + "100%", //正负100%
+			top: (Math.random(0,1,0)?"-":"") + "100%", //正负100%
 			opacity: 0
 		}, 1000, ()=>{
 			$(".about").css("display", "none");
-			console.log("init", "animate end", $(".init").css("display"), $(".about").css("display"));
+			$("button").removeAttr("disabled");
+			console.log("init", "animate end", $(".init").css("display"), $(".about").css("display"), $("button").attr("disabled"));
 		});
 	$(".more").removeAttr("open");
 	
-	console.log("init", "animate start", $(".init").css("display"), $(".about").css("display"));
+	console.log("init", "animate start", $(".init").css("display"), $(".about").css("display"), $("button").attr("disabled"));
 });
 
 //生成世界
