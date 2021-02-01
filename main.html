@@ -64,10 +64,30 @@ Copyright © 2020~2021 by wzh
 				font-weight: bold;
 			}
 			
+			/* 字体缩放方案 */
+			@media screen and (max-width:320px){
+				body {font-size: 0.8rem;}
+			}
+			@media screen and (min-width: 321px) and (max-width:481px){
+				body {font-size: 1rem;}
+			}
+			@media screen and (min-width: 481px) and (max-width:640px){
+				body {font-size: 1.1rem;}
+			}
+			@media screen and (min-width: 641px) and (max-width:800px){
+				body {font-size: 1.2rem;}
+			}
+			@media screen and (min-width: 801px) and (max-width:960px){
+				body {font-size: 1.5rem;}
+			}
+			@media screen and (min-width: 960px){
+				body {font-size: 2rem;}
+			}
+			
 			/* 选择 */
-			::selection {
+			::selection{
 				color: #fff;
-				background: #f9cc9d;
+				background: #c2b099;
 			}
 			*{
 				/* 禁止复制选中 */
@@ -95,10 +115,11 @@ Copyright © 2020~2021 by wzh
 				/* 隐藏body窗口区域滚动条 */
 			}
 			button{
-				font-weight: 400;
 				vertical-align: middle;
-				border: 1px solid #ced4da;
+				border: 0.2vmax solid #ced4da;
 				border-radius: 1vmax;
+				font-size: 0.6em;
+				font-weight: 400;
 				color: #212529;
 				background-color: #fff;
 				transition: color 0.3s, background-color 0.3s, border-color 0.3s;
@@ -157,16 +178,10 @@ Copyright © 2020~2021 by wzh
 					0 0 20px rgba(0,0,255, .5),
 					0 0 30px rgba(255,255,0, .7);
 			}
-			/* h1::before{
-				/* content: "\a\a";
-				white-space: pre; *//*
-				display: block;
-				height: 6.6vmax;
-			} */
 			h1::after{
 				content: "Copyright © 2020 by wzh";
 				white-space: pre;
-				font-size: 1.6vmax;
+				font-size: 0.2em;
 				
 				position: absolute;
 				bottom: 6vh;
@@ -255,22 +270,22 @@ Copyright © 2020~2021 by wzh
 			*/
 			#control{
 				position: absolute;
-				bottom: 16%;
-				left: 10%;
+				bottom: 16vh;
+				left: 10vw;
 				background: #aaa;
 				opacity: 0.66;
-				width: 66px;
-				height: 66px;
+				width: 8vw;
+				height: 8vw;
 				border-radius: 50%;
 			}
 			#jump{
 				position: absolute;
-				bottom: 16%;
-				right: 10%;
+				bottom: 16vh;
+				right: 10vw;
 				background: #aaa;
 				opacity: 0.66;
-				width: 46px;
-				height: 46px;
+				width: 6vw;
+				height: 6vw;
 				border-radius: 50%;
 			}
 			
@@ -288,7 +303,6 @@ Copyright © 2020~2021 by wzh
 				transform: translate(-50%, -50%);
 				
 				display: none;
-				z-index: 1;
 				
 				background-color: rgb(200,200,200);
 				border: 0.5vmax #fff outset;
@@ -305,16 +319,16 @@ Copyright © 2020~2021 by wzh
 				color: black;
 				background-color: #d6d6d6;
 				border: 0.3vmax #fff inset;
-				font-size: 3vmax;
+				font-size: 1em;
 			}
 			#command > span{
-				font-size: 66%;
+				font-size: 0.5em;
 			}
 			#command > button{
 				width: 48%;
 				height: 9%;
 				margin: 0 0.6%;
-				font-size: 3vmax;
+				font-size: 1.4em;
 			}
 			
 			
@@ -330,31 +344,23 @@ Copyright © 2020~2021 by wzh
 				padding: 0;
 				
 				display: none;
-				flex-direction: column-reverse; /* 反向 */
+				flex-direction: column;
 				/* overflow-y: auto; */
 				/* top: 45%; */
 				
 			}
 			
-			/* input */
-			#bag > input[type="radio"][name="bag-nav"]{ /* 隐藏input */
-				display: none;
-			}
-			#bag > input[type="radio"][name="bag-nav"] + section{ /* 未选择的section隐藏 */
-				display: none;
-			}
-			#bag > input[type="radio"][name="bag-nav"]:checked + section{ /* 选择的section显示 */
-				display: flex;
-			}
 			
 			/* 导航栏 */
-			#bag > nav{ /* 导航栏 */
+			#bag > nav{
 				display: flex;
 				justify-content: center;
 				
 				width: 100%;
 			}
-			#bag > nav > label{ /* 导航栏项目 */
+			
+			/* 导航栏项目 */
+			#bag > nav > label{
 				width: 33%;
 				height: 6vh;
 				margin: 0 0.3vmax;
@@ -367,14 +373,20 @@ Copyright © 2020~2021 by wzh
 				border-top-right-radius: 3vmax;
 				
 				text-align: center;
-				font-size: 3vmax;
+				font-size: 1.2em;
 				line-height: 6vh;
 			}
 			#bag > nav > label:not([onclick]):hover{ /* 悬停加深颜色 */
 				background-color: rgb(100,100,100);
 			}
+			#bag > nav > label[checked]{ /* 被选中 */
+				color: black !important;
+				background-color: rgb(200,200,200) !important;
+				border: 0.5vmax outset rgb(116,116,116) !important;
+			}
 			
-			#bag > nav > label[onclick]{ /* “关闭”按钮 */
+			/* “关闭”按钮 */
+			#bag > nav > label[onclick]{
 				width: 6vh;
 				flex-grow: 0;
 				flex-shrink: 0;
@@ -389,24 +401,23 @@ Copyright © 2020~2021 by wzh
 				border: 0.5vmax solid rgb(116,116,116);
 			}
 			
-			#bag > input:nth-of-type(1)[type="radio"][name="bag-nav"]#bag-nav-choice1:checked ~ nav > label:nth-of-type(1),
-			#bag > input:nth-of-type(2)[type="radio"][name="bag-nav"]#bag-nav-choice2:checked ~ nav > label:nth-of-type(2),
-			#bag > input:nth-of-type(3)[type="radio"][name="bag-nav"]#bag-nav-choice3:checked ~ nav > label:nth-of-type(3)
-			{ /* 被选中 */
-				color: black;
-				background-color: rgb(200,200,200);
-				border: 0.5vmax outset rgb(116,116,116);
-			}
-			
+			/* section */
 			#bag > section{
 				height: 100%;
 				
 				background-color: rgb(200,200,200);
 				border: 0.5vmax #fff outset;
 			}
+			#bag > section:not([checked]){ /* 未选择的section隐藏 */
+				display: none;
+			}
+			#bag > section[checked]{ /* 选择的section显示 */
+				display: flex;
+			}
+			
 			/* section1:背包 */
 			#bag > section:nth-of-type(1) > #bag_deskgood{ /* deskgood旋转动画 */
-				margin: 1vw;
+				margin: 1vmax;
 				border: 0.5vmax inset rgb(200,200,200);
 			}
 			#bag > section:nth-of-type(1) > ul{ /* 背包物品栏列表 */
@@ -418,7 +429,7 @@ Copyright © 2020~2021 by wzh
 			}
 			#bag > section:nth-of-type(1) > ul > li{ /* 背包物品栏 */
 				display: block;
-				font-size: 3vmax;
+				font-size: 1.2em;
 			}
 			#bag > section:nth-of-type(1) > ul > li > ol{ /* 背包物品栏图片项目列表 */
 				display: inline-flex;
@@ -441,16 +452,22 @@ Copyright © 2020~2021 by wzh
 				1:遮罩
 			*/
 			#setting{
+				display: flex;
+				flex-direction: column;
+				
 				opacity: 0.5;
-				font-size: 6vmax;
 				padding-top: 6vh;
 				height: 94vh;
+			}
+			#setting > p{
+				font-size: 1.5em;
+				margin: 6vmax 0;
 			}
 			#setting > button{
 				width: 60vw;
 				height: 10vh;
-				font-size: 3vmax;
-				margin: 3vmax;
+				font-size: 0.8em;
+				margin: 3vmax auto;
 			}
 			
 			
@@ -463,7 +480,7 @@ Copyright © 2020~2021 by wzh
 				left: 0;
 				max-width: 16vw;
 				max-height: 86vh;
-				font-size: 1.5vw;
+				font-size: 0.5em;
 				overflow-y: hidden;
 			}
 			printgroup > print{
@@ -477,7 +494,7 @@ Copyright © 2020~2021 by wzh
 				3:进度条
 			*/
 			#progress{
-				font-size: 3vmax;
+				font-size: 1.4em;
 				padding-top: 12.6vh;
 				height: 87.4vh;
 				
@@ -536,7 +553,7 @@ Copyright © 2020~2021 by wzh
 				
 				padding-bottom: 16.6vh;
 				height: 83.4vh;
-				font-size: 6.6vmax;
+				font-size: 2.8em;
 			}
 			#warning > span{
 				flex-grow: 0;
@@ -547,7 +564,7 @@ Copyright © 2020~2021 by wzh
 				position: relative;
 				top: 6vh;
 				margin: 0 auto;
-				font-size: 6vmax;
+				font-size: 0.8em;
 			}
 			/* 电脑隐藏 */
 			@media not screen and (orientation:portrait){
@@ -563,7 +580,7 @@ Copyright © 2020~2021 by wzh
 			#die{
 				background-image: none;
 				background-color: rgba(200,0,0,0.392157);
-				font-size: 3.6vmax;
+				font-size: 1.6em;
 				padding-top: 6vh;
 			}
 			#die p{
@@ -571,11 +588,11 @@ Copyright © 2020~2021 by wzh
 				margin: 0;
 			}
 			#die > header{
-				font-size: 5.6vmax;
+				font-size: 1.6em;
 			}
 			#die > button{
-				width: 50%;
-				font-size: 6vmax;
+				width: 66vw;
+				font-size: 1.2em;
 				/*font-family: hwxk, serif;*/
 			}
 			/*#die > .resaon{
@@ -618,6 +635,7 @@ Copyright © 2020~2021 by wzh
 				bottom: 16vh;
 				max-width: 36vw;
 				
+				font-size: 1em;
 				background-color: #fffae8;
 				
 				padding: 1vmax;
@@ -705,8 +723,13 @@ deskgood.moveTo(0,10000*100);
 		
 		<!-- 1:背包 -->
 		<div id="bag" data-display="flex" style="z-index: 1;">
-			<input type="radio" name="bag-nav" id="bag-nav-choice1" checked />
-			<section>
+			<nav>
+				<label checked>物品</label>
+				<label>状态</label>
+				<label>智造</label>
+				<label onclick="state('bag');">╳</label>
+			</nav>
+			<section checked>
 				<ul>
 					<li>
 						头(Head)：
@@ -734,27 +757,26 @@ deskgood.moveTo(0,10000*100);
 					</li>
 				</ul>
 			</section>
-			<input type="radio" name="bag-nav" id="bag-nav-choice2" />
 			<section>
 				“状态”功能待开发中……
 			</section>
-			<input type="radio" name="bag-nav" id="bag-nav-choice3" />
 			<section>
 				“制造”功能待开发中……
 			</section>
-			<nav>
-				<label for="bag-nav-choice1">物品</label>
-				<label for="bag-nav-choice2">状态</label>
-				<label for="bag-nav-choice3">智造</label>
-				<label onclick="state('bag');">╳</label>
-			</nav>
+			<script>
+				for (const [i,v] of Object.entries($("#bag > nav > label")))
+					v.onclick = function(){
+						$(this).attr("checked", "").siblings().removeAttr("checked");
+						$("#bag > section:eq("+i+")").attr("checked", "").siblings().removeAttr("checked");
+					};
+			</script>
 		</div>
 		
 		<!-- 1:遮罩 -->
 		<h1 id="setting" style="z-index: 1; display: none;">
 			<p>已暂停</p>
-			<button>继续游戏</button>
-			<button>设置</button>
+			<button class="success">继续游戏</button>
+			<button class="info">设置</button>
 		</h1>
 		
 		<!-- 2:print -->

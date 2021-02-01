@@ -52,17 +52,24 @@
 			font-weight: bold;
 		}
 		
+		
 		/* 字体缩放方案 */
-		@media screen and (min-width: 320px){
+		@media screen and (max-width:320px){
+			body {font-size: 0.8rem;}
+		}
+		@media screen and (min-width: 321px) and (max-width:481px){
 			body {font-size: 1rem;}
 		}
 		@media screen and (min-width: 481px) and (max-width:640px){
 			body {font-size: 1.1rem;}
 		}
 		@media screen and (min-width: 641px) and (max-width:800px){
-			body {font-size: 1.2rem;}
+			body {font-size: 1.15rem;}
 		}
-		@media screen and (min-width: 801px){
+		@media screen and (min-width: 801px) and (max-width:960px){
+			body {font-size: 1.25rem;}
+		}
+		@media screen and (min-width: 960px){
 			body {font-size: 1.3rem;}
 		}
 		
