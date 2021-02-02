@@ -235,6 +235,37 @@ Copyright © 2020~2021 by wzh
 				resize: none;
 			}
 			
+			/*
+				0:顶部工具栏
+			*/
+		   #topTools{
+			   position: absolute;
+			   top: 0;
+			   left: 50%;
+			   transform: translateX(-50%);
+			   margin: 0;
+			   padding: 0;
+		   }
+			#topTools > li{
+				display: block;
+			}
+			#topTools > li:nth-child(1){ /* 暂停按钮 */
+				padding: 0.6vmax;
+				opacity: 0.6;
+				background-color: #aaa;
+			}
+			#topTools > li:nth-child(1) > div{
+				width: 1.2vmax;
+				height: 1.2vmax;
+				padding: 0;
+				background-color: #aaa;
+				box-sizing: border-box;
+				
+				border-style: double;
+				border-width: 0px 0px 0px 1.2vmax;
+				border-color: #202020;
+			}
+			
 			
 			/*
 				0:十字准星
@@ -460,13 +491,13 @@ Copyright © 2020~2021 by wzh
 				height: 94vh;
 			}
 			#setting > p{
-				font-size: 1.5em;
+				font-size: 1.4em;
 				margin: 6vmax 0;
 			}
 			#setting > button{
 				width: 60vw;
 				height: 10vh;
-				font-size: 0.8em;
+				font-size: 0.7em;
 				margin: 3vmax auto;
 			}
 			
@@ -699,6 +730,11 @@ Copyright © 2020~2021 by wzh
 			<li><img src="./img/more.png" onclick="state('bag');" /></li>
 		</ul>
 		
+		<!-- 0:顶部工具栏 -->
+		<ul id="topTools">
+			<li><div></div></li>
+		</ul>
+		
 		<!-- 0:十字准星 -->
 		<div id="pointer" style="display: none;">
 			<div></div>
@@ -773,7 +809,7 @@ deskgood.moveTo(0,10000*100);
 		</div>
 		
 		<!-- 1:遮罩 -->
-		<h1 id="setting" style="z-index: 1; display: none;">
+		<h1 id="setting" style="z-index: 1;">
 			<p>已暂停</p>
 			<button class="success">继续游戏</button>
 			<button class="info">设置</button>
@@ -889,57 +925,62 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 		device = +1
 	}
 }
+console.log("device:", device)
 
 if (device < 0){ //手机
-	$("#control, #jump").css("display", "block");
+	$("#control, #jump").css("display", "block"); //显示摇杆
 	
+	$("#setting").css("display", "none");
 	stop = false;
-	if (time.stop) //被停止
-		time.stopTime(); //开始
+	if (time.stop) //已暂停
+		time.stopTime(); //继续
+	//继续游戏
+	$("#setting > button:eq(0)").click(function (){
+		$("#setting").css("display", "none");
+		stop = false;
+		if (time.stop) //已暂停
+			time.stopTime(); //继续
+		playBGM();
+	});
 }else{ //电脑
-	/* 遮罩，指针 */
-	$("#setting, #pointer").css("display", "block");
+	$("#pointer").css("display", "block"); //显示指针
 	
 	//请求指针锁定
 	document.body.requestPointerLock =
 		document.body.requestPointerLock ||
 		document.body.mozRequestPointerLock ||
-		document.body.webkitRequestPointerLock
-	;
+		document.body.webkitRequestPointerLock;
 	//解除鼠标锁定
 	document.exitPointerLock =
 		document.exitPointerLock ||
 		document.mozExitPointerLock ||
-		document.webkitExitPointerLock
-	;
+		document.webkitExitPointerLock;
 	
 	//继续游戏
-	$("#setting > button:eq(0)")[0].addEventListener("click", function (){
-		document.body.requestPointerLock();
-		stop = false;
+	$("#setting > button:eq(0)").click(function (){
+		document.body.requestPointerLock(); //请求成功后再继续游戏
 		playBGM();
-	}, false);
+	});
 	
 	//输入锁定改变事件
 	const pointerLockChangeEvent = function(){
 		if (typeof stop == "string")
 			return;
 		
-		if (
-			document.pointerLockElement === document.body ||
+		if ( document.pointerLockElement === document.body ||
 			document.mozPointerLockElement === document.body ||
 			document.webkitPointerLockElement === document.body
-		){ //已锁定
-			console.warn("pointerLock yes");
+		){ //已锁定 继续
+			console.log("pointerLock yes");
 			stop = false;
-			if (time.stop) //true
-				time.stopTime();
+			if (time.stop) //已暂停
+				time.stopTime(); //继续
 			$("#setting").css("display", "none");
-		}else{ //未锁定
-			console.warn("pointerLock no");
+		}else{ //未锁定 暂停
+			console.log("pointerLock no");
 			stop = true;
-			if (!time.stop) //false
-				time.stopTime();
+			if (!time.stop) //未暂停
+				time.stopTime(); //暂停
 			$("#setting").css("display", "inline-block");
 			DB.save();
 		}
@@ -953,15 +994,32 @@ if (device < 0){ //手机
 		document.body.requestPointerLock();
 	};
 	
-	//添加锁定事件
+	//添加锁定改变事件
 	document.addEventListener("pointerlockchange", pointerLockChangeEvent, false);
 	document.addEventListener("mozpointerlockchange", pointerLockChangeEvent, false);
 	document.addEventListener("webkitpointerlockchange", pointerLockChangeEvent, false);
 	
+	//添加锁定错误事件
 	document.addEventListener("pointerlockerror", pointerLockErrorEvent, false);
 	document.addEventListener("mozpointerlockerror", pointerLockErrorEvent, false);
 	document.addEventListener("webkitpointerlockerror", pointerLockErrorEvent, false);
 }
+
+//暂停按钮
+$("#topTools > li:eq(0)").click(function(){
+	if (typeof stop == "string"){ //打开窗口
+		const stop0 = stop;
+		state(stop);
+		console.log("StopButton", stop0, "changeTo", stop);
+	}else{ //普通暂停
+		const stop0 = stop;
+		stop = true;
+		DB.save();
+		document.exitPointerLock();
+		$("#setting").css("display", "inline-block");
+		console.log("StopButton", stop0, "changeTo", stop);
+	}
+});
 
 //2维度射线检测
 function ray2D(crosshair, x, y){
@@ -1075,13 +1133,7 @@ function record(canvas, time, opt={}){
 	};
 	
 	mediaRecord.start(); //开始录屏
-	setTimeout(()=>{
-		mediaRecord.stop(); //结束录屏
-		/* const videoBlob = new Blob(chunks, {type: "video/mp4"}),
-			videoUrl = window.URL.createObjectURL(videoBlob);
-		console.log(videoUrl);
-		Img.download(videoUrl, "录屏.mp4"); */
-	}, time);
+	return ()=>mediaRecord.stop();
 }
 </script>
 		<!-- <script src="./js/sendMessage.js"></script> -->

@@ -1,8 +1,7 @@
 function playBGM(){
 	const bgm = $("#bgm")[0];
-	if (bgm.paused){
-		const random = Math.random();
-		if (random < 0.5){
+	if ( bgm.paused ){
+		if ( Math.random(1, 0, 0) ){
 			bgm.volume = 1;
 			bgm.src = "./music/1.m4a";
 			bgm.play();
@@ -33,5 +32,6 @@ function playBGM(){
 		bgm.play();
 	}
 }
+
 document.addEventListener("plusready", playBGM);
 document.addEventListener("touchstart", playBGM);

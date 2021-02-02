@@ -397,7 +397,7 @@ class ChunkMap{
 	//更新列方块
 	updateColumn(x, z){
 		//console.log("updateColumn:",x,z,+time.getTime());
-		for (let dy=this.size[0].y, yMax = this.size[1].y; dy<=yMax; dy++)
+		for (let dy=this.size[0].y, y1 = this.size[1].y; dy<=y1; dy++)
 			this.update(x, dy, z);
 	}
 	
@@ -416,8 +416,8 @@ class ChunkMap{
 		let {
 				finishCallback,
 				progressCallback,
-				breakTime, // 最大执行时间/ms
-				mostSpeed, // 最大速度/次
+				breakTime=66, // 最大执行时间/ms
+				mostSpeed=2, // 最大速度/次
 				breakPoint={}
 			} = opt,
 			{
@@ -428,87 +428,44 @@ class ChunkMap{
 		const ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
-		if (finishCallback || progressCallback || breakTime || mostSpeed){ // 有回调（必须setInterval）or限速
-			breakTime = breakTime || 66;
-			mostSpeed = mostSpeed || 2;
-			let t0 = new Date(),
-				num = 0;
-			
-			for (let i=dx; i<=this.size[1].x; i++){
-				for (let j=dz; j<=this.size[1].z; j++){
-					
-					for (let dy=this.size[0].y; dy<=this.size[1].y; dy++)
-						this.update(ox+i, dy, oz+j);
-					
-					if (new Date()-t0 > breakTime) //超时
-						return setTimeout(()=>{
-							this.updateChunkAsync(x, z, {
-								finishCallback,
-								progressCallback,
-								breakTime,
-								breakPoint: {dx:i, dz:j+1}
-							});
-						},0);
-					
-				}
-				dz = this.size[0].z;
-				if (progressCallback)
-					progressCallback( (i-this.size[0].x) / (this.size[1].x-this.size[0].x) );
-				if (++num >= mostSpeed) //超数
+		
+		let t0 = new Date(),
+			num = 0;
+		
+		for (let i=dx; i<=this.size[1].x; i++){
+			for (let j=dz; j<=this.size[1].z; j++){
+				
+				for (let dy=this.size[0].y; dy<=this.size[1].y; dy++)
+					this.update(ox+i, dy, oz+j);
+				
+				if (new Date()-t0 > breakTime) //超时
 					return setTimeout(()=>{
 						this.updateChunkAsync(x, z, {
 							finishCallback,
 							progressCallback,
 							breakTime,
-							breakPoint: {dx:i+1}
+							breakPoint: {dx:i, dz:j+1}
 						});
 					},0);
+				
 			}
+			dz = this.size[0].z;
 			
-			if (finishCallback) finishCallback();
+			if (progressCallback)
+				progressCallback( (i-this.size[0].x) / (this.size[1].x-this.size[0].x) );
 			
-			/* let dx = this.size[0].x;
-			let updateChunk_id = setInterval(()=>{
-				if (dx > this.size[1].x){
-					clearInterval(updateChunk_id);
-					finishCallback();
-					return;
-				}
-				
-				//正常代码
-				for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
-					for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-						this.update(ox+dx, dy, oz+dz);
-					}
-				}
-				
-				dx++;
-				
-				if (progressCallback)
-					progressCallback((dx-this.size[0].x)/(this.size[1].x-this.size[0].x));
-			},0); */
-		}else{ //无回调（不分顺序）
-			for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
-				setTimeout(()=>{
-					
-					//正常代码
-					for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
-						for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-							this.update(ox+dx, dy, oz+dz);
-						}
-					}
-					
+			if (++num >= mostSpeed) //超数
+				return setTimeout(()=>{
+					this.updateChunkAsync(x, z, {
+						finishCallback,
+						progressCallback,
+						breakTime,
+						breakPoint: {dx:i+1}
+					});
 				},0);
-			}
 		}
 		
-		/* for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
-			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
-				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-					this.update(ox+dx, dy, oz+dz);
-				}
-			}
-		} */
+		if (finishCallback) finishCallback();
 	}
 	
 	
@@ -604,7 +561,7 @@ class ChunkMap{
 		const arr = [];
 		for (const i in this.chunks)			
 			for (const j in this.chunks[i])
-				if ( this.chunks[i][j].state !== undefined )
+				if ( this.chunks[i][j].state !== undefined ) // true或false
 					arr.push([i, j])
 		
 		return arr;
@@ -627,28 +584,6 @@ class ChunkMap{
 	/*
 	* 区块操作
 	*/
-   
-	/* //初始化区块
-	initChunk(x, z){
-		[x, z] = [Math.round(pos.x), Math.round(pos.z)]; //规范化
-		let ox = x*this.size.x,
-			oz = z*this.size.z; //区块中心坐标
-		
-		if (this.getInitedChunks().every(function(value, index, arr){
-			return value[0] != x || value[1] != z;
-		})) //每个都不一样（不存在）
-			this.initedChunk.push([x,z]);
-		
-		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++){
-			this.map[ox+dx] = this.map[ox+dx] || [];
-			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
-				this.map[ox+dx][dy] = this.map[ox+dx][dy] || [];
-				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-					this.map[ox+dx][dy][oz+dz] = false/* null *//*;
-				}
-			}
-		}
-	} */
 	
 	//获取方块信息
 	perGet(x, y, z, edit){
@@ -1034,49 +969,6 @@ class ChunkMap{
 		}
 		
 		return column;
-		/* if (treeTop){ //非强制添加树叶(9)
-			setTimeout(()=>{
-				this.addID(9, {
-					x: x,
-					y: treeTop+1,
-					z: z
-				}, template, {
-					type: false
-				});
-				let leavesHeight = sNoise.leavesScale(this.seed.noise, this.seed.lS, x, z) *(treeHeight - height);
-				for (let i=0; i<=leavesHeight; i++){
-					this.addID(9, {
-						x: x+1,
-						y: treeTop-i,
-						z: z
-					}, template, {
-						type: false
-					});
-					this.addID(9, {
-						x: x-1,
-						y: treeTop-i,
-						z: z
-					}, template, {
-						type: false
-					});
-					this.addID(9, {
-						x: x,
-						y: treeTop-i,
-						z: z+1
-					}, template, {
-						type: false
-					});
-					this.addID(9, {
-						x: x,
-						y: treeTop-i,
-						z: z-1
-					}, template, {
-						type: false
-					});
-				}
-			}, 1000);
-			
-		} */
 	}
 	/*perGetColumn_worker(x, z, edit, finishCallback){
 		let worker = new Worker("./perGetColumn_worker.js");
@@ -1831,7 +1723,7 @@ class ChunkMap{
 			progressCallback,
 			finishCallback
 		} = opt;
-		let chunks = [];
+		const chunks = [];
 		for (let x=-length; x<=length; x+=map.size.x){
 			for (let z=-length; z<=length; z+=map.size.z){
 				let push = [

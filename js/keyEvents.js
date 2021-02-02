@@ -1,10 +1,11 @@
 /*
 * keydown
 */
-let keydown = {
+const keydown = {
 	key: new Set(),
 	double_run: [],
-	t0: null
+	t0: null,
+	record_stop: null
 };
 document.addEventListener("keydown", function (e){
 	if (e.keyCode == 69){ //E 切换背包
@@ -23,8 +24,7 @@ document.addEventListener("keydown", function (e){
 		stop = false;
 		document.exitPointerLock();
 		//手动更新锁定情况
-		if (
-			document.pointerLockElement === document.body ||
+		if ( document.pointerLockElement === document.body ||
 			document.mozPointerLockElement === document.body ||
 			document.webkitPointerLockElement === document.body
 		){ //已锁定
@@ -42,23 +42,25 @@ document.addEventListener("keydown", function (e){
 	}
 	
 	if (e.keyCode == 19){ //Pause-Break 切换
-		if (stop){ //暂停
-			if (typeof stop == "string"){ //打开窗口
-				let stop0 = stop;
+		if (stop){ //已暂停
+			if (typeof stop == "string"){ //已打开窗口
+				const stop0 = stop;
 				state(stop);
 				console.log("Pause-Break", stop0, "changeTo", stop);
-			}else{ //普通暂停
-				let stop0 = stop;
+			}else{ //无抵抗窗口 继续
+				const stop0 = stop;
 				document.body.requestPointerLock();
 				stop = false;
+				$("#setting").css("display", "none");
 				console.log("Pause-Break", stop0, "changeTo", stop);
 			}
 		}else{ //未暂停
-			let stop0 = stop;
+			const stop0 = stop;
 			stop = true;
 			// $("#game,#mouse").css("cursor", "default");
-			DB_save();
+			DB.save();
 			document.exitPointerLock();
+			$("#setting").css("display", "inline-block");
 			console.log("Pause-Break", stop0, "changeTo", stop);
 		}
 		return false;
@@ -91,9 +93,6 @@ document.addEventListener("keydown", function (e){
 			return false;
 		}
 	}
-	if (e.keyCode == 115){ //F4 录屏
-		record($("#game")[0], prompt("请输入欲录屏时长(s)")*1000);
-	}
 	
 	if (stop){
 		keydown.double_run = [];
@@ -125,7 +124,7 @@ document.addEventListener("keydown", function (e){
 	keydown.key.add(e.keyCode);
 	
 	return false;
-});
+}, true);
 document.addEventListener("keyup", function (e){
 	keydown.key.delete(e.keyCode);
 	
@@ -138,8 +137,18 @@ document.addEventListener("keyup", function (e){
 			keydown.double_run = [];
 		}
 	}
+	
+	if (e.keyCode == 115){ //F4 录屏
+		if (keydown.record_stop){
+			keydown.record_stop(); //停止录屏
+			keydown.record_stop = null;
+		}else if ( confirm("是否开始录屏？\n再次按F4结束录屏") ){
+			keydown.record_stop = record( $("#game")[0] );
+		}
+	}
+	
 	return false;
-});
+}, true);
 
 let last_jump = time.getTime()-1000;
 setInterval(function(){
