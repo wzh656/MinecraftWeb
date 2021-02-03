@@ -35,7 +35,7 @@ document.addEventListener("keydown", function (e){
 			console.log("pointerLock no");
 			stop = true;
 			$("#help").css("display", "inline-block");
-			DB_save();
+			DB.save();
 		}
 		
 		return false;
@@ -104,7 +104,7 @@ document.addEventListener("keydown", function (e){
 		
 		stop = true;
 		// $("#game,#mouse").css("cursor", "default");
-		DB_save();
+		DB.save();
 		document.exitPointerLock();
 		
 		return false;

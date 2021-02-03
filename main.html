@@ -42,11 +42,12 @@ Copyright © 2020~2021 by wzh
 		
 		<link href="./css/bootstrap.css" rel="stylesheet" type="text/css" />
 		<style>
-			/* 我的世界颜色：
-			按钮：(116,116,116),
-			物品：(140,140,140),
-			背景：(200,200,200),
-			852*480 => 400*40
+			/*
+			深红色：rgb(254, 67, 101)
+			浅红色：rgb(252, 157, 154)
+			浅黄色：rgb(249, 205, 173)
+			浅青色：rgb(200, 200, 169)
+			淡青色：rgb(131, 175, 155)
 			*/
 			
 			.wf-active *{
@@ -86,8 +87,8 @@ Copyright © 2020~2021 by wzh
 			
 			/* 选择 */
 			::selection{
-				color: #fff;
-				background: #c2b099;
+				color: #2497d4;
+				background: #f9bc64;
 			}
 			*{
 				/* 禁止复制选中 */
@@ -130,6 +131,10 @@ Copyright © 2020~2021 by wzh
 				background-color: #007bff;
 				text-decoration: none;
 			}
+			button.success:focus{
+				outline: 0;
+				box-shadow: 0 0 0 0.6vmax rgba(0,123,255,.25)
+			}
 			button.info:hover{
 				color: #fff;
 				border-color: #46b8da;
@@ -148,10 +153,6 @@ Copyright © 2020~2021 by wzh
 				background-color: #d9534f;
 				text-decoration: none;
 			}
-			button.success:focus{
-				outline: 0;
-				box-shadow: 0 0 0 0.6vmax rgba(0,123,255,.25)
-			}
 			
 			h1{
 				position: absolute;
@@ -162,8 +163,8 @@ Copyright © 2020~2021 by wzh
 				text-align: center;
 				
 				color: #fff;
-				background-color: #000;
-				background-image: radial-gradient(#666, #232, #011);
+				background-color: #77b5fe;
+				background-image: radial-gradient(#c5effd, #77b5fe);
 				
 				text-shadow:
 					0 0 10px rgba(255,0,0, .4),
@@ -224,7 +225,7 @@ Copyright © 2020~2021 by wzh
 				height: 5vmax;
 				display: inline-block;
 				margin: 0 -2px;
-				border: 0.6vmax groove #aaa;
+				border: 0.6vmax groove #edc;
 			}
 			#tools > li > img{
 				width: 100%;
@@ -252,18 +253,18 @@ Copyright © 2020~2021 by wzh
 			#topTools > li:nth-child(1){ /* 暂停按钮 */
 				padding: 0.6vmax;
 				opacity: 0.6;
-				background-color: #aaa;
+				background-color: #83af9b;
 			}
 			#topTools > li:nth-child(1) > div{
 				width: 1.2vmax;
 				height: 1.2vmax;
 				padding: 0;
-				background-color: #aaa;
+				background-color: #83af9b;
 				box-sizing: border-box;
 				
 				border-style: double;
 				border-width: 0px 0px 0px 1.2vmax;
-				border-color: #202020;
+				border-color: #233067;
 			}
 			
 			
@@ -335,8 +336,8 @@ Copyright © 2020~2021 by wzh
 				
 				display: none;
 				
-				background-color: rgb(200,200,200);
-				border: 0.5vmax #fff outset;
+				background-color: #93c2ff;
+				border: 0.5vmax #8bbbff outset;
 				padding: 1.6%;
 			}
 			/*#command{
@@ -348,8 +349,8 @@ Copyright © 2020~2021 by wzh
 				height: 66vh;
 				
 				color: black;
-				background-color: #d6d6d6;
-				border: 0.3vmax #fff inset;
+				background-color: #d4e8ff;
+				border: 0.3vmax #c4d8f6 inset;
 				font-size: 1em;
 			}
 			#command > span{
@@ -397,9 +398,9 @@ Copyright © 2020~2021 by wzh
 				margin: 0 0.3vmax;
 				
 				/* 黑底白字白边框 */
-				color: rgb(200,200,200);
-				background-color: rgb(116,116,116);
-				border: 0.5vmax outset rgb(200,200,200);
+				color: #c5effd;
+				background-color: #677278;
+				border: 0.5vmax outset #b4dae6;
 				border-top-left-radius: 3vmax;
 				border-top-right-radius: 3vmax;
 				
@@ -408,12 +409,13 @@ Copyright © 2020~2021 by wzh
 				line-height: 6vh;
 			}
 			#bag > nav > label:not([onclick]):hover{ /* 悬停加深颜色 */
-				background-color: rgb(100,100,100);
+				background-color: #586166;
 			}
 			#bag > nav > label[checked]{ /* 被选中 */
-				color: black !important;
-				background-color: rgb(200,200,200) !important;
-				border: 0.5vmax outset rgb(116,116,116) !important;
+				/* 白底黑字黑边框 */
+				color: #8a98a0 !important;
+				background-color: #cef !important;
+				border: 0.5vmax outset #758288 !important;
 			}
 			
 			/* “关闭”按钮 */
@@ -423,20 +425,23 @@ Copyright © 2020~2021 by wzh
 				flex-shrink: 0;
 				
 				font-weight: 10000;
-				border: 0.5vmax solid rgb(200, 200, 200);
+				/* 黑底白字白边框 */
+				color: #c5effd;
+				background-color: #8a98a0;
+				border: 0.5vmax solid #b4dae6;
 				border-radius: 666px;
 			}
 			#bag > nav > label[onclick]:hover{ /* 悬停白底黑字黑边框 */
-				color: rgb(116,116,116);
-				background-color: rgb(200,200,200);
-				border: 0.5vmax solid rgb(116,116,116);
+				color: #8a98a0;
+				background-color: #cef;
+				border: 0.5vmax solid #758288;
 			}
 			
 			/* section */
 			#bag > section{
 				height: 100%;
 				
-				background-color: rgb(200,200,200);
+				background-color: #cef;
 				border: 0.5vmax #fff outset;
 			}
 			#bag > section:not([checked]){ /* 未选择的section隐藏 */
@@ -449,7 +454,7 @@ Copyright © 2020~2021 by wzh
 			/* section1:背包 */
 			#bag > section:nth-of-type(1) > #bag_deskgood{ /* deskgood旋转动画 */
 				margin: 1vmax;
-				border: 0.5vmax inset rgb(200,200,200);
+				border: 0.5vmax inset #cef;
 			}
 			#bag > section:nth-of-type(1) > ul{ /* 背包物品栏列表 */
 				display: inline-flex;
@@ -471,7 +476,7 @@ Copyright © 2020~2021 by wzh
 				display: block;
 				width: 6vmax;
 				height: 6vmax;
-				border: 0.3vmax inset rgb(116,116,116);
+				border: 0.3vmax inset #b4dae6;
 			}
 			#bag > section:nth-of-type(1) > ul > li > ol > li > img{ /* 背包物品图片 */
 				width: 100%;
@@ -486,7 +491,7 @@ Copyright © 2020~2021 by wzh
 				display: flex;
 				flex-direction: column;
 				
-				opacity: 0.5;
+				opacity: 0.6;
 				padding-top: 6vh;
 				height: 94vh;
 			}
@@ -610,7 +615,7 @@ Copyright © 2020~2021 by wzh
 			*/
 			#die{
 				background-image: none;
-				background-color: rgba(200,0,0,0.392157);
+				background-color: rgba(254, 67, 101, .392157);
 				font-size: 1.6em;
 				padding-top: 6vh;
 			}
@@ -800,7 +805,7 @@ deskgood.moveTo(0,10000*100);
 				“制造”功能待开发中……
 			</section>
 			<script>
-				for (const [i,v] of Object.entries($("#bag > nav > label")))
+				for (const [i,v] of Object.entries($("#bag > nav > label:not([onclick])")))
 					v.onclick = function(){
 						$(this).attr("checked", "").siblings().removeAttr("checked");
 						$("#bag > section:eq("+i+")").attr("checked", "").siblings().removeAttr("checked");

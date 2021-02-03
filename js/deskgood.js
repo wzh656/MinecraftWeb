@@ -41,7 +41,7 @@ const deskgood = { //桌子好
 		fixedLength: 4,
 		updateCallback(children){
 			for (let i=0, len=children.length; i<len; i++){
-				$(children[i]).css("borderColor", (i==deskgood.choice)?"#fff":"#aaa")
+				$(children[i]).css("borderColor", (i==deskgood.choice)?"#cba":"#edc")
 					.css("borderWidth", (i==deskgood.choice)?"0.6vmax":"0.5vmax")
 					.css("transform", (i==deskgood.choice)?"translateY(-3px)":"")
 					.css("margin", "0 0");
