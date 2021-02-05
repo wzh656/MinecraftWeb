@@ -1,4 +1,4 @@
-function state(id, pointerLock){
+function status(id, pointerLock){
 	if ($("#"+id).css("display") != "none"){ //已显示
 		$("#"+id).css("display", "none");
 		stop = false;

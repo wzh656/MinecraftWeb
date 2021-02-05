@@ -11,7 +11,7 @@ document.addEventListener("keydown", function (e){
 	if (e.keyCode == 69){ //E 切换背包
 		if (stop == "bag" || stop == false){
 			console.log("E:", keydown.key);
-			state("bag");
+			status("bag");
 			return false;
 		}
 	}
@@ -45,7 +45,7 @@ document.addEventListener("keydown", function (e){
 		if (stop){ //已暂停
 			if (typeof stop == "string"){ //已打开窗口
 				const stop0 = stop;
-				state(stop);
+				status(stop);
 				console.log("Pause-Break", stop0, "changeTo", stop);
 			}else{ //无抵抗窗口 继续
 				const stop0 = stop;

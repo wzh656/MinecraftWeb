@@ -3,8 +3,8 @@
 　┐ ├┬─┐ ┌──┼┼┐
 　│ ││　 ┌──┼┼┐
 │╯├─┐ ╭──┴╯			W
-└╯│   ┌────┐			Z
-　│　├─┐ ├────┤	H
+└╯│    ┌────┐			Z
+　│　├─┐ ├────┤			H
 　╰┘└　 └────╯
 Copyright © 2020~2021 by wzh
 允许非商业用途的阅读、使用、复制、分发代码，
@@ -41,15 +41,7 @@ Copyright © 2020~2021 by wzh
 		</script>
 		
 		<link href="./css/bootstrap.css" rel="stylesheet" type="text/css" />
-		<style>
-			/*
-			深红色：rgb(254, 67, 101)
-			浅红色：rgb(252, 157, 154)
-			浅黄色：rgb(249, 205, 173)
-			浅青色：rgb(200, 200, 169)
-			淡青色：rgb(131, 175, 155)
-			*/
-			
+		<style>	
 			.wf-active *{
 				font-family: zyyt, serif;
 			}
@@ -87,8 +79,8 @@ Copyright © 2020~2021 by wzh
 			
 			/* 选择 */
 			::selection{
-				color: #2497d4;
-				background: #f9bc64;
+				color: #1f122d;
+				background: #dfecd2;
 			}
 			*{
 				/* 禁止复制选中 */
@@ -163,8 +155,8 @@ Copyright © 2020~2021 by wzh
 				text-align: center;
 				
 				color: #fff;
-				background-color: #77b5fe;
-				background-image: radial-gradient(#c5effd, #77b5fe);
+				background-color: #fffae8;
+				background-image: radial-gradient(#c5effd, #e0edd3, #77b5fe);
 				
 				text-shadow:
 					0 0 10px rgba(255,0,0, .4),
@@ -239,14 +231,14 @@ Copyright © 2020~2021 by wzh
 			/*
 				0:顶部工具栏
 			*/
-		   #topTools{
-			   position: absolute;
-			   top: 0;
-			   left: 50%;
-			   transform: translateX(-50%);
-			   margin: 0;
-			   padding: 0;
-		   }
+			#topTools{
+				position: absolute;
+				top: 0;
+				left: 50%;
+				transform: translateX(-50%);
+				margin: 0;
+				padding: 0;
+			}
 			#topTools > li{
 				display: block;
 			}
@@ -336,8 +328,8 @@ Copyright © 2020~2021 by wzh
 				
 				display: none;
 				
-				background-color: #93c2ff;
-				border: 0.5vmax #8bbbff outset;
+				background-color: #d3e0ed;
+				border: 0.5vmax #a3c0dc outset;
 				padding: 1.6%;
 			}
 			/*#command{
@@ -349,8 +341,8 @@ Copyright © 2020~2021 by wzh
 				height: 66vh;
 				
 				color: black;
-				background-color: #d4e8ff;
-				border: 0.3vmax #c4d8f6 inset;
+				background-color: #d3e0ed;
+				border: 0.3vmax #a3c0dc inset;
 				font-size: 1em;
 			}
 			#command > span{
@@ -398,9 +390,9 @@ Copyright © 2020~2021 by wzh
 				margin: 0 0.3vmax;
 				
 				/* 黑底白字白边框 */
-				color: #c5effd;
-				background-color: #677278;
-				border: 0.5vmax outset #b4dae6;
+				color: #876;
+				background-color: #fffae8;
+				border: 0.5vmax outset #876;
 				border-top-left-radius: 3vmax;
 				border-top-right-radius: 3vmax;
 				
@@ -409,13 +401,13 @@ Copyright © 2020~2021 by wzh
 				line-height: 6vh;
 			}
 			#bag > nav > label:not([onclick]):hover{ /* 悬停加深颜色 */
-				background-color: #586166;
+				background-color: #ccd8c1;
 			}
 			#bag > nav > label[checked]{ /* 被选中 */
 				/* 白底黑字黑边框 */
-				color: #8a98a0 !important;
-				background-color: #cef !important;
-				border: 0.5vmax outset #758288 !important;
+				color: #876 !important;
+				background-color: #e0edd3 !important;
+				border: 0.5vmax outset #876 !important;
 			}
 			
 			/* “关闭”按钮 */
@@ -426,22 +418,22 @@ Copyright © 2020~2021 by wzh
 				
 				font-weight: 10000;
 				/* 黑底白字白边框 */
-				color: #c5effd;
-				background-color: #8a98a0;
-				border: 0.5vmax solid #b4dae6;
+				color: #876;
+				background-color: #fffae8;
+				border: 0.5vmax solid #876;
 				border-radius: 666px;
 			}
 			#bag > nav > label[onclick]:hover{ /* 悬停白底黑字黑边框 */
-				color: #8a98a0;
-				background-color: #cef;
-				border: 0.5vmax solid #758288;
+				color: #876;
+				background-color: #ccd8c1;
+				border: 0.5vmax solid #876;
 			}
 			
 			/* section */
 			#bag > section{
 				height: 100%;
 				
-				background-color: #cef;
+				background-color: #fffae8;
 				border: 0.5vmax #fff outset;
 			}
 			#bag > section:not([checked]){ /* 未选择的section隐藏 */
@@ -454,7 +446,7 @@ Copyright © 2020~2021 by wzh
 			/* section1:背包 */
 			#bag > section:nth-of-type(1) > #bag_deskgood{ /* deskgood旋转动画 */
 				margin: 1vmax;
-				border: 0.5vmax inset #cef;
+				border: 0.5vmax inset #fffae8;
 			}
 			#bag > section:nth-of-type(1) > ul{ /* 背包物品栏列表 */
 				display: inline-flex;
@@ -476,7 +468,7 @@ Copyright © 2020~2021 by wzh
 				display: block;
 				width: 6vmax;
 				height: 6vmax;
-				border: 0.3vmax inset #b4dae6;
+				border: 0.3vmax inset #876;
 			}
 			#bag > section:nth-of-type(1) > ul > li > ol > li > img{ /* 背包物品图片 */
 				width: 100%;
@@ -487,7 +479,7 @@ Copyright © 2020~2021 by wzh
 			/*
 				1:遮罩
 			*/
-			#setting{
+			#pause{
 				display: flex;
 				flex-direction: column;
 				
@@ -495,15 +487,21 @@ Copyright © 2020~2021 by wzh
 				padding-top: 6vh;
 				height: 94vh;
 			}
-			#setting > p{
+			#pause > p{
 				font-size: 1.4em;
 				margin: 6vmax 0;
 			}
-			#setting > button{
+			#pause > button{
 				width: 60vw;
 				height: 10vh;
 				font-size: 0.7em;
 				margin: 3vmax auto;
+			}
+			/*
+				1:设置
+			*/
+			#setting{
+				
 			}
 			
 			
@@ -583,6 +581,9 @@ Copyright © 2020~2021 by wzh
 				4:竖屏警告
 			*/
 			#warning{
+				background-image: none;
+				background-color: #fffae8;;
+				
 				display: flex;
 				flex-direction: column;
 				justify-content: space-around;
@@ -755,8 +756,7 @@ Copyright © 2020~2021 by wzh
 			<textarea>
 deskgood.goY(10000*100);
 deskgood.move(0,10000*100,0);
-deskgood.moveTo(0,10000*100);
-//这是注释，告诉你这三个命令都可以把deskgood送上万米高空</textarea>
+deskgood.moveTo(0,10000*100);</textarea>
 			<span>运行代码即表示同意《免责协议》：输入代码产生的一切后果由玩家自行承担</span><br/>
 			<button onclick="state('command');" class="warn">关闭</button>
 			<button onclick="run($('#command > textarea').val());" class="success">运行</button>
@@ -814,10 +814,18 @@ deskgood.moveTo(0,10000*100);
 		</div>
 		
 		<!-- 1:遮罩 -->
-		<h1 id="setting" style="z-index: 1;">
+		<h1 id="pause" style="z-index: 1;">
 			<p>已暂停</p>
 			<button class="success">继续游戏</button>
 			<button class="info">设置</button>
+		</h1>
+		
+		<!-- 1:设置 -->
+		<h1 id="setting" style="z-index: 1; display: none;">
+			<p>设置</p>
+			<div>
+				
+			</div>
 		</h1>
 		
 		<!-- 2:print -->
@@ -935,13 +943,13 @@ console.log("device:", device)
 if (device < 0){ //手机
 	$("#control, #jump").css("display", "block"); //显示摇杆
 	
-	$("#setting").css("display", "none");
+	$("#pause").css("display", "none");
 	stop = false;
 	if (time.stop) //已暂停
 		time.stopTime(); //继续
 	//继续游戏
-	$("#setting > button:eq(0)").click(function (){
-		$("#setting").css("display", "none");
+	$("#pause > button:eq(0)").click(function (){
+		$("#pause").css("display", "none");
 		stop = false;
 		if (time.stop) //已暂停
 			time.stopTime(); //继续
@@ -962,7 +970,7 @@ if (device < 0){ //手机
 		document.webkitExitPointerLock;
 	
 	//继续游戏
-	$("#setting > button:eq(0)").click(function (){
+	$("#pause > button:eq(0)").click(function (){
 		document.body.requestPointerLock(); //请求成功后再继续游戏
 		playBGM();
 	});
@@ -980,13 +988,13 @@ if (device < 0){ //手机
 			stop = false;
 			if (time.stop) //已暂停
 				time.stopTime(); //继续
-			$("#setting").css("display", "none");
+			$("#pause").css("display", "none");
 		}else{ //未锁定 暂停
 			console.log("pointerLock no");
 			stop = true;
 			if (!time.stop) //未暂停
 				time.stopTime(); //暂停
-			$("#setting").css("display", "inline-block");
+			$("#pause").css("display", "inline-block");
 			DB.save();
 		}
 	};
@@ -1021,7 +1029,7 @@ $("#topTools > li:eq(0)").click(function(){
 		stop = true;
 		DB.save();
 		document.exitPointerLock();
-		$("#setting").css("display", "inline-block");
+		$("#pause").css("display", "inline-block");
 		console.log("StopButton", stop0, "changeTo", stop);
 	}
 });

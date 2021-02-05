@@ -63,7 +63,7 @@ const deskgood = { //桌子好
 			}
 			children.push(
 				$("<li></li>").append( $("<img/>").attr("src", "./img/more.png") )
-				.click(()=>state("bag"))[0]
+				.click(()=>status("bag"))[0]
 			);
 		}
 	}),
@@ -72,7 +72,7 @@ const deskgood = { //桌子好
 		maxLength: Infinity,
 		updateCallback(children){
 			for (let i=0, len=children.length; i<len; i++){
-				$(children[i]).css("borderColor", (i==children.length-1)?"#aaa":"rgb(116,116,116)")
+				$(children[i]).css("borderColor", (i==children.length-1)?"#876":"#a6917c")
 					.css("borderWidth", (i==children.length-1)?"0.5vmax":"0.3vmax")
 					.css("margin", "0 0");
 				children[i].onclick = ()=>{
@@ -102,7 +102,7 @@ const deskgood = { //桌子好
 		maxLength: Infinity,
 		updateCallback(children){
 			for (let i=0, len=children.length; i<len; i++){
-				$(children[i]).css("borderColor", (i==children.length-1)?"#aaa":"rgb(116,116,116)")
+				$(children[i]).css("borderColor", (i==children.length-1)?"#876":"#a6917c")
 					.css("borderWidth", (i==children.length-1)?"0.5vmax":"0.3vmax")
 					.css("margin", "0 0");
 				children[i].onclick = ()=>{
@@ -132,7 +132,7 @@ const deskgood = { //桌子好
 		maxLength: Infinity,
 		updateCallback(children){
 			for (let i=0, len=children.length; i<len; i++){
-				$(children[i]).css("borderColor", (i==children.length-1)?"#aaa":"rgb(116,116,116)")
+				$(children[i]).css("borderColor", (i==children.length-1)?"#876":"#a6917c")
 					.css("borderWidth", (i==children.length-1)?"0.5vmax":"0.3vmax")
 					.css("margin", "0 0");
 				children[i].onclick = ()=>{
@@ -163,7 +163,7 @@ const deskgood = { //桌子好
 		maxLength: Infinity,
 		updateCallback(children){
 			for (let i=0, len=children.length; i<len; i++){
-				$(children[i]).css("borderColor", (i==children.length-1)?"#aaa":"rgb(116,116,116)")
+				$(children[i]).css("borderColor", (i==children.length-1)?"#876":"#a6917c")
 					.css("borderWidth", (i==children.length-1)?"0.5vmax":"0.3vmax")
 					.css("margin", "0 0");
 				children[i].onclick = ()=>{
@@ -207,7 +207,7 @@ const deskgood = { //桌子好
 		
 		document.exitPointerLock(); //取消鼠标锁定
 		gui.close(); //隐藏gui
-		$("#setting, #warn").hide(); //隐藏 遮罩、横屏提示
+		$("body > h1, #command, #bag").hide(); //隐藏 遮罩、横屏提示
 		$("#die")
 			.css("display", "block")
 			.children(".resaon").html(reason);

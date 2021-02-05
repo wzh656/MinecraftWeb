@@ -409,7 +409,7 @@ function render(){
 	
 	if (deskgood.VR && !stop)
 		controls.update(); //陀螺仪更新
-	stats.update(); //state.js更新
+	stats.update(); //stats.js更新
 	
 	if (!stop){ //重力加速度
 		const ρ = 1.25*rnd_error(), //空气密度/(kg/m³)

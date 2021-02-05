@@ -19,7 +19,7 @@ class ChunkMap{
 		
 		//所有方块
 		this.map = [];
-		//所有区块信息(state, edit, weather)
+		//所有区块信息(status, edit, weather)
 		this.chunks = [];
 		//区块预加载范围
 		this.perloadLength = perloadLength;
@@ -472,7 +472,7 @@ class ChunkMap{
 	
 	/*
 	* 区块状态操作
-	* state: {true:已加载, false:加载/卸载中, undefined:已卸载}
+	* status: {true:已加载, false:加载/卸载中, undefined:已卸载}
 	*/
 	
 	//开始加载区块
@@ -488,7 +488,7 @@ class ChunkMap{
 		if (!this.chunks[x][z])
 			this.chunks[x][z] = {};
 		
-		this.chunks[x][z].state = false; //加载中
+		this.chunks[x][z].status = false; //加载中
 		this.chunks[x][z].edit = edit;
 		this.chunks[x][z].weather = new Weather(
 			[
@@ -520,7 +520,7 @@ class ChunkMap{
 		if (!this.chunks[x][z])
 			this.chunks[x][z] = {};
 		
-		this.chunks[x][z].state = true; //加载完毕
+		this.chunks[x][z].status = true; //加载完毕
 		if (this.chunks[x][z].weather)
 			this.chunks[x][z].weather.start_rain(); //开始下雨
 	}
@@ -535,7 +535,7 @@ class ChunkMap{
 		if (!this.chunks[x][z])
 			this.chunks[x][z] = {};
 		
-		this.chunks[x][z].state = false; //卸载中
+		this.chunks[x][z].status = false; //卸载中
 	}
 	//完成卸载区块
 	finishUnloadChunk(x, z){
@@ -551,29 +551,29 @@ class ChunkMap{
 		if (this.chunks[x][z].weather)
 			this.chunks[x][z].weather.clear_rain();
 		delete this.chunks[x][z].weather;
-		delete this.chunks[x][z].state; //已卸载
+		delete this.chunks[x][z].status; //已卸载
 	}
 	
-	//获取已初始化的区块(state:true/false)
+	//获取已初始化的区块(status:true/false)
 	getInitedChunks(x, z){
 		x=Math.round(x), z=Math.round(z); //规范化
 		
 		const arr = [];
 		for (const i in this.chunks)			
 			for (const j in this.chunks[i])
-				if ( this.chunks[i][j].state !== undefined ) // true或false
+				if ( this.chunks[i][j].status !== undefined ) // true或false
 					arr.push([i, j])
 		
 		return arr;
 	}
-	//获取已加载的区块(state:true)
+	//获取已加载的区块(status:true)
 	getLoadedChunks(x, z){
 		x=Math.round(x), z=Math.round(z); //规范化
 		
 		const arr = [];
 		for (const i in this.chunks)			
 			for (const j in this.chunks[i])
-				if ( this.chunks[i][j].state === true )
+				if ( this.chunks[i][j].status === true )
 					arr.push([i, j])
 		
 		return arr;

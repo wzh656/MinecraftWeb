@@ -4,7 +4,7 @@
 let bag_view = {
 	camera: new THREE.PerspectiveCamera(70, 1, 0.01, 1000),
 	scene: new THREE.Scene(),
-	renderer: new THREE.WebGLRenderer({ antialias: true }),
+	renderer: new THREE.WebGLRenderer({ antialias:true, alpha:true }), //抗锯齿、透明背景
 	deskgood: {
 		top: {},
 		legs: []
@@ -12,7 +12,7 @@ let bag_view = {
 };
 bag_view.camera.position.z = 260;
 bag_view.renderer.setSize(0.1*WIDTH, 0.1*WIDTH);
-bag_view.renderer.setClearColor("#cceeff");
+// bag_view.renderer.setClearColor("#cceeff");
 bag_view.renderer.domElement.id = "bag_deskgood";
 $("#bag > section:eq(0)").prepend( bag_view.renderer.domElement );
 

@@ -13,8 +13,8 @@ TEMPLATES.push(new Block({
 	},
 	attr: {
 		block: {
-			onRightMouseDown: "state('command');false;",
-			onShortTouch: "state('command');false;"
+			onRightMouseDown: "status('command');false;",
+			onShortTouch: "status('command');false;"
 		},
 		onPutToHead: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);message('放到头上', '你自己要把方块放头上的，别怪我');false;",
 		onPutToBody: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);message('放到身上', '你自己要把方块放身上的，别怪我');false;",
