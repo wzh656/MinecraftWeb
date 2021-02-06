@@ -356,7 +356,7 @@ const deskgood = { //桌子好
 				const fx = Math.min(...objs.map(v => v.point.x))-10; //获取碰撞点，计算移动位置
 				rt[0] = fx-(deskgood.pos.x+x);
 				deskgood.moveX(fx);
-				console.log("x+ 上 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), fx, rt[0])
+				// console.log("x+ 上 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), fx, rt[0])
 			}else{ //无阻挡
 				deskgood.moveX(deskgood.pos.x+x);
 			}
@@ -371,7 +371,7 @@ const deskgood = { //桌子好
 				const fx = Math.min(...objs.map(v => v.point.x))-10; //获取碰撞点，计算移动位置
 				rt[0] = fx-(deskgood.pos.x+x);
 				deskgood.moveX(fx);
-				console.log("x+ 下 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), fx, rt[0])
+				// console.log("x+ 下 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), fx, rt[0])
 			}else{ //无阻挡
 				deskgood.moveX(deskgood.pos.x+x);
 			}
@@ -387,7 +387,7 @@ const deskgood = { //桌子好
 				const fx = Math.max(...objs.map(v => v.point.x))+10; //获取碰撞点，计算移动位置
 				rt[0] = fx-(deskgood.pos.x+x);
 				deskgood.moveX(fx);
-				console.log("x- 上 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), fx, rt[0])
+				// console.log("x- 上 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), fx, rt[0])
 			}else{ //无阻挡
 				deskgood.moveX(deskgood.pos.x+x);
 				// console.log("x- 上 无碰撞",x)
@@ -403,7 +403,7 @@ const deskgood = { //桌子好
 				const fx = Math.max(...objs.map(v => v.point.x))+10; //获取碰撞点，计算移动位置
 				rt[0] = fx-(deskgood.pos.x+x);
 				deskgood.moveX(fx);
-				console.log("x- 下 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), fx, rt[0])
+				// console.log("x- 下 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), fx, rt[0])
 			}else{ //无阻挡
 				deskgood.moveX(deskgood.pos.x+x);
 				// console.log("x- 下 无碰撞",x)
@@ -462,7 +462,7 @@ const deskgood = { //桌子好
 				const fz = Math.min(...objs.map(v => v.point.z))-10; //获取碰撞点，计算移动位置
 				rt[2] = fz-(deskgood.pos.z+z);
 				deskgood.moveZ(fz);
-				console.log("z+ 上 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), fz, rt[2])
+				// console.log("z+ 上 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), fz, rt[2])
 			}else{ //无阻挡
 				deskgood.moveZ(deskgood.pos.z+z);
 			}
@@ -477,7 +477,7 @@ const deskgood = { //桌子好
 				const fz = Math.min(...objs.map(v => v.point.z))-10; //获取碰撞点，计算移动位置
 				rt[2] = fz-(deskgood.pos.z+z);
 				deskgood.moveZ(fz);
-				console.log("z+ 下 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), fz, rt[2])
+				// console.log("z+ 下 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), fz, rt[2])
 			}else{ //无阻挡
 				deskgood.moveZ(deskgood.pos.z+z);
 			}
@@ -493,7 +493,7 @@ const deskgood = { //桌子好
 				const fz = Math.max(...objs.map(v => v.point.z))+10; //获取碰撞点，计算移动位置
 				rt[2] = fz-(deskgood.pos.z+z);
 				deskgood.moveZ(fz);
-				console.log("z- 上 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), fz, rt[2])
+				// console.log("z- 上 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), fz, rt[2])
 			}else{ //无阻挡
 				deskgood.moveZ(deskgood.pos.z+z);
 				// console.log("z- 上 无碰撞",z)
@@ -509,7 +509,7 @@ const deskgood = { //桌子好
 				const fz = Math.max(...objs.map(v => v.point.z))+10; //获取碰撞点，计算移动位置
 				rt[2] = fz-(deskgood.pos.z+z);
 				deskgood.moveZ(fz);
-				console.log("z- 下 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), fz, rt[2])
+				// console.log("z- 下 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), fz, rt[2])
 			}else{ //无阻挡
 				deskgood.moveZ(deskgood.pos.z+z);
 				// console.log("z- 下 无碰撞",z)
@@ -532,7 +532,7 @@ const deskgood = { //桌子好
 						null
 				){
 					rt[0] = true;
-					console.log("撞到脸，s:"+((deskgood.pos.x+x)-i));
+					// console.log("撞到脸，s:"+((deskgood.pos.x+x)-i));
 					break;
 				}
 				if (map.get((i+10)/100,
@@ -542,7 +542,7 @@ const deskgood = { //桌子好
 						null
 				){
 					rt[0] = true;
-					console.log("撞到脚，s:"+((deskgood.pos.x+x)-i));
+					// console.log("撞到脚，s:"+((deskgood.pos.x+x)-i));
 					break;
 				}
 			}
@@ -556,7 +556,7 @@ const deskgood = { //桌子好
 						null
 				){
 					rt[0] = true;
-					console.log("撞到后脑，s:"+(i-(deskgood.pos.x+x)));
+					// console.log("撞到后脑，s:"+(i-(deskgood.pos.x+x)));
 					break;
 				}
 				if (map.get((i-10)/100,
@@ -566,7 +566,7 @@ const deskgood = { //桌子好
 						null
 				){
 					rt[0] = true;
-					console.log("撞到脚，s:"+(i-(deskgood.pos.x+x)));
+					// console.log("撞到脚，s:"+(i-(deskgood.pos.x+x)));
 					break;
 				}
 			}
@@ -584,7 +584,7 @@ const deskgood = { //桌子好
 					rt[1] = true;
 					const s = (deskgood.pos.y-150+y)-j;
 					if (s)
-						console.log("撞到天花板，s:", s);
+						// console.log("撞到天花板，s:", s);
 					break;
 				}
 			}
@@ -600,7 +600,7 @@ const deskgood = { //桌子好
 					rt[1] = true;
 					const s = j-(deskgood.pos.y-150+y);
 					if (s)
-						// console.log("撞到地面，s:", s);
+						console.log("撞到地面，s:", s);
 					break;
 				}
 			}
@@ -617,7 +617,7 @@ const deskgood = { //桌子好
 						null
 				){
 					rt[2] = true;
-					console.log("撞到头，s:"+((deskgood.pos.z+z)-i));
+					// console.log("撞到头，s:"+((deskgood.pos.z+z)-i));
 					break;
 				}
 				if (map.get((k+10)/100,
@@ -627,7 +627,7 @@ const deskgood = { //桌子好
 						null
 				){
 					rt[2] = true;
-					console.log("撞到腿，s:"+((deskgood.pos.z+z)-k));
+					// console.log("撞到腿，s:"+((deskgood.pos.z+z)-k));
 					break;
 				}
 			}
@@ -641,7 +641,7 @@ const deskgood = { //桌子好
 						null
 				){
 					rt[2] = true;
-					console.log("撞到头，s:"+(k-(deskgood.pos.z+z)));
+					// console.log("撞到头，s:"+(k-(deskgood.pos.z+z)));
 					break;
 				}
 				if (map.get((k-10)/100,
@@ -651,7 +651,7 @@ const deskgood = { //桌子好
 						null
 				){
 					rt[2] = true;
-					console.log("撞到腿，s:"+(k-(deskgood.pos.z+z)));
+					// console.log("撞到腿，s:"+(k-(deskgood.pos.z+z)));
 					break;
 				}
 			}

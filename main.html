@@ -107,6 +107,8 @@ Copyright © 2020~2021 by wzh
 				overflow: hidden;
 				/* 隐藏body窗口区域滚动条 */
 			}
+			
+			
 			button{
 				vertical-align: middle;
 				border: 0.2vmax solid #ced4da;
@@ -117,33 +119,62 @@ Copyright © 2020~2021 by wzh
 				background-color: #fff;
 				transition: color 0.3s, background-color 0.3s, border-color 0.3s;
 			}
-			button.success:hover{
+			button[disabled]{
+				color: #a2b5c8;
+			}
+			button[disabled]:hover{
+				color: #fff;
+				border-color: #a2b5c8;
+				background-color: #a2b5c8;
+				text-decoration: none;
+			}
+			button[disabled]:focus{
+				outline: 0;
+				box-shadow: 0 0 0 0.6vmax rgba(162, 181, 200, .25);
+			}
+			
+			button.success:not([disabled]):hover{
 				color: #fff;
 				border-color: #007bff;
 				background-color: #007bff;
 				text-decoration: none;
 			}
-			button.success:focus{
+			button.success:not([disabled]):focus{
 				outline: 0;
-				box-shadow: 0 0 0 0.6vmax rgba(0,123,255,.25)
+				box-shadow: 0 0 0 0.6vmax rgba(0, 123, 255, .25);
 			}
-			button.info:hover{
+			
+			button.info:not([disabled]):hover{
 				color: #fff;
 				border-color: #46b8da;
 				background-color: #5bc0de;
 				text-decoration: none;
 			}
-			button.warn:hover{
+			button.info:not([disabled]):focus{
+				outline: 0;
+				box-shadow: 0 0 0 0.6vmax rgba(91, 192, 222, .25);
+			}
+			
+			button.warn:not([disabled]):hover{
 				color: #fff;
 				border-color: #eea236;
 				background-color: #f0ad4e;
 				text-decoration: none;
 			}
-			button.danger:hover{
+			button.warn:not([disabled]):focus{
+				outline: 0;
+				box-shadow: 0 0 0 0.6vmax rgba(240, 173, 78, .25);
+			}
+			
+			button.danger:not([disabled]):hover{
 				color: #fff;
 				border-color: #d43f3a;
 				background-color: #d9534f;
 				text-decoration: none;
+			}
+			button.danger:not([disabled]):focus{
+				outline: 0;
+				box-shadow: 0 0 0 0.6vmax rgba(217, 83, 79, .25);
 			}
 			
 			h1{
@@ -501,7 +532,40 @@ Copyright © 2020~2021 by wzh
 				1:设置
 			*/
 			#setting{
-				
+				background-color: #fffae8;
+				background-image: none; /* 清除渐变颜色 */
+				padding-top: 6vh;
+				height: 94vh;
+			}
+			#setting > button{
+				width: 60vw;
+				height: 10vh;
+				font-size: 0.7em;
+				margin: 3vmax auto;
+			}
+			#setting > div{
+				/* width: 100%; */
+				padding: 3vw;
+			}
+			#setting > div > button{
+				width: 100%;
+				height: 6vh;
+			}
+			#setting > div > fieldset{
+				display: inline-block;
+				/* width: 100%; */
+			}
+			#setting > div > fieldset button{
+				width: 100%;
+				height: 6vh;
+			}
+			/* 横屏情况下 */
+			@media screen and (orientation:landscape){
+				#setting > div{
+					display: grid; /* 网格布局 */
+					grid-template-columns: 50% 50%;
+					grid-gap: 1vw 1vw; /* 行列间距 */
+				}
 			}
 			
 			
@@ -758,7 +822,7 @@ deskgood.goY(10000*100);
 deskgood.move(0,10000*100,0);
 deskgood.moveTo(0,10000*100);</textarea>
 			<span>运行代码即表示同意《免责协议》：输入代码产生的一切后果由玩家自行承担</span><br/>
-			<button onclick="state('command');" class="warn">关闭</button>
+			<button onclick="status('command');" class="warn">关闭</button>
 			<button onclick="run($('#command > textarea').val());" class="success">运行</button>
 		</div>
 		
@@ -768,7 +832,7 @@ deskgood.moveTo(0,10000*100);</textarea>
 				<label checked>物品</label>
 				<label>状态</label>
 				<label>智造</label>
-				<label onclick="state('bag');">╳</label>
+				<label onclick="status('bag');">╳</label>
 			</nav>
 			<section checked>
 				<ul>
@@ -824,8 +888,16 @@ deskgood.moveTo(0,10000*100);</textarea>
 		<h1 id="setting" style="z-index: 1; display: none;">
 			<p>设置</p>
 			<div>
-				
+				<fieldset name="debug">
+					<legend>
+						<button class="info">调试模式：<span>开</span></button>
+					</legend>
+					<button name="stats" class="info">stats：<span>开</span></button>
+					<button name="dat-gui" class="info">dat.gui：<span>开</span></button>
+					<button name="console" class="info">console：<span>开</span></button>
+				</fieldset>
 			</div>
+			<button class="success">确定</button>
 		</h1>
 		
 		<!-- 2:print -->
@@ -1033,6 +1105,16 @@ $("#topTools > li:eq(0)").click(function(){
 		console.log("StopButton", stop0, "changeTo", stop);
 	}
 });
+
+$("#pause > button:eq(1)").click(function(){ //设置
+	$("#pause").fadeOut("slow");
+	$("#setting").show("slow");
+});
+$("#setting > button").click(function(){ //确定
+	$("#setting").hide("slow");
+	$("#pause").fadeIn("slow");
+	document.body.requestPointerLock(); //请求成功后再继续游戏
+})
 
 //2维度射线检测
 function ray2D(crosshair, x, y){

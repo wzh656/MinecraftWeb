@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, globalShortcut } = require('electron');
 const child_process = require("child_process");
 // const path = require('path');
 // const url = require('url');
@@ -10,14 +10,17 @@ function createWindow(){ //创建了一个新的窗口
 	child_process.exec("创建桌面快捷方式.vbs");
 
 	win = new BrowserWindow({
-		/*width: 800,
-		height: 600,*/
+		minWidth: 300,
+		minHeight: 300,
+		fullscreenable: true,
 		webPreferences: {
 			nodeIntegration: true
 		},
 		autoHideMenuBar: true //隐藏菜单
 	});
 	win.setMenu(null); //清除菜单
+	win.maximize(); //默认最大化
+	let fullscreen = false; //默认不全屏
 
 	win.loadFile('home.html'); // 加载项目的home.html文件.
 
@@ -28,7 +31,18 @@ function createWindow(){ //创建了一个新的窗口
 		console.log('closed');
 		
 		win = null;
-	})
+	});
+
+	//注册F11
+	globalShortcut.register('F11', function () {
+		if (fullscreen){
+			win.setFullScreen(false); //退出全屏
+			fullscreen = false;
+		}else{
+			win.setFullScreen(true); //进入全屏
+			fullscreen = true;
+		}
+	});
 }
 
 app.on('activate', () => {
@@ -65,12 +79,6 @@ ipcMain.on('progressUpdate', (event, arg)=>{
 	console.log('progressUpdate', arg);
 	win.setProgressBar(arg); //进度条
 });
-
-/* ipcMain.on('changeProgress', function (event, arg){
-	console.log(+arg);
-	win.setProgressBar(+arg); //进度条
-	// event.sender.send('ExeToWeb', 'ExeToWeb_message');
-}); */
 
 /*const fs = require("fs");
 const http = require('http');
