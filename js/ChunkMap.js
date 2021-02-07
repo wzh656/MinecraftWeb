@@ -270,10 +270,75 @@ class ChunkMap{
 		x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 		
 		let thisBlock = this.get(x,y,z);
-		if (thisBlock === null) //空气    //没有方块(null)/不在范围(undefined) //加载中(false)
+		
+		if (thisBlock === null) //空气
 			return;
-		let visibleValue;
+		
+		const rule = [
+				[1,0,0],
+				[-1,0,0],
+				[0,1,0],
+				[0,-1,0],
+				[0,0,1],
+				[0,0,-1]
+			], 
+			visibleValue = [];
+		
+		for (const [dx,dy,dz] of rule){
+			const px=x+dx, py=y+dy, pz=z+dz;
+			
+			const edit = this.chunks[cX] && this.chunks[cX][cZ] && this.chunks[cX][cZ].edit,
+				get = new Block( this.perGet(px, py, pz, edit||[]) );
+			
+			if ( py < map.size[0].y ){ //最底层 则不显示
+				visibleValue.push(false);
+			}else if ( get.id ){ //无方块 显示
+				visibleValue.push(true);
+			}else if ( get.attr && get.attr.block ){ //有属性
+				const visible = get.attr.block.transparent;
+				visibleValue.push( visible ); //方块透明 显示
+			}else{ //继承模板
+				const visible = TEMPLATES[ get.id ].attr.block.transparent;
+				visibleValue.push( visible ); //方块透明 显示
+			}
+		}
+		
 		if (thisBlock === undefined){ //未加载
+			const cX = Math.round(x/map.size.x),
+				cZ = Math.round(z/map.size.z), //所属区块(Chunk)
+				edit = this.chunks[cX] && this.chunks[cX][cZ] && this.chunks[cX][cZ].edit,
+				get = new Block( this.perGet(x, y, z, edit||[]) );
+			
+			if ( visibleValue.some(v => v) && this.getInitedChunks().some(v => v[0]==cX && v[1]==cZ) ){ //不可隐藏（有面true） 且 在加载区块内
+				this.addID(get.id, {
+					x,
+					y,
+					z,
+				}, TEMPLATES, {
+					attr: get.attr
+				});
+				thisBlock = this.get(x,y,z); //加载后的this方块
+			}
+			if (!thisBlock) //undefined（无需加载） 或 null（加载为空气）
+				return;
+		}
+		
+		const material = thisBlock.block.material;
+		for (const i in material)
+			material[i].visible = visibleValue[i];
+		
+		if (thisBlock.block.addTo == true && visibleValue.every(value => !value)){ //已加入 and 可隐藏（每面都false）
+			scene.remove(thisBlock.block.mesh);
+			thisBlock.block.addTo = false;
+			// console.log("隐藏", this.map[x][y][z])
+		}
+		if (thisBlock.block.addTo == false && visibleValue.some(value => value)){ //未加入 and 不可隐藏（有面true）
+			scene.add(thisBlock.block.mesh);
+			thisBlock.block.addTo = true;
+			// console.log("显示", this.map[x][y][z])
+		}
+		
+		/* if (thisBlock === undefined){ //未加载
 			const cX = Math.round(x/map.size.x),
 				cZ = Math.round(z/map.size.z), //所属区块(Chunk)
 				edit = this.chunks[cX] && this.chunks[cX][cZ] && this.chunks[cX][cZ].edit,
@@ -312,7 +377,7 @@ class ChunkMap{
 				!( this.get(x, y, z-1) && !this.get(x, y, z-1).get("attr", "block", "transparent")) || noTransparent
 				// 没有方块 或 有方块非透明 则显示  或  自身透明 也显示
 			];
-		}
+		} */
 		
 		/*if (thisBlock === undefined){ //未加载
 			let [cX, cZ] = [x/map.size.x, z/map.size.z].map(Math.round); //所属区块(Chunk)
@@ -331,20 +396,8 @@ class ChunkMap{
 			if (!thisBlock) //undefined（仍未加载） or null（加载为空气）
 				return;
 		}*/
-		const material = thisBlock.block.material;
-		for (const i in material)
-			material[i].visible = visibleValue[i];
 		
-		if (thisBlock.block.addTo == true && visibleValue.every(value => !value)){ //已加入 and 可隐藏（每面都false）
-			scene.remove(thisBlock.block.mesh);
-			thisBlock.block.addTo = false;
-			// console.log("隐藏", this.map[x][y][z])
-		}
-		if (thisBlock.block.addTo == false && visibleValue.some(value => value)){ //未加入 and 不可隐藏（有面true）
-			scene.add(thisBlock.block.mesh);
-			thisBlock.block.addTo = true;
-			// console.log("显示", this.map[x][y][z])
-		}
+		
 		
 		/* try{
 			if (thisBlock === undefined && visibleValue.some(value => value)){ //未加载 且 不可隐藏（有面true）
@@ -1082,7 +1135,34 @@ class ChunkMap{
 		const ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
-		const edit = DB.readChunk(x, z).then((edit)=>{
+		const edit = [];
+		db.readStep(TABLE.WORLD, {
+			index: "type",
+			range: ["only", 0],
+			stepCallback: (res)=>{
+				if (
+					res.x >= ox+this.size[0].x && res.x <= ox+this.size[1].x &&
+					res.z >= oz+this.size[0].z && res.z <= oz+this.size[1].z
+				) edit.push(res);
+			},
+			successCallback: ()=>{
+				this.startLoadChunk(x, z); //初始化区块
+				
+				console.log("edit(DB):", edit);
+				//保存edit
+				this.chunks[x][z].edit = edit;
+				
+				const columns = this.perGetChunk(x, z, edit);
+				
+				for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
+					for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
+						for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
+							this.loadColumn(ox+dx, oz+dz, columns);
+				
+				this.finishLoadChunk(x, z); //区块加载完毕
+			},
+		});
+		/* const edit = DB.readChunk(x, z).then((edit)=>{
 			this.startLoadChunk(x, z); //初始化区块
 			
 			console.log("edit(DB):", edit);
@@ -1098,19 +1178,6 @@ class ChunkMap{
 			
 			this.finishLoadChunk(x, z); //区块加载完毕
 			
-		});
-		/* db.readStep(TABLE.WORLD, {
-			index: "type",
-			range: ["only", 0],
-			stepCallback: (res)=>{
-				if (
-					res.x >= ox+this.size[0].x && res.x <= ox+this.size[1].x &&
-					res.z >= oz+this.size[0].z && res.z <= oz+this.size[1].z
-				) edit.push(res);
-			},
-			successCallback: ()=>{
-				
-			}
 		}); */
 	}
 	//加载区块（异步）
@@ -1538,11 +1605,8 @@ class ChunkMap{
 			const edit = this.chunks[x][z].edit;
 			func( this.perGetChunk(x, z, edit) );
 		}else{
-			const edit = DB.readChunk(x, z).then((edit)=>{
-				this.startLoadChunk(x, z, edit); //初始化区块
-				func( this.perGetChunk(x, z, edit) );
-			});
-			/* db.readStep(TABLE.WORLD, {
+			const edit = [];
+			db.readStep(TABLE.WORLD, {
 				index: "type",
 				range: ["only", 0],
 				stepCallback: (res)=>{
@@ -1552,10 +1616,13 @@ class ChunkMap{
 					) edit.push(res);
 				},
 				successCallback: ()=>{
-					console.log("edit(DB):", edit);
-					
-				}
-			}); */
+					this.startLoadChunk(x, z, edit); //初始化区块
+					func( this.perGetChunk(x, z, edit) );
+				},
+			});
+			// const edit = DB.readChunk(x, z).then((edit)=>{
+				
+			// });
 			/*sql.selectData(tableName, ["x", "y", "z", "id", "attr"],
 				`type=0 AND`+
 				` (x BETWEEN ${ ox+this.size[0].x } AND ${ ox+this.size[1].x }) AND`+
@@ -1579,7 +1646,7 @@ class ChunkMap{
 		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
 			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++)
 				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
-					if (this.get(ox+dx, dy, oz+dz)){
+					if ( this.get(ox+dx, dy, oz+dz) ){
 						console.log("delete")
 						for (let i of this.map[ox+dx][dy][oz+dz].block.mesh.material)
 							i.dispose();
