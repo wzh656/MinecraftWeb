@@ -12,7 +12,7 @@ const map = new ChunkMap([
 		min: 1,
 		max: 256,
 		//ave: 10,
-		q: 166,
+		q: 266,
 		error:{
 			min: -1,
 			max: 1,

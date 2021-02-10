@@ -281,24 +281,26 @@ class ChunkMap{
 				[0,-1,0],
 				[0,0,1],
 				[0,0,-1]
-			], 
+			],
 			visibleValue = [];
+		let needLoad = false;
 		
 		for (const [dx,dy,dz] of rule){
-			const px=x+dx, py=y+dy, pz=z+dz;
-			
-			const edit = this.chunks[cX] && this.chunks[cX][cZ] && this.chunks[cX][cZ].edit,
-				get = new Block( this.perGet(px, py, pz, edit||[]) );
+			const px=x+dx, py=y+dy, pz=z+dz,
+				thatBlock = this.get(px, py, pz);
 			
 			if ( py < map.size[0].y ){ //最底层 则不显示
 				visibleValue.push(false);
-			}else if ( get.id ){ //无方块 显示
+			}else if ( !(thatBlock && thatBlock.id) ){ //无方块 显示
+				needLoad = true;
 				visibleValue.push(true);
-			}else if ( get.attr && get.attr.block ){ //有属性
-				const visible = get.attr.block.transparent;
+			}else if ( thatBlock.attr && thatBlock.attr.block && thatBlock.attr.block.transparent !== undefined ){ //有属性
+				const visible = thatBlock.attr.block.transparent;
+				needLoad = needLoad || visible;
 				visibleValue.push( visible ); //方块透明 显示
 			}else{ //继承模板
-				const visible = TEMPLATES[ get.id ].attr.block.transparent;
+				const visible = TEMPLATES[ thatBlock.id ].attr.block.transparent;
+				needLoad = needLoad || visible;
 				visibleValue.push( visible ); //方块透明 显示
 			}
 		}
@@ -307,9 +309,9 @@ class ChunkMap{
 			const cX = Math.round(x/map.size.x),
 				cZ = Math.round(z/map.size.z), //所属区块(Chunk)
 				edit = this.chunks[cX] && this.chunks[cX][cZ] && this.chunks[cX][cZ].edit,
-				get = new Block( this.perGet(x, y, z, edit||[]) );
+				get = new Block( this.perGet(x, y, z, edit||[]) ); //应该的方块
 			
-			if ( visibleValue.some(v => v) && this.getInitedChunks().some(v => v[0]==cX && v[1]==cZ) ){ //不可隐藏（有面true） 且 在加载区块内
+			if ( needLoad && this.getInitedChunks().some(v => v[0]==cX && v[1]==cZ) ){ //不可隐藏（有面true） 且 在加载区块内
 				this.addID(get.id, {
 					x,
 					y,
@@ -328,12 +330,12 @@ class ChunkMap{
 			material[i].visible = visibleValue[i];
 		
 		if (thisBlock.block.addTo == true && visibleValue.every(value => !value)){ //已加入 and 可隐藏（每面都false）
-			scene.remove(thisBlock.block.mesh);
+			scene.remove( thisBlock.block.mesh );
 			thisBlock.block.addTo = false;
 			// console.log("隐藏", this.map[x][y][z])
 		}
 		if (thisBlock.block.addTo == false && visibleValue.some(value => value)){ //未加入 and 不可隐藏（有面true）
-			scene.add(thisBlock.block.mesh);
+			scene.add( thisBlock.block.mesh );
 			thisBlock.block.addTo = true;
 			// console.log("显示", this.map[x][y][z])
 		}
@@ -1135,6 +1137,9 @@ class ChunkMap{
 		const ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
+		if ( map.getInitedChunks().some(v => v[0]==x && v[1]==z) ) //已初始化
+			return console.warn("loadChunk", x, z, "already inited");
+		
 		const edit = [];
 		db.readStep(TABLE.WORLD, {
 			index: "type",
@@ -1146,14 +1151,10 @@ class ChunkMap{
 				) edit.push(res);
 			},
 			successCallback: ()=>{
-				this.startLoadChunk(x, z); //初始化区块
-				
-				console.log("edit(DB):", edit);
-				//保存edit
-				this.chunks[x][z].edit = edit;
+				console.log("edit(DB):", x, z, edit);
+				this.startLoadChunk(x, z, edit); //初始化区块
 				
 				const columns = this.perGetChunk(x, z, edit);
-				
 				for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
 					for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
 						for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
@@ -1199,10 +1200,13 @@ class ChunkMap{
 		const ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
+		if ( map.getInitedChunks().some(v => v[0]==x && v[1]==z) && !Object.keys(breakPoint).length ) //已初始化 且 非断点
+			return console.warn("loadChunkAsync", x, z, "already inited");;
+		
 		//回调
 		const func = (columns)=>{
 			
-			switch (dir.substr(0,2)){
+			switch ( dir.substr(0,2) ){
 				case "x-":
 					{
 						let t0 = +new Date(),
@@ -1616,6 +1620,7 @@ class ChunkMap{
 					) edit.push(res);
 				},
 				successCallback: ()=>{
+					console.log("edit(DB):", x, z, edit);
 					this.startLoadChunk(x, z, edit); //初始化区块
 					func( this.perGetChunk(x, z, edit) );
 				},
@@ -1634,13 +1639,142 @@ class ChunkMap{
 			);*/
 		}
 	}
+	//加载区块（生成器异步）
+	loadChunkGenerator(x, z, opt={}){
+		let {
+				finishCallback,
+				progressCallback,
+				breakTime=66, // 最大执行时间/ms
+				mostSpeed=2, // 最大速度/次
+				dir="", //方向
+				breakPoint={}
+			} = opt,
+			{
+				dx = dir=="x-"? this.size[1].x: this.size[0].x,
+				dz = dir=="z-"? this.size[1].z: this.size[0].z
+			} = breakPoint;
+		
+		x=Math.round(x), z=Math.round(z); //规范化
+		const ox = x*this.size.x,
+			oz = z*this.size.z; //区块中心坐标
+		
+		if ( map.getInitedChunks().some(v => v[0]==x && v[1]==z) ) //已初始化
+			return console.warn("loadChunkGenerator", x, z, "already inited");
+		
+		const gen = function* (columns, _this){
+			switch ( dir.substr(0,2) ){
+				case "x-":
+					for (let i=dx; i>=_this.size[0].x; i--){
+						for (let j=dz; j<=_this.size[1].z; j++){
+							_this.loadColumn(ox+i, oz+j, columns);
+							yield; //暂停
+						}
+						dz = _this.size[0].z;
+						
+						yield true;
+						if (progressCallback)
+							progressCallback( (i-_this.size[1].x)/(_this.size[0].x-_this.size[1].x) );
+					}
+					
+					_this.finishLoadChunk(x, z); //区块加载完毕
+					if (finishCallback) finishCallback();
+					break;
+				
+				case "z+":
+					for (let j=dz; j<=_this.size[1].z; j++){
+						for (let i=dx; i<=_this.size[1].x; i++){
+							_this.loadColumn(ox+i, oz+j, columns);
+							yield;
+						}
+						dx = _this.size[0].x;
+						
+						yield true;
+						if (progressCallback)
+							progressCallback( (j-_this.size[0].z)/(_this.size[0].z-_this.size[1].z) );
+					}
+					
+					_this.finishLoadChunk(x, z); //区块加载完毕
+					if (finishCallback) finishCallback();
+					break;
+				
+				case "z-":
+					for (let j=dz; j>=_this.size[0].z; j--){
+						for (let i=dx; i<=_this.size[1].z; i++){
+							_this.loadColumn(ox+i, oz+j, columns);
+							yield;
+						}
+						dx = _this.size[0].x;
+						
+						yield true;
+						if (progressCallback)
+							progressCallback( (j-_this.size[1].dz)/(_this.size[0].z-_this.size[1].z) );
+					}
+					
+					_this.finishLoadChunk(x, z); //区块加载完毕
+					if (finishCallback) finishCallback();
+					break;
+				
+				default:
+					for (let i=dx; i<=_this.size[1].x; i++){
+						for (let j=dz; j<=_this.size[1].z; j++){
+							_this.loadColumn(ox+i, oz+j, columns);
+							yield;
+						}
+						dz = map.size[0].z;
+						
+						yield true;
+						if (progressCallback)
+							progressCallback( (i-_this.size[0].x)/(_this.size[1].x-_this.size[0].x) );
+					}
+					
+					_this.finishLoadChunk(x, z); //区块加载完毕
+					if (finishCallback) finishCallback();
+					break;
+			}
+		}
+		
+		const edit = [];
+		db.readStep(TABLE.WORLD, {
+			index: "type",
+			range: ["only", 0],
+			stepCallback: (res)=>{
+				if (
+					res.x >= ox+this.size[0].x && res.x <= ox+this.size[1].x &&
+					res.z >= oz+this.size[0].z && res.z <= oz+this.size[1].z
+				) edit.push(res);
+			},
+			successCallback: ()=>{
+				console.log("edit(DB):", x, z, edit);
+				this.startLoadChunk(x, z); //初始化区块
+				
+				const gener = gen( this.perGetChunk(x, z, edit), this ),
+					id = setInterval(function work(){
+						let res = {},
+							t0 = +new Date(),
+							num = 0;
+						while ( !res.done ){
+							res = gener.next();
+							if (new Date()-t0 >= breakTime) //超时
+								return;
+							if (res.value == true && ++num >= mostSpeed) //超数
+								return;
+						}
+						clearInterval(id); //运行结束
+					}, 0);
+				return id;
+			},
+		});
+	}
 	
 	//卸载区块（同步）
 	unloadChunk(x, z){
 		x = Math.round(x), z = Math.round(z); //规范化
 		let ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
-			
+		
+		if ( !map.getLoadedChunks().some(v => v[0]==x && v[1]==z) ) //已卸载
+			return console.warn("unloadChunk", x, z, "already unload");;
+		
 		this.startUnloadChunk(x, z); //开始卸载区块
 		
 		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
@@ -1675,6 +1809,9 @@ class ChunkMap{
 		x = Math.round(x), z = Math.round(z); //规范化
 		const ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
+		
+		if ( !map.getLoadedChunks().some(v => v[0]==x && v[1]==z) && !Object.keys(breakPoint).length ) //已卸载
+			return console.warn("unloadChunk", x, z, "already unload");;
 		
 		if (Object.keys(breakPoint).length < 3)
 			this.startUnloadChunk(x, z); //开始卸载区块
