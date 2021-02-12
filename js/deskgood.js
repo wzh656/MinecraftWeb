@@ -338,7 +338,7 @@ const deskgood = { //桌子好
 			deskgood.pos.y/100-1,
 			deskgood.pos.z/100
 		)){ //腿上有方块
-			console.warn("卡住leg go不了");
+			// console.warn("卡住leg go不了");
 			rt[1] = y;
 			y = 0;
 		}
@@ -998,11 +998,11 @@ setInterval(()=>{
 			deskgood.v.y += deskgood.jump_v*rnd_error(); //自动跳跃
 		}
 		
-		if (warn[0] & warn[1]){
+		/* if (warn[0] & warn[1]){
 			console.warn(warn[0], warn[1]);
 		}else{
 			console.warn(warn[0]);
-		}
+		} */
 	}
 }, 36);
 

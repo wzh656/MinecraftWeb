@@ -112,7 +112,7 @@ texture_load.id = setInterval(async function(){
 		}
 		
 		/* // map.initChunk(0, 0); //初始化区块
-		map.loadChunkAsync(0, 0, {
+		map.loadChunkGenerator(0, 0, {
 			progressCallback: function(value){
 				$("#progress span").text( value*100 );
 				$("#progress progress")[0].value = value;

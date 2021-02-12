@@ -171,41 +171,41 @@ setInterval(function(){
 	/* if (keydown.key.size)
 		console.log("keydown:", keydown.key); */
 	
-	if ((keydown.key.has(87) | keydown.key.has(38)) & keydown.key.has(17)){ //control 按下
+	if ((keydown.key.has(87) || keydown.key.has(38)) & keydown.key.has(17)){ //control 按下
 		keydown.double_run = true;
 		console.log("run");
 	}
 	
-	if (keydown.key.has(87) | keydown.key.has(38)){ //前(x+)
-		console.log("front:", keydown.key);
+	if (keydown.key.has(87) || keydown.key.has(38)){ //前(x+)
+		// console.log("front:", keydown.key);
 		const vec = new THREE.Vector2((keydown.double_run==true?3:1), 0)
 			.rotateAround( new THREE.Vector2(0,0), THREE.Math.degToRad(deskgood.look.y) );
 		x += vec.x*rnd_error(),
 		z += vec.y*rnd_error();
 	}
-	if (keydown.key.has(83) | keydown.key.has(40)){ //后(x-)
-		console.log("behind:", keydown.key);
+	if (keydown.key.has(83) || keydown.key.has(40)){ //后(x-)
+		// console.log("behind:", keydown.key);
 		const vec = new THREE.Vector2(-(keydown.double_run==true?3:1), 0)
 			.rotateAround( new THREE.Vector2(0,0), THREE.Math.degToRad(deskgood.look.y) );
 		x += vec.x*rnd_error(),
 		z += vec.y*rnd_error();
 	}
-	if (keydown.key.has(65) | keydown.key.has(37)){ //左(z-)
-		console.log("left:", keydown.key);
+	if (keydown.key.has(65) || keydown.key.has(37)){ //左(z-)
+		// console.log("left:", keydown.key);
 		const vec = new THREE.Vector2(0, -(keydown.double_run==true?3:1))
 			.rotateAround( new THREE.Vector2(0,0), THREE.Math.degToRad(deskgood.look.y) );
 		x += vec.x*rnd_error(),
 		z += vec.y*rnd_error();
 	}
-	if (keydown.key.has(68) | keydown.key.has(39)){ //右(z+)
-		console.log("right:", keydown.key);
+	if (keydown.key.has(68) || keydown.key.has(39)){ //右(z+)
+		// console.log("right:", keydown.key);
 		const vec = new THREE.Vector2(0, (keydown.double_run==true?3:1))
 			.rotateAround( new THREE.Vector2(0,0), THREE.Math.degToRad(deskgood.look.y) );
 		x += vec.x*rnd_error(),
 		z += vec.y*rnd_error();
 	}
 	if (keydown.key.has(32)){ //上
-		console.log("up:", keydown.key);
+		// console.log("up:", keydown.key);
 		y += 1*rnd_error();
 	}
 	/* if (keydown.key.has(16)){ //下
