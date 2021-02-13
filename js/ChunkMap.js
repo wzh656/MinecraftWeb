@@ -268,11 +268,9 @@ class ChunkMap{
 	//更新方块
 	update(x, y, z){
 		x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
-		
 		let thisBlock = this.get(x,y,z);
 		
-		if (thisBlock === null) //空气
-			return;
+		if (thisBlock === null) return; //空气
 		
 		const rule = [
 				[1,0,0],
@@ -282,26 +280,45 @@ class ChunkMap{
 				[0,0,1],
 				[0,0,-1]
 			],
-			visibleValue = [];
-		let needLoad = false;
+			visibleValue = [], //可见值
+			noTransparent = (thisBlock && thisBlock.attr && thisBlock.attr.block && thisBlock.attr.block.noTransparent!==undefined)? //有属性
+				thisBlock.attr.block.noTransparent:
+				TEMPLATES[ thisBlock?thisBlock.id:0 ].attr.block.noTransparent; //是否可以隐藏
+		let needLoad = false; //需要加载
 		
-		for (const [dx,dy,dz] of rule){
-			const px=x+dx, py=y+dy, pz=z+dz,
-				thatBlock = this.get(px, py, pz);
-			
-			if ( py < map.size[0].y ){ //最底层 则不显示
-				visibleValue.push(false);
-			}else if ( !(thatBlock && thatBlock.id) ){ //无方块 显示
-				needLoad = true;
-				visibleValue.push(true);
-			}else if ( thatBlock.attr && thatBlock.attr.block && thatBlock.attr.block.transparent !== undefined ){ //有属性
-				const visible = thatBlock.attr.block.transparent;
-				needLoad = needLoad || visible;
-				visibleValue.push( visible ); //方块透明 显示
-			}else{ //继承模板
-				const visible = TEMPLATES[ thatBlock.id ].attr.block.transparent;
-				needLoad = needLoad || visible;
-				visibleValue.push( visible ); //方块透明 显示
+		if (noTransparent === true){ //整体不可隐藏
+			for (let i=0; i<6; i++)
+				visibleValue[i] = true;
+			needLoad = true;
+		}else{
+			for (const [i, [dx,dy,dz]] of Object.entries(rule)){ //遍历四周的方块
+				const px=x+dx, py=y+dy, pz=z+dz;
+				let thatBlock = this.get(px, py, pz); //四周的方块
+				
+				if (thatBlock === undefined){ //未加载
+					const cX = Math.round(px/map.size.x),
+						cZ = Math.round(pz/map.size.z), //所属区块(Chunk)
+						edit = this.chunks[cX] && this.chunks[cX][cZ] && this.chunks[cX][cZ].edit;
+					thatBlock = this.perGet(px, py, pz, edit||[]); //应该的方块
+				}
+				
+				if ( noTransparent && noTransparent[i] ){ //为数组 且 不可隐藏
+					needLoad = true;
+					visibleValue.push(true);
+				}else if ( py < map.size[0].y ){ //最底层 则不显示
+					visibleValue.push(false);
+				}else if ( !(thatBlock && thatBlock.id) ){ //无方块 显示
+					needLoad = true;
+					visibleValue.push(true);
+				}else if ( thatBlock.attr && thatBlock.attr.block && thatBlock.attr.block.transparent !== undefined ){ //有属性
+					const visible = thatBlock.attr.block.transparent; //透明则可见
+					needLoad = needLoad || visible;
+					visibleValue.push( visible ); //方块透明 显示
+				}else{ //继承模板
+					const visible = TEMPLATES[ thatBlock.id ].attr.block.transparent;
+					needLoad = needLoad || visible;
+					visibleValue.push( visible ); //方块透明 显示
+				}
 			}
 		}
 		
@@ -321,7 +338,7 @@ class ChunkMap{
 				});
 				thisBlock = this.get(x,y,z); //加载后的this方块
 			}
-			if (!thisBlock) //undefined（无需加载） 或 null（加载为空气）
+			if ( !thisBlock ) //undefined（无需加载） 或 null（加载为空气）
 				return;
 		}
 		
@@ -458,8 +475,12 @@ class ChunkMap{
 	
 	//更新区块内所有方块（同步）
 	updateChunk(x, z){
+		x = Math.round(x), z = Math.round(z); //规范化
 		const ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
+		
+		if ( !this.getLoadedChunks().some(v => v[0]==x && v[1]==z) ) //未加载完毕
+			return console.warn("updateChunk", x, z, "haven't load");
 		
 		for (let dy=this.size[0].y; dy<=this.size[1].y; dy++)
 			for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
@@ -480,9 +501,12 @@ class ChunkMap{
 				dz = this.size[0].z
 			} = breakPoint;
 		
+		x = Math.round(x), z = Math.round(z); //规范化
 		const ox = x*this.size.x,
 			oz = z*this.size.z; //区块中心坐标
 		
+		if ( !this.getLoadedChunks().some(v => v[0]==x && v[1]==z) ) //未加载完毕
+			return console.warn("updateChunkAsync", x, z, "haven't load");
 		
 		let t0 = new Date(),
 			num = 0;
@@ -522,7 +546,52 @@ class ChunkMap{
 		
 		if (finishCallback) finishCallback();
 	}
-	
+	//更新区块内所有方块（生成器异步）
+	updateChunkGenerator(x, z, opt={}){
+		let {
+			finishCallback,
+			progressCallback,
+			breakTime=66, // 最大执行时间/ms
+			mostSpeed=2 // 最大速度/次
+		} = opt;
+		
+		x = Math.round(x), z = Math.round(z); //规范化
+		const ox = x*this.size.x,
+			oz = z*this.size.z; //区块中心坐标
+		
+		if ( !this.getLoadedChunks().some(v => v[0]==x && v[1]==z) ) //未加载完毕
+			return console.warn("updateChunkGenerator", x, z, "haven't load");
+		
+		const gen = function* (_this){
+			for (let i=_this.size[0].x; i<=_this.size[1].x; i++){
+				for (let j=_this.size[0].z; j<=_this.size[1].z; j++){
+					for (let k=_this.size[0].y; k<=_this.size[1].y; k++)
+						_this.update(ox+i, k, oz+j);
+					yield; //判断超时k
+				}
+				if (progressCallback)
+					progressCallback( (i-_this.size[0].x) / (_this.size[1].x-_this.size[0].x) );
+				yield true; //判断超数
+			}
+		}
+		
+		const gener = gen( this ),
+			id = setInterval(function work(){
+				let res = {},
+					t0 = +new Date(),
+					num = 0;
+				while ( !res.done ){
+					res = gener.next();
+					if (new Date()-t0 >= breakTime) //超时
+						return;
+					if (res.value == true && ++num >= mostSpeed) //超数
+						return;
+				}
+				if (finishCallback) finishCallback(); //更新完毕
+				clearInterval(id); //运行结束
+			}, 0);
+		return id;
+	}
 	
 	
 	/*
@@ -1071,32 +1140,52 @@ class ChunkMap{
 			];
 		
 		for (let y=this.size[0].y; y<=this.size[1].y; y++){
-			if (columns[dx][dz][y].id){ //有方块
+			const block = columns[dx][dz][y];
+			if ( block.id ){ //有方块
 				
-				const visibleValue = [];
+				const visibleValue = [],
+					noTransparent = (block.attr && block.attr.block && block.attr.block.noTransparent!==undefined)? //有属性
+						block.attr.block.noTransparent:
+						TEMPLATES[ block.id ].attr.block.noTransparent; //是否可以隐藏
 				let needLoad = false;
-				for (const [ddx,ddy,ddz] of rule){
-					const px=dx+ddx, py=y+ddy, pz=dz+ddz;
-					
-					if ( py < map.size[0].y ){ //最底层 则不显示
-						visibleValue.push(false);
-					}else if ( !(columns[px] && columns[px][pz] && columns[px][pz][py] && columns[px][pz][py].id) ){ //无方块 显示
-						needLoad = true;
-						visibleValue.push(true);
-					}else if ( columns[px][pz][py].attr && columns[px][pz][py].attr.block ){ //有属性
-						const visible = columns[px][pz][py].attr.block.transparent;
-						needLoad = needLoad || visible;
-						visibleValue.push( visible ); //方块透明 显示
-					}else{ //继承模板
-						const visible = TEMPLATES[ columns[px][pz][py].id ].attr.block.transparent;
-						needLoad = needLoad || visible;
-						visibleValue.push( visible ); //方块透明 显示
+				
+				if (noTransparent === true){ //整体不可隐藏
+					for (let i=0; i<6; i++)
+						visibleValue[i] = true;
+					needLoad = true;
+				}else{
+					for (const [i, [ddx,ddy,ddz]] of Object.entries(rule)){
+						const px=dx+ddx, py=y+ddy, pz=dz+ddz;
+						
+						if ( noTransparent && noTransparent[i] ){ //为数组 且 不可隐藏
+							needLoad = true;
+							visibleValue.push(true);
+						}else if ( py < map.size[0].y ){ //位于最底层 则不显示
+							visibleValue.push(false);
+						}/* else if (
+							px < map.size[0].x || px > map.size[1].x ||
+							py < map.size[0].y || py > map.size[1].y ||
+							pz < map.size[0].z || pz > map.size[1].z
+						){ //位于边缘 则不显示
+							visibleValue.push(false);
+						} */else if ( !(columns[px] && columns[px][pz] && columns[px][pz][py] && columns[px][pz][py].id) ){ //无方块 显示
+							needLoad = true;
+							visibleValue.push(true);
+						}else if ( columns[px][pz][py].attr && columns[px][pz][py].attr.block ){ //有属性
+							const visible = columns[px][pz][py].attr.block.transparent;
+							needLoad = needLoad || visible;
+							visibleValue.push( visible ); //方块透明 显示
+						}else{ //继承模板
+							const visible = TEMPLATES[ columns[px][pz][py].id ].attr.block.transparent;
+							needLoad = needLoad || visible;
+							visibleValue.push( visible ); //方块透明 显示
+						}
 					}
 				}
 				
 				if ( needLoad ){ //有面需显示
 					// if (y == 0) console.log(visibleValue)
-					const thisBlock = new Block(columns[dx][dz][y]).makeMesh(),
+					const thisBlock = new Block( block ).makeMesh(),
 						material = thisBlock.block.material;
 					
 					if ( !thisBlock.get("attr", "block", "noTransparent") ) //允许透明
@@ -1658,8 +1747,6 @@ class ChunkMap{
 		if ( this.getInitedChunks().some(v => v[0]==x && v[1]==z) ) //已初始化
 			return console.warn("loadChunkGenerator", x, z, "already inited");
 		
-		this.startLoadChunk(x, z); //开始加载区块
-		
 		const gen = function* (columns, _this){
 			switch ( dir.substr(0,2) ){
 				case "x-":
@@ -1675,7 +1762,6 @@ class ChunkMap{
 					}
 					
 					_this.finishLoadChunk(x, z); //区块加载完毕
-					if (finishCallback) finishCallback();
 					break;
 				
 				case "z+":
@@ -1691,7 +1777,6 @@ class ChunkMap{
 					}
 					
 					_this.finishLoadChunk(x, z); //区块加载完毕
-					if (finishCallback) finishCallback();
 					break;
 				
 				case "z-":
@@ -1707,7 +1792,6 @@ class ChunkMap{
 					}
 					
 					_this.finishLoadChunk(x, z); //区块加载完毕
-					if (finishCallback) finishCallback();
 					break;
 				
 				default:
@@ -1723,7 +1807,6 @@ class ChunkMap{
 					}
 					
 					_this.finishLoadChunk(x, z); //区块加载完毕
-					if (finishCallback) finishCallback();
 					break;
 			}
 		}
@@ -1740,6 +1823,7 @@ class ChunkMap{
 			},
 			successCallback: ()=>{
 				console.log("edit(DB):", x, z, edit);
+				this.startLoadChunk(x, z, edit); //开始加载区块
 				
 				const gener = gen( this.perGetChunk(x, z, edit), this ),
 					id = setInterval(function work(){
@@ -1753,6 +1837,7 @@ class ChunkMap{
 							if (res.value == true && ++num >= mostSpeed) //超数
 								return;
 						}
+						if (finishCallback) finishCallback(); //加载完毕
 						clearInterval(id); //运行结束
 					}, 0);
 				return id;
@@ -1955,7 +2040,6 @@ class ChunkMap{
 			}
 			
 			_this.finishUnloadChunk(x, z); //完成卸载区块
-			if (finishCallback) finishCallback();
 		}
 		
 		const gener = gen( this ),
@@ -1970,6 +2054,7 @@ class ChunkMap{
 					if (res.value == true && ++num >= mostSpeed) //超数
 						return;
 				}
+				if (finishCallback) finishCallback(); //卸载完毕
 				clearInterval(id); //运行结束
 			}, 0);
 		return id;
@@ -2029,7 +2114,7 @@ class ChunkMap{
 		
 		let loading=0, total=0; //当前正在加载 和 需加载总数
 		
-		if (!chunks.length){
+		if ( !chunks.length ){
 			if (finishCallback)
 				finishCallback();
 			return console.warn("chunk_perload chunks:", chunks);
@@ -2054,14 +2139,9 @@ class ChunkMap{
 					},
 					finishCallback: ()=>{
 						//更新区块
-						this.updateChunkAsync(cX, cZ, {
+						this.updateChunkGenerator(cX, cZ, {
 							breakTime: 16
 						});
-						setTimeout(()=>{
-							this.updateChunkAsync(cX, cZ, { //重新更新
-								breakTime: 16
-							});
-						}, 1);
 						
 						if (loading < 1e-6 && finishCallback){ //完成所有
 							finishCallback();

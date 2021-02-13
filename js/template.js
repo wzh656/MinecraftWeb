@@ -117,7 +117,14 @@ TEMPLATES[7.1] = new Block({
 	attr: {
 		block: {
 			transparent: true, //部分透明方块（不让相邻方块透明）
-			noTransparent: true //不让本方块透明
+			noTransparent: [
+				true,
+				true,
+				false,
+				false,
+				true,
+				true
+			] //不让本方块前后左右透明
 		},
 		onPutToHead: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);message('放到头上', '你自己要把方块放头上的，别怪我');false;",
 		onPutToBody: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);message('放到身上', '你自己要把方块放身上的，别怪我');false;",

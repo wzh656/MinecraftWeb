@@ -852,7 +852,7 @@ if (DEBUG){
 			f(){
 				cX = Math.round(deskgood.pos.x/100/map.size.x),
 				cZ = Math.round(deskgood.pos.z/100/map.size.z);
-				map.updateChunkAsync(cX, cZ, {
+				map.updateChunkGenerator(cX, cZ, {
 					breakTime: 16
 				});
 			}

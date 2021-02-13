@@ -74,5 +74,5 @@ const map = new ChunkMap([
 			q: 16
 		}
 	},
-}, 6*100);
+}, 10*100);
 document.title = "我的世界:"+map.seed.seed||"读取数据失败";

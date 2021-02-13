@@ -118,7 +118,7 @@ texture_load.id = setInterval(async function(){
 				$("#progress progress")[0].value = value;
 			},
 			finishCallback: function(){
-				// map.updateChunkAsync(0, 0); //更新区块
+				// map.updateChunkGenerator(0, 0); //更新区块
 				if (++perload_condition >= 2){
 					map.perloadChunk();
 				}
