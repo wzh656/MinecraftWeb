@@ -999,15 +999,15 @@ if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
 	)
 ){ //手机(-)
 	if ( navigator.userAgent.toLowerCase().indexOf("html5plus") != -1 ){ //html5+
-		device = -2
+		device = -2;
 	}else{ //浏览器
-		device = -1
+		device = -1;
 	}
 }else{ //电脑(+)
 	if (typeof require != "undefined"){ //electron
-		device = +2
+		device = +2;
 	}else{ //浏览器
-		device = +1
+		device = +1;
 	}
 }
 console.log("device:", device)
