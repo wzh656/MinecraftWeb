@@ -41,10 +41,13 @@ const deskgood = { //桌子好
 		fixedLength: 4,
 		updateCallback(children){
 			for (let i=0, len=children.length; i<len; i++){
-				$(children[i]).css("borderColor", (i==deskgood.choice)?"#cba":"#edc")
+				$(children[i])
+					.removeClass("checked")
+					.addClass(i==deskgood.choice? "checked": undefined);
+					/* .css("borderColor", (i==deskgood.choice)?"#cba":"#edc")
 					.css("borderWidth", (i==deskgood.choice)?"0.6vmax":"0.5vmax")
 					.css("transform", (i==deskgood.choice)?"translateY(-3px)":"")
-					.css("margin", "0 0");
+					.css("margin", "0 0"); */
 				children[i].onclick = ()=>{
 					const before = deskgood.choice;
 					
@@ -72,9 +75,12 @@ const deskgood = { //桌子好
 		maxLength: Infinity,
 		updateCallback(children){
 			for (let i=0, len=children.length; i<len; i++){
-				$(children[i]).css("borderColor", (i==children.length-1)?"#876":"#a6917c")
+				$(children[i])
+					.removeClass("checked")
+					.addClass(i==deskgood.choice? "checked": undefined);
+					/* .css("borderColor", (i==children.length-1)?"#876":"#a6917c")
 					.css("borderWidth", (i==children.length-1)?"0.5vmax":"0.3vmax")
-					.css("margin", "0 0");
+					.css("margin", "0 0"); */
 				children[i].onclick = ()=>{
 					if (deskgood.head[i]){ //有方块（放到手上）
 						if ( deskgood.head[deskgood.head.length-1] &&
@@ -102,9 +108,12 @@ const deskgood = { //桌子好
 		maxLength: Infinity,
 		updateCallback(children){
 			for (let i=0, len=children.length; i<len; i++){
-				$(children[i]).css("borderColor", (i==children.length-1)?"#876":"#a6917c")
+				$(children[i])
+					.removeClass("checked")
+					.addClass(i==deskgood.choice? "checked": undefined);
+					/* .css("borderColor", (i==children.length-1)?"#876":"#a6917c")
 					.css("borderWidth", (i==children.length-1)?"0.5vmax":"0.3vmax")
-					.css("margin", "0 0");
+					.css("margin", "0 0"); */
 				children[i].onclick = ()=>{
 					if (deskgood.body[i]){ //有方块（放到手上）
 						if ( deskgood.body[deskgood.body.length-1] &&
@@ -132,9 +141,12 @@ const deskgood = { //桌子好
 		maxLength: Infinity,
 		updateCallback(children){
 			for (let i=0, len=children.length; i<len; i++){
-				$(children[i]).css("borderColor", (i==children.length-1)?"#876":"#a6917c")
+				$(children[i])
+					.removeClass("checked")
+					.addClass(i==deskgood.choice? "checked": undefined);
+					/* .css("borderColor", (i==children.length-1)?"#876":"#a6917c")
 					.css("borderWidth", (i==children.length-1)?"0.5vmax":"0.3vmax")
-					.css("margin", "0 0");
+					.css("margin", "0 0"); */
 				children[i].onclick = ()=>{
 					if (deskgood.leg[i]){ //有方块（放到手上）
 						if ( deskgood.leg[deskgood.leg.length-1] &&
@@ -163,9 +175,12 @@ const deskgood = { //桌子好
 		maxLength: Infinity,
 		updateCallback(children){
 			for (let i=0, len=children.length; i<len; i++){
-				$(children[i]).css("borderColor", (i==children.length-1)?"#876":"#a6917c")
+				$(children[i])
+					.removeClass("checked")
+					.addClass(i==deskgood.choice? "checked": undefined);
+					/* .css("borderColor", (i==children.length-1)?"#876":"#a6917c")
 					.css("borderWidth", (i==children.length-1)?"0.5vmax":"0.3vmax")
-					.css("margin", "0 0");
+					.css("margin", "0 0"); */
 				children[i].onclick = ()=>{
 					if ( deskgood.foot[deskgood.foot.length-1] &&
 							eval( deskgood.foot[deskgood.foot.length-1].get("attr", "onHold") ) === false

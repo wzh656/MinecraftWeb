@@ -247,8 +247,13 @@ Copyright © 2020~2021 by wzh
 				width: 5vmax;
 				height: 5vmax;
 				display: inline-block;
-				margin: 0 -2px;
-				border: 0.6vmax groove #edc;
+				/* margin: 0 -2px; */
+				margin: 0;
+				border: 0.5vmax groove #fffae8;
+			}
+			#tools > li.checked{ /* 选中 */
+				border: 0.6vmax groove #dae6cd;
+				transform: translateY(-0.3vmax);
 			}
 			#tools > li > img{
 				width: 100%;
@@ -434,7 +439,7 @@ Copyright © 2020~2021 by wzh
 			#bag > nav > label:not([onclick]):hover{ /* 悬停加深颜色 */
 				background-color: #ccd8c1;
 			}
-			#bag > nav > label[checked]{ /* 被选中 */
+			#bag > nav > label.checked{ /* 被选中 */
 				/* 白底黑字黑边框 */
 				color: #876 !important;
 				background-color: #e0edd3 !important;
@@ -467,10 +472,13 @@ Copyright © 2020~2021 by wzh
 				background-color: #fffae8;
 				border: 0.5vmax #fff outset;
 			}
-			#bag > section:not([checked]){ /* 未选择的section隐藏 */
+			#bag > section.checked{ /* 选择的section显示 */
+				display: flex;
+			}
+			#bag > section:not(.checked){ /* 未选择的section隐藏 */
 				display: none;
 			}
-			#bag > section[checked]{ /* 选择的section显示 */
+			#bag > section.checked{ /* 选择的section显示 */
 				display: flex;
 			}
 			
@@ -499,7 +507,11 @@ Copyright © 2020~2021 by wzh
 				display: block;
 				width: 6vmax;
 				height: 6vmax;
-				border: 0.3vmax inset #876;
+				margin: 0;
+				border: 0.3vmax inset #a6917c;
+			}
+			#bag > section:nth-of-type(1) > ul > li > ol > li.checked{ /* 选中 */
+				border: 0.5vmax inset #876;
 			}
 			#bag > section:nth-of-type(1) > ul > li > ol > li > img{ /* 背包物品图片 */
 				width: 100%;
@@ -829,35 +841,35 @@ deskgood.moveTo(0,10000*100);</textarea>
 		<!-- 1:背包 -->
 		<div id="bag" data-display="flex" style="z-index: 1;">
 			<nav>
-				<label checked>物品</label>
+				<label class="checked">物品</label>
 				<label>状态</label>
 				<label>智造</label>
 				<label onclick="status('bag');">╳</label>
 			</nav>
-			<section checked>
+			<section class="checked">
 				<ul>
 					<li>
 						头(Head)：
 						<ol class="head">
-							<li><img/></li>
+							<li class="checked"><img/></li>
 						</ol>
 					</li>
 					<li>
 						身(Body)：
 						<ol class="body">
-							<li><img/></li>
+							<li class="checked"><img/></li>
 						</ol>
 					</li>
 					<li>
 						腿(leg)：
 						<ol class="leg">
-							<li><img/></li>
+							<li class="checked"><img/></li>
 						</ol>
 					</li>
 					<li>
 						脚(foot)：
 						<ol class="foot">
-							<li><img/></li>
+							<li class="checked"><img/></li>
 						</ol>
 					</li>
 				</ul>
@@ -871,8 +883,8 @@ deskgood.moveTo(0,10000*100);</textarea>
 			<script>
 				for (const [i,v] of Object.entries($("#bag > nav > label:not([onclick])")))
 					v.onclick = function(){
-						$(this).attr("checked", "").siblings().removeAttr("checked");
-						$("#bag > section:eq("+i+")").attr("checked", "").siblings().removeAttr("checked");
+						$(this).addClass("checked").siblings().removeClass("checked");
+						$("#bag > section:eq("+i+")").addClass("checked").siblings().removeClass("checked");
 					};
 			</script>
 		</div>

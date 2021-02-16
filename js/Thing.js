@@ -1,11 +1,14 @@
+/*
+* Thing基础类
+*/
 class Thing{
-	constructor (opt, template=true){
+	constructor (opt/* , template=true */){
 		//物品ID
 		this.id = Number(opt.id);
 		//this.id = Thing.prototype.idLength++; //同时自增
 		
 		//Object.defineProperties();
-		this.template = !!template;
+		// this.template = !!template;
 		
 		//名称
 		if (opt.name)
@@ -30,6 +33,8 @@ class Thing{
 			if (opt.attr.lifeLoss) this.attr.lifeLoss = opt.attr.lifeLoss; //生命损耗 /m³*/
 		}
 	}
+	
+	//获取属性
 	get(...attr){
 		let this_part = this,
 			template_part = TEMPLATES[this.id];
@@ -45,6 +50,7 @@ class Thing{
 		}
 		return this_part===undefined? template_part: this_part;
 	};
+	//设置属性
 	set(...attr){
 		let this_part = this,
 			value = attr.pop(); // 最后一位为要赋的值
@@ -56,6 +62,7 @@ class Thing{
 		this_part[attr.pop()] = value;
 		return this;
 	};
+	//判断是否拥有属性
 	have(...attr){
 		let part = this;
 		for (let i of attr){
@@ -65,22 +72,26 @@ class Thing{
 		return true;
 	};
 }
-Thing.geometry = new THREE.BoxBufferGeometry(100, 100, 100);
 
 
+/*
+* Block方块类 继承Thing类
+*/
 class Block extends Thing{
-	constructor(opt, template=true){
-		super(opt, template);
+	constructor(opt/* , template=true */){
+		super(opt/* , template */);
 		
 		this.block = {};
 		if (opt.block){
 			//face
 			if (opt.block.face){ //贴图 位置
 				this.block.face = [];
-				for (let i=0; i<opt.block.face.length; i++)
-					this.block.face[i] = opt.block.face[i];
+				for (let i=0; i<opt.block.face.length; i++){
+					this.block.face[i] = []; //面
+					for (let j=0; j<2; j++) //横纵uv
+						this.block.face[i][j] = opt.block.face[i][j];
+				}
 			}
-					
 			//texture
 			if (opt.block.texture){ //贴图 数据
 				this.block.texture = [];
@@ -88,27 +99,21 @@ class Block extends Thing{
 					if (opt.block.texture[i])
 						this.block.texture[i] = opt.block.texture[i];
 			}
-			
-			this.block.addTo = false; //加入scene
 			//material
-			if (opt.block.material){ //材质
-				this.block.material = opt.block.material;
-			}
+			if (opt.block.material) this.block.material = opt.block.material; //材质
 			//geometry
-			if (opt.block.geometry){ //几何体
-				this.block.geometry = opt.block.geometry;
-			}
+			if (opt.block.geometry) this.block.geometry = opt.block.geometry; //几何体
 			//mesh
-			if (opt.block.mesh){ //网格模型
-				this.block.mesh = opt.block.mesh;
-			}
+			if (opt.block.mesh) this.block.mesh = opt.block.mesh; //网格模型
+			this.block.addTo = false; //未加入scene
 		}
 		
+		//属性
 		this.attr.block = {};
 		if (opt.attr && opt.attr.block){
 			if (opt.attr.block.transparent) this.attr.block.transparent = opt.attr.block.transparent; //透明方块（其他方块必须显示）
 			if (opt.attr.block.noTransparent) this.attr.block.noTransparent = opt.attr.block.noTransparent; //必须显示本方块
-			if (opt.attr.block.through) this.attr.block.through = opt.attr.block.through; //运行穿过
+			if (opt.attr.block.through) this.attr.block.through = opt.attr.block.through; //允许穿过
 			
 			if (opt.attr.block.onLeftMouseDown) this.attr.block.onLeftMouseDown = opt.attr.block.onLeftMouseDown; //鼠标左键按下
 			if (opt.attr.block.onLeftMouseUp) this.attr.block.onLeftMouseUp = opt.attr.block.onLeftMouseUp; //鼠标左键抬起
@@ -126,7 +131,8 @@ class Block extends Thing{
 			if (opt.attr.block.onRemove) this.attr.block.onRemove = opt.attr.block.onRemove; //被删除
 		}
 	}
-	//face
+	
+	// face
 	setFace(value, index){
 		if (index === undefined){ //无索引（所有）
 			for (let i=0; i<value.length; i++)
@@ -148,7 +154,8 @@ class Block extends Thing{
 		this.set("block", "parent", value);
 		return this;
 	};
-	//texture
+	
+	// texture
 	setTexture(texture, index){
 		/*if (!this.block.texture){ //不存在texture
 			this.block.texture = [];
@@ -163,18 +170,19 @@ class Block extends Thing{
 	};
 	deleteTexture(index){
 		if (index === undefined){ //无索引（所有）
-			if (this.have("block", "texture"))
+			if ( this.have("block", "texture") )
 				for (let i of Object.values(this.get("block", "texture")))
 					i.dispose(); //清除内存
 			this.set("block", "texture", []); //半保留
 		}else{ //有索引（单个）
-			if (this.have("block", "texture", index))
+			if ( this.have("block", "texture", index) )
 				this.block.texture[index].dispose(); //清除内存
 			this.set("block", "texture", index, null); //半保留
 		}
 		return this;
 	};
-	//material
+	
+	// material
 	makeMaterial(/* material */){
 		/* if (material)
 			return this.set("block", "material", material.map( v => v.clone() )); */
@@ -192,35 +200,37 @@ class Block extends Thing{
 		return this;
 	};
 	deleteMaterial(){
-		if (this.have("block", "material"))
-			for (let i of this.get("block", "material"))
+		if ( this.have("block", "material") )
+			for (const i of this.get("block", "material"))
 				i.dispose(); //清除内存
 		this.set("block", "material", null); //半保留
 		return this;
 	};
-	//geometry
+	
+	// geometry
 	makeGeometry(x, y, z){
 		this.set("block", "geometry", new THREE.BoxBufferGeometry(x, y, z));
 		return this;
 	};
 	deleteGeometry(){
-		if (this.have("block", "geometry"))
+		if ( this.have("block", "geometry") )
 			this.block.geometry.dispose();
 		this.set("block", "geometry", null); //半保留
 		return this;
 	};
-	//mesh
+	
+	// mesh
 	makeMesh( geometry=this.get("block", "geometry") ){
-		if (!this.have("block", "material")){
+		if ( !this.have("block", "material") ){ //没有材质
 			const template = this.get("block", "material");
 			this.block.material = [];
-			for (const i in template)
+			for (let i=0; i<template.length; i++)
 				this.block.material[i] = template[i].clone();
 		}
 		if (geometry){
 			this.set("block", "mesh", new THREE.Mesh(geometry, this.block.material)); //网格模型对象Mesh
 		}else{ //使用默认
-			this.set("block", "mesh", new THREE.Mesh(Thing.geometry, this.block.material)); //网格模型对象Mesh
+			this.set("block", "mesh", new THREE.Mesh(Block.geometry, this.block.material)); //网格模型对象Mesh
 		}
 		this.get("block", "mesh").castShadow = true;
 		this.get("block", "mesh").receiveShadow = true;
@@ -229,7 +239,7 @@ class Block extends Thing{
 	};
 	deleteMesh(index){
 		if (this.have("block", "mesh", "material"))
-			for (let i of this.get("block", "mesh", "material"))
+			for (const i of this.get("block", "mesh", "material"))
 				i.dispose();
 		if (this.have("block", "mesh", "geometry"))
 			this.get("block", "mesh", "geometry").dispose(); //清除内存
@@ -237,8 +247,37 @@ class Block extends Thing{
 		return this;
 	};
 }
+Block.geometry = new THREE.BoxBufferGeometry(100, 100, 100); //通用几何体
 
 
+/*
+* Tool工具类 继承Thing类
+*/
+class Tool extends Thing{
+	constructor(opt){
+		super(opt);
+		
+		this.tool = {};
+		if (opt.tool){
+			if (opt.tool.face) this.tool.face = opt.tool.face; //显示贴图
+		}
+		
+		//工具属性
+		this.attr.tool = {};
+		if (opt.attr && opt.attr.tool){
+			if (opt.attr.tool.diggingSpeed){ //每一种方块的挖掘速度
+				this.attr.tool.diggingSpeed = {};
+				for (cosnt [id,speed] of Object.entries(opt.attr.tool.diggingSpeed))
+					this.attr.tool.diggingSpeed[id] = speed;
+			}
+			if (opt.attr.tool.durability) this.attr.tool.durability = opt.attr.tool.durability; //耐久度/m³
+		}
+	}
+}
+
+/*
+* ThingGroup物品栏类 继承数组
+*/
 class ThingGroup extends Array{
 	constructor(element, opt, ...array) {
 		super(...array);
@@ -263,7 +302,6 @@ class ThingGroup extends Array{
 			this.addOne(item[i], where[i], false);
 		return this.update();
 	}
-	
 	//添加一个
 	addOne(item, where, needUpdate=true){
 		if (this.fixedLength && !this.maxLength){ //有固定长度，无最大长度
