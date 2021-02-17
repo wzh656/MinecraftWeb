@@ -1,11 +1,12 @@
 const TEMPLATES = []; //模板
-TEMPLATES.push(new Block({
+TEMPLATES[0] = new Block({
 	id: 0,
 	name: "空气"
-}));
-TEMPLATES.push(new Block({
+});
+TEMPLATES[1] = new Block({
 	id: 1,
 	name: "命令方块",
+	view: [1,0],
 	block: {
 		face: [
 			[1,0], [1,0], [0,0], [2,0], [1,0], [1,0]
@@ -21,18 +22,19 @@ TEMPLATES.push(new Block({
 		onPutToLeg: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);false;",
 		onPutToFoot: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);false;"
 	}
-}));
-/*TEMPLATES.push(new Block({
+});
+/*TEMPLATES[2] = new Block({
 	id: 2,
 	name: "基岩",
 	block: {
 		face: FACE_URL[1]
 	},
 	attr: {}
-}));*/
-TEMPLATES.push(new Block({
+});*/
+TEMPLATES[2] = new Block({
 	id: 2,
 	name: "草方块",
+	view: [4,0],
 	block: {
 		face: [
 			[4,0], [4,0], [3,0], [5,0], [4,0], [4,0]
@@ -44,10 +46,11 @@ TEMPLATES.push(new Block({
 		onPutToLeg: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);false;",
 		onPutToFoot: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);false;"
 	}
-}));
-TEMPLATES.push(new Block({
+});
+TEMPLATES[3] = new Block({
 	id: 3,
 	name: "泥土",
+	view: [5,0],
 	block: {
 		face: [
 			[5,0], [5,0], [5,0], [5,0], [5,0], [5,0]
@@ -59,10 +62,11 @@ TEMPLATES.push(new Block({
 		onPutToLeg: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);false;",
 		onPutToFoot: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);false;"
 	}
-}));
-TEMPLATES.push(new Block({
+});
+TEMPLATES[4] = new Block({
 	id: 4,
 	name: "原石",
+	view: [6,0],
 	block: {
 		face: [
 			[6,0], [6,0], [6,0], [6,0], [6,0], [6,0]
@@ -74,10 +78,11 @@ TEMPLATES.push(new Block({
 		onPutToLeg: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);false;",
 		onPutToFoot: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);false;"
 	}
-}));
-TEMPLATES.push(new Block({
+});
+TEMPLATES[5] = new Block({
 	id: 5,
 	name: "石头",
+	view: [7,0],
 	block: {
 		face: [
 			[7,0], [7,0], [7,0], [7,0], [7,0], [7,0]
@@ -89,10 +94,11 @@ TEMPLATES.push(new Block({
 		onPutToLeg: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);false;",
 		onPutToFoot: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);false;"
 	}
-}));
-TEMPLATES.push(new Block({
+});
+TEMPLATES[6] = new Block({
 	id: 6,
 	name: "沙子",
+	view: [0,1],
 	block: {
 		face: [
 			[0,1], [0,1], [0,1], [0,1], [0,1], [0,1]
@@ -104,10 +110,11 @@ TEMPLATES.push(new Block({
 		onPutToLeg: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);false;",
 		onPutToFoot: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);false;"
 	}
-}));
+});
 TEMPLATES[7.1] = new Block({
 	id: 7.1,
 	name: "细橡木",
+	view: [2,1],
 	block: {
 		parent: "./img/blocks/8/",
 		face: [
@@ -135,6 +142,7 @@ TEMPLATES[7.1] = new Block({
 TEMPLATES[8] = new Block({
 	id: 8,
 	name: "疏树叶",
+	view: [3,1],
 	block: {
 		face: [
 			[3,1], [3,1], [3,1], [3,1], [3,1], [3,1]
@@ -155,6 +163,7 @@ TEMPLATES[8] = new Block({
 TEMPLATES[8.2] = new Block({
 	id: 8.2,
 	name: "密树叶",
+	view: [4,1],
 	block: {
 		face: [
 			[4,1], [4,1], [4,1], [4,1], [4,1], [4,1]
@@ -175,6 +184,7 @@ TEMPLATES[8.2] = new Block({
 TEMPLATES[9] = new Block({
 	id: 9,
 	name: "木板",
+	view: [5,1],
 	block: {
 		face: [
 			[5,1], [5,1], [5,1], [5,1], [5,1], [5,1]
@@ -187,9 +197,10 @@ TEMPLATES[9] = new Block({
 		onPutToFoot: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);false;"
 	}
 });
-TEMPLATES.push(new Block({
+TEMPLATES[10] = new Block({
 	id: 10,
 	name: "砖",
+	view: [6,1],
 	block: {
 		face: [
 			[6,1], [6,1], [6,1], [6,1], [6,1], [6,1]
@@ -201,10 +212,11 @@ TEMPLATES.push(new Block({
 		onPutToLeg: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);deskgood.hold.delete(1, deskgood.choice);false;",
 		onPutToFoot: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);deskgood.hold.delete(1, deskgood.choice);false;"
 	}
-}));
-TEMPLATES.push(new Block({
+});
+TEMPLATES[11] = new Block({
 	id: 11,
 	name: "仙人掌",
+	view: [0,2],
 	block: {
 		face: [
 			[0,2], [0,2], [7,1], [1,2], [0,2], [0,2]
@@ -216,4 +228,40 @@ TEMPLATES.push(new Block({
 		onPutToLeg: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);deskgood.hold.delete(1, deskgood.choice);false;",
 		onPutToFoot: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);deskgood.hold.delete(1, deskgood.choice);false;"
 	}
-}));
+});
+TEMPLATES[12.2] = new Tool({
+	id: 12.2,
+	name: "石镐",
+	view: [2,2],
+	attr: {
+		hardnesss: 10,
+		durability: 10
+	}
+});
+TEMPLATES[13.2] = new Tool({
+	id: 13.2,
+	name: "石剑",
+	view: [3,2],
+	attr: {
+		hardnesss: 10,
+		durability: 10
+	}
+});
+TEMPLATES[14.2] = new Tool({
+	id: 14.2,
+	name: "石斧",
+	view: [4,2],
+	attr: {
+		hardnesss: 10,
+		durability: 10
+	}
+});
+TEMPLATES[15.2] = new Tool({
+	id: 15.2,
+	name: "石铲",
+	view: [5,2],
+	attr: {
+		hardnesss: 10,
+		durability: 10
+	}
+});
