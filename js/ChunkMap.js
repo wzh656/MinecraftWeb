@@ -203,14 +203,14 @@ class ChunkMap{
 		block.block.addTo = true;
 	}
 	
-	//根据 模板和ID 添加方块
-	addID(id, {x,y,z}, template, opt={}){
+	//根据 模板和name 添加方块
+	addID(name, {x,y,z}, opt={}){
 		const {type=true, attr={}} = opt;
 		/* if (typeof type != "boolean"){
 			[type, attr] = [undefined, type];
 		} */
 		// if (!attr.block) attr.block = {};
-		if (id == 0){ //添加空气
+		if (name == "空气"){ //添加空气
 			x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 			if ( this.get(x, y, z) ){ //有方块（强制移除）
 				for (const i of this.map[x][y][z].block.mesh.material)
@@ -229,7 +229,7 @@ class ChunkMap{
 		}
 		
 		const block = new Block({
-			id,
+			name,
 			attr
 		}).makeMesh();
 		this.add(
@@ -281,9 +281,10 @@ class ChunkMap{
 				[0,0,-1]
 			],
 			visibleValue = [], //可见值
-			noTransparent = (thisBlock && thisBlock.attr && thisBlock.attr.block && thisBlock.attr.block.noTransparent!==undefined)? //有属性
+			noTransparent = thisBlock.get("attr", "block", "noTransparent"); //是否可以隐藏
+				/* (thisBlock && thisBlock.attr && thisBlock.attr.block && thisBlock.attr.block.noTransparent!==undefined)? //有属性
 				thisBlock.attr.block.noTransparent:
-				TEMPLATES[ thisBlock?thisBlock.id:0 ].attr.block.noTransparent; //是否可以隐藏
+				Block.prototype.TEMPLATES[ thisBlock?thisBlock.name:0 ].attr.block.noTransparent; */
 		let needLoad = false; //需要加载
 		
 		if (noTransparent === true){ //整体不可隐藏
@@ -307,7 +308,7 @@ class ChunkMap{
 					visibleValue.push(true);
 				}else if ( py < map.size[0].y ){ //最底层 则不显示
 					visibleValue.push(false);
-				}else if ( !(thatBlock && thatBlock.id) ){ //无方块 显示
+				}else if ( !(thatBlock && thatBlock.name!="空气") ){ //无方块 显示
 					needLoad = true;
 					visibleValue.push(true);
 				}else if ( thatBlock.attr && thatBlock.attr.block && thatBlock.attr.block.transparent !== undefined ){ //有属性
@@ -315,7 +316,7 @@ class ChunkMap{
 					needLoad = needLoad || visible;
 					visibleValue.push( visible ); //方块透明 显示
 				}else{ //继承模板
-					const visible = TEMPLATES[ thatBlock.id ].attr.block.transparent;
+					const visible = Block.prototype.TEMPLATES[ thatBlock.name ].attr.block.transparent;
 					needLoad = needLoad || visible;
 					visibleValue.push( visible ); //方块透明 显示
 				}
@@ -329,11 +330,11 @@ class ChunkMap{
 				get = new Block( this.perGet(x, y, z, edit||[]) ); //应该的方块
 			
 			if ( needLoad && this.getInitedChunks().some(v => v[0]==cX && v[1]==cZ) ){ //不可隐藏（有面true） 且 在加载区块内
-				this.addID(get.id, {
+				this.addID(get.name, {
 					x,
 					y,
 					z,
-				}, TEMPLATES, {
+				}, {
 					attr: get.attr
 				});
 				thisBlock = this.get(x,y,z); //加载后的this方块
@@ -378,7 +379,7 @@ class ChunkMap{
 					x,
 					y,
 					z,
-				}, TEMPLATES, {
+				}, {
 					attr: get.attr
 				});
 				thisBlock = this.get(x,y,z); //加载后的this方块
@@ -407,7 +408,7 @@ class ChunkMap{
 					x,
 					y,
 					z,
-				}, TEMPLATES, {
+				}, {
 					attr: get.attr
 				});
 				thisBlock = this.get(x,y,z);
@@ -426,7 +427,7 @@ class ChunkMap{
 					x,
 					y,
 					z,
-				}, TEMPLATES, {
+				}, {
 					attr: get.attr
 				});
 				console.log(this.get(x,y,z), thisBlock)
@@ -723,7 +724,7 @@ class ChunkMap{
 				value.z == z
 			){ //被编辑
 				return {
-					id: value.id,
+					name: value.name,
 					attr: value.attr
 				};
 			}
@@ -781,7 +782,7 @@ class ChunkMap{
 		
 		/* let earth = height - height * (t.noise.more3D(6.6, x/t.s.q, z/t.s.q, 6) *t.s.k +t.s.b)+
 		t.noise.more3D(-52.6338, x/t.s.e.q, z/t.s.e.q, 3) *t.s.e.k +t.s.e.b; */
-		let id = 0;
+		let name = "空气";
 		switch (type){
 			case 0: //森林
 				
@@ -795,42 +796,42 @@ class ChunkMap{
 				
 				if (y > treeHeight+1){
 					if (y <= leaves[1] && y > leaves[0]){
-						id = 8; //树叶
+						name = "疏树叶";
 					}else{
-						id = 0; // 空气/真空 (null)
+						name = "空气";
 					}
 				}else if (y > treeHeight){
 					if ( treeHeight != height ||
 						(y <= leaves[1] && y > leaves[0])
 					){ //有树或旁边有树
-						id = 8; //树叶
+						name = "疏树叶";
 					}else{
-						id = 0; // 空气/真空 (null)
+						name = "空气";
 					}
 				}else if (y > height){
 					//if (!treeTop) treeTop = y;
-					id = 7.1; //橡木
+					name = "细橡木";
 				}else if (y == Math.floor(height) && !(height > 0.9*this.size[1].y)){ // 90%+ 高原（草木不生，积雪覆盖）
 					if (sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
-						id = 5; //石头
+						name = "石头";
 					}else{
-						id = 2; //草方块
+						name = "草方块";
 					}
 				}else if (y > earth){
 					// if (grass){
-						id = 3; //泥土
+						name = "泥土";
 					/* }else{
-						id = 2; //草方块
+						name = "草方块";
 						// grass = true;
 					} */
 				}/*else if (y == 0){
-					id = 2; //基岩
+					name = 2; //基岩
 				}*/else{
 					/* if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
-						id = 2; //草方块
+						name = "草方块";
 						grass = true;
 					}else{ */
-						id = 5; //石头
+						name = "石头";
 					// }
 				}
 				break;
@@ -843,32 +844,32 @@ class ChunkMap{
 				
 				if (y > height){
 					if (y <= leaves[1] && y > leaves[0]){
-						id = 8; //树叶
+						name = "树叶";
 					}else{
-						id = 0; // 空气/真空 (null)
+						name = "空气";
 					}
 				}/* else if (y > height){
 					//if (!treeTop) treeTop = y;
-					id = 7.1; //橡木
+					name = 7.1; //橡木
 				} */else if (y == Math.floor(height) && !(height > 0.9*this.size[1].y)){ // 90%+ 高原（草木不生，积雪覆盖）
 					if (sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
-						id = 5; //石头
+						name = "石头";
 					}else{
-						id = 2; //草方块
+						name = "草方块";
 					}
 				}else if (y > earth){
 					// if (grass){
-						id = 3; //泥土
+						name = "泥土";
 					/* }else{
-						id = 2; //草方块
+						name = "草方块";
 						// grass = true;
 					} */
 				}else{
 					/* if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
-						id = 2; //草方块
+						name = "草方块";
 						// grass = true;
 					}else{ */
-						id = 5; //石头
+						name = "石头";
 					// }
 				}
 				break;
@@ -877,27 +878,27 @@ class ChunkMap{
 				
 				if (y > height){
 					if (y <= leaves[1] && y > leaves[0]){
-						id = 8; //树叶
+						name = "树叶";
 					}else{
-						id = 0; // 空气/真空 (null)
+						name = "空气";
 					}
 				}else if (y > earth){
-					id = 6; //沙子
+					name = "沙子";
 				}else{
 					/* if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
-						id = 6; //沙子
+						name = "沙子";
 						grass = true;
 					}else{ */
-						id = 5; //石头
+						name = "石头";
 					// }
 				}
 				break;
 			
 			default:
-				id = 0;
+				name = "空气";
 		}
 		
-		return {id};
+		return {name};
 	}
 	
 	//获取一列方块信息
@@ -965,7 +966,7 @@ class ChunkMap{
 					value.z == z
 				){ //被编辑
 					column[dy] = {
-						id: value.id,
+						name: value.name,
 						attr: value.attr
 					};
 					return true; //让下面continue
@@ -1141,12 +1142,12 @@ class ChunkMap{
 		
 		for (let y=this.size[0].y; y<=this.size[1].y; y++){
 			const block = columns[dx][dz][y];
-			if ( block.id ){ //有方块
+			if ( block.name != "空气" ){ //有方块
 				
 				const visibleValue = [],
 					noTransparent = (block.attr && block.attr.block && block.attr.block.noTransparent!==undefined)? //有属性
 						block.attr.block.noTransparent:
-						TEMPLATES[ block.id ].attr.block.noTransparent; //是否可以隐藏
+						Block.prototype.TEMPLATES[ block.name ].attr.block.noTransparent; //是否可以隐藏
 				let needLoad = false;
 				
 				if (noTransparent === true){ //整体不可隐藏
@@ -1168,7 +1169,7 @@ class ChunkMap{
 							pz < map.size[0].z || pz > map.size[1].z
 						){ //位于边缘 则不显示
 							visibleValue.push(false);
-						} */else if ( !(columns[px] && columns[px][pz] && columns[px][pz][py] && columns[px][pz][py].id) ){ //无方块 显示
+						} */else if ( !(columns[px] && columns[px][pz] && columns[px][pz][py] && columns[px][pz][py].name!="空气") ){ //无方块 显示
 							needLoad = true;
 							visibleValue.push(true);
 						}else if ( columns[px][pz][py].attr && columns[px][pz][py].attr.block ){ //有属性
@@ -1176,7 +1177,7 @@ class ChunkMap{
 							needLoad = needLoad || visible;
 							visibleValue.push( visible ); //方块透明 显示
 						}else{ //继承模板
-							const visible = TEMPLATES[ columns[px][pz][py].id ].attr.block.transparent;
+							const visible = Block.prototype.TEMPLATES[ columns[px][pz][py].name ].attr.block.transparent;
 							needLoad = needLoad || visible;
 							visibleValue.push( visible ); //方块透明 显示
 						}
@@ -1200,12 +1201,12 @@ class ChunkMap{
 					// x,z,y
 					/*const noTransparent =  thisBlock.get("attr", "block", "noTransparent"),
 						visibleValue = [
-							!( columns[dx+1] && columns[dx+1][y] && columns[dx+1][y][dz] && columns[dx+1][y][dz].id && !((columns[dx+1][y][dz].attr&&columns[dx+1][y][dz].attr.block.transparent)||TEMPLATES[columns[dx+1][y][dz].id].attr.block.transparent)) || noTransparent,
-							!( columns[dx-1] && columns[dx-1][y] && columns[dx-1][y][dz] && columns[dx-1][y][dz].id && !((columns[dx-1][y][dz].attr&&columns[dx-1][y][dz].attr.block.transparent)||TEMPLATES[columns[dx-1][y][dz].id].attr.block.transparent)) || noTransparent,
-							!( columns[dx] && columns[dx][y+1] && columns[dx][y+1][dz] && columns[dx][y+1][dz].id && !((columns[dx][y+1][dz].attr&&columns[dx][y+1][dz].attr.block.transparent)||TEMPLATES[columns[dx][y+1][dz].id].attr.block.transparent)) || noTransparent,
-							!( columns[dx] && columns[dx][y-1] &&  columns[dx][y-1][dz] && columns[dx][y-1][dz].id && !((columns[dx][y-1][dz].attr&&columns[dx][y-1][dz].attr.block.transparent)||TEMPLATES[columns[dx][y-1][dz].id].attr.block.transparent)) || noTransparent,
-							!( columns[dx] && columns[dx][y] && columns[dx][y][dz+1] && columns[dx][y][dz+1].id && !((columns[dx][y][dz+1].attr&&columns[dx][y][dz+1].attr.block.transparent)||TEMPLATES[columns[dx][y][dz+1].id].attr.block.transparent)) || noTransparent,
-							!( columns[dx] && columns[dx][y] && columns[dx][y][dz-1] && columns[dx][y][dz-1].id && !((columns[dx][y][dz-1].attr&&columns[dx][y][dz-1].attr.block.transparent)||TEMPLATES[columns[dx][y][dz-1].id].attr.block.transparent)) || noTransparent
+							!( columns[dx+1] && columns[dx+1][y] && columns[dx+1][y][dz] && columns[dx+1][y][dz].id && !((columns[dx+1][y][dz].attr&&columns[dx+1][y][dz].attr.block.transparent)||Block.prototype.TEMPLATES[columns[dx+1][y][dz].id].attr.block.transparent)) || noTransparent,
+							!( columns[dx-1] && columns[dx-1][y] && columns[dx-1][y][dz] && columns[dx-1][y][dz].id && !((columns[dx-1][y][dz].attr&&columns[dx-1][y][dz].attr.block.transparent)||Block.prototype.TEMPLATES[columns[dx-1][y][dz].id].attr.block.transparent)) || noTransparent,
+							!( columns[dx] && columns[dx][y+1] && columns[dx][y+1][dz] && columns[dx][y+1][dz].id && !((columns[dx][y+1][dz].attr&&columns[dx][y+1][dz].attr.block.transparent)||Block.prototype.TEMPLATES[columns[dx][y+1][dz].id].attr.block.transparent)) || noTransparent,
+							!( columns[dx] && columns[dx][y-1] &&  columns[dx][y-1][dz] && columns[dx][y-1][dz].id && !((columns[dx][y-1][dz].attr&&columns[dx][y-1][dz].attr.block.transparent)||Block.prototype.TEMPLATES[columns[dx][y-1][dz].id].attr.block.transparent)) || noTransparent,
+							!( columns[dx] && columns[dx][y] && columns[dx][y][dz+1] && columns[dx][y][dz+1].id && !((columns[dx][y][dz+1].attr&&columns[dx][y][dz+1].attr.block.transparent)||Block.prototype.TEMPLATES[columns[dx][y][dz+1].id].attr.block.transparent)) || noTransparent,
+							!( columns[dx] && columns[dx][y] && columns[dx][y][dz-1] && columns[dx][y][dz-1].id && !((columns[dx][y][dz-1].attr&&columns[dx][y][dz-1].attr.block.transparent)||Block.prototype.TEMPLATES[columns[dx][y][dz-1].id].attr.block.transparent)) || noTransparent
 							// 没有方块 或 有方块非透明 则显示  或  自身透明 也显示
 						],*/
 					
@@ -1216,7 +1217,7 @@ class ChunkMap{
 					x,
 					y,
 					z
-				}, TEMPLATES);
+				});
 			}
 		}
 	}

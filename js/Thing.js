@@ -3,8 +3,8 @@
 */
 class Thing{
 	constructor (opt/* , template=true */){
-		//物品ID
-		this.id = +opt.id;
+		/* //物品ID
+		this.id = ""+opt.id; */
 		//this.id = Thing.prototype.idLength++; //同时自增
 		
 		//Object.defineProperties();
@@ -44,7 +44,7 @@ class Thing{
 	//获取属性
 	get(...attr){
 		let this_part = this,
-			template_part = TEMPLATES[this.id];
+			template_part = this.constructor.prototype.TEMPLATES[ this.name ];
 		//let type = !!this.template;
 		for (let i of attr){
 			if (this_part && this_part[i]){ //不为undefined 且 可获取下一个属性
@@ -79,6 +79,7 @@ class Thing{
 		return true;
 	};
 }
+Thing.prototype.TEMPLATES = []; //模板
 
 
 /*
@@ -118,6 +119,8 @@ class Block extends Thing{
 		//属性
 		this.attr.block = {};
 		if (opt.attr && opt.attr.block){
+			if (opt.attr.block.hardness) this.attr.block.hardness = opt.attr.block.hardness; //硬度
+			
 			if (opt.attr.block.transparent) this.attr.block.transparent = opt.attr.block.transparent; //透明方块（其他方块必须显示）
 			if (opt.attr.block.noTransparent) this.attr.block.noTransparent = opt.attr.block.noTransparent; //必须显示本方块
 			if (opt.attr.block.through) this.attr.block.through = opt.attr.block.through; //允许穿过
@@ -237,7 +240,7 @@ class Block extends Thing{
 		if (geometry){
 			this.set("block", "mesh", new THREE.Mesh(geometry, this.block.material)); //网格模型对象Mesh
 		}else{ //使用默认
-			this.set("block", "mesh", new THREE.Mesh(Block.geometry, this.block.material)); //网格模型对象Mesh
+			this.set("block", "mesh", new THREE.Mesh(this.constructor.prototype.geometry, this.block.material)); //网格模型对象Mesh
 		}
 		this.get("block", "mesh").castShadow = true;
 		this.get("block", "mesh").receiveShadow = true;
@@ -248,13 +251,13 @@ class Block extends Thing{
 		if (this.have("block", "mesh", "material"))
 			for (const i of this.get("block", "mesh", "material"))
 				i.dispose();
-		if (this.have("block", "mesh", "geometry"))
+		if ( this.have("block", "mesh", "geometry")) 
 			this.get("block", "mesh", "geometry").dispose(); //清除内存
 		this.set("block", "mesh", null); //半保留
 		return this;
 	};
 }
-Block.geometry = new THREE.BoxBufferGeometry(100, 100, 100); //通用几何体
+Block.prototype.geometry = new THREE.BoxBufferGeometry(100, 100, 100); //通用几何体
 
 
 /*

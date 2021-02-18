@@ -159,7 +159,6 @@ const deskgood = { //桌子好
 						const choice = deskgood.hold[deskgood.choice];
 						if ( !choice ) return; //手上无方块
 						
-						console.log(choice, TEMPLATES, choice.get("attr", "onPutToLeg"))
 						if ( eval( choice.get("attr", "onPutToLeg") ) === false )
 							return;
 						
@@ -687,7 +686,7 @@ const deskgood = { //桌子好
 		
 		console.log("deskgood.place", {x,y,z}, block.id, block.attr)
 		
-		map.addID(block.id, {x,y,z}, TEMPLATES, {
+		map.addID(block.id, {x,y,z}, {
 			attr: block.attr
 		});
 		

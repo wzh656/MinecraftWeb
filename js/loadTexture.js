@@ -3,10 +3,12 @@
 */
 let TEXTURES;
 (async function(){
-	const keys = Object.keys(TEMPLATES);
+	const keys = Object.keys(Thing.prototype.TEMPLATES); //（有序）
 	TEXTURES = Img.grid( await Img.get("./img/textures/textures.png"), 16, 16 );
 	for (const i of keys.slice(1)){ //除去空气
-		const block = TEMPLATES[i];
+		const block = Thing.prototype.TEMPLATES[i];
+		if (!(block instanceof Block)) continue; //不属于方块类
+		
 		for (const j in block.block.face){
 			const face = block.block.face[j];
 			block.setTexture(
@@ -21,7 +23,8 @@ let TEXTURES;
 				), j
 			);
 		}
-		block.makeMaterial().deleteTexture();
+		block.makeMaterial().deleteTexture(); //制作材质
+		
 	}
 	// 所有block贴图加载完毕
 	setTimeout(function(){
