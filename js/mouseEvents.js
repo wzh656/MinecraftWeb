@@ -8,7 +8,7 @@ let mouse_choice = {
 	y: -1,
 	z: -1,
 	faceIndex: -1,
-	id: -1
+	name: -1
 };
 if (DEBUG){
 	let deskgood_choice_folder = gui.__folders["玩家/观察者(deskgood)"].addFolder("选择物体");
@@ -17,7 +17,7 @@ if (DEBUG){
 		deskgood_choice_folder.add(mouse_choice, "y", -1000, 1000, 100).listen();
 		deskgood_choice_folder.add(mouse_choice, "z", -1000, 1000, 100).listen();
 		deskgood_choice_folder.add(mouse_choice, "faceIndex", 0, 12, 1).listen();
-		deskgood_choice_folder.add(mouse_choice, "id", 0, 9, 1).listen();
+		deskgood_choice_folder.add(mouse_choice, "name", 0, 9, 1).listen();
 }
 
 /* $(document).on("click", function (e){
@@ -75,11 +75,11 @@ document.addEventListener("mousemove", function (e){
 		mouse_choice.y = get.object.position.y;
 		mouse_choice.z = get.object.position.z;
 		mouse_choice.faceIndex = get.faceIndex;
-		mouse_choice.id = map.get(
+		mouse_choice.name = map.get(
 			get.object.position.x/100,
 			get.object.position.y/100,
 			get.object.position.z/100
-		).id;
+		).name;
 		
 		if (mouse_choice.view){
 			const geometry1 = new THREE.BoxBufferGeometry(100, 100, 100),
@@ -124,7 +124,7 @@ document.addEventListener("mousemove", function (e){
 			y: -1,
 			z: -1,
 			faceIndex: -1,
-			id: -1
+			name: -1
 		};
 	}
 });
@@ -227,7 +227,7 @@ document.addEventListener("mousedown", function (e){
 				}
 				const block = map.get(x, y, z);
 				deskgood.hold.addOne(new Block({
-					id: block.id,
+					name: block.name,
 					attr: block.attr
 				}), free); //放在手中
 				

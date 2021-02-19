@@ -684,9 +684,9 @@ const deskgood = { //桌子好
 			eval(map.get(x, y, z).get("attr", "block", "onPut")) === false
 		) return;
 		
-		console.log("deskgood.place", {x,y,z}, block.id, block.attr)
+		console.log("deskgood.place", {x,y,z}, block.name, block.attr)
 		
-		map.addID(block.id, {x,y,z}, {
+		map.addID(block.name, {x,y,z}, {
 			attr: block.attr
 		});
 		
@@ -708,7 +708,7 @@ const deskgood = { //桌子好
 			x,
 			y,
 			z,
-			id: block.id,
+			name: block.name,
 			attr
 		}); //添加edit
 		map.updateRound(x, y, z); //刷新方块及周围
@@ -722,7 +722,7 @@ const deskgood = { //桌子好
 			x,
 			y,
 			z,
-			id: block.id,
+			name: block.name,
 			attr
 		}, {
 			successCallback: function(){
@@ -785,7 +785,7 @@ const deskgood = { //桌子好
 			x,
 			y,
 			z,
-			id: 0
+			name: "空气"
 		}); //添加edit
 		map.updateRound(x, y, z); //刷新方块及周围
 		
@@ -798,7 +798,7 @@ const deskgood = { //桌子好
 			x,
 			y,
 			z,
-			id: 0
+			name: "空气"
 		}, {
 			successCallback: function(){
 				let find = false;
@@ -948,10 +948,10 @@ if (DEBUG){
 			deskgood_hold_folder.add(deskgood, "choice", 0, 3, 1).listen().name("选择工具").onChange(deskgood.hold.update);
 			const deskgood_hold_things_folder = deskgood_hold_folder.addFolder("物品(只读勿编辑)");
 			deskgood_hold_things_folder.open();
-				deskgood_hold_things_folder.add(deskgood.hold[0] || {id:0}, "id").name("0").listen().onChange(deskgood.hold.update);
-				deskgood_hold_things_folder.add(deskgood.hold[1] || {id:0}, "id").name("1").listen().onChange(deskgood.hold.update);
-				deskgood_hold_things_folder.add(deskgood.hold[2] || {id:0}, "id").name("2").listen().onChange(deskgood.hold.update);
-				deskgood_hold_things_folder.add(deskgood.hold[3] || {id:0}, "id").name("3").listen().onChange(deskgood.hold.update);
+				deskgood_hold_things_folder.add(deskgood.hold[0] || {name:0}, "name").name("0").listen().onChange(deskgood.hold.update);
+				deskgood_hold_things_folder.add(deskgood.hold[1] || {name:0}, "name").name("1").listen().onChange(deskgood.hold.update);
+				deskgood_hold_things_folder.add(deskgood.hold[2] || {name:0}, "name").name("2").listen().onChange(deskgood.hold.update);
+				deskgood_hold_things_folder.add(deskgood.hold[3] || {name:0}, "name").name("3").listen().onChange(deskgood.hold.update);
 }
 
 

@@ -3,8 +3,8 @@ let openDBListener = null; //数据库加载完毕监听
 const db = new IndexDB("Minecraft", 1, {
 		updateCallback: function(){
 			db.createTable(TABLE.WORLD, {
-				keyPath: "key",
-				autoIncrement: true
+				keyPath: "key", //主键
+				autoIncrement: true //自增
 			}, [
 				{name:"type", attr:"type", unique:false}
 			]);
@@ -49,9 +49,9 @@ const DB = {
 				//deskgood.look_update();
 				
 				for (const [i, v] of Object.entries(res.hold))
-					if (v){ //{id, attr}
+					if (v){ //{name, attr}
 						deskgood.hold[i] = new Block({
-							id: v.id,
+							name: v.name,
 							attr: JSON.parse("{"+v.attr+"}")
 						});
 					}else{ //null
@@ -95,9 +95,9 @@ const DB = {
 			time: time.getTime()
 		};
 		for (let i=0,v=deskgood.hold[i]; i<deskgood.hold.length; v=deskgood.hold[++i]){
-			if (v){ //{id, attr}
+			if (v){ //{name, attr}
 				data.hold[i] = {
-					id: v.id,
+					name: v.name,
 					attr: JSON.stringify(v.attr).slice(1,-1)
 				}
 			}else{

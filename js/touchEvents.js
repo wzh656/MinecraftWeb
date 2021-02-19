@@ -265,7 +265,7 @@ $("#game").on("touchstart", function (e){
 					}
 					const block = map.get(x, y, z);
 					deskgood.hold.addOne(new Block({
-						id: block.id,
+						name: block.name,
 						attr: block.attr
 					}), free); //放在手中
 					

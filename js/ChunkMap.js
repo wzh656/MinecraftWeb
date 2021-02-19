@@ -281,7 +281,7 @@ class ChunkMap{
 				[0,0,-1]
 			],
 			visibleValue = [], //可见值
-			noTransparent = thisBlock.get("attr", "block", "noTransparent"); //是否可以隐藏
+			noTransparent = thisBlock? thisBlock.get("attr", "block", "noTransparent"): undefined; //是否可以隐藏
 				/* (thisBlock && thisBlock.attr && thisBlock.attr.block && thisBlock.attr.block.noTransparent!==undefined)? //有属性
 				thisBlock.attr.block.noTransparent:
 				Block.prototype.TEMPLATES[ thisBlock?thisBlock.name:0 ].attr.block.noTransparent; */
@@ -844,7 +844,7 @@ class ChunkMap{
 				
 				if (y > height){
 					if (y <= leaves[1] && y > leaves[0]){
-						name = "树叶";
+						name = "疏树叶";
 					}else{
 						name = "空气";
 					}
@@ -878,7 +878,7 @@ class ChunkMap{
 				
 				if (y > height){
 					if (y <= leaves[1] && y > leaves[0]){
-						name = "树叶";
+						name = "疏树叶";
 					}else{
 						name = "空气";
 					}
@@ -976,7 +976,7 @@ class ChunkMap{
 			
 			/* let earth = height - height * (t.noise.more3D(6.6, x/t.s.q, z/t.s.q, 6) *t.s.k +t.s.b)+
 			t.noise.more3D(-52.6338, x/t.s.e.q, z/t.s.e.q, 3) *t.s.e.k +t.s.e.b; */
-			let id = 0;
+			let name = "空气";
 			switch (type){
 				case 0: //森林
 					
@@ -990,40 +990,40 @@ class ChunkMap{
 					
 					if (dy > treeHeight+1){
 						if (dy <= leaves[1] && dy > leaves[0]){
-							id = 8; //树叶
+							name = "疏树叶";
 						}else{
-							id = 0; // 空气/真空 (null)
+							name = "空气";
 						}
 					}else if (dy > treeHeight){
 						if ( treeHeight != height ||
 							(dy <= leaves[1] && dy > leaves[0])
 						){ //有树或旁边有树
-							id = 8; //树叶
+							name = "疏树叶";
 						}else{
-							id = 0; // 空气/真空 (null)
+							name = "空气";
 						}
 					}else if (dy > height){
 						//if (!treeTop) treeTop = y;
-						id = 7.1; //橡木
+						name = "细橡木";
 					}else if (dy == Math.floor(height) && !(height > 0.9*this.size[1].y)){ // 90%+ 高原（草木不生，积雪覆盖）
 						if (sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
-							id = 5; //石头
+							name = "石头";
 						}else{
-							id = 2; //草方块
+							name = "草方块";
 						}
 					}else if (dy > earth){
 						// if (grass){
-							id = 3; //泥土
+							name = "泥土";
 						/* }else{
-							id = 2; //草方块
+							name = "草方块";
 							// grass = true;
 						} */
 					}else{
 						/* if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
-							id = 2; //草方块
+							name = "草方块";
 							grass = true;
 						}else{ */
-							id = 5; //石头
+							name = "石头";
 						// }
 					}
 					break;
@@ -1036,32 +1036,32 @@ class ChunkMap{
 					
 					if (dy > height){
 						if (dy <= leaves[1] && dy > leaves[0]){
-							id = 8; //树叶
+							name = "疏树叶";
 						}else{
-							id = 0; // 空气/真空 (null)
+							name = "空气";
 						}
 					}/* else if (dy > height){
 						//if (!treeTop) treeTop = dy;
-						id = 7.1; //橡木
+						name = "细橡木";
 					} */else if (dy == Math.floor(height) && !(height > 0.9*this.size[1].y)){ // 90%+ 高原（草木不生，积雪覆盖）
 						if (sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
-							id = 5; //石头
+							name = "石头";
 						}else{
-							id = 2; //草方块
+							name = "草方块";
 						}
 					}else if (dy > earth){
 						// if (grass){
-							id = 3; //泥土
+							name = "泥土";
 						/* }else{
-							id = 2; //草方块
+							name = "草方块";
 							// grass = true;
 						} */
 					}else{
 						/* if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
-							id = 2; //草方块
+							name = "草方块";
 							// grass = true;
 						}else{ */
-							id = 5; //石头
+							name = "石头";
 						// }
 					}
 					break;
@@ -1070,28 +1070,28 @@ class ChunkMap{
 					
 					if (dy > height){
 						if (dy <= leaves[1] && dy > leaves[0]){
-							id = 8; //树叶
+							name = "疏树叶";
 						}else{
-							id = 0; // 空气/真空 (null)
+							name = "空气";
 						}
 					}else if (dy > earth){
-						id = 6; //沙子
+						name = "沙子";
 						//grass = true;
 					}else{
 						/*if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
-							id = 6; //沙子
+							name = "沙子";
 							grass = true;
 						}else{*/
-							id = 5; //石头
+							name = "石头";
 						//}
 					}
 					break;
 				
 				default:
-					id = 0;
+					name = "空气";
 			}
 			
-			column[dy] = { id };
+			column[dy] = { name };
 		}
 		
 		return column;
@@ -1213,7 +1213,7 @@ class ChunkMap{
 				}
 				
 			}else{ //空气
-				this.addID(0, {
+				this.addID("空气", {
 					x,
 					y,
 					z
