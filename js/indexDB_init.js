@@ -48,15 +48,19 @@ const DB = {
 				deskgood.look.y = res.look.y;
 				//deskgood.look_update();
 				
-				for (const [i, v] of Object.entries(res.hold))
-					if (v){ //{name, attr}
-						deskgood.hold[i] = new Block({
-							name: v.name,
-							attr: JSON.parse("{"+v.attr+"}")
-						});
-					}else{ //null
-						deskgood.hold[i] = null;
+				for (const t of ["hold", "head", "body", "leg", "foot"]){
+					for (const [i, v] of Object.entries(res[t])){
+						if (v){ //{name, attr}
+							deskgood[t][i] = new (eval(v.type))({
+								name: v.name,
+								attr: JSON.parse("{"+v.attr+"}")
+							});
+						}else{ //null
+							deskgood[t][i] = null;
+						}
 					}
+				}
+				
 				deskgood.choice = res.choice;
 				
 				deskgood.sensitivity = res.sensitivity;
@@ -89,19 +93,29 @@ const DB = {
 				x: deskgood.look.x,
 				y: deskgood.look.y
 			},
-			hold: [],
+			hold: [], //手
+			head: [], //头
+			body: [], //身
+			leg: [], //腿
+			foot: [], //脚
 			choice: deskgood.choice,
 			sensitivity: deskgood.sensitivity,
 			time: time.getTime()
 		};
-		for (let i=0,v=deskgood.hold[i]; i<deskgood.hold.length; v=deskgood.hold[++i]){
-			if (v){ //{name, attr}
-				data.hold[i] = {
-					name: v.name,
-					attr: JSON.stringify(v.attr).slice(1,-1)
+		
+		for (const t of ["hold", "head", "body", "leg", "foot"]){
+			for (let i=0,v=deskgood[t][i]; i<deskgood[t].length; v=deskgood[t][++i]){
+				if (v){ //{name, attr}
+					data[t][i] = {
+						type: ( (v instanceof Block)? "Block":
+							(v instanceof Tool)? "Tool":
+							"Thing"),
+						name: v.name,
+						attr: JSON.stringify(v.attr).slice(1,-1)
+					}
+				}else{
+					data[t][i] = null;
 				}
-			}else{
-				data.hold[i] = null;
 			}
 		}
 		

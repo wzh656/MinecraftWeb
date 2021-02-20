@@ -138,26 +138,23 @@ $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind�
 	const wheel = event.originalEvent.wheelDelta || event.originalEvent.detail; //判断浏览器IE,谷歌滚轮事件 Firefox滚轮事件
 	if (wheel){
 		if (wheel > 0) { //当滑轮向上滚动时
-			console.log("上滚轮");
 			if ( keydown.key.has(16) ){ //shift
-				
+				console.log("上滚轮+shift");
 				time.setSpeed(time.speed*1.5); //时间流逝加速
 				console.log("time speed:", `${time.speed}s/s\n=${time.speed/60}min/s\n=${time.speed/3600}h/s\n=${time.speed/3600/24}day/s\n=${time.speed/3600/24/365.25}year/s`)
 				
 			}else{
-				
+				console.log("上滚轮");
 				let before = deskgood.choice; //之前的选择
-				if (
-					deskgood.hold[before] && //切换前事件
-					eval(deskgood.hold[before].get("attr", "block", "onChangeLeave")) === false //取消事件
+				if ( deskgood.hold[before] && //切换前事件
+					eval(deskgood.hold[before].get("attr", "onChangeLeave")) === false //取消事件
 				) return;
 				
 				deskgood.choice--;
 				if (deskgood.choice < 0)
 					deskgood.choice = 3;
 				
-				if (
-					deskgood.hold[deskgood.choice] && //切换后事件
+				if ( deskgood.hold[deskgood.choice] && //切换后事件
 					eval(deskgood.hold[deskgood.choice].get("attr", "onChangeTo")) === false //取消事件
 				) return (deskgood.choice = before); //恢复之前选择
 				
@@ -165,17 +162,15 @@ $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind�
 			}
 		}  
 		if (wheel < 0) { //当滑轮向下滚动时
-			console.log("下滚轮");
 			if ( keydown.key.has(16) ){ //shift
-			
+				console.log("下滚轮+shift");
 				time.setSpeed(time.speed/1.5); //时间流逝减慢
 				console.log("time speed:", `${time.speed}s/s\n=${time.speed/60}min/s\n=${time.speed/3600}h/s\n=${time.speed/3600/24}day/s\n=${time.speed/3600/24/365.25}year/s`)
 				
 			}else{
-				
-				let before = deskgood.choice;
-				if (
-					deskgood.hold[before] && //切换前事件
+				console.log("下滚轮");
+				const before = deskgood.choice;
+				if ( deskgood.hold[before] && //切换前事件
 					eval(deskgood.hold[before].get("attr", "onChangeLeave")) === false //取消事件
 				) return;
 				
@@ -183,8 +178,7 @@ $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind�
 				if (deskgood.choice > 3)
 					deskgood.choice = 0;
 				
-				if (
-					deskgood.hold[deskgood.choice] && //切换后事件
+				if ( deskgood.hold[deskgood.choice] && //切换后事件
 					eval(deskgood.hold[deskgood.choice].get("attr", "onChangeTo")) === false //取消事件
 				) return (deskgood.choice = before); //恢复之前选择
 				
@@ -195,7 +189,7 @@ $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind�
 });
 
 
-//mousedown
+/* mousedown */
 document.addEventListener("mousedown", function (e){
 	if (stop)
 		return;
@@ -205,103 +199,104 @@ document.addEventListener("mousedown", function (e){
 	
 	if (e.button == 0){ //左键（删除）
 		for (const obj of ray2D()){
-			if (obj.object instanceof THREE.Mesh){
-				let {x,y,z} = obj.object.position; //单位 px=cm
-				
-				x = x/100, y = y/100, z = z/100; //单位 m
-				
-				if ( map.get(x, y, z) &&
-					eval(map.get(x, y, z).get("attr", "block", "onLeftMouseDown")) === false
-				) return;
-				
-				if ( Math.sqrt(
-					(x*100 - deskgood.pos.x) **2+
-					(y*100 - deskgood.pos.y) **2+
-					(z*100 - deskgood.pos.z) **2
-				) >= deskgood.handLength) return; //距离>=手长
-				
-				const free = !deskgood.hold[deskgood.choice]? deskgood.choice: deskgood.hold.indexOf(null);
-				if (free == -1){
-					console.warn("not free!")
-					return print("拿不下方块", "两只手拿4m³方块已经够多了，反正我是拿不下了", 3);
-				}
-				const block = map.get(x, y, z);
-				deskgood.hold.addOne(new Block({
-					name: block.name,
-					attr: block.attr
-				}), free); //放在手中
-				
-				deskgood.remove( {x,y,z} ); //删除方块
-				
-				break;//跳出 寻找有效放置的 循环
+			if ( !(obj.object instanceof THREE.Mesh) ) continue;
+			
+			let {x,y,z} = obj.object.position; //单位 px=cm
+			x = x/100, y = y/100, z = z/100; //单位 m
+			
+			if ( map.get(x, y, z) &&
+				eval(map.get(x, y, z).get("attr", "block", "onLeftMouseDown")) === false
+			) return;
+			
+			if ( Math.sqrt(
+				(x*100 - deskgood.pos.x) **2+
+				(y*100 - deskgood.pos.y) **2+
+				(z*100 - deskgood.pos.z) **2
+			) >= deskgood.handLength) return; //距离>=手长
+			
+			const free = !deskgood.hold[deskgood.choice]? deskgood.choice: deskgood.hold.indexOf(null);
+			if (free == -1){
+				console.warn("not free!")
+				return print("拿不下方块", "两只手拿4m³方块已经够多了，反正我是拿不下了", 3);
 			}
+			const block = map.get(x, y, z);
+			deskgood.hold.addOne(new Block({
+				name: block.name,
+				attr: block.attr
+			}), free); //放在手中
+			
+			deskgood.remove( {x,y,z} ); //删除方块
+			
+			break;//跳出 寻找有效放置的 循环
 		}
 	}else if (e.button == 2){ //右键（放置）
+		if ( !(deskgood.hold[deskgood.choice] instanceof Block) ) return; //非方块
+		
 		for (const obj of ray2D()){
-			if (obj.object instanceof THREE.Mesh){
-				let {x,y,z} = obj.object.position; //单位 px=cm
-				
-				x = x/100, y = y/100, z = z/100; //单位 m
-				if (
-					map.get(x, y, z) &&
-					eval(map.get(x, y, z).get("attr", "block", "onRightMouseDown")) === false
-				) return;
-				
-				switch (obj.faceIndex){
-					case 0:
-					case 1:
-						x++;
-						break;
-					case 2:
-					case 3:
-						x--;
-						break;
-					case 4:
-					case 5:
-						y++;
-						break;
-					case 6:
-					case 7:
-						y--;
-						break;
-					case 8:
-					case 9:
-						z++;
-						break;
-					case 10:
-					case 11:
-						z--;
-						break;
-					default:
-						throw ["faceIndex wrong:", obj.faceIndex];
-				}
-				
-				if (Math.sqrt(
-					(x*100 - deskgood.pos.x) **2+
-					(y*100 - deskgood.pos.y) **2+
-					(z*100 - deskgood.pos.z) **2
-				) >= deskgood.handLength) return; //距离>=手长
-				
-				if (!deskgood.hold[deskgood.choice]) //空气
-					return;
-				
-				if ( Math.round(x) == Math.round(deskgood.pos.x/100) &&
-					Math.round(y) == Math.round(deskgood.pos.y/100) &&
-					Math.round(z) == Math.round(deskgood.pos.z/100)
-				) return print("往头上放方块", "想窒息吗？还往头上放方块！"); //放到头上
-				
-				deskgood.place(deskgood.hold[deskgood.choice], {x,y,z}); //放置方块
-				
-				deskgood.hold.delete(1, deskgood.choice); //删除手里的方块
-				
-				break; //跳出 寻找有效放置的 循环
+			if ( !(obj.object instanceof THREE.Mesh) ) continue;
+			
+			let {x,y,z} = obj.object.position; //单位 px=cm
+			x = x/100, y = y/100, z = z/100; //单位 m
+			
+			if ( map.get(x, y, z) &&
+				eval(map.get(x, y, z).get("attr", "block", "onRightMouseDown")) === false
+			) return;
+			
+			switch (obj.faceIndex){
+				case 0:
+				case 1:
+					x++;
+					break;
+				case 2:
+				case 3:
+					x--;
+					break;
+				case 4:
+				case 5:
+					y++;
+					break;
+				case 6:
+				case 7:
+					y--;
+					break;
+				case 8:
+				case 9:
+					z++;
+					break;
+				case 10:
+				case 11:
+					z--;
+					break;
+				default:
+					throw ["faceIndex wrong:", obj.faceIndex];
 			}
+			
+			if (Math.sqrt(
+				(x*100 - deskgood.pos.x) **2+
+				(y*100 - deskgood.pos.y) **2+
+				(z*100 - deskgood.pos.z) **2
+			) >= deskgood.handLength) return; //距离>=手长
+			
+			if ( !deskgood.hold[deskgood.choice] ) //空气
+				return;
+			
+			if ( Math.round(x) == Math.round(deskgood.pos.x/100) &&
+				Math.round(y) == Math.round(deskgood.pos.y/100) &&
+				Math.round(z) == Math.round(deskgood.pos.z/100)
+			) return print("往头上放方块", "想窒息吗？还往头上放方块！"); //放到头上
+			
+			deskgood.place(deskgood.hold[deskgood.choice], {x,y,z}); //放置方块
+			
+			deskgood.hold.delete(1, deskgood.choice); //删除手里的方块
+			
+			break; //跳出 寻找有效放置的 循环
 		}
 	}
 	return false;
 });
 
-// mouseup(事件专用)
+
+/* mouseup(事件专用) */
 document.addEventListener("mousedown", function (e){
 	if (stop)
 		return;
@@ -311,64 +306,61 @@ document.addEventListener("mousedown", function (e){
 	
 	if (e.button == 0){ //左键(onLeftMouseUp)
 		for (const obj of ray2D()){
-			if (obj.faceIndex){
-				if (obj.object instanceof THREE.Mesh){
-					let {x,y,z} = obj.object.position; //单位 px=cm
-					
-					x = x/100, y = y/100, z = z/100; //单位 m
-					
-					if (
-						map.get(x, y, z) &&
-						eval(map.get(x, y, z).get("attr", "block", "onLeftMouseUp")) === false
-					) return;
-					
-					break;//跳出 寻找有效放置的 循环
-				}
-			}
+			// if (!obj.faceIndex) continue;
+			if ( !(obj.object instanceof THREE.Mesh) ) continue;
+			
+			let {x,y,z} = obj.object.position; //单位 px=cm
+			
+			x = x/100, y = y/100, z = z/100; //单位 m
+			
+			if ( map.get(x, y, z) &&
+				eval(map.get(x, y, z).get("attr", "block", "onLeftMouseUp")) === false
+			) return;
+			
+			break;//跳出 寻找有效放置的 循环
 		}
+	
 	}else if (e.button == 2){ //右键(onRightMouseDown)
 		for (const obj of ray2D()){
-			if (obj.object instanceof THREE.Mesh){
-				let {x,y,z} = obj.object.position; //单位 px=cm
-				
-				x = x/100, y = y/100, z = z/100; //单位 m
-				
-				switch (obj.faceIndex){
-					case 0:
-					case 1:
-						x++;
-						break;
-					case 2:
-					case 3:
-						x--;
-						break;
-					case 4:
-					case 5:
-						y++;
-						break;
-					case 6:
-					case 7:
-						y--;
-						break;
-					case 8:
-					case 9:
-						z++;
-						break;
-					case 10:
-					case 11:
-						z--;
-						break;
-					default:
-						throw ["faceIndex wrong:", obj.faceIndex];
-				}
-				
-				if (
-					map.get(x, y, z) &&
-					eval(map.get(x, y, z).get("attr", "block", "onRightMouseDown")) === false
-				) return;
-				
-				break; //跳出 寻找有效放置的 循环
+			if ( !(obj.object instanceof THREE.Mesh) ) continue;
+			let {x,y,z} = obj.object.position; //单位 px=cm
+			
+			x = x/100, y = y/100, z = z/100; //单位 m
+			
+			switch (obj.faceIndex){
+				case 0:
+				case 1:
+					x++;
+					break;
+				case 2:
+				case 3:
+					x--;
+					break;
+				case 4:
+				case 5:
+					y++;
+					break;
+				case 6:
+				case 7:
+					y--;
+					break;
+				case 8:
+				case 9:
+					z++;
+					break;
+				case 10:
+				case 11:
+					z--;
+					break;
+				default:
+					throw ["faceIndex wrong:", obj.faceIndex];
 			}
+			
+			if ( map.get(x, y, z) &&
+				eval(map.get(x, y, z).get("attr", "block", "onRightMouseDown")) === false
+			) return;
+			
+			break; //跳出 寻找有效放置的 循环
 		}
 	}
 	return false;

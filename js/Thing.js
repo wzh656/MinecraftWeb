@@ -120,6 +120,11 @@ class Block extends Thing{
 		this.attr.block = {};
 		if (opt.attr && opt.attr.block){
 			if (opt.attr.block.hardness) this.attr.block.hardness = opt.attr.block.hardness; //硬度
+			if (opt.attr.block.PureExcavationTime){ //纯挖掘时间(cm³/s)
+				this.attr.block.PureExcavationTime = {};
+				for (const [name, value] of opt.attr.block.PureExcavationTime)
+					this.attr.block.PureExcavationTime[name] = +value;
+			}
 			
 			if (opt.attr.block.transparent) this.attr.block.transparent = opt.attr.block.transparent; //透明方块（其他方块必须显示）
 			if (opt.attr.block.noTransparent) this.attr.block.noTransparent = opt.attr.block.noTransparent; //必须显示本方块

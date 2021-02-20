@@ -197,8 +197,7 @@ $("#jump").on("touchstart", function(){
 	
 	console.log("try jump");
 	
-	if (
-		map.get(deskgood.pos.x/100,
+	if ( map.get(deskgood.pos.x/100,
 			deskgood.pos.y/100-2,
 			deskgood.pos.z/100)
 	){ //脚下有方块
@@ -242,37 +241,37 @@ $("#game").on("touchstart", function (e){
 				(touch_screen.y0 - touch_screen.y) **2
 			) < 36
 		){ //误差36px
-			for (const obj of ray2D(true, x, y) ){
-				if (obj.object instanceof THREE.Mesh){
-					let {x,y,z} = obj.object.position; //单位 px=cm
-					
-					x = x/100, y = y/100, z = z/100; //单位 m
-					
-					if ( map.get(x, y, z) &&
-						eval(map.get(x, y, z).get("attr", "block", "onLongTouch")) === false
-					) return;
-					
-					if ( Math.sqrt(
-						(x*100 - deskgood.pos.x) **2+
-						(y*100 - deskgood.pos.y) **2+
-						(z*100 - deskgood.pos.z) **2
-					) >= deskgood.handLength) return; //距离>=手长
-					
-					const free = !deskgood.hold[deskgood.choice]? deskgood.choice: deskgood.hold.indexOf(null);
-					if (free == -1){
-						console.warn("not free!")
-						return print("拿不下方块", "两只手拿4m³方块已经够多了，反正我是拿不下了", 3);
-					}
-					const block = map.get(x, y, z);
-					deskgood.hold.addOne(new Block({
-						name: block.name,
-						attr: block.attr
-					}), free); //放在手中
-					
-					deskgood.remove({x,y,z}); //删除方块
-					
-					break; //跳出 寻找有效放置的 循环
+			for (const obj of ray2D(x, y) ){
+				if ( !(obj.object instanceof THREE.Mesh) ) continue;
+				
+				let {x,y,z} = obj.object.position; //单位 px=cm
+				
+				x = x/100, y = y/100, z = z/100; //单位 m
+				
+				if ( map.get(x, y, z) &&
+					eval(map.get(x, y, z).get("attr", "block", "onLongTouch")) === false
+				) return;
+				
+				if ( Math.sqrt(
+					(x*100 - deskgood.pos.x) **2+
+					(y*100 - deskgood.pos.y) **2+
+					(z*100 - deskgood.pos.z) **2
+				) >= deskgood.handLength) return; //距离>=手长
+				
+				const free = !deskgood.hold[deskgood.choice]? deskgood.choice: deskgood.hold.indexOf(null);
+				if (free == -1){
+					console.warn("not free!")
+					return print("拿不下方块", "两只手拿4m³方块已经够多了，反正我是拿不下了", 3);
 				}
+				const block = map.get(x, y, z);
+				deskgood.hold.addOne(new Block({
+					name: block.name,
+					attr: block.attr
+				}), free); //放在手中
+				
+				deskgood.remove({x,y,z}); //删除方块
+				
+				break; //跳出 寻找有效放置的 循环
 			}
 		}
 	}, 1000);
@@ -333,15 +332,16 @@ $("#game").on("touchend", function (e){
 	if (touch_screen.loop !== null){ //短按（放置）
 		clearTimeout(touch_screen.loop);
 		touch_screen.loop = null;
-		if (Math.sqrt(
+		if ( Math.sqrt(
 			(touch_screen.x0 - touch_screen.x) **2+
 			(touch_screen.y0 - touch_screen.y) **2)
 			< 36
 		){ //误差36px
-			for (const obj of ray2D(true, x, y) ){
-				if (obj.object instanceof THREE.Mesh){
-					let {x,y,z} = obj.object.position; //单位 px=cm
+			if ( deskgood.hold[deskgood.choice] instanceof Block ){ //是方块
+				for (const obj of ray2D(x, y) ){
+					if ( !(obj.object instanceof THREE.Mesh) ) continue;
 					
+					let {x,y,z} = obj.object.position; //单位 px=cm
 					x = x/100, y = y/100, z = z/100; //单位 m
 					
 					if (

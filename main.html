@@ -1129,11 +1129,13 @@ $("#setting > button").click(function(){ //确定
 })
 
 //2维度射线检测
-function ray2D(crosshair, x, y){
+function ray2D(x, y){
+	if (x===undefined) x = WIDTH/2;
+	if (y===undefined) y = HEIGHT/2;
 	const raycaster = new THREE.Raycaster(), //光线投射，用于确定鼠标点击位置
 		mouse = new THREE.Vector2(); //创建二维平面
-	mouse.x = crosshair? 2*(x/WIDTH)-1: 0;
-	mouse.y = crosshair? -2*(y/HEIGHT)+1: 0;
+	mouse.x = 2*(x/WIDTH)-1;
+	mouse.y = -2*(y/HEIGHT)+1;
 	//console.log("get:", x, y, mouse.x, mouse.y);
 	//以camera为z坐标，确定所点击物体的3D空间位置
 	raycaster.setFromCamera(mouse, camera);
