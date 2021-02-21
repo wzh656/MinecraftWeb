@@ -236,7 +236,7 @@ $("#game").on("touchstart", function (e){
 	touch_screen.y = touch_screen.y0 = y;
 	touch_screen.loop = setTimeout(()=>{ //长按1000ms（删除）
 		touch_screen.loop = null;
-		if (Math.sqrt(
+		if ( Math.sqrt(
 				(touch_screen.x0 - touch_screen.x) **2+
 				(touch_screen.y0 - touch_screen.y) **2
 			) < 36
@@ -245,7 +245,6 @@ $("#game").on("touchstart", function (e){
 				if ( !(obj.object instanceof THREE.Mesh) ) continue;
 				
 				let {x,y,z} = obj.object.position; //单位 px=cm
-				
 				x = x/100, y = y/100, z = z/100; //单位 m
 				
 				if ( map.get(x, y, z) &&
@@ -344,8 +343,7 @@ $("#game").on("touchend", function (e){
 					let {x,y,z} = obj.object.position; //单位 px=cm
 					x = x/100, y = y/100, z = z/100; //单位 m
 					
-					if (
-						map.get(x, y, z) &&
+					if ( map.get(x, y, z) &&
 						eval(map.get(x, y, z).get("attr", "block", "onShortTouch")) === false
 					) return;
 					

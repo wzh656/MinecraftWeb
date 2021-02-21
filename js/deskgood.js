@@ -77,7 +77,7 @@ const deskgood = { //桌子好
 			for (let i=0, len=children.length; i<len; i++){
 				$(children[i])
 					.removeClass("checked")
-					.addClass(i==deskgood.choice? "checked": undefined);
+					.addClass(i==children.length-1? "checked": undefined);
 					/* .css("borderColor", (i==children.length-1)?"#876":"#a6917c")
 					.css("borderWidth", (i==children.length-1)?"0.5vmax":"0.3vmax")
 					.css("margin", "0 0"); */
@@ -110,7 +110,7 @@ const deskgood = { //桌子好
 			for (let i=0, len=children.length; i<len; i++){
 				$(children[i])
 					.removeClass("checked")
-					.addClass(i==deskgood.choice? "checked": undefined);
+					.addClass(i==children.length-1? "checked": undefined);
 					/* .css("borderColor", (i==children.length-1)?"#876":"#a6917c")
 					.css("borderWidth", (i==children.length-1)?"0.5vmax":"0.3vmax")
 					.css("margin", "0 0"); */
@@ -143,7 +143,7 @@ const deskgood = { //桌子好
 			for (let i=0, len=children.length; i<len; i++){
 				$(children[i])
 					.removeClass("checked")
-					.addClass(i==deskgood.choice? "checked": undefined);
+					.addClass(i==children.length-1? "checked": undefined);
 					/* .css("borderColor", (i==children.length-1)?"#876":"#a6917c")
 					.css("borderWidth", (i==children.length-1)?"0.5vmax":"0.3vmax")
 					.css("margin", "0 0"); */
@@ -176,7 +176,7 @@ const deskgood = { //桌子好
 			for (let i=0, len=children.length; i<len; i++){
 				$(children[i])
 					.removeClass("checked")
-					.addClass(i==deskgood.choice? "checked": undefined);
+					.addClass(i==children.length-1? "checked": undefined);
 					/* .css("borderColor", (i==children.length-1)?"#876":"#a6917c")
 					.css("borderWidth", (i==children.length-1)?"0.5vmax":"0.3vmax")
 					.css("margin", "0 0"); */

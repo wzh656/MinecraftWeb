@@ -46,13 +46,17 @@ class Thing{
 		let this_part = this,
 			template_part = this.constructor.prototype.TEMPLATES[ this.name ];
 		//let type = !!this.template;
-		for (let i of attr){
-			if (this_part && this_part[i]){ //不为undefined 且 可获取下一个属性
+		for (const i of attr){
+			if (this_part && this_part[i]){ //this_part不为undefined 且 可获取下一个属性
 				this_part = this_part[i];
 			}else{
 				this_part = undefined;
 			}
-			template_part = template_part[i];
+			if (template_part && template_part[i]){ //template_part不为undefined 且 可获取下一个属性
+				template_part = template_part[i];
+			}else{
+				template_part = undefined;
+			}
 			//if (this_part === undefined) type=true;
 		}
 		return this_part===undefined? template_part: this_part;
@@ -119,6 +123,16 @@ class Block extends Thing{
 		//属性
 		this.attr.block = {};
 		if (opt.attr && opt.attr.block){
+			if (opt.attr.block.size){ //大小
+				this.attr.block.size = {};
+				if (opt.attr.block.size["x+"]) this.attr.block.size["x+"] = opt.attr.block.size["x+"];
+				if (opt.attr.block.size["x-"]) this.attr.block.size["x-"] = opt.attr.block.size["x-"];
+				if (opt.attr.block.size["y+"]) this.attr.block.size["y+"] = opt.attr.block.size["y+"];
+				if (opt.attr.block.size["y-"]) this.attr.block.size["y-"] = opt.attr.block.size["y-"];
+				if (opt.attr.block.size["z+"]) this.attr.block.size["z+"] = opt.attr.block.size["z+"];
+				if (opt.attr.block.size["z-"]) this.attr.block.size["z-"] = opt.attr.block.size["z-"];
+			}
+			
 			if (opt.attr.block.hardness) this.attr.block.hardness = opt.attr.block.hardness; //硬度
 			if (opt.attr.block.PureExcavationTime){ //纯挖掘时间(cm³/s)
 				this.attr.block.PureExcavationTime = {};

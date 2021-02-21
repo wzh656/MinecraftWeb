@@ -1,7 +1,6 @@
 function try_start_load(){
 	console.log("load_condition", try_start_load.prototype.condition+1)
 	if (++try_start_load.prototype.condition == 2){
-		deskgood.hold.update();
 		map.perloadChunk({
 			progressCallback: (value)=>{
 				$("#progress span").text( Math.round(value*100, 2).padding(2, 2) );

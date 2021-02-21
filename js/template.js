@@ -45,12 +45,20 @@ Thing.prototype.TEMPLATES["草方块"] = new Block({
 	attr: {
 		PureExcavationTime: {
 			"手": 400,
+			
 			"木镐": 200,
 			"木斧": 500,
 			"木铲": 1000,
 			"木锄": 200,
 			"木剑": 200,
-			"碎木": 200
+			"碎木": 200,
+			
+			"石镐": 200,
+			"石斧": 500,
+			"石铲": 1000,
+			"石锄": 200,
+			"石剑": 200,
+			"碎石": 200
 		},
 		onPutToHead: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);message('放到头上', '你自己要把方块放头上的，别怪我');message('绿色成就','【获得成就】<br/>恭喜获得成就：头上长草绿得快。');false;",
 		onPutToBody: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);message('放到身上', '你自己要把方块放身上的，别怪我');false;",
@@ -70,12 +78,20 @@ Thing.prototype.TEMPLATES["泥土"] = new Block({
 	attr: {
 		PureExcavationTime: {
 			"手": 400,
+			
 			"木镐": 200,
 			"木斧": 500,
 			"木铲": 1000,
 			"木锄": 200,
 			"木剑": 200,
-			"碎木": 200
+			"碎木": 200,
+			
+			"石镐": 200,
+			"石斧": 500,
+			"石铲": 1000,
+			"石锄": 200,
+			"石剑": 200,
+			"碎石": 200
 		},
 		onPutToHead: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);message('放到头上', '你自己要把方块放头上的，别怪我');false;",
 		onPutToBody: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);message('放到身上', '你自己要把方块放身上的，别怪我');false;",
@@ -95,12 +111,20 @@ Thing.prototype.TEMPLATES["松泥土"] = new Block({
 	attr: {
 		PureExcavationTime: {
 			"手": 1000,
+			
 			"木镐": 400,
 			"木斧": 1000,
 			"木铲": 2000,
 			"木锄": 400,
 			"木剑": 400,
-			"碎木": 200
+			"碎木": 200,
+			
+			"石镐": 400,
+			"石斧": 1000,
+			"石铲": 2000,
+			"石锄": 400,
+			"石剑": 400,
+			"碎石": 200
 		},
 		onPutToHead: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);message('放到头上', '你自己要把方块放头上的，别怪我');false;",
 		onPutToBody: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);message('放到身上', '你自己要把方块放身上的，别怪我');false;",
@@ -118,6 +142,14 @@ Thing.prototype.TEMPLATES["石头"] = new Block({
 		]
 	},
 	attr: {
+		PureExcavationTime: {
+			"石镐": 2,
+			"石斧": 2,
+			"石铲": 2,
+			"石锄": 1,
+			"石剑": 1,
+			"碎石": 0.5
+		},
 		onPutToHead: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);message('放到头上', '你自己要把方块放头上的，别怪我');false;",
 		onPutToBody: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);message('放到身上', '你自己要把方块放身上的，别怪我');false;",
 		onPutToLeg: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);false;",
@@ -125,9 +157,9 @@ Thing.prototype.TEMPLATES["石头"] = new Block({
 	}
 });
 
-Thing.prototype.TEMPLATES["原石"] = new Block({
+Thing.prototype.TEMPLATES["碎石"] = new Block({
 	// id: 4.1,
-	name: "原石",
+	name: "碎石",
 	view: [6,0],
 	block: {
 		face: [
@@ -135,6 +167,21 @@ Thing.prototype.TEMPLATES["原石"] = new Block({
 		]
 	},
 	attr: {
+		PureExcavationTime: {
+			"手": 800,
+			
+			"木镐": 200,
+			"木斧": 500,
+			"木铲": 2000,
+			"木锄": 1000,
+			"木剑": 200,
+			
+			"石镐": 200,
+			"石斧": 500,
+			"石铲": 1000,
+			"石锄": 200,
+			"石剑": 200
+		},
 		onPutToHead: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);message('放到头上', '你自己要把方块放头上的，别怪我');false;",
 		onPutToBody: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);message('放到身上', '你自己要把方块放身上的，别怪我');false;",
 		onPutToLeg: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);false;",
@@ -151,6 +198,23 @@ Thing.prototype.TEMPLATES["沙子"] = new Block({
 		]
 	},
 	attr: {
+		PureExcavationTime: {
+			"手": 1000,
+			
+			"木镐": 400,
+			"木斧": 1000,
+			"木铲": 2000,
+			"木锄": 400,
+			"木剑": 400,
+			"碎木": 200,
+			
+			"石镐": 400,
+			"石斧": 1000,
+			"石铲": 2000,
+			"石锄": 400,
+			"石剑": 400,
+			"碎石": 200
+		},
 		onPutToHead: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);message('放到头上', '你自己要把方块放头上的，别怪我');false;",
 		onPutToBody: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);message('放到身上', '你自己要把方块放身上的，别怪我');false;",
 		onPutToLeg: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);false;",

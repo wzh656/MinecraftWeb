@@ -24,7 +24,7 @@ db.setErrCallback(function(err){
 });
 
 const DB = {
-	// 读取存档
+	/* 读取存档 */
 	read(){
 		if (!db.db) //未加载完毕
 			return (openDBListener = DB.read);
@@ -38,14 +38,14 @@ const DB = {
 				
 				deskgood.pos.x = res.pos.x,
 				deskgood.pos.y = res.pos.y,
-				deskgood.pos.z = res.pos.z;
+				deskgood.pos.z = res.pos.z; //位置
 				
 				deskgood.v.x = res.v.x,
 				deskgood.v.y = res.v.y,
-				deskgood.v.z = res.v.z;
+				deskgood.v.z = res.v.z; //速度
 				
 				deskgood.look.x = res.look.x,
-				deskgood.look.y = res.look.y;
+				deskgood.look.y = res.look.y; //朝向
 				//deskgood.look_update();
 				
 				for (const t of ["hold", "head", "body", "leg", "foot"]){
@@ -59,14 +59,11 @@ const DB = {
 							deskgood[t][i] = null;
 						}
 					}
+					deskgood[t].update(); //更新
 				}
-				
-				deskgood.choice = res.choice;
-				
-				deskgood.sensitivity = res.sensitivity;
-				
-				time.setTime(res.time);
-				
+				deskgood.choice = res.choice; //选择方块
+				deskgood.sensitivity = res.sensitivity; //灵敏度
+				time.setTime(res.time); //设置时间
 				try_start_load(); //加载区块
 				
 				return false; //停止查找
@@ -75,21 +72,21 @@ const DB = {
 		});
 	},
 	
-	// 保存存档
+	/* 保存存档 */
 	save(){
 		const data = {
 			type: 1,
-			pos: {
+			pos: { //位置
 				x: deskgood.pos.x,
 				y: deskgood.pos.y,
 				z: deskgood.pos.z
 			},
-			v: {
+			v: { //速度
 				x: deskgood.v.x,
 				y: deskgood.v.y,
 				z: deskgood.v.z
 			},
-			look: {
+			look: { //朝向
 				x: deskgood.look.x,
 				y: deskgood.look.y
 			},
@@ -98,26 +95,24 @@ const DB = {
 			body: [], //身
 			leg: [], //腿
 			foot: [], //脚
-			choice: deskgood.choice,
-			sensitivity: deskgood.sensitivity,
-			time: time.getTime()
+			choice: deskgood.choice, //选择物品
+			sensitivity: deskgood.sensitivity, //灵敏度
+			time: time.getTime() //当前时间
 		};
 		
-		for (const t of ["hold", "head", "body", "leg", "foot"]){
-			for (let i=0,v=deskgood[t][i]; i<deskgood[t].length; v=deskgood[t][++i]){
+		for (const t of ["hold", "head", "body", "leg", "foot"])
+			for (let i=0,v=deskgood[t][i]; i<deskgood[t].length; v=deskgood[t][++i])
 				if (v){ //{name, attr}
 					data[t][i] = {
 						type: ( (v instanceof Block)? "Block":
 							(v instanceof Tool)? "Tool":
-							"Thing"),
+							"Thing"), //物品类型
 						name: v.name,
 						attr: JSON.stringify(v.attr).slice(1,-1)
 					}
 				}else{
 					data[t][i] = null;
 				}
-			}
-		}
 		
 		db.addData(TABLE.WORLD, data, {
 			successCallback: function(){
@@ -141,6 +136,7 @@ const DB = {
 		});
 	},
 	
+	/* 读取区块信息 */
 	readChunk(x, z){
 		const ox = x*map.size.x,
 			oz = z*map.size.z; //区块中心坐标

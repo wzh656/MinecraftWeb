@@ -174,7 +174,7 @@ class ChunkMap{
 	//添加方块
 	add(block, {x,y,z}, type=true){
 		// let {type=true} = opt;
-		x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
+		// x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 		
 		// if (this.get(x, y, z) === undefined) return;
 		if ( this.get(x, y, z) ){ //有方块
@@ -231,12 +231,29 @@ class ChunkMap{
 		const block = new Block({
 			name,
 			attr
-		}).makeMesh();
-		this.add(
-			block,
-			{x, y, z},
-			type
-		); //以模板建立
+		});
+		if ( block.get("attr", "block", "size") ){ //有大小
+			const size = {
+				"x+": block.get("attr", "block", "size", "x+") || 0 ,
+				"x-": block.get("attr", "block", "size", "x-") || 0 ,
+				"y+": block.get("attr", "block", "size", "y+") || 0 ,
+				"y-": block.get("attr", "block", "size", "y-") || 0 ,
+				"z+": block.get("attr", "block", "size", "z+") || 0 ,
+				"z-": block.get("attr", "block", "size", "z-") || 0 
+			};
+			size.x = 100 - size["x+"] - size["x-"],
+			size.y = 100 - size["y+"] - size["y-"],
+			size.z = 100 - size["z+"] - size["z-"]; //长宽高
+			
+			this.add( block.makeGeometry(size.x, size.y, size.z).makeMesh(), {
+				x: x + (-50+size["x-"] + 50-size["x+"]) /2,
+				y: y + (-50+size["y-"] + 50-size["y+"]) /2,
+				z: z + (-50+size["z-"] + 50-size["z+"]) /2
+			}, type ); //以模板建立
+		
+		}else{
+			this.add( block.makeMesh(), {x,y,z}, type ); //以模板建立
+		}
 	}
 	
 	//删除方块

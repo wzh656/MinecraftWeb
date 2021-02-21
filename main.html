@@ -508,7 +508,10 @@ Copyright © 2020~2021 by wzh
 				width: 6vmax;
 				height: 6vmax;
 				margin: 0;
-				border: 0.3vmax inset #a6917c;
+				border: 0.3vmax inset #a6917c; /* 未选中 */
+			}
+			#bag > section:nth-of-type(1) > ul > li > ol > li:hover{ /* 悬停背景 */
+				background-color: #e0edd3;
 			}
 			#bag > section:nth-of-type(1) > ul > li > ol > li.checked{ /* 选中 */
 				border: 0.5vmax inset #876;
