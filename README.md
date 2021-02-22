@@ -7,7 +7,7 @@
 [![latest-release](https://img.shields.io/github/v/release/wzh656/MinecraftWeb?include_prereleases&labelColor=aaa&style=plastic&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACdUlEQVRYR9VWgTFDQRCNClCBqAAVkApQgagAFYgKUIGoABWIClCBqAAV8N6fe5n9m73LzZcZ42Z27udu9927t3t3Wen9cVv54/V7JQJrIHcCO00k79GfwT4XkGbcJewg+V2hv87F5QgQ5BG27RZ7we9BgUQ/xbG3LRuXI8Dd7sO+zE44tgoj2E5GBc5twd5hQ6Mc4xh/6OMiApTuLjkeox+nbzt+gbGRA+Pv8zRGlSbpmylkSthIgERmLSIwxewGjLvou0U0xzrYhKke6PeWfF/R+9Qpjj3jsgSGmLlJsywcFaAC7G6sCiM4aPdWNcWxEFnQbC0VvAITOOwmR+aZObWtjx/aqd0NlWCe2dZh/qTsYYxFzfYA0wlpHUMLzuLjSYgaF2aK2Lgb+km1SH5hfBswpoE4LQJW3ifMkXXUxhg8ShO3qdfvKG3CmOBD6vI+YVpaBKxDVOUCskQltdSaq3KzgxG+VSezNNgasBKVgKiM8ukViupGPvYYzzYvAh60BMTdfmTSU7ra/RrNXaEAK49PTbSWrXrNlwpQPlblJs0ioKuXjjVAtl4EXipc+UzxoRPU1IEI2IkaoIhA6QSIgI3jmpsiYKVpXRSZXPuU0a10ciICTapJwBdHDVBEILqCPX8fNyABfzxqCAwRp9tPi9gXMCNc84LqLqDPIQnMDWKs9WQGaF41utQQ8MQvIgI1QF0JzKWbBCYw3dG1O4kIRK+gF8/HPXUl0AeynmUtUroF5VNFYPZU5iopjdujy6EaAvyn9GxwGwWmMN1OtUD060LAx72QwDKAOhP/1wQWlEh2uqX4bxRYGoGuQEuJqzk6S1koB/IDAjacvLF4OQ0AAAAASUVORK5CYII=)](https://github.com/wzh656/MinecraftWeb/releases/download/1.2.0-alpha/Minecraft-v1.2.0-alpha-full.apk)
 [![downloads](https://img.shields.io/github/downloads/wzh656/MinecraftWeb/total?style=plastic&labelColor=aaa&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACdElEQVRYR7WWjVEjMQyFoQLogFDBQQUsFRxUcKEDqIBQAUcFt1QAqYBQwR0VEDqACuB9nvWNI6T1Jiya0SS2ZelZv7u9tT4d6MqemN+S/mnxIuZ3MG0PlGwk91N8Ip5U7ix1fi+eixc1/TUAGLsUT2uKgvNW+1diQLnUBwCjfzY0bK+daQMwnygCgPCvkYxnNegEyAp5AL7DeAjCAphJkph/J5ET2ElUAmi0fjCWL7TGI2T/VHw0ENmj5H6LF+Jz51HH3dkKgKU2qe+S/gt2m4Cg/ql15EuadGcYpQwzNfpjH8bdfQSyB1DsZTxC1pCxW116ALiUKiMDwIh9PULWA1VrjkAEIHkBABPxc6B5DADkz12gPwEgSa4dgVvtEZoxqJUSr69cAGAh9rJ7jPhn8CTuX+cljxEAphqhGZPeIwDugYSbMa1LF6X7w+h8xQMeAIQPRwbg2Ul9wD3Qfm1Ur4svBBAlIR5Y6+umBxHhtN0Q8ZSEtE2+diytDI11n2vkW629Mpz39YHXLg+WXzQelSBqUx+YiKNOSAhOxZuCwDiu3w0ekTohtBDnZvTU7eWSwROM1hsx/4cQj8LldNnIOCO78aYhOcGkasS2h+MRLqLYo1abALef7J4snr0vS630Qu4D3pxIYzQAMNX+kA/Z9Hp0lABwW5kL2RAgZuIdMeFhui0DAH0Jl6+8dR5KOmyzKV+AAL1gaNyzgaix5fMVD3rdrnT7JlXQB+BT+KJ2a2MJEDxBRtdmRATAzZ2+fk+StGL7qVabERYAo528cdt6TRkvJiQwSejljc3HDIBko3/MrEC5rgEoZQkLgFDaR4AlXHivSh+QhoYeN6Q7yAAAAABJRU5ErkJggg==)](https://github.com/wzh656/MinecraftWeb/zipball/master)
 
-![修改日期-2021.2.15](https://img.shields.io/badge/修改日期-2021.2.15-blueviolet)
+![修改日期-2021.2.22](https://img.shields.io/badge/修改日期-2021.2.22-blueviolet)
 
 
 
@@ -118,13 +118,29 @@
     手机调试工具，点击右下角即可看到一堆输出，可以调试html+css+js，也可以运行JavaScript代码，等效于*命令方块*
 
 
-## （四）计划(plans)
+## （四）已实现功能 & 发展计划
+### 部分值得一提的功能
+1. [x] 通过 `F=ma`, `v=at`, `s=vt` 等物理公式计算玩家位置
+2. [x] 考虑空气阻力 `f = 1/2*CρSV²` 对玩家的影响
+3. [x] 考虑宇宙无规则随机扰动对一切参数数据的影响
+4. [x] 【特性】`XYZ`轴均无限、区块无限的世界
+5. [x] 【特性】爬树功能
+6. [x] 根据玩家设置的*经纬度*和*开始日期*计算日出日落时间和天空颜色、环境光颜色
+7. [x] 具有降雨量控制天气系统
+8. [x] 用柏林噪声`simplexNoise`根据种子(seed)随机生成的区块类型、地形、土壤层厚度、树高、树叶高、降雨量和完善的区块系统
+9. [x] 独立于外界且可更改流速、可进行`setTimeout`, `setInterval`, `clearTimeout`, `clearInterval`的时间系统
+
+> 注：此处的*特性*指偶然的产生功能
+
+### 计划(plans)
 1. [ ] 【创新】工具：编写新的工具类`class Tool`，并增加挖掘时间和挖掘损耗
-2. [ ] 【创新】【改革】使游戏更加科学：方块重力及电磁力
-3. [ ] 【优化】【改革】尝试使用多线程工作（除涉及`scene`等主线程对象以外）
-4. [ ] 【优化】【改革】尝试使用asm.js或wasm工作
-5. [ ] 【创新】联机：尝试使用内网联机（'electron'）
-6. [ ] 更多……【未解密】天机不可泄露
+2. [ ] 【创新】玩家状态界面：健康、饥饿、口渴、精神、疲惫等
+3. [ ] 【创新】工具合成界面
+4. [ ] 【创新】【改革】使游戏更加科学：方块重力及电磁力
+5. [ ] 【优化】【改革】尝试使用多线程工作（除涉及`scene`等主线程对象以外）
+6. [ ] 【优化】【改革】尝试使用asm.js或wasm工作
+7. [ ] 【创新】联机：尝试使用内网联机（'electron'）
+8. [ ] 更多……【未解密】天机不可泄露
 
 > 注：计划赶不上变化
 
