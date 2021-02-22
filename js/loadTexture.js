@@ -1,10 +1,14 @@
 /**
 * 创建网格模型
 */
+const task = Img.get(REQUIRE_PICTURE[0]);
+for (let i=1; i<REQUIRE_PICTURE.length; i++)
+	task.then( ()=>Img.get(REQUIRE_PICTURE[i]) ); //确保所有图片载入cache以便后文同步获取
+
 let TEXTURES;
-(async function(){
+task.then(()=>{
 	const keys = Object.keys(Thing.prototype.TEMPLATES); //（有序）
-	TEXTURES = Img.grid( await Img.get("./img/textures/textures.png"), 16, 16 );
+	TEXTURES = Img.grid( Img.get("./img/textures/textures.png"), 16, 16 );
 	for (const i of keys.slice(1)){ //除去空气
 		const block = Thing.prototype.TEMPLATES[i];
 		if (!(block instanceof Block)) continue; //不属于方块类
@@ -15,7 +19,7 @@ let TEXTURES;
 				new THREE.TextureLoader().load(
 					Img.scale(
 						( face[2]? //自定义
-							Img.clip( await Img.get(face[2]), face[0]*16, face[1]*16, 16, 16 )
+							Img.clip( Img.get(face[2]), face[0]*16, face[1]*16, 16, 16 )
 						:
 							TEXTURES[ face[0] ][ face[1] ] ),
 						64, 64
@@ -35,7 +39,7 @@ let TEXTURES;
 		
 		try_start_load(); //加载区块
 	}, 0);
-})();
+});
 
 
 // TextureLoader创建一个纹理加载器对象，可以加载图片作为几何体纹理

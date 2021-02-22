@@ -200,7 +200,7 @@ class Block extends Thing{
 	deleteTexture(index){
 		if (index === undefined){ //无索引（所有）
 			if ( this.have("block", "texture") )
-				for (let i of Object.values(this.get("block", "texture")))
+				for (const i of Object.values(this.get("block", "texture")))
 					i.dispose(); //清除内存
 			this.set("block", "texture", []); //半保留
 		}else{ //有索引（单个）
@@ -212,12 +212,11 @@ class Block extends Thing{
 	};
 	
 	// material
-	makeMaterial(/* material */){
+	makeMaterial(textures=this.get("block", "texture")/* material */){
 		/* if (material)
 			return this.set("block", "material", material.map( v => v.clone() )); */
 		
-		const textures = this.get("block", "texture"),
-			transparent = this.get("attr", "block", "transparent") || false;
+		const transparent = this.get("attr", "block", "transparent") || false;
 		this.set("block", "material", [
 			new THREE.MeshLambertMaterial({ map:textures[0], transparent }),
 			new THREE.MeshLambertMaterial({ map:textures[1], transparent }),

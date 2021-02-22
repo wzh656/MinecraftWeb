@@ -142,6 +142,7 @@ class ChunkMap{
 	
 	//获取方块（不可编辑）
 	get(x, y, z){
+		/* x,y,z 单位：m */
 		x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 		
 		return this.map[x] && this.map[x][y] && this.map[x][y][z];
@@ -161,6 +162,7 @@ class ChunkMap{
 	
 	//设置方块
 	set(x, y, z, value){
+		/* x,y,z 单位：m */
 		x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 		
 		if (!this.map[x])
@@ -173,6 +175,7 @@ class ChunkMap{
 	
 	//添加方块
 	add(block, {x,y,z}, type=true){
+		/* x,y,z 单位：m */
 		// let {type=true} = opt;
 		// x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 		
@@ -205,6 +208,7 @@ class ChunkMap{
 	
 	//根据 模板和name 添加方块
 	addID(name, {x,y,z}, opt={}){
+		/* x,y,z 单位：m */
 		const {type=true, attr={}} = opt;
 		/* if (typeof type != "boolean"){
 			[type, attr] = [undefined, type];
@@ -239,18 +243,49 @@ class ChunkMap{
 				"y+": block.get("attr", "block", "size", "y+") || 0 ,
 				"y-": block.get("attr", "block", "size", "y-") || 0 ,
 				"z+": block.get("attr", "block", "size", "z+") || 0 ,
-				"z-": block.get("attr", "block", "size", "z-") || 0 
+				"z-": block.get("attr", "block", "size", "z-") || 0
 			};
 			size.x = 100 - size["x+"] - size["x-"],
 			size.y = 100 - size["y+"] - size["y-"],
 			size.z = 100 - size["z+"] - size["z-"]; //长宽高
 			
-			this.add( block.makeGeometry(size.x, size.y, size.z).makeMesh(), {
+			let face = block.get("block", "face")[0];
+			block.setTexture(
+				new THREE.TextureLoader().load(
+					Img.scale(
+						Img.clip(
+							( face[2]? //自定义
+								Img.clip( Img.get(face[2]), face[0]*16, face[1]*16, 16, 16 )
+							:
+								TEXTURES[ face[0] ][ face[1] ] ),
+							(size["x-"])/100*64, 0, (100-size["x+"])/100*64, 64
+						), 64, 64
+					).toDataURL("image/png")
+				), 0
+			);
+			face = block.get("block", "face")[1];
+			block.setTexture(
+				new THREE.TextureLoader().load(
+					Img.scale(
+						Img.clip(
+							( face[2]? //自定义
+								Img.clip( Img.get(face[2]), face[0]*16, face[1]*16, 16, 16 )
+							:
+								TEXTURES[ face[0] ][ face[1] ] ),
+							(size["x-"])/100*64, 0, (100-size["x+"])/100*64, 64
+						), 64, 64
+					).toDataURL("image/png")
+				), 1
+			);
+			
+			this.add( block.makeGeometry(size.x, size.y, size.z).makeMaterial().makeMesh(), {
 				x: x + (-50+size["x-"] + 50-size["x+"]) /2,
 				y: y + (-50+size["y-"] + 50-size["y+"]) /2,
 				z: z + (-50+size["z-"] + 50-size["z+"]) /2
 			}, type ); //以模板建立
-		
+			
+			block.deleteTexture(); //删除贴图
+			
 		}else{
 			this.add( block.makeMesh(), {x,y,z}, type ); //以模板建立
 		}

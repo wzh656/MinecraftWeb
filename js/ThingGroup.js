@@ -28,14 +28,14 @@ class ThingGroup extends Array{
 	//添加一个
 	addOne(item, where, needUpdate=true){
 		if (this.fixedLength && !this.maxLength){ //有固定长度 且 无最大长度
-			if (this[where]){ //已满 从头找空位
+			if (this[where||0]){ //已满 从头找空位
 				for (let i=0; i<this.length; i++)
 					if (!this[i]){
 						this[i] = item;
 						return needUpdate? this.update(): this;
 					}
 			}else{ //未满
-				this[where] = item;
+				this[where||0] = item;
 				return needUpdate? this.update(): this;
 			}
 			console.warn(`ThingGroup is full to add:`, item, where); //找不到空位
@@ -76,7 +76,7 @@ class ThingGroup extends Array{
 	}
 	
 	//更新
-	async update(retryTime=1000){
+	update(retryTime=1000){
 		if (!TEXTURES) //贴图未加载 等待重试
 			return setTimeout(()=>this.update(retryTime), retryTime);
 		
@@ -92,7 +92,7 @@ class ThingGroup extends Array{
 			if ( this[i] ){ //有方块
 				const face = this[i].get("view");
 				src = Img.scale( face[2]? //自定义贴图位置
-						Img.clip( await Img.get(face[2]), face[0]*16, face[1]*16, 16, 16 )
+						Img.clip( Img.get(face[2]), face[0]*16, face[1]*16, 16, 16 )
 					:
 						TEXTURES[ face[0] ][ face[1] ]
 					, 32, 32
