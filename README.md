@@ -14,7 +14,7 @@
 > # 运行(Run)
 
 1. 手机版(Android apk软件)/电脑Windows版(electron实现)运行  
-    国内链接：[腾讯微云永久下载链接(v1.1.0+,apk&electron)](https://share.weiyun.com/WkQTgj8H)
+    国内链接: [腾讯微云永久下载链接(v1.1.0+,apk&electron)](https://share.weiyun.com/WkQTgj8H)
     | 版本(version)	| Android版下载(apk)																																		| Windows下载(electron)																		| Github查看(release)									|
     | -----------------	| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	| ------------------------------------------------------------------------------------------------------	|
     | v1.2.0-alpha	| [完整版(22.3MB)](https://github.com/wzh656/MinecraftWeb/releases/download/1.2.0-alpha/Minecraft-v1.2.0-alpha-full.apk)，[简化版(6.41MB)](https://github.com/wzh656/MinecraftWeb/releases/download/1.2.0-alpha/Minecraft-v1.2.0-alpha-simplified.apk)	| [exe安装程序(67.3MB)](https://github.com/wzh656/MinecraftWeb/releases/download/1.2.0-alpha/Minecraft-v1.2.0-win32-x64-installProgram.exe)	| [release](https://github.com/wzh656/MinecraftWeb/releases/tag/1.2.0-alpha)		|
@@ -118,7 +118,7 @@
     手机调试工具，点击右下角即可看到一堆输出，可以调试html+css+js，也可以运行JavaScript代码，等效于*命令方块*
 
 
-## （四）已实现功能 & 发展计划
+## （四）功能 & 计划
 ### 部分值得一提的功能
 1. [x] 通过 `F=ma`, `v=at`, `s=vt` 等物理公式计算玩家位置
 2. [x] 考虑空气阻力 `f = 1/2*CρSV²` 对玩家的影响
