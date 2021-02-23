@@ -14,14 +14,22 @@ const Img = {
 	},
 	// 图片裁剪
 	clip(img, x, y, width, height){
-		let canvas1 = $("<canvas></canvas>").attr("width", img.width).attr("height", img.height)[0],
+		const canvas1 = $("<canvas></canvas>").attr("width", img.width).attr("height", img.height)[0],
 			canvas2 = $("<canvas></canvas>").attr("width", width).attr("height", height)[0],
 			ctx1 = canvas1.getContext("2d"),
 			ctx2 = canvas2.getContext("2d");
 		ctx1.drawImage(img, 0, 0, img.width, img.height);
-		let imgData = ctx1.getImageData(x, y, width, height);
+		const imgData = ctx1.getImageData(x, y, width, height);
 		ctx2.putImageData(imgData, 0, 0);
 		return canvas2;
+	},
+	// 旋转
+	rotate(img, angle, width, height){
+		const canvas = $("<canvas></canvas>").attr("width", width).attr("height", height)[0],
+			ctx = canvas.getContext("2d");
+		ctx.rotate(angle *Math.PI/180);
+		ctx.drawImage(img, 0, 0, img.width, img.height);
+		return canvas;
 	},
 	// 图片按照网格裁剪
 	grid(img, width, height){

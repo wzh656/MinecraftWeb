@@ -238,50 +238,53 @@ class ChunkMap{
 		});
 		if ( block.get("attr", "block", "size") ){ //有大小
 			const size = {
-				"x+": block.get("attr", "block", "size", "x+") || 0 ,
-				"x-": block.get("attr", "block", "size", "x-") || 0 ,
-				"y+": block.get("attr", "block", "size", "y+") || 0 ,
-				"y-": block.get("attr", "block", "size", "y-") || 0 ,
-				"z+": block.get("attr", "block", "size", "z+") || 0 ,
-				"z-": block.get("attr", "block", "size", "z-") || 0
+				x0: block.get("attr", "block", "size", "x0") || 0 ,
+				x1: block.get("attr", "block", "size", "x1") || 100 ,
+				y0: block.get("attr", "block", "size", "y0") || 0 ,
+				y1: block.get("attr", "block", "size", "y1") || 100 ,
+				z0: block.get("attr", "block", "size", "z0") || 0 ,
+				z1: block.get("attr", "block", "size", "z1") || 100
 			};
-			size.x = 100 - size["x+"] - size["x-"],
-			size.y = 100 - size["y+"] - size["y-"],
-			size.z = 100 - size["z+"] - size["z-"]; //长宽高
+			size.x = size.x1 - size.x0,
+			size.y = size.y1 - size.y0,
+			size.z = size.z1 - size.z0; //长宽高
 			
-			let face = block.get("block", "face")[0];
-			block.setTexture(
-				new THREE.TextureLoader().load(
-					Img.scale(
-						Img.clip(
-							( face[2]? //自定义
-								Img.clip( Img.get(face[2]), face[0]*16, face[1]*16, 16, 16 )
-							:
-								TEXTURES[ face[0] ][ face[1] ] ),
-							(size["x-"])/100*64, 0, (100-size["x+"])/100*64, 64
-						), 64, 64
-					).toDataURL("image/png")
-				), 0
-			);
-			face = block.get("block", "face")[1];
-			block.setTexture(
-				new THREE.TextureLoader().load(
-					Img.scale(
-						Img.clip(
-							( face[2]? //自定义
-								Img.clip( Img.get(face[2]), face[0]*16, face[1]*16, 16, 16 )
-							:
-								TEXTURES[ face[0] ][ face[1] ] ),
-							(size["x-"])/100*64, 0, (100-size["x+"])/100*64, 64
-						), 64, 64
-					).toDataURL("image/png")
-				), 1
-			);
+			const uv = [
+				[size.z0/100*16, size.y0/100*16, size.z1/100*16, size.y1/100*16],
+				[size.z0/100*16, size.y0/100*16, size.z1/100*16, size.y1/100*16],
+				[size.x0/100*16, size.z0/100*16, size.x1/100*16, size.z1/100*16],
+				[size.x0/100*16, size.z0/100*16, size.x1/100*16, size.z1/100*16],
+				[size.x0/100*16, size.y0/100*16, size.x1/100*16, size.y1/100*16],
+				[size.x0/100*16, size.y0/100*16, size.x1/100*16, size.y1/100*16]
+			];
+			for (const [i,face] of Object.entries(block.get("block", "face")) ){
+				console.log(uv[i][0], uv[i][1], uv[i][2], uv[i][3])
+				console.log(Img.clip(
+								( face[2]? //自定义
+									Img.clip( Img.get(face[2]), face[0]*16, face[1]*16, 16, 16 )
+								:
+									TEXTURES[ face[0] ][ face[1] ] ),
+								uv[i][0], uv[i][1], uv[i][2]-uv[i][0], uv[i][3]-uv[i][1]
+							).toDataURL("image/png"))
+				block.setTexture(
+					new THREE.TextureLoader().load(
+						Img.scale(
+							Img.clip(
+								( face[2]? //自定义
+									Img.clip( Img.get(face[2]), face[0]*16, face[1]*16, 16, 16 )
+								:
+									TEXTURES[ face[0] ][ face[1] ] ),
+								uv[i][0], uv[i][1], uv[i][2]-uv[i][0], uv[i][3]-uv[i][1]
+							), 64, 64
+						).toDataURL("image/png")
+					), i
+				);
+			}
 			
 			this.add( block.makeGeometry(size.x, size.y, size.z).makeMaterial().makeMesh(), {
-				x: x + (-50+size["x-"] + 50-size["x+"]) /2,
-				y: y + (-50+size["y-"] + 50-size["y+"]) /2,
-				z: z + (-50+size["z-"] + 50-size["z+"]) /2
+				x: x + (size.x0 + size.x1)/2 /100 -0.5,
+				y: y + (size.y0 + size.y1)/2 /100 -0.5,
+				z: z + (size.z0 + size.z1)/2 /100 -0.5
 			}, type ); //以模板建立
 			
 			block.deleteTexture(); //删除贴图

@@ -125,12 +125,12 @@ class Block extends Thing{
 		if (opt.attr && opt.attr.block){
 			if (opt.attr.block.size){ //大小
 				this.attr.block.size = {};
-				if (opt.attr.block.size["x+"]) this.attr.block.size["x+"] = opt.attr.block.size["x+"];
-				if (opt.attr.block.size["x-"]) this.attr.block.size["x-"] = opt.attr.block.size["x-"];
-				if (opt.attr.block.size["y+"]) this.attr.block.size["y+"] = opt.attr.block.size["y+"];
-				if (opt.attr.block.size["y-"]) this.attr.block.size["y-"] = opt.attr.block.size["y-"];
-				if (opt.attr.block.size["z+"]) this.attr.block.size["z+"] = opt.attr.block.size["z+"];
-				if (opt.attr.block.size["z-"]) this.attr.block.size["z-"] = opt.attr.block.size["z-"];
+				if (opt.attr.block.size.x0) this.attr.block.size.x0 = opt.attr.block.size.x0;
+				if (opt.attr.block.size.x1) this.attr.block.size.x1 = opt.attr.block.size.x1;
+				if (opt.attr.block.size.y0) this.attr.block.size.y0 = opt.attr.block.size.y0;
+				if (opt.attr.block.size.y1) this.attr.block.size.y1 = opt.attr.block.size.y1;
+				if (opt.attr.block.size.z0) this.attr.block.size.z0 = opt.attr.block.size.z0;
+				if (opt.attr.block.size.z1) this.attr.block.size.z1 = opt.attr.block.size.z1;
 			}
 			
 			if (opt.attr.block.hardness) this.attr.block.hardness = opt.attr.block.hardness; //硬度

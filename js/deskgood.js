@@ -675,13 +675,12 @@ const deskgood = { //桌子好
 	},
 	
 	// 放置方块
-	place(block, {x, y, z}){ // 单位 px=cm
-		x = Math.round(x),
-		y = Math.round(y),
-		z = Math.round(z);
+	place(block, {x, y, z}){
+		/* 单位：m */
+		x = Math.round(x), y = Math.round(y), z = Math.round(z);
 		
 		if ( map.get(x, y, z) &&
-			eval(map.get(x, y, z).get("attr", "block", "onPut")) === false
+			eval(map.get(x, y, z).get("attr", "block", "onPut")) === false //放置事件
 		) return;
 		
 		console.log("deskgood.place", {x,y,z}, block.name, block.attr)
@@ -694,9 +693,7 @@ const deskgood = { //桌子好
 			cX = Math.round(x/map.size.x),
 			cZ = Math.round(z/map.size.z);
 		map.chunks[cX][cZ].edit = map.chunks[cX][cZ].edit.filter(v =>
-			v.x != x &&
-			v.y != y &&
-			v.z != z
+			v.x != x && v.y != y && v.z != z
 		); //删除重复
 		/*for (const [i, item] of Object.entries(map.chunks[cX][cZ].edit) )
 			if (
@@ -705,6 +702,7 @@ const deskgood = { //桌子好
 				item.z == z
 			) map.chunks[cX][cX].edit.splice(i,1); //删除重复*/
 		map.chunks[cX][cZ].edit.push({
+			type: 0,
 			x,
 			y,
 			z,
@@ -713,9 +711,7 @@ const deskgood = { //桌子好
 		}); //添加edit
 		map.updateRound(x, y, z); //刷新方块及周围
 		
-		x = Math.round(x),
-		y = Math.round(y),
-		z = Math.round(z); //存储必须整数
+		// x = Math.round(x), y = Math.round(y), z = Math.round(z); //存储必须整数
 		//DB
 		db.addData(TABLE.WORLD, {
 			type: 0,
@@ -756,14 +752,12 @@ const deskgood = { //桌子好
 	},
 	
 	// 移除方块
-	remove({x, y, z}){ // 单位 px=cm
-		x = Math.round(x),
-		y = Math.round(y),
-		z = Math.round(z);
+	remove({x, y, z}){
+		/* 单位：m */
+		x = Math.round(x), y = Math.round(y), z = Math.round(z);
 		
-		if (
-			map.get(x, y, z) &&
-			eval(map.get(x, y, z).get("attr", "block", "onDelete")) === false
+		if ( map.get(x, y, z) &&
+			eval(map.get(x, y, z).get("attr", "block", "onRemove")) === false //移除事件
 		) return;
 		
 		console.log("deskgood.remove", {x,y,z}, map.get(x, y, z))
@@ -782,6 +776,7 @@ const deskgood = { //桌子好
 				item.z == z
 			) map.chunks[cX][cZ].edit.splice(i,1); //删除重复*/
 		map.chunks[cX][cZ].edit.push({
+			type: 0,
 			x,
 			y,
 			z,
@@ -789,9 +784,7 @@ const deskgood = { //桌子好
 		}); //添加edit
 		map.updateRound(x, y, z); //刷新方块及周围
 		
-		x = Math.round(x),
-		y = Math.round(y),
-		z = Math.round(z); //存储必须整数
+		// x = Math.round(x), y = Math.round(y), z = Math.round(z); //存储必须整数
 		//DB
 		db.addData(TABLE.WORLD, {
 			type: 0,
@@ -997,8 +990,8 @@ setInterval(()=>{
 		warn.push("脚被卡住？");
 	}
 	
-	if (warn.length && !stop){
-		if (!map.get(deskgood.pos.x/100,
+	// if (warn.length && !stop){
+		/* if (!map.get(deskgood.pos.x/100,
 				deskgood.pos.y/100,
 				deskgood.pos.z/100
 			) &&
@@ -1010,14 +1003,14 @@ setInterval(()=>{
 		){
 			last_jump = +time.getTime();
 			deskgood.v.y += deskgood.jump_v*rnd_error(); //自动跳跃
-		}
+		} */
 		
 		/* if (warn[0] & warn[1]){
 			console.warn(warn[0], warn[1]);
 		}else{
 			console.warn(warn[0]);
 		} */
-	}
+	// }
 }, 36);
 
 
