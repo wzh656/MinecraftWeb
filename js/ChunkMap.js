@@ -250,32 +250,24 @@ class ChunkMap{
 			size.z = size.z1 - size.z0; //长宽高
 			
 			const uv = [
-				[size.z0/100*16, size.y0/100*16, size.z1/100*16, size.y1/100*16],
-				[size.z0/100*16, size.y0/100*16, size.z1/100*16, size.y1/100*16],
-				[size.x0/100*16, size.z0/100*16, size.x1/100*16, size.z1/100*16],
-				[size.x0/100*16, size.z0/100*16, size.x1/100*16, size.z1/100*16],
-				[size.x0/100*16, size.y0/100*16, size.x1/100*16, size.y1/100*16],
-				[size.x0/100*16, size.y0/100*16, size.x1/100*16, size.y1/100*16]
+				[size.z0/100*64, size.y0/100*64, size.z1/100*64, size.y1/100*64],
+				[size.z0/100*64, size.y0/100*64, size.z1/100*64, size.y1/100*64],
+				[size.x0/100*64, size.z0/100*64, size.x1/100*64, size.z1/100*64],
+				[size.x0/100*64, size.z0/100*64, size.x1/100*64, size.z1/100*64],
+				[size.x0/100*64, size.y0/100*64, size.x1/100*64, size.y1/100*64],
+				[size.x0/100*64, size.y0/100*64, size.x1/100*64, size.y1/100*64]
 			];
 			for (const [i,face] of Object.entries(block.get("block", "face")) ){
-				console.log(uv[i][0], uv[i][1], uv[i][2], uv[i][3])
-				console.log(Img.clip(
-								( face[2]? //自定义
-									Img.clip( Img.get(face[2]), face[0]*16, face[1]*16, 16, 16 )
-								:
-									TEXTURES[ face[0] ][ face[1] ] ),
-								uv[i][0], uv[i][1], uv[i][2]-uv[i][0], uv[i][3]-uv[i][1]
-							).toDataURL("image/png"))
 				block.setTexture(
 					new THREE.TextureLoader().load(
-						Img.scale(
-							Img.clip(
+						Img.clip(
+							Img.scale(
 								( face[2]? //自定义
 									Img.clip( Img.get(face[2]), face[0]*16, face[1]*16, 16, 16 )
 								:
 									TEXTURES[ face[0] ][ face[1] ] ),
-								uv[i][0], uv[i][1], uv[i][2]-uv[i][0], uv[i][3]-uv[i][1]
-							), 64, 64
+								64, 64
+							), uv[i][0], uv[i][1], uv[i][2]-uv[i][0], uv[i][3]-uv[i][1]
 						).toDataURL("image/png")
 					), i
 				);
@@ -328,14 +320,17 @@ class ChunkMap{
 		if (thisBlock === null) return; //空气
 		
 		const rule = [
-				[1,0,0],
-				[-1,0,0],
-				[0,1,0],
-				[0,-1,0],
-				[0,0,1],
-				[0,0,-1]
+				/* x,y,z偏移量 反方向 */
+				[1,0,0, "x1"],
+				[-1,0,0, "x0"],
+				[0,1,0, "y1"],
+				[0,-1,0, "y0"],
+				[0,0,1, "z1"],
+				[0,0,-1, "z0"]
 			],
+			direction = {x0:0, x1:100, y0:0, y1:100, z0:0, z1:100}, //所有方向 及默认值
 			visibleValue = [], //可见值
+			thisSize = thisBlock? thisBlock.get("attr", "block", "size"): undefined, //本方块大小
 			noTransparent = thisBlock? thisBlock.get("attr", "block", "noTransparent"): undefined; //是否可以隐藏
 				/* (thisBlock && thisBlock.attr && thisBlock.attr.block && thisBlock.attr.block.noTransparent!==undefined)? //有属性
 				thisBlock.attr.block.noTransparent:
@@ -347,27 +342,38 @@ class ChunkMap{
 				visibleValue[i] = true;
 			needLoad = true;
 		}else{
-			for (const [i, [dx,dy,dz]] of Object.entries(rule)){ //遍历四周的方块
-				const px=x+dx, py=y+dy, pz=z+dz;
+			for (const [i, [dx,dy,dz, oppDir]] of Object.entries(rule)){ //遍历四周的方块
+				const px=x+dx, py=y+dy, pz=z+dz; //四周方块位置
 				let thatBlock = this.get(px, py, pz); //四周的方块
+				const thatSize = thatBlock? thatBlock.get("attr", "block", "size"): undefined; //四周方块大小
 				
 				if (thatBlock === undefined){ //未加载
 					const cX = Math.round(px/map.size.x),
-						cZ = Math.round(pz/map.size.z), //所属区块(Chunk)
+						cZ = Math.round(pz/map.size.z), //所属区块
 						edit = this.chunks[cX] && this.chunks[cX][cZ] && this.chunks[cX][cZ].edit;
 					thatBlock = this.perGet(px, py, pz, edit||[]); //应该的方块
 				}
 				
+				if (thatSize)
+					for (const [dir, normal] of Object.entries(direction)){
+						
+					}
+				if ( thatSize &&
+					thatSize.x0 != 0 && thatSize.x1 != 100 &&
+					thatSize.y0 != 0 && thatSize.y1 != 100 &&
+					thatSize.z0 != 0 && thatSize.z1 != 100
+				) noTransparent = true; //四周方块任何方向变小 不可隐藏
+				
 				if ( noTransparent && noTransparent[i] ){ //为数组 且 不可隐藏
 					needLoad = true;
 					visibleValue.push(true);
-				}else if ( py < map.size[0].y ){ //最底层 则不显示
+				}else if ( py < map.size[0].y ){ //位于最底层 不显示
 					visibleValue.push(false);
 				}else if ( !(thatBlock && thatBlock.name!="空气") ){ //无方块 显示
 					needLoad = true;
 					visibleValue.push(true);
 				}else if ( thatBlock.attr && thatBlock.attr.block && thatBlock.attr.block.transparent !== undefined ){ //有属性
-					const visible = thatBlock.attr.block.transparent; //透明则可见
+					const visible = thatBlock.attr.block.transparent; //透明 则可见
 					needLoad = needLoad || visible;
 					visibleValue.push( visible ); //方块透明 显示
 				}else{ //继承模板
@@ -399,7 +405,7 @@ class ChunkMap{
 		}
 		
 		const material = thisBlock.block.material;
-		for (const i in material)
+		for (let i=0, len=material.length; i<len; i++)
 			material[i].visible = visibleValue[i];
 		
 		if (thisBlock.block.addTo == true && visibleValue.every(value => !value)){ //已加入 and 可隐藏（每面都false）
@@ -780,7 +786,7 @@ class ChunkMap{
 			){ //被编辑
 				return {
 					name: value.name,
-					attr: value.attr
+					attr: value.attr? JSON.parse( "{"+value.attr+"}" ): {}
 				};
 			}
 		} //未编辑
@@ -1022,7 +1028,7 @@ class ChunkMap{
 				){ //被编辑
 					column[dy] = {
 						name: value.name,
-						attr: value.attr
+						attr: value.attr? JSON.parse( "{"+value.attr+"}" ): {}
 					};
 					return true; //让下面continue
 				}
@@ -1241,17 +1247,18 @@ class ChunkMap{
 				
 				if ( needLoad ){ //有面需显示
 					// if (y == 0) console.log(visibleValue)
-					const thisBlock = new Block( block ).makeMesh(),
+					
+					this.addID(block.name, {x, y, z}, {
+						attr: block.attr
+					});
+					
+					const thisBlock = this.get(x, y, z),
 						material = thisBlock.block.material;
 					
 					if ( !thisBlock.get("attr", "block", "noTransparent") ) //允许透明
 						for (let i=material.length-1; i>=0; i--)
 							material[i].visible = visibleValue[i];
 					
-					this.add(
-						thisBlock,
-						{x, y, z}
-					);
 					
 					// x,z,y
 					/*const noTransparent =  thisBlock.get("attr", "block", "noTransparent"),

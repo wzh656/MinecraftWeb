@@ -689,7 +689,7 @@ const deskgood = { //桌子好
 			attr: block.attr
 		});
 		
-		const attr = `'${JSON.stringify(map.get(x, y, z).attr).slice(1,-1)}'`,
+		const attr = JSON.stringify(map.get(x, y, z).attr).slice(1,-1),
 			cX = Math.round(x/map.size.x),
 			cZ = Math.round(z/map.size.z);
 		map.chunks[cX][cZ].edit = map.chunks[cX][cZ].edit.filter(v =>
