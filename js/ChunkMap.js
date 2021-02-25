@@ -320,51 +320,58 @@ class ChunkMap{
 		if (thisBlock === null) return; //空气
 		
 		const rule = [
-				/* x,y,z偏移量 反方向 */
-				[1,0,0, "x1"],
-				[-1,0,0, "x0"],
-				[0,1,0, "y1"],
-				[0,-1,0, "y0"],
-				[0,0,1, "z1"],
-				[0,0,-1, "z0"]
+				/* x,y,z偏移量 正方向 反方向 */
+				[1,0,0, "x0","x1"],
+				[-1,0,0, "x1","x0"],
+				[0,1,0, "y0","y1"],
+				[0,-1,0, "y1","y0"],
+				[0,0,1, "z0","z1"],
+				[0,0,-1, "z1","z0"]
 			],
 			direction = {x0:0, x1:100, y0:0, y1:100, z0:0, z1:100}, //所有方向 及默认值
 			visibleValue = [], //可见值
 			thisSize = thisBlock? thisBlock.get("attr", "block", "size"): undefined, //本方块大小
-			noTransparent = thisBlock? thisBlock.get("attr", "block", "noTransparent"): undefined; //是否可以隐藏
-				/* (thisBlock && thisBlock.attr && thisBlock.attr.block && thisBlock.attr.block.noTransparent!==undefined)? //有属性
-				thisBlock.attr.block.noTransparent:
-				Block.prototype.TEMPLATES[ thisBlock?thisBlock.name:0 ].attr.block.noTransparent; */
+			transparent = thisBlock? thisBlock.get("attr", "block", "transparent"): undefined; //透明方块（自己不可隐藏）
 		let needLoad = false; //需要加载
 		
-		if (noTransparent === true){ //整体不可隐藏
+		if (transparent === true){ //整体不可隐藏
 			for (let i=0; i<6; i++)
 				visibleValue[i] = true;
 			needLoad = true;
 		}else{
-			for (const [i, [dx,dy,dz, oppDir]] of Object.entries(rule)){ //遍历四周的方块
+			for (const [i, [dx,dy,dz, posDir,oppDir]] of Object.entries(rule)){ //遍历四周的方块
 				const px=x+dx, py=y+dy, pz=z+dz; //四周方块位置
 				let thatBlock = this.get(px, py, pz); //四周的方块
-				const thatSize = thatBlock? thatBlock.get("attr", "block", "size"): undefined; //四周方块大小
 				
 				if (thatBlock === undefined){ //未加载
 					const cX = Math.round(px/map.size.x),
 						cZ = Math.round(pz/map.size.z), //所属区块
 						edit = this.chunks[cX] && this.chunks[cX][cZ] && this.chunks[cX][cZ].edit;
-					thatBlock = this.perGet(px, py, pz, edit||[]); //应该的方块
+					thatBlock = new Block( this.perGet(px, py, pz, edit||[]) ); //应该的方块
 				}
 				
+				const thatSize = thatBlock? thatBlock.get("attr", "block", "size"): undefined, //四周方块大小
+					thatTransparent = thatBlock? thatBlock.get("attr", "block", "transparent"): undefined; //四周方块透明（不可隐藏）
+				
+				let noTransparent = false;
+				if (thisSize)
+					for (const [dir, normal] of Object.entries(direction)){
+						if (dir == oppDir) continue; //不考虑反方向
+						if (thisSize && thisSize[dir] != normal){ //不为默认值 不可隐藏
+							noTransparent = true;
+							break;
+						}
+					}
 				if (thatSize)
 					for (const [dir, normal] of Object.entries(direction)){
-						
+						if (dir == posDir) continue; //不考虑正反向
+						if (thatSize && thatSize[dir] != normal){ //不为默认值 不可隐藏
+							noTransparent = true;
+							break;
+						}
 					}
-				if ( thatSize &&
-					thatSize.x0 != 0 && thatSize.x1 != 100 &&
-					thatSize.y0 != 0 && thatSize.y1 != 100 &&
-					thatSize.z0 != 0 && thatSize.z1 != 100
-				) noTransparent = true; //四周方块任何方向变小 不可隐藏
 				
-				if ( noTransparent && noTransparent[i] ){ //为数组 且 不可隐藏
+				if ( thatTransparent || noTransparent ){ //透明方块 或 不可透明 显示
 					needLoad = true;
 					visibleValue.push(true);
 				}else if ( py < map.size[0].y ){ //位于最底层 不显示
@@ -372,8 +379,8 @@ class ChunkMap{
 				}else if ( !(thatBlock && thatBlock.name!="空气") ){ //无方块 显示
 					needLoad = true;
 					visibleValue.push(true);
-				}else if ( thatBlock.attr && thatBlock.attr.block && thatBlock.attr.block.transparent !== undefined ){ //有属性
-					const visible = thatBlock.attr.block.transparent; //透明 则可见
+				}else if ( thatBlock.get("attr", "block", "transparent") !== undefined ){ //有属性
+					const visible = thatBlock.get("attr", "block", "transparent"); //透明 则可见
 					needLoad = needLoad || visible;
 					visibleValue.push( visible ); //方块透明 显示
 				}else{ //继承模板
@@ -1206,12 +1213,12 @@ class ChunkMap{
 			if ( block.name != "空气" ){ //有方块
 				
 				const visibleValue = [],
-					noTransparent = (block.attr && block.attr.block && block.attr.block.noTransparent!==undefined)? //有属性
-						block.attr.block.noTransparent:
+					transparent = (block.attr && block.attr.block && block.attr.block.transparent!==undefined)? //有属性
+						block.attr.block.transparent:
 						Block.prototype.TEMPLATES[ block.name ].attr.block.noTransparent; //是否可以隐藏
 				let needLoad = false;
 				
-				if (noTransparent === true){ //整体不可隐藏
+				if (transparent === true){ //整体不可隐藏
 					for (let i=0; i<6; i++)
 						visibleValue[i] = true;
 					needLoad = true;
@@ -1219,10 +1226,7 @@ class ChunkMap{
 					for (const [i, [ddx,ddy,ddz]] of Object.entries(rule)){
 						const px=dx+ddx, py=y+ddy, pz=dz+ddz;
 						
-						if ( noTransparent && noTransparent[i] ){ //为数组 且 不可隐藏
-							needLoad = true;
-							visibleValue.push(true);
-						}else if ( py < map.size[0].y ){ //位于最底层 则不显示
+						if ( py < map.size[0].y ){ //位于最底层 则不显示
 							visibleValue.push(false);
 						}/* else if (
 							px < map.size[0].x || px > map.size[1].x ||

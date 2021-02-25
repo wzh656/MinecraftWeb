@@ -228,19 +228,15 @@ Thing.prototype.TEMPLATES["细橡木"] = new Block({
 	block: {
 		face: [
 			[2,1], [2,1], [1,1], [1,1], [2,1], [2,1]
-		], geometry: new THREE.BoxBufferGeometry(40, 100, 40)
+		],
 	},
 	attr: {
 		block: {
-			transparent: true, //部分透明方块（不让相邻方块透明）
-			noTransparent: [
-				true,
-				true,
-				false,
-				false,
-				true,
-				true
-			] //不让本方块前后左右透明
+			size: {
+				x0: 30, x1: 70,
+				y0: 30, y1: 70,
+				z0: 30, z1: 70
+			}
 		},
 		onPutToHead: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);message('放到头上', '你自己要把方块放头上的，别怪我');false;",
 		onPutToBody: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);message('放到身上', '你自己要把方块放身上的，别怪我');false;",
@@ -260,7 +256,6 @@ Thing.prototype.TEMPLATES["疏树叶"] = new Block({
 	attr: {
 		block: {
 			transparent: true, //透明方块
-			noTransparent: true, //不让本方块透明
 			through: true //可穿过
 		},
 		onPutToHead: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);message('放到头上', '你自己要把方块放头上的，别怪我');false;",
@@ -281,7 +276,6 @@ Thing.prototype.TEMPLATES["密树叶"] = new Block({
 	attr: {
 		block: {
 			transparent: true, //透明方块
-			noTransparent: true, //不让本方块透明
 			through: true //可穿过
 		},
 		onPutToHead: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});deskgood.hold.delete(1, deskgood.choice);message('放到头上', '你自己要把方块放头上的，别怪我');false;",

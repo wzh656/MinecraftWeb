@@ -34,6 +34,32 @@ Number.prototype.padding = function(start, end){
 	return symbol + part[0] + (part[1] ?"." + part[1] :"");
 }
 
+//Map遍历Object
+Object.prototype.map = function(f){
+	const obj = {};
+	for (const [i,v] of Object.entries(this))
+		obj[i] = f(v, i, this);
+	return obj;
+}
+
+//some遍历Object
+Object.prototype.some = function(f){
+	const obj = {};
+	for (const [i,v] of Object.entries(this))
+		if ( f(v, i, this) )
+			return true;
+	return false;
+}
+
+//every遍历Object
+Object.prototype.every = function(f){
+	const obj = {};
+	for (const [i,v] of Object.entries(this))
+		if ( !f(v, i, this) )
+			return false;
+	return true;
+}
+
 // 保留小数位数
 {
 	const round = Math.round;

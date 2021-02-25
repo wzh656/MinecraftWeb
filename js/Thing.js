@@ -140,8 +140,7 @@ class Block extends Thing{
 					this.attr.block.PureExcavationTime[name] = +value;
 			}
 			
-			if (opt.attr.block.transparent) this.attr.block.transparent = opt.attr.block.transparent; //透明方块（其他方块必须显示）
-			if (opt.attr.block.noTransparent) this.attr.block.noTransparent = opt.attr.block.noTransparent; //必须显示本方块
+			if (opt.attr.block.transparent) this.attr.block.transparent = opt.attr.block.transparent; //透明方块（其他方块必须显示，自己不可隐藏）
 			if (opt.attr.block.through) this.attr.block.through = opt.attr.block.through; //允许穿过
 			
 			if (opt.attr.block.onLeftMouseDown) this.attr.block.onLeftMouseDown = opt.attr.block.onLeftMouseDown; //鼠标左键按下
