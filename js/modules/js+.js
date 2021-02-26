@@ -35,27 +35,27 @@ Number.prototype.padding = function(start, end){
 }
 
 //Map遍历Object
-Object.prototype.map = function(f){
+Object.map = function(object, f=v=>v){
 	const obj = {};
-	for (const [i,v] of Object.entries(this))
-		obj[i] = f(v, i, this);
+	for (const [i,v] of Object.entries(object))
+		obj[i] = f(v, i, object);
 	return obj;
 }
 
 //some遍历Object
-Object.prototype.some = function(f){
+Object.some = function(object, f=v=>v){
 	const obj = {};
-	for (const [i,v] of Object.entries(this))
-		if ( f(v, i, this) )
+	for (const [i,v] of Object.entries(object))
+		if ( f(v, i, object) )
 			return true;
 	return false;
 }
 
 //every遍历Object
-Object.prototype.every = function(f){
+Object.every = function(object, f=v=>v){
 	const obj = {};
-	for (const [i,v] of Object.entries(this))
-		if ( !f(v, i, this) )
+	for (const [i,v] of Object.entries(object))
+		if ( !f(v, i, object) )
 			return false;
 	return true;
 }

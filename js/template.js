@@ -234,7 +234,7 @@ Thing.prototype.TEMPLATES["细橡木"] = new Block({
 		block: {
 			size: {
 				x0: 30, x1: 70,
-				y0: 30, y1: 70,
+				y0: 0, y1: 100,
 				z0: 30, z1: 70
 			}
 		},

@@ -1,13 +1,16 @@
 const Img = {
-	cache: [],
+	cache: {
+		get: {},
+		clip: []
+	},
 	// 获取图片对象
 	get(src){
-		if (this.cache[src]) return this.cache[src];
+		if (this.cache.get[src]) return this.cache.get[src];
 		return new Promise((resolve,reject)=>{
 			let img = new Image();
 			img.src = src;
 			img.onload = ()=>{
-				this.cache[src] = img;
+				this.cache.get[src] = img;
 				resolve(img);
 			};
 		});
