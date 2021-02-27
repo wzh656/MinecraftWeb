@@ -1,16 +1,15 @@
 const Img = {
 	cache: {
-		get: {},
-		clip: []
+		get: {}
 	},
 	// 获取图片对象
 	get(src){
-		if (this.cache.get[src]) return this.cache.get[src];
+		if (this.cache.get[src]) return this.cache.get[src]; //有缓存
 		return new Promise((resolve,reject)=>{
 			let img = new Image();
 			img.src = src;
 			img.onload = ()=>{
-				this.cache.get[src] = img;
+				this.cache.get[src] = img; //保存缓存
 				resolve(img);
 			};
 		});
@@ -32,6 +31,7 @@ const Img = {
 			ctx = canvas.getContext("2d");
 		ctx.rotate(angle *Math.PI/180);
 		ctx.drawImage(img, 0, 0, img.width, img.height);
+		
 		return canvas;
 	},
 	// 图片按照网格裁剪
@@ -49,7 +49,7 @@ const Img = {
 	},
 	// 图片大小缩放
 	scale(img, width, height){
-		let canvas1 = $("<canvas></canvas>").attr("width", img.width).attr("height", img.height)[0],
+		const canvas1 = $("<canvas></canvas>").attr("width", img.width).attr("height", img.height)[0],
 			canvas2 = $("<canvas></canvas>").attr("width", width).attr("height", height)[0],
 			ctx1 = canvas1.getContext("2d"),
 			ctx2 = canvas2.getContext("2d");

@@ -268,13 +268,13 @@ class ChunkMap{
 				block.setTexture(
 					new THREE.TextureLoader().load(
 						Img.clip(
-							Img.scale(
-								( face[2]? //自定义
-									Img.clip( Img.get(face[2]), face[0]*16, face[1]*16, 16, 16 )
-								:
-									TEXTURES[ face[0] ][ face[1] ] ),
-								64, 64
-							), uv[i][0], uv[i][1], uv[i][2]-uv[i][0], uv[i][3]-uv[i][1]
+							( face[2]? //自定义
+								Img.scale(
+									Img.clip( Img.get(face[2]), face[0]*16, face[1]*16, 16, 16 ),
+								64, 64)
+							:
+								TEXTURES[ face[0] ][ face[1] ] ),
+							uv[i][0], uv[i][1], uv[i][2]-uv[i][0], uv[i][3]-uv[i][1]
 						).toDataURL("image/png")
 					), i
 				);
@@ -338,9 +338,10 @@ class ChunkMap{
 			direction = {x0:0, x1:100, y0:0, y1:100, z0:0, z1:100}, //所有方向 及默认值
 			visibleValue = [], //可见值
 			thisSize = thisBlock?
-				Object.map(thisBlock.get("attr", "block", "size")||{}, (v,i)=> v===undefined? direction[i]: v):
-				undefined, //本方块大小
+				thisBlock.get("attr", "block", "size") || {}:
+				{}, //本方块大小
 			transparent = thisBlock? thisBlock.get("attr", "block", "transparent"): undefined; //透明方块（自己不可隐藏）
+		Object.map(direction, (v,i)=> thisSize[i] = thisSize[i]===undefined? v: thisSize[i]); //默认值
 		
 		let needLoad = false; //需要加载
 		if (transparent === true){ //整体不可隐藏
@@ -360,11 +361,12 @@ class ChunkMap{
 				}
 				
 				const thatSize = thatBlock?
-					Object.map(thatBlock.get("attr", "block", "size")||{}, (v,i)=> v===undefined? direction[i]: v):
-					undefined; //旁边方块大小
+					thatBlock.get("attr", "block", "size") || {}:
+					{}; //旁边方块大小
+				Object.map(direction, (v,i)=> thatSize[i] = thatSize[i]===undefined? v: thatSize[i]); //默认值
 				
-				if ( thisSize[posDir] != direction[posDir] || //本方块 正方向变小
-					thatSize[oppDir] != direction[oppDir] || //旁方块 反方向变小
+				if ( thisSize && thisSize[posDir] != direction[posDir] || //本方块 正方向变小
+					thatSize && thatSize[oppDir] != direction[oppDir] || //旁方块 反方向变小
 					thisSize[othDir1+"0"] < thatSize[othDir1+"0"] ||
 					thisSize[othDir1+"1"] > thatSize[othDir1+"1"] ||
 					thisSize[othDir2+"0"] < thatSize[othDir2+"0"] ||
@@ -1213,12 +1215,11 @@ class ChunkMap{
 			if (block.name != "空气"){ //有方块
 				
 				const visibleValue = [],
-					thisSize = Object.map(
-						block.attr && block.attr.block && block.attr.block.size || {},
-						(v,i)=> v===undefined? direction[i]: v ), //本方块大小
+					thisSize = block.attr && block.attr.block && block.attr.block.size || {}, //本方块大小
 					thisTransparent = (block.attr && block.attr.block && block.attr.block.transparent!==undefined)? //有属性
 						block.attr.block.transparent:
 						Block.prototype.TEMPLATES[ block.name ].attr.block.noTransparent; //是否可以隐藏
+				Object.map(direction, (v,i)=> thisSize[i] = thisSize[i]===undefined? v: thisSize[i]); //默认值
 				
 				let needLoad = false;
 				if (thisTransparent === true){ //整体不可隐藏
@@ -1231,18 +1232,18 @@ class ChunkMap{
 							thatBlock = columns[px] && columns[px][pz] && columns[px][pz][py]; //旁边方块
 						
 						const thatSize = thatBlock?
-								Object.map(
-									thatBlock.attr && thatBlock.attr.block && thatBlock.attr.block.size || {},
-									(v,i)=> v===undefined? direction[i]: v)
-							: undefined; //旁边方块大小
+							thatBlock.attr && thatBlock.attr.block && thatBlock.attr.block.size || {}:
+							{}; //旁边方块大小
+						Object.map(direction, (v,i)=> thatSize[i] = thatSize[i]===undefined? v: thatSize[i]); //默认值
 						
-						if ( thisSize[posDir] != direction[posDir] || //本方块 正方向变小
+						if ( thisSize && thatSize && ( //有属性
+							thisSize[posDir] != direction[posDir] || //本方块 正方向变小
 							thatSize[oppDir] != direction[oppDir] || //旁方块 反方向变小
 							thisSize[othDir1+"0"] < thatSize[othDir1+"0"] ||
 							thisSize[othDir1+"1"] > thatSize[othDir1+"1"] ||
 							thisSize[othDir2+"0"] < thatSize[othDir2+"0"] ||
 							thisSize[othDir2+"1"] > thatSize[othDir2+"1"] //超出旁边方块
-						){ // 显示
+						) ){ // 显示
 							needLoad = true;
 							visibleValue.push(true);
 						}else if ( py < map.size[0].y ){ //位于最底层 则不显示

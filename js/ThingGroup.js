@@ -91,11 +91,10 @@ class ThingGroup extends Array{
 			let src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP4//8/AwAI/AL+eMSysAAAAABJRU5ErkJggg=="; //透明图片
 			if ( this[i] ){ //有方块
 				const face = this[i].get("view");
-				src = Img.scale( face[2]? //自定义贴图位置
+				src = ( face[2]? //自定义贴图位置
 						Img.clip( Img.get(face[2]), face[0]*16, face[1]*16, 16, 16 )
 					:
 						TEXTURES[ face[0] ][ face[1] ]
-					, 32, 32
 				).toDataURL("image/png");
 			}
 			children.push(

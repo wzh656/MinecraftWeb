@@ -9,6 +9,11 @@ let TEXTURES;
 task.then(()=>{
 	const keys = Object.keys(Thing.prototype.TEMPLATES); //（有序）
 	TEXTURES = Img.grid( Img.get("./img/textures/textures.png"), 16, 16 );
+	
+	for (let x=0, len=TEXTURES.length; x<len; x++)
+		for (let y=0, len=TEXTURES[x].length; y<len; y++)
+			TEXTURES[x][y] = Img.scale(TEXTURES[x][y], 64, 64);
+	
 	for (const i of keys.slice(1)){ //除去空气
 		const block = Thing.prototype.TEMPLATES[i];
 		if (!(block instanceof Block)) continue; //不属于方块类
@@ -17,13 +22,13 @@ task.then(()=>{
 			const face = block.block.face[j];
 			block.setTexture(
 				new THREE.TextureLoader().load(
-					Img.scale(
-						( face[2]? //自定义
-							Img.clip( Img.get(face[2]), face[0]*16, face[1]*16, 16, 16 )
-						:
-							TEXTURES[ face[0] ][ face[1] ] ),
-						64, 64
-					).toDataURL("image/png")
+					( face[2]? //自定义
+						Img.scale(
+							Img.clip( Img.get(face[2]), face[0]*16, face[1]*16, 16, 16 ),
+						64, 64)
+					:
+						TEXTURES[ face[0] ][ face[1] ] )
+					.toDataURL("image/png")
 				), j
 			);
 		}
