@@ -256,15 +256,46 @@ class ChunkMap{
 			size.y = size.y1 - size.y0,
 			size.z = size.z1 - size.z0; //长宽高
 			
-			const uv = [
-				[size.z0/100*64, size.y0/100*64, size.z1/100*64, size.y1/100*64],
-				[size.z0/100*64, size.y0/100*64, size.z1/100*64, size.y1/100*64],
-				[size.x0/100*64, size.z0/100*64, size.x1/100*64, size.z1/100*64],
-				[size.x0/100*64, size.z0/100*64, size.x1/100*64, size.z1/100*64],
-				[size.x0/100*64, size.y0/100*64, size.x1/100*64, size.y1/100*64],
-				[size.x0/100*64, size.y0/100*64, size.x1/100*64, size.y1/100*64]
+			const pos = [
+				[size.z0/100, size.y0/100, size.z1/100, size.y1/100],
+				[size.z0/100, size.y0/100, size.z1/100, size.y1/100],
+				[size.x0/100, size.z0/100, size.x1/100, size.z1/100],
+				[size.x0/100, size.z0/100, size.x1/100, size.z1/100],
+				[size.x0/100, size.y0/100, size.x1/100, size.y1/100],
+				[size.x0/100, size.y0/100, size.x1/100, size.y1/100]
 			];
-			for (const [i,face] of Object.entries(block.get("block", "face")) ){
+			const uv = [
+				[	new THREE.Vector2( pos[0][3], pos[0][2] ),
+					new THREE.Vector2( pos[0][1], pos[0][2] ),
+					new THREE.Vector2( pos[0][1], pos[0][0] ),
+					new THREE.Vector2( pos[0][3], pos[0][0] )	],
+				
+				[	new THREE.Vector2( pos[1][3], pos[1][2] ),
+					new THREE.Vector2( pos[1][1], pos[1][2] ),
+					new THREE.Vector2( pos[1][1], pos[1][0] ),
+					new THREE.Vector2( pos[1][3], pos[1][0] )	],
+				
+				[	new THREE.Vector2( pos[2][3], pos[2][2] ),
+					new THREE.Vector2( pos[2][1], pos[2][2] ),
+					new THREE.Vector2( pos[2][1], pos[2][0] ),
+					new THREE.Vector2( pos[2][3], pos[2][0] )	],
+				
+				[	new THREE.Vector2( pos[3][3], pos[3][2] ),
+					new THREE.Vector2( pos[3][1], pos[3][2] ),
+					new THREE.Vector2( pos[3][1], pos[3][0] ),
+					new THREE.Vector2( pos[3][3], pos[3][0] )	],
+				
+				[	new THREE.Vector2( pos[4][3], pos[4][2] ),
+					new THREE.Vector2( pos[4][1], pos[4][2] ),
+					new THREE.Vector2( pos[4][1], pos[4][0] ),
+					new THREE.Vector2( pos[4][3], pos[4][0] )	],
+				
+				[	new THREE.Vector2( pos[5][3], pos[5][2] ),
+					new THREE.Vector2( pos[5][1], pos[5][2] ),
+					new THREE.Vector2( pos[5][1], pos[5][0] ),
+					new THREE.Vector2( pos[5][3], pos[5][0] )	]
+			];
+			/* for (const [i,face] of Object.entries(block.get("block", "face")) ){
 				block.setTexture(
 					new THREE.TextureLoader().load(
 						Img.clip(
@@ -278,9 +309,27 @@ class ChunkMap{
 						).toDataURL("image/png")
 					), i
 				);
-			}
+			} */
+			block.deleteGeometry().makeGeometry(size.x, size.y, size.z).makeMesh();
+			block.block.geometry.faceVertexUvs[0][0] = [ uv[0][0], uv[0][1], uv[0][3] ];
+			block.block.geometry.faceVertexUvs[0][1] = [ uv[0][1], uv[0][2], uv[0][3] ];
 			
-			this.add( block.makeGeometry(size.x, size.y, size.z).makeMaterial().makeMesh(), {
+			block.block.geometry.faceVertexUvs[0][2] = [ uv[1][0], uv[1][1], uv[1][3] ];
+			block.block.geometry.faceVertexUvs[0][3] = [ uv[1][1], uv[1][2], uv[1][3] ];
+			
+			block.block.geometry.faceVertexUvs[0][4] = [ uv[2][0], uv[2][1], uv[2][3] ];
+			block.block.geometry.faceVertexUvs[0][5] = [ uv[2][1], uv[2][2], uv[2][3] ];
+			
+			block.block.geometry.faceVertexUvs[0][6] = [ uv[3][0], uv[3][1], uv[3][3] ];
+			block.block.geometry.faceVertexUvs[0][7] = [ uv[3][1], uv[3][2], uv[3][3] ];
+			
+			block.block.geometry.faceVertexUvs[0][8] = [ uv[4][0], uv[4][1], uv[4][3] ];
+			block.block.geometry.faceVertexUvs[0][9] = [ uv[4][1], uv[4][2], uv[4][3] ];
+			
+			block.block.geometry.faceVertexUvs[0][10] = [ uv[5][0], uv[5][1], uv[5][3] ];
+			block.block.geometry.faceVertexUvs[0][11] = [ uv[5][1], uv[5][2], uv[5][3] ];
+			
+			this.add( block, {
 				x: x + (size.x0 + size.x1)/2 /100 -0.5,
 				y: y + (size.y0 + size.y1)/2 /100 -0.5,
 				z: z + (size.z0 + size.z1)/2 /100 -0.5
