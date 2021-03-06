@@ -180,12 +180,12 @@ class ChunkMap{
 		// x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 		
 		// if (this.get(x, y, z) === undefined) return;
-		if ( this.get(x, y, z) ){ //有方块
+		if ( this.get(x,y,z) ){ //有方块
 			if (type){ //强制替换
-				for (const i of this.map[x][y][z].block.mesh.material)
+				for (const i of this.get(x,y,z).block.mesh.material)
 					i.dispose();
-				this.map[x][y][z].block.mesh.geometry.dispose(); //清除内存
-				scene.remove( this.map[x][y][z].block.mesh );
+				this.get(x,y,z).block.mesh.geometry.dispose(); //清除内存
+				scene.remove( this.get(x,y,z).block.mesh );
 				// this.map[x][y][z] = null;
 				delete this.map[x][y][z];
 				/*if (this.map[x][y].every(v => !v))
@@ -217,10 +217,10 @@ class ChunkMap{
 		if (name == "空气"){ //添加空气
 			x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 			if ( this.get(x, y, z) ){ //有方块（强制移除）
-				for (const i of this.map[x][y][z].block.mesh.material)
+				for (const i of this.get(x,y,z).block.mesh.material)
 					i.dispose();
-				this.map[x][y][z].block.mesh.geometry.dispose(); //清除内存
-				scene.remove(this.map[x][y][z].block.mesh);
+				this.get(x,y,z).block.mesh.geometry.dispose(); //清除内存
+				scene.remove(this.get(x,y,z).block.mesh);
 			}
 			// this.map[x][y][z] = null; //空气
 			this.set(x, y, z, null);
@@ -257,44 +257,41 @@ class ChunkMap{
 			size.z = size.z1 - size.z0; //长宽高
 			
 			const pos = [
-				[size.z0/100, size.y0/100, size.z1/100, size.y1/100],
-				[size.z0/100, size.y0/100, size.z1/100, size.y1/100],
-				[size.x0/100, size.z0/100, size.x1/100, size.z1/100],
-				[size.x0/100, size.z0/100, size.x1/100, size.z1/100],
-				[size.x0/100, size.y0/100, size.x1/100, size.y1/100],
-				[size.x0/100, size.y0/100, size.x1/100, size.y1/100]
-			];
-			const uv = [
-				[	new THREE.Vector2( pos[0][3], pos[0][2] ),
-					new THREE.Vector2( pos[0][1], pos[0][2] ),
-					new THREE.Vector2( pos[0][1], pos[0][0] ),
-					new THREE.Vector2( pos[0][3], pos[0][0] )	],
-				
-				[	new THREE.Vector2( pos[1][3], pos[1][2] ),
-					new THREE.Vector2( pos[1][1], pos[1][2] ),
-					new THREE.Vector2( pos[1][1], pos[1][0] ),
-					new THREE.Vector2( pos[1][3], pos[1][0] )	],
-				
-				[	new THREE.Vector2( pos[2][3], pos[2][2] ),
-					new THREE.Vector2( pos[2][1], pos[2][2] ),
-					new THREE.Vector2( pos[2][1], pos[2][0] ),
-					new THREE.Vector2( pos[2][3], pos[2][0] )	],
-				
-				[	new THREE.Vector2( pos[3][3], pos[3][2] ),
-					new THREE.Vector2( pos[3][1], pos[3][2] ),
-					new THREE.Vector2( pos[3][1], pos[3][0] ),
-					new THREE.Vector2( pos[3][3], pos[3][0] )	],
-				
-				[	new THREE.Vector2( pos[4][3], pos[4][2] ),
-					new THREE.Vector2( pos[4][1], pos[4][2] ),
-					new THREE.Vector2( pos[4][1], pos[4][0] ),
-					new THREE.Vector2( pos[4][3], pos[4][0] )	],
-				
-				[	new THREE.Vector2( pos[5][3], pos[5][2] ),
-					new THREE.Vector2( pos[5][1], pos[5][2] ),
-					new THREE.Vector2( pos[5][1], pos[5][0] ),
-					new THREE.Vector2( pos[5][3], pos[5][0] )	]
-			];
+					[size.z0/100, size.y0/100, size.z1/100, size.y1/100],
+					[size.x0/100, size.z0/100, size.x1/100, size.z1/100],
+					[size.x0/100, size.y0/100, size.x1/100, size.y1/100]
+				],
+				uv = [
+					[	[ pos[0][0], pos[0][1] ],
+						[ pos[0][2], pos[0][1] ],
+						[ pos[0][2], pos[0][3] ],
+						[ pos[0][0], pos[0][3] ]	],
+						
+					[	[ pos[0][0], pos[0][1] ],
+						[ pos[0][2], pos[0][1] ],
+						[ pos[0][2], pos[0][3] ],
+						[ pos[0][0], pos[0][3] ]	],
+						
+					[	[ pos[1][0], pos[1][1] ],
+						[ pos[1][2], pos[1][1] ],
+						[ pos[1][2], pos[1][3] ],
+						[ pos[1][0], pos[1][3] ]	],
+						
+					[	[ pos[1][0], pos[1][1] ],
+						[ pos[1][2], pos[1][1] ],
+						[ pos[1][2], pos[1][3] ],
+						[ pos[1][0], pos[1][3] ]	],
+						
+					[	[ pos[2][0], pos[2][1] ],
+						[ pos[2][2], pos[2][1] ],
+						[ pos[2][2], pos[2][3] ],
+						[ pos[2][0], pos[2][3] ]	],
+						
+					[	[ pos[2][0], pos[2][1] ],
+						[ pos[2][2], pos[2][1] ],
+						[ pos[2][2], pos[2][3] ],
+						[ pos[2][0], pos[2][3] ]	]
+				];
 			/* for (const [i,face] of Object.entries(block.get("block", "face")) ){
 				block.setTexture(
 					new THREE.TextureLoader().load(
@@ -311,23 +308,56 @@ class ChunkMap{
 				);
 			} */
 			block.deleteGeometry().makeGeometry(size.x, size.y, size.z).makeMesh();
-			block.block.geometry.faceVertexUvs[0][0] = [ uv[0][0], uv[0][1], uv[0][3] ];
-			block.block.geometry.faceVertexUvs[0][1] = [ uv[0][1], uv[0][2], uv[0][3] ];
+			block.block.geometry.setAttribute("uv", new THREE.BufferAttribute(
+				new Float32Array([
+					uv[0][3][0], uv[0][3][1],
+					uv[0][2][0], uv[0][2][1],
+					uv[0][0][0], uv[0][0][1],
+					uv[0][1][0], uv[0][1][1],
+					
+					uv[1][3][0], uv[1][3][1],
+					uv[1][2][0], uv[1][2][1],
+					uv[1][0][0], uv[1][0][1],
+					uv[1][1][0], uv[1][1][1],
+					
+					uv[2][3][0], uv[2][3][1],
+					uv[2][2][0], uv[2][2][1],
+					uv[2][0][0], uv[2][0][1],
+					uv[2][1][0], uv[2][1][1],
+					
+					uv[3][3][0], uv[3][3][1],
+					uv[3][2][0], uv[3][2][1],
+					uv[3][0][0], uv[3][0][1],
+					uv[3][1][0], uv[3][1][1],
+					
+					uv[4][3][0], uv[4][3][1],
+					uv[4][2][0], uv[4][2][1],
+					uv[4][0][0], uv[4][0][1],
+					uv[4][1][0], uv[4][1][1],
+					
+					uv[5][3][0], uv[5][3][1],
+					uv[5][2][0], uv[5][2][1],
+					uv[5][0][0], uv[5][0][1],
+					uv[5][1][0], uv[5][1][1]
+				]), 2
+			));
+			/* block.block.geometry.faceVertexUvs[0][0] = [ uv[0][3], uv[0][0], uv[0][2] ];
+			block.block.geometry.faceVertexUvs[0][1] = [ uv[0][0], uv[0][1], uv[0][2] ];
 			
-			block.block.geometry.faceVertexUvs[0][2] = [ uv[1][0], uv[1][1], uv[1][3] ];
-			block.block.geometry.faceVertexUvs[0][3] = [ uv[1][1], uv[1][2], uv[1][3] ];
+			block.block.geometry.faceVertexUvs[0][2] = [ uv[1][3], uv[1][0], uv[1][2] ];
+			block.block.geometry.faceVertexUvs[0][3] = [ uv[1][0], uv[1][1], uv[1][2] ];
 			
-			block.block.geometry.faceVertexUvs[0][4] = [ uv[2][0], uv[2][1], uv[2][3] ];
-			block.block.geometry.faceVertexUvs[0][5] = [ uv[2][1], uv[2][2], uv[2][3] ];
+			block.block.geometry.faceVertexUvs[0][4] = [ uv[2][3], uv[2][0], uv[2][2] ];
+			block.block.geometry.faceVertexUvs[0][5] = [ uv[2][0], uv[2][1], uv[2][2] ];
 			
-			block.block.geometry.faceVertexUvs[0][6] = [ uv[3][0], uv[3][1], uv[3][3] ];
-			block.block.geometry.faceVertexUvs[0][7] = [ uv[3][1], uv[3][2], uv[3][3] ];
+			block.block.geometry.faceVertexUvs[0][6] = [ uv[3][3], uv[3][0], uv[3][2] ];
+			block.block.geometry.faceVertexUvs[0][7] = [ uv[3][0], uv[3][1], uv[3][2] ];
 			
-			block.block.geometry.faceVertexUvs[0][8] = [ uv[4][0], uv[4][1], uv[4][3] ];
-			block.block.geometry.faceVertexUvs[0][9] = [ uv[4][1], uv[4][2], uv[4][3] ];
+			block.block.geometry.faceVertexUvs[0][8] = [ uv[4][3], uv[4][0], uv[4][2] ];
+			block.block.geometry.faceVertexUvs[0][9] = [ uv[4][0], uv[4][1], uv[4][2] ];
 			
-			block.block.geometry.faceVertexUvs[0][10] = [ uv[5][0], uv[5][1], uv[5][3] ];
-			block.block.geometry.faceVertexUvs[0][11] = [ uv[5][1], uv[5][2], uv[5][3] ];
+			block.block.geometry.faceVertexUvs[0][10] = [ uv[5][3], uv[5][0], uv[5][2] ];
+			block.block.geometry.faceVertexUvs[0][11] = [ uv[5][0], uv[5][1], uv[5][2] ]; */
 			
 			this.add( block, {
 				x: x + (size.x0 + size.x1)/2 /100 -0.5,
@@ -349,11 +379,11 @@ class ChunkMap{
 		if (!this.get(x,y,z)) // 没有方块(null)/不在范围(undefined)/加载中(false)
 			return;
 		
-		for (const i of this.map[x][y][z].block.mesh.material)
+		for (const i of this.get(x,y,z).block.mesh.material)
 			i.dispose();
-		this.map[x][y][z].block.mesh.geometry.dispose(); //清除内存
+		this.get(x,y,z).block.mesh.geometry.dispose(); //清除内存
 		
-		scene.remove(this.map[x][y][z].block.mesh);
+		scene.remove(this.get(x,y,z).block.mesh);
 		
 		delete this.map[x][y][z];
 		if (this.map[x][y].every(v => !v))
@@ -731,8 +761,9 @@ class ChunkMap{
 			this.chunks[x][z] = {};
 		
 		this.chunks[x][z].status = false; //加载中
-		this.chunks[x][z].edit = edit;
-		this.chunks[x][z].weather = new Weather(
+		this.chunks[x][z].entity = []; //实体
+		this.chunks[x][z].edit = edit; //需存储的修改
+		this.chunks[x][z].weather = new Weather( //天气
 			[
 				ox + this.size[0].x,
 				oz + this.size[0].z

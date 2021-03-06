@@ -287,7 +287,7 @@ document.addEventListener("mousedown", function (e){
 			
 			deskgood.place(deskgood.hold[deskgood.choice], {x,y,z}); //放置方块
 			
-			deskgood.hold.delete(1, deskgood.choice); //删除手里的方块
+			deskgood.hold.delete(deskgood.choice); //删除手里的方块
 			
 			break; //跳出 寻找有效放置的 循环
 		}

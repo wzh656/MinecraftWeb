@@ -97,7 +97,7 @@ const deskgood = { //桌子好
 							return;
 						
 						deskgood.head.addOne( choice );
-						deskgood.hold.delete(1, deskgood.choice);
+						deskgood.hold.delete(deskgood.choice);
 					}
 				};
 			}
@@ -130,7 +130,7 @@ const deskgood = { //桌子好
 							return;
 						
 						deskgood.body.addOne( choice );
-						deskgood.hold.delete(1, deskgood.choice);
+						deskgood.hold.delete(deskgood.choice);
 					}
 				};
 			}
@@ -163,7 +163,7 @@ const deskgood = { //桌子好
 							return;
 						
 						deskgood.leg.addOne( choice );
-						deskgood.hold.delete(1, deskgood.choice);
+						deskgood.hold.delete(deskgood.choice);
 					}
 				};
 			}
@@ -196,7 +196,7 @@ const deskgood = { //桌子好
 							return;
 						
 						deskgood.foot.addOne( choice );
-						deskgood.hold.delete(1, deskgood.choice);
+						deskgood.hold.delete(deskgood.choice);
 					}
 				};
 			}
