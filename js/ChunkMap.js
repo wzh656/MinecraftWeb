@@ -203,7 +203,7 @@ class ChunkMap{
 		
 		this.set(x, y, z, block);
 		scene.add( block.block.mesh ); //网格模型添加到场景中
-		block.block.addTo = true;
+		block.block.added = true;
 	}
 	
 	//根据 模板和name 添加方块
@@ -233,10 +233,10 @@ class ChunkMap{
 		}
 		
 		const block = new Block({
-				name,
-				attr
-			}),
-			size = {
+			name,
+			attr
+		});
+		const size = {
 				x0: block.get("attr", "block", "size", "x0"),
 				x1: block.get("attr", "block", "size", "x1"),
 				y0: block.get("attr", "block", "size", "y0"),
@@ -379,11 +379,11 @@ class ChunkMap{
 		if (!this.get(x,y,z)) // 没有方块(null)/不在范围(undefined)/加载中(false)
 			return;
 		
-		for (const i of this.get(x,y,z).block.mesh.material)
+		/* for (const i of this.get(x,y,z).block.mesh.material)
 			i.dispose();
-		this.get(x,y,z).block.mesh.geometry.dispose(); //清除内存
-		
-		scene.remove(this.get(x,y,z).block.mesh);
+		this.get(x,y,z).block.mesh.geometry.dispose(); //清除内存 */
+		scene.remove( this.get(x,y,z).block.mesh );
+		this.get(x,y,z).deleteMesh();
 		
 		delete this.map[x][y][z];
 		if (this.map[x][y].every(v => !v))
@@ -494,14 +494,14 @@ class ChunkMap{
 		for (let i=0, len=material.length; i<len; i++)
 			material[i].visible = visibleValue[i];
 		
-		if (thisBlock.block.addTo == true && visibleValue.every(value => !value)){ //已加入 and 可隐藏（每面都false）
+		if (thisBlock.block.added == true && visibleValue.every(value => !value)){ //已加入 and 可隐藏（每面都false）
 			scene.remove( thisBlock.block.mesh );
-			thisBlock.block.addTo = false;
+			thisBlock.block.added = false;
 			// console.log("隐藏", this.map[x][y][z])
 		}
-		if (thisBlock.block.addTo == false && visibleValue.some(value => value)){ //未加入 and 不可隐藏（有面true）
+		if (thisBlock.block.added == false && visibleValue.some(value => value)){ //未加入 and 不可隐藏（有面true）
 			scene.add( thisBlock.block.mesh );
-			thisBlock.block.addTo = true;
+			thisBlock.block.added = true;
 			// console.log("显示", this.map[x][y][z])
 		}
 		
@@ -587,14 +587,14 @@ class ChunkMap{
 			for (let i in material)
 				material[i].visible = visibleValue[i];
 			
-			if (thisBlock.block.addTo == true && visibleValue.every(value => !value)){ //已加入 且 可隐藏（每面都false）
+			if (thisBlock.block.added == true && visibleValue.every(value => !value)){ //已加入 且 可隐藏（每面都false）
 				scene.remove(thisBlock.block.mesh);
-				thisBlock.block.addTo = false;
+				thisBlock.block.added = false;
 				// console.log("隐藏", this.map[x][y][z])
 			}
-			if (thisBlock.block.addTo == false && visibleValue.some(value => value)){ //未加入 且 不可隐藏（有面true）
+			if (thisBlock.block.added == false && visibleValue.some(value => value)){ //未加入 且 不可隐藏（有面true）
 				scene.add(thisBlock.block.mesh);
-				thisBlockblock.addTo = true;
+				thisBlockblock.added = true;
 				// console.log("显示", this.map[x][y][z])
 			}
 		}catch(e){
@@ -825,6 +825,7 @@ class ChunkMap{
 			this.chunks[x][z].weather.clear_rain();
 		
 		delete this.chunks[x][z].weather;
+		delete this.chunks[x][z].entity;
 		delete this.chunks[x][z].status; //已卸载
 	}
 	

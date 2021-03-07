@@ -1151,12 +1151,12 @@ function ray2D(x, y){
 }
 //3维度射线检测
 function ray3D(start, end, near, far){
-	if (start.x === undefined) start.x = deskgood.pos.x;
-	if (start.y === undefined) start.y = deskgood.pos.y;
-	if (start.z === undefined) start.z = deskgood.pos.z;
-	if (end.x === undefined) end.x = 0;
-	if (end.y === undefined) end.y = 0;
-	if (end.z === undefined) end.z = 0;
+	start.x = start.x || deskgood.pos.x,
+	start.y = start.y || deskgood.pos.y,
+	start.z = start.z || deskgood.pos.z;
+	end.x = end.x || 0,
+	end.y = end.y || 0,
+	end.z = end.z || 0;
 	
 	const ray = new THREE.Raycaster(
 		new THREE.Vector3(start.x, start.y, start.z),

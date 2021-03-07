@@ -281,10 +281,10 @@ const deskgood = { //桌子好
 			}); //显示所有
 			//if (i.x == 9 && i.y == 0 && i.z == 26) console.warn(block.block.material.map(v => v.visible));
 			// console.info("显示面", i, [i.x,i.y,i.z].map(Math.round), block);
-			if (!block.block.addTo){
-				//if (i.x == 9 && i.y == 0 && i.z == 26) console.warn("add", block.block.addTo);
+			if (!block.block.added){
+				//if (i.x == 9 && i.y == 0 && i.z == 26) console.warn("add", block.block.added);
 				scene.add(block.block.mesh);
-				block.block.addTo = true;
+				block.block.added = true;
 				// console.info("显示体", i, [i.x,i.y,i.z].map(Math.round), block);
 			}
 		}
@@ -347,11 +347,11 @@ const deskgood = { //桌子好
 		
 		const rt = [0,0,0]; //返回值
 		
-		if (y<0 && map.get(
+		if ( y<0 && map.get(
 			deskgood.pos.x/100,
 			deskgood.pos.y/100-1,
 			deskgood.pos.z/100
-		)){ //腿上有方块
+		) ){ //腿上有方块
 			// console.warn("卡住leg go不了");
 			rt[1] = y;
 			y = 0;
@@ -364,10 +364,10 @@ const deskgood = { //桌子好
 				{x: deskgood.pos.x-50},
 				{x: 1},
 				0,
-				x+60
-			).filter(value => value.object.userData.through != true);
+				x+66
+			).filter(value => value.object.userData.object.get("attr", "block", "through") != true); //过滤透明方块
 			if (objs.length){ //被阻挡
-				const fx = Math.min(...objs.map(v => v.point.x))-10; //获取碰撞点，计算移动位置
+				const fx = Math.min(...objs.map(v => v.point.x))-16; //获取碰撞点，计算移动位置
 				rt[0] = fx-(deskgood.pos.x+x);
 				deskgood.moveX(fx);
 				// console.log("x+ 上 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), fx, rt[0])
@@ -379,10 +379,10 @@ const deskgood = { //桌子好
 				{x: deskgood.pos.x-50, y: deskgood.pos.y-100},
 				{x: 1},
 				0,
-				x+60
-			).filter(value => value.object.userData.through != true);
+				x+66
+			).filter(value => value.object.userData.object.get("attr", "block", "through") != true); //过滤透明方块
 			if (objs.length){ //被阻挡
-				const fx = Math.min(...objs.map(v => v.point.x))-10; //获取碰撞点，计算移动位置
+				const fx = Math.min(...objs.map(v => v.point.x))-16; //获取碰撞点，计算移动位置
 				rt[0] = fx-(deskgood.pos.x+x);
 				deskgood.moveX(fx);
 				// console.log("x+ 下 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), fx, rt[0])
@@ -395,10 +395,10 @@ const deskgood = { //桌子好
 				{x: deskgood.pos.x+50},
 				{x: -1},
 				0,
-				-x+60
-			).filter(value => value.object.userData.through != true);
+				-x+66
+			).filter(value => value.object.userData.object.get("attr", "block", "through") != true); //过滤透明方块
 			if (objs.length){ //被阻挡
-				const fx = Math.max(...objs.map(v => v.point.x))+10; //获取碰撞点，计算移动位置
+				const fx = Math.max(...objs.map(v => v.point.x))+16; //获取碰撞点，计算移动位置
 				rt[0] = fx-(deskgood.pos.x+x);
 				deskgood.moveX(fx);
 				// console.log("x- 上 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), fx, rt[0])
@@ -411,10 +411,10 @@ const deskgood = { //桌子好
 				{x: deskgood.pos.x+50, y: deskgood.pos.y-100},
 				{x: -1},
 				0,
-				-x+60
-			).filter(value => value.object.userData.through != true);
+				-x+66
+			).filter(value => value.object.userData.object.get("attr", "block", "through") != true); //过滤透明方块
 			if (objs.length){ //被阻挡
-				const fx = Math.max(...objs.map(v => v.point.x))+10; //获取碰撞点，计算移动位置
+				const fx = Math.max(...objs.map(v => v.point.x))+16; //获取碰撞点，计算移动位置
 				rt[0] = fx-(deskgood.pos.x+x);
 				deskgood.moveX(fx);
 				// console.log("x- 下 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), fx, rt[0])
@@ -431,7 +431,7 @@ const deskgood = { //桌子好
 				{y: 1},
 				0,
 				y
-			).filter(value => value.object.userData.through != true);
+			).filter(value => value.object.userData.object.get("attr", "block", "through") != true); //过滤透明方块
 			if (objs.length){ //被阻挡
 				/*const fy = Math.min(...ray3D(
 					{y: deskgood.pos.y+50},
@@ -449,7 +449,7 @@ const deskgood = { //桌子好
 				{y: -1},
 				0,
 				-y
-			).filter(value => value.object.userData.through != true);
+			).filter(value => value.object.userData.object.get("attr", "block", "through") != true); //过滤透明方块
 			if (objs.length){ //被阻挡
 				/*const fy = Math.max(...ray3D(
 					{y: deskgood.pos.y-150},
@@ -470,10 +470,10 @@ const deskgood = { //桌子好
 				{z: deskgood.pos.z-50},
 				{z: 1},
 				0,
-				z+60
-			).filter(value => value.object.userData.through != true);
+				z+66
+			).filter(value => value.object.userData.object.get("attr", "block", "through") != true); //过滤透明方块
 			if (objs.length){ //被阻挡
-				const fz = Math.min(...objs.map(v => v.point.z))-10; //获取碰撞点，计算移动位置
+				const fz = Math.min(...objs.map(v => v.point.z))-16; //获取碰撞点，计算移动位置
 				rt[2] = fz-(deskgood.pos.z+z);
 				deskgood.moveZ(fz);
 				// console.log("z+ 上 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), fz, rt[2])
@@ -485,10 +485,10 @@ const deskgood = { //桌子好
 				{z: deskgood.pos.z-50, y: deskgood.pos.y-100},
 				{z: 1},
 				0,
-				z+60
-			).filter(value => value.object.userData.through != true);
+				z+66
+			).filter(value => value.object.userData.object.get("attr", "block", "through") != true); //过滤透明方块
 			if (objs.length){ //被阻挡
-				const fz = Math.min(...objs.map(v => v.point.z))-10; //获取碰撞点，计算移动位置
+				const fz = Math.min(...objs.map(v => v.point.z))-16; //获取碰撞点，计算移动位置
 				rt[2] = fz-(deskgood.pos.z+z);
 				deskgood.moveZ(fz);
 				// console.log("z+ 下 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), fz, rt[2])
@@ -501,10 +501,10 @@ const deskgood = { //桌子好
 				{z: deskgood.pos.z+50},
 				{z: -1},
 				0,
-				-z+60
-			).filter(value => value.object.userData.through != true);
+				-z+66
+			).filter(value => value.object.userData.object.get("attr", "block", "through") != true); //过滤透明方块
 			if (objs.length){ //被阻挡
-				const fz = Math.max(...objs.map(v => v.point.z))+10; //获取碰撞点，计算移动位置
+				const fz = Math.max(...objs.map(v => v.point.z))+16; //获取碰撞点，计算移动位置
 				rt[2] = fz-(deskgood.pos.z+z);
 				deskgood.moveZ(fz);
 				// console.log("z- 上 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), fz, rt[2])
@@ -517,10 +517,10 @@ const deskgood = { //桌子好
 				{z: deskgood.pos.z+50, y: deskgood.pos.y-100},
 				{z: -1},
 				0,
-				-z+60
-			).filter(value => value.object.userData.through != true);
+				-z+66
+			).filter(value => value.object.userData.object.get("attr", "block", "through") != true); //过滤透明方块
 			if (objs.length){ //被阻挡
-				const fz = Math.max(...objs.map(v => v.point.z))+10; //获取碰撞点，计算移动位置
+				const fz = Math.max(...objs.map(v => v.point.z))+16; //获取碰撞点，计算移动位置
 				rt[2] = fz-(deskgood.pos.z+z);
 				deskgood.moveZ(fz);
 				// console.log("z- 下 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), fz, rt[2])
@@ -953,7 +953,7 @@ if (DEBUG){
 */
 setInterval(()=>{
 	const warn = [];
-	if (map.get(deskgood.pos.x/100,
+	if ( map.get(deskgood.pos.x/100,
 			deskgood.pos.y/100,
 			deskgood.pos.z/100) &&
 		!map.get(deskgood.pos.x/100,
@@ -961,11 +961,7 @@ setInterval(()=>{
 			deskgood.pos.z/100).get("attr", "block", "through")
 	){ //头被卡住
 		warn.push("头被卡住？");
-		if (
-			!map.get(deskgood.pos.x/100,
-				deskgood.pos.y/100,
-				deskgood.pos.z/100).get("attr", "block", "transparent") //不透明
-		) print("窒息提示", "你的头竟然卡到方块里了，想窒息吗？看你怎么出来", 1, "#f68");
+		print("窒息提示", "你的头竟然卡到方块里了，想窒息吗？看你怎么出来", 1, "#f68");
 		/* try{
 			plus.nativeUI.toast(
 				"<font size=\"16\">想窒息吗？还往头上放方块，看你怎么出来！</font>",
