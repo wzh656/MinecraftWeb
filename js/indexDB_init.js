@@ -31,7 +31,7 @@ const DB = {
 		
 		db.readStep(TABLE.WORLD, {
 			index: "type",
-			range: ["only", 1],
+			range: ["only", 0],
 			dirt: "prev",
 			stepCallback: function(res){
 				console.log("存档read成功", res)
@@ -75,7 +75,7 @@ const DB = {
 	/* 保存存档 */
 	save(){
 		const data = {
-			type: 1,
+			type: 0,
 			pos: { //位置
 				x: deskgood.pos.x,
 				y: deskgood.pos.y,
@@ -101,12 +101,10 @@ const DB = {
 		};
 		
 		for (const t of ["hold", "head", "body", "leg", "foot"])
-			for (let i=0,v=deskgood[t][i]; i<deskgood[t].length; v=deskgood[t][++i])
+			for (let i=0,v=deskgood[t][i],len=deskgood[t].length; i<len; v=deskgood[t][++i])
 				if (v){ //{name, attr}
 					data[t][i] = {
-						type: ( (v instanceof Block)? "Block":
-							(v instanceof Tool)? "Tool":
-							"Thing"), //物品类型
+						type: v.type, //物品类型
 						name: v.name,
 						attr: JSON.stringify(v.attr).slice(1,-1)
 					}
@@ -137,23 +135,21 @@ const DB = {
 	},
 	
 	/* 读取区块信息 */
-	readChunk(x, z){
+	readChunk(x, z, opt={}){
+		const {successCallback, errorCallback} = opt;
 		const ox = x*map.size.x,
 			oz = z*map.size.z; //区块中心坐标
-		return new Promise(function(resolve, reject){
-			const edit = [];
-			db.readStep(TABLE.WORLD, {
-				index: "type",
-				range: ["only", 0],
-				stepCallback: (res)=>{
-					if (
-						res.x >= ox+map.size[0].x && res.x <= ox+map.size[1].x &&
-						res.z >= oz+map.size[0].z && res.z <= oz+map.size[1].z
-					) edit.push(res);
-				},
-				successCallback: ()=>resolve(edit),
-				errorCallback: ()=>reject(edit)
-			});
+		const edit = [];
+		db.readStep(TABLE.WORLD, {
+			index: "type",
+			range: ["only", 0],
+			stepCallback: (res)=>{
+				if ( res.x >= ox+map.size[0].x && res.x <= ox+map.size[1].x &&
+					res.z >= oz+map.size[0].z && res.z <= oz+map.size[1].z
+				) edit.push(res);
+			},
+			successCallback: ()=> successCallback(edit),
+			errorCallback
 		});
 	}
 };

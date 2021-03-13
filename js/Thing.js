@@ -276,6 +276,7 @@ class Block extends Thing{
 		return this;
 	};
 }
+Block.prototype.type = "Block"; //名称
 Block.prototype.normalGeometry = new THREE.BoxBufferGeometry(100, 100, 100); //通用几何体
 
 
@@ -351,6 +352,30 @@ class Entity extends Thing{
 		this.set("block", "mesh", null); //半保留
 		return this;
 	};
+}
+Entity.prototype.type = "Entity"; //名称
+
+
+/*
+* EntityBlock实体方块类 继承Block类
+*/
+class EntityBlock extends Thing{
+	constructor(opt){
+		super(opt);
+		
+		this.attr.entityBlock = {};
+		if (opt.attr && opt.attr.entityBlock){
+			if (opt.attr.entityBlock.size){ //挖掘大小程度
+				this.attr.entityBlock.size = {};
+				if (opt.attr.entityBlock.size.x0) this.attr.entityBlock.size.x0 = opt.attr.entityBlock.size.x0;
+				if (opt.attr.entityBlock.size.x1) this.attr.entityBlock.size.x1 = opt.attr.entityBlock.size.x1;
+				if (opt.attr.entityBlock.size.y0) this.attr.entityBlock.size.y0 = opt.attr.entityBlock.size.y0;
+				if (opt.attr.entityBlock.size.y1) this.attr.entityBlock.size.y1 = opt.attr.entityBlock.size.y1;
+				if (opt.attr.entityBlock.size.z0) this.attr.entityBlock.size.z0 = opt.attr.entityBlock.size.z0;
+				if (opt.attr.entityBlock.size.z1) this.attr.entityBlock.size.z1 = opt.attr.entityBlock.size.z1;
+			}
+		}
+	}
 }
 
 
