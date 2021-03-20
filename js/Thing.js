@@ -377,6 +377,7 @@ class EntityBlock extends Thing{
 		}
 	}
 }
+EntityBlock.prototype.type = "EntityBlock"; //名称
 
 
 /*

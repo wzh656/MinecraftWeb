@@ -201,7 +201,17 @@ class ChunkMap{
 		block.block.mesh.position.y = y*100;
 		block.block.mesh.position.z = z*100;
 		
-		this.set(x, y, z, block);
+		switch (block.type){
+			case "Block":
+				this.set(x, y, z, block);
+				break;
+			case "Entity":
+			case "EntityBlock":
+				const cX = Math.round(x/this.size.x),
+					cZ = Math.round(z/this.size.z); //区块
+				this.chunks[cX][cZ].entity.push(block);
+				break;
+		}
 		scene.add( block.block.mesh ); //网格模型添加到场景中
 		block.block.added = true;
 	}
@@ -301,8 +311,8 @@ class ChunkMap{
 							[ pos[2][2], pos[2][3] ],
 							[ pos[2][0], pos[2][3] ]	]
 					];
-				/* for (const [i,face] of Object.entries(block.get("block", "face")) ){
-					block.setTexture(
+				/* for (const [i,face] of Object.entries(entityBlock.get("entityBlock", "face")) ){
+					entityBlock.setTexture(
 						new THREE.TextureLoader().load(
 							Img.clip(
 								( face[2]? //自定义
@@ -316,8 +326,8 @@ class ChunkMap{
 						), i
 					);
 				} */
-				block.deleteGeometry().makeGeometry(size.x, size.y, size.z).makeMesh();
-				block.block.geometry.setAttribute("uv", new THREE.BufferAttribute(
+				entityBlock.deleteGeometry().makeGeometry(size.x, size.y, size.z).makeMesh();
+				entityBlock.entityBlock.geometry.setAttribute("uv", new THREE.BufferAttribute(
 					new Float32Array([
 						uv[0][3][0], uv[0][3][1],
 						uv[0][2][0], uv[0][2][1],
@@ -350,31 +360,31 @@ class ChunkMap{
 						uv[5][1][0], uv[5][1][1]
 					]), 2
 				));
-				/* block.block.geometry.faceVertexUvs[0][0] = [ uv[0][3], uv[0][0], uv[0][2] ];
-				block.block.geometry.faceVertexUvs[0][1] = [ uv[0][0], uv[0][1], uv[0][2] ];
+				/* entityBlock.entityBlock.geometry.faceVertexUvs[0][0] = [ uv[0][3], uv[0][0], uv[0][2] ];
+				entityBlock.entityBlock.geometry.faceVertexUvs[0][1] = [ uv[0][0], uv[0][1], uv[0][2] ];
 				
-				block.block.geometry.faceVertexUvs[0][2] = [ uv[1][3], uv[1][0], uv[1][2] ];
-				block.block.geometry.faceVertexUvs[0][3] = [ uv[1][0], uv[1][1], uv[1][2] ];
+				entityBlock.entityBlock.geometry.faceVertexUvs[0][2] = [ uv[1][3], uv[1][0], uv[1][2] ];
+				entityBlock.entityBlock.geometry.faceVertexUvs[0][3] = [ uv[1][0], uv[1][1], uv[1][2] ];
 				
-				block.block.geometry.faceVertexUvs[0][4] = [ uv[2][3], uv[2][0], uv[2][2] ];
-				block.block.geometry.faceVertexUvs[0][5] = [ uv[2][0], uv[2][1], uv[2][2] ];
+				entityBlock.entityBlock.geometry.faceVertexUvs[0][4] = [ uv[2][3], uv[2][0], uv[2][2] ];
+				entityBlock.entityBlock.geometry.faceVertexUvs[0][5] = [ uv[2][0], uv[2][1], uv[2][2] ];
 				
-				block.block.geometry.faceVertexUvs[0][6] = [ uv[3][3], uv[3][0], uv[3][2] ];
-				block.block.geometry.faceVertexUvs[0][7] = [ uv[3][0], uv[3][1], uv[3][2] ];
+				entityBlock.entityBlock.geometry.faceVertexUvs[0][6] = [ uv[3][3], uv[3][0], uv[3][2] ];
+				entityBlock.entityBlock.geometry.faceVertexUvs[0][7] = [ uv[3][0], uv[3][1], uv[3][2] ];
 				
-				block.block.geometry.faceVertexUvs[0][8] = [ uv[4][3], uv[4][0], uv[4][2] ];
-				block.block.geometry.faceVertexUvs[0][9] = [ uv[4][0], uv[4][1], uv[4][2] ];
+				entityBlock.entityBlock.geometry.faceVertexUvs[0][8] = [ uv[4][3], uv[4][0], uv[4][2] ];
+				entityBlock.entityBlock.geometry.faceVertexUvs[0][9] = [ uv[4][0], uv[4][1], uv[4][2] ];
 				
-				block.block.geometry.faceVertexUvs[0][10] = [ uv[5][3], uv[5][0], uv[5][2] ];
-				block.block.geometry.faceVertexUvs[0][11] = [ uv[5][0], uv[5][1], uv[5][2] ]; */
+				entityBlock.entityBlock.geometry.faceVertexUvs[0][10] = [ uv[5][3], uv[5][0], uv[5][2] ];
+				entityBlock.entityBlock.geometry.faceVertexUvs[0][11] = [ uv[5][0], uv[5][1], uv[5][2] ]; */
 				
-				this.add( block, {
+				this.addEntity( entityBlock, {
 					x: x + (size.x0 + size.x1)/2 /100 -0.5,
 					y: y + (size.y0 + size.y1)/2 /100 -0.5,
 					z: z + (size.z0 + size.z1)/2 /100 -0.5
 				}, type ); //以模板建立
 				
-				// block.deleteTexture(); //删除贴图
+				// entityBlock.deleteTexture(); //删除贴图
 				break;
 		}
 	}
