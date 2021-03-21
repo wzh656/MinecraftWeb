@@ -359,7 +359,7 @@ Entity.prototype.type = "Entity"; //名称
 /*
 * EntityBlock实体方块类 继承Block类
 */
-class EntityBlock extends Thing{
+class EntityBlock extends Block{
 	constructor(opt){
 		super(opt);
 		

@@ -262,11 +262,27 @@ $("#game").on("touchstart", function (e){
 					console.warn("not free!")
 					return print("拿不下方块", "两只手拿4m³方块已经够多了，反正我是拿不下了", 3);
 				}
-				const block = map.get(x, y, z);
-				deskgood.hold.addOne(new Block({
-					name: block.name,
-					attr: block.attr
-				}), free); //放在手中
+				const block = obj.object.block;
+				switch (block.type){
+					case "Block":
+						deskgood.hold.addOne(new Block({
+							name: block.name,
+							attr: block.attr
+						}), free); //放在手中
+						break;
+					case "EntityBlock":
+						deskgood.hold.addOne(new EntityBlock({
+							name: block.name,
+							attr: block.attr
+						}), free); //放在手中
+						break;
+					case "Entity":
+						deskgood.hold.addOne(new Entity({
+							name: block.name,
+							attr: block.attr
+						}), free); //放在手中
+						break;
+				}
 				
 				deskgood.remove({x,y,z}); //删除方块
 				

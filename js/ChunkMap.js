@@ -141,11 +141,29 @@ class ChunkMap{
 	*/
 	
 	//获取方块（不可编辑）
-	get(x, y, z){
-		/* x,y,z 单位：m */
-		x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
+	get(x, y, z, entity=false, r=0.5){
+		/* x,y,z,r 单位：m */
+		const rX=Math.round(x), rY=Math.round(y), rZ=Math.round(z); //规范化
 		
-		return this.map[x] && this.map[x][y] && this.map[x][y][z];
+		if (entity){ //查找多个方块/实体
+			const result = [],
+				block = this.map[rX] && this.map[rX][rY] && this.map[rX][rY][rZ], //方块
+				cX = Math.round(x/this.size.x),
+				cZ = Math.round(z/this.size.z); //区块
+			if (block) result.push(block); //方块
+			if (this.chunks[cX] && this.chunks[cX][cZ])
+				for (const e of this.chunks[cX][cZ].entity){ // 实体/实体方块
+					const pos = e.type=="EntityBlock"? e.block.mesh.position: e.entity.mesh.position; //坐标
+					/* pos 单位：px */
+					if ( (pos.x/100 - x) **2+
+						(pos.y/100 - y) **2+
+						(pos.z/100 - z) **2 <= r*r
+					) result.push(e); //在半径范围内
+				}
+			return result;
+		}else{
+			return this.map[rX] && this.map[rX][rY] && this.map[rX][rY][rZ];
+		}
 		
 		/*if (this.map[x] && this.map[x][y]){
 			return this.map[x][y][z];
@@ -201,6 +219,8 @@ class ChunkMap{
 		block.block.mesh.position.y = y*100;
 		block.block.mesh.position.z = z*100;
 		
+		block.block.mesh.block = block;
+		
 		switch (block.type){
 			case "Block":
 				this.set(x, y, z, block);
@@ -244,147 +264,155 @@ class ChunkMap{
 		
 		switch (Thing.prototype.TEMPLATES[name].type){
 			case "Block":
-				const block = new Block({
+				if (attr.entityBlock){ //实体方块
+					const entityBlock = new EntityBlock({
+							name,
+							attr
+						}),
+						size = {
+							x0: entityBlock.get("attr", "entityBlock", "size", "x0"),
+							x1: entityBlock.get("attr", "entityBlock", "size", "x1"),
+							y0: entityBlock.get("attr", "entityBlock", "size", "y0"),
+							y1: entityBlock.get("attr", "entityBlock", "size", "y1"),
+							z0: entityBlock.get("attr", "entityBlock", "size", "z0"),
+							z1: entityBlock.get("attr", "entityBlock", "size", "z1"),
+						};
+					size.x0 = size.x0 || 0,
+					size.x1 = size.x1 || 100,
+					size.y0 = size.y0 || 0,
+					size.y1 = size.y1 || 100,
+					size.z0 = size.z0 || 0,
+					size.z1 = size.z1 || 100;
+					
+					size.x = size.x1 - size.x0,
+					size.y = size.y1 - size.y0,
+					size.z = size.z1 - size.z0; //长宽高
+					
+					const pos = [
+							[size.z0/100, size.y0/100, size.z1/100, size.y1/100],
+							[size.x0/100, size.z0/100, size.x1/100, size.z1/100],
+							[size.x0/100, size.y0/100, size.x1/100, size.y1/100]
+						],
+						uv = [
+							[	[ pos[0][0], pos[0][1] ],
+								[ pos[0][2], pos[0][1] ],
+								[ pos[0][2], pos[0][3] ],
+								[ pos[0][0], pos[0][3] ]	],
+							
+							[	[ pos[0][0], pos[0][1] ],
+								[ pos[0][2], pos[0][1] ],
+								[ pos[0][2], pos[0][3] ],
+								[ pos[0][0], pos[0][3] ]	],
+							
+							[	[ pos[1][0], pos[1][1] ],
+								[ pos[1][2], pos[1][1] ],
+								[ pos[1][2], pos[1][3] ],
+								[ pos[1][0], pos[1][3] ]	],
+							
+							[	[ pos[1][0], pos[1][1] ],
+								[ pos[1][2], pos[1][1] ],
+								[ pos[1][2], pos[1][3] ],
+								[ pos[1][0], pos[1][3] ]	],
+							
+							[	[ pos[2][0], pos[2][1] ],
+								[ pos[2][2], pos[2][1] ],
+								[ pos[2][2], pos[2][3] ],
+								[ pos[2][0], pos[2][3] ]	],
+							
+							[	[ pos[2][0], pos[2][1] ],
+								[ pos[2][2], pos[2][1] ],
+								[ pos[2][2], pos[2][3] ],
+								[ pos[2][0], pos[2][3] ]	]
+						];
+					/* for (const [i,face] of Object.entries(entityBlock.get("entityBlock", "face")) ){
+						entityBlock.setTexture(
+							new THREE.TextureLoader().load(
+								Img.clip(
+									( face[2]? //自定义
+										Img.scale(
+											Img.clip( Img.get(face[2]), face[0]*16, face[1]*16, 16, 16 ),
+										64, 64)
+									:
+										TEXTURES[ face[0] ][ face[1] ] ),
+									uv[i][0], uv[i][1], uv[i][2]-uv[i][0], uv[i][3]-uv[i][1]
+								).toDataURL("image/png")
+							), i
+						);
+					} */
+					entityBlock.deleteGeometry().makeGeometry(size.x, size.y, size.z).makeMesh();
+					entityBlock.block.geometry.setAttribute("uv", new THREE.BufferAttribute(
+						new Float32Array([
+							uv[0][3][0], uv[0][3][1],
+							uv[0][2][0], uv[0][2][1],
+							uv[0][0][0], uv[0][0][1],
+							uv[0][1][0], uv[0][1][1],
+							
+							uv[1][3][0], uv[1][3][1],
+							uv[1][2][0], uv[1][2][1],
+							uv[1][0][0], uv[1][0][1],
+							uv[1][1][0], uv[1][1][1],
+							
+							uv[2][3][0], uv[2][3][1],
+							uv[2][2][0], uv[2][2][1],
+							uv[2][0][0], uv[2][0][1],
+							uv[2][1][0], uv[2][1][1],
+							
+							uv[3][3][0], uv[3][3][1],
+							uv[3][2][0], uv[3][2][1],
+							uv[3][0][0], uv[3][0][1],
+							uv[3][1][0], uv[3][1][1],
+							
+							uv[4][3][0], uv[4][3][1],
+							uv[4][2][0], uv[4][2][1],
+							uv[4][0][0], uv[4][0][1],
+							uv[4][1][0], uv[4][1][1],
+							
+							uv[5][3][0], uv[5][3][1],
+							uv[5][2][0], uv[5][2][1],
+							uv[5][0][0], uv[5][0][1],
+							uv[5][1][0], uv[5][1][1]
+						]), 2
+					));
+					/* entityBlock.entityBlock.geometry.faceVertexUvs[0][0] = [ uv[0][3], uv[0][0], uv[0][2] ];
+					entityBlock.entityBlock.geometry.faceVertexUvs[0][1] = [ uv[0][0], uv[0][1], uv[0][2] ];
+					
+					entityBlock.entityBlock.geometry.faceVertexUvs[0][2] = [ uv[1][3], uv[1][0], uv[1][2] ];
+					entityBlock.entityBlock.geometry.faceVertexUvs[0][3] = [ uv[1][0], uv[1][1], uv[1][2] ];
+					
+					entityBlock.entityBlock.geometry.faceVertexUvs[0][4] = [ uv[2][3], uv[2][0], uv[2][2] ];
+					entityBlock.entityBlock.geometry.faceVertexUvs[0][5] = [ uv[2][0], uv[2][1], uv[2][2] ];
+					
+					entityBlock.entityBlock.geometry.faceVertexUvs[0][6] = [ uv[3][3], uv[3][0], uv[3][2] ];
+					entityBlock.entityBlock.geometry.faceVertexUvs[0][7] = [ uv[3][0], uv[3][1], uv[3][2] ];
+					
+					entityBlock.entityBlock.geometry.faceVertexUvs[0][8] = [ uv[4][3], uv[4][0], uv[4][2] ];
+					entityBlock.entityBlock.geometry.faceVertexUvs[0][9] = [ uv[4][0], uv[4][1], uv[4][2] ];
+					
+					entityBlock.entityBlock.geometry.faceVertexUvs[0][10] = [ uv[5][3], uv[5][0], uv[5][2] ];
+					entityBlock.entityBlock.geometry.faceVertexUvs[0][11] = [ uv[5][0], uv[5][1], uv[5][2] ]; */
+					
+					this.add( entityBlock, {
+						x: x + (size.x0 + size.x1)/2 /100 -0.5,
+						y: y + (size.y0 + size.y1)/2 /100 -0.5,
+						z: z + (size.z0 + size.z1)/2 /100 -0.5
+					}, type ); //以模板建立
+					
+					// entityBlock.deleteTexture(); //删除贴图
+				}else{ //普通方块
+					const block = new Block({
+						name,
+						attr
+					});
+					this.add( block.makeMesh(), {x,y,z}, type ); //以模板建立
+				}
+				break;
+			
+			case "Entity":
+				const entity = new ntity({
 					name,
 					attr
 				});
-				this.add( block.makeMesh(), {x,y,z}, type ); //以模板建立
-				break;
-			
-			case "EntityBlock":
-				const entityBlock = new Block({
-						name,
-						attr
-					}),
-					size = {
-						x0: entityBlock.get("attr", "entityBlock", "size", "x0"),
-						x1: entityBlock.get("attr", "entityBlock", "size", "x1"),
-						y0: entityBlock.get("attr", "entityBlock", "size", "y0"),
-						y1: entityBlock.get("attr", "entityBlock", "size", "y1"),
-						z0: entityBlock.get("attr", "entityBlock", "size", "z0"),
-						z1: entityBlock.get("attr", "entityBlock", "size", "z1"),
-					};
-				size.x0 = size.x0 || 0,
-				size.x1 = size.x1 || 100,
-				size.y0 = size.y0 || 0,
-				size.y1 = size.y1 || 100,
-				size.z0 = size.z0 || 0,
-				size.z1 = size.z1 || 100;
-				
-				size.x = size.x1 - size.x0,
-				size.y = size.y1 - size.y0,
-				size.z = size.z1 - size.z0; //长宽高
-				
-				const pos = [
-						[size.z0/100, size.y0/100, size.z1/100, size.y1/100],
-						[size.x0/100, size.z0/100, size.x1/100, size.z1/100],
-						[size.x0/100, size.y0/100, size.x1/100, size.y1/100]
-					],
-					uv = [
-						[	[ pos[0][0], pos[0][1] ],
-							[ pos[0][2], pos[0][1] ],
-							[ pos[0][2], pos[0][3] ],
-							[ pos[0][0], pos[0][3] ]	],
-							
-						[	[ pos[0][0], pos[0][1] ],
-							[ pos[0][2], pos[0][1] ],
-							[ pos[0][2], pos[0][3] ],
-							[ pos[0][0], pos[0][3] ]	],
-							
-						[	[ pos[1][0], pos[1][1] ],
-							[ pos[1][2], pos[1][1] ],
-							[ pos[1][2], pos[1][3] ],
-							[ pos[1][0], pos[1][3] ]	],
-							
-						[	[ pos[1][0], pos[1][1] ],
-							[ pos[1][2], pos[1][1] ],
-							[ pos[1][2], pos[1][3] ],
-							[ pos[1][0], pos[1][3] ]	],
-							
-						[	[ pos[2][0], pos[2][1] ],
-							[ pos[2][2], pos[2][1] ],
-							[ pos[2][2], pos[2][3] ],
-							[ pos[2][0], pos[2][3] ]	],
-							
-						[	[ pos[2][0], pos[2][1] ],
-							[ pos[2][2], pos[2][1] ],
-							[ pos[2][2], pos[2][3] ],
-							[ pos[2][0], pos[2][3] ]	]
-					];
-				/* for (const [i,face] of Object.entries(entityBlock.get("entityBlock", "face")) ){
-					entityBlock.setTexture(
-						new THREE.TextureLoader().load(
-							Img.clip(
-								( face[2]? //自定义
-									Img.scale(
-										Img.clip( Img.get(face[2]), face[0]*16, face[1]*16, 16, 16 ),
-									64, 64)
-								:
-									TEXTURES[ face[0] ][ face[1] ] ),
-								uv[i][0], uv[i][1], uv[i][2]-uv[i][0], uv[i][3]-uv[i][1]
-							).toDataURL("image/png")
-						), i
-					);
-				} */
-				entityBlock.deleteGeometry().makeGeometry(size.x, size.y, size.z).makeMesh();
-				entityBlock.entityBlock.geometry.setAttribute("uv", new THREE.BufferAttribute(
-					new Float32Array([
-						uv[0][3][0], uv[0][3][1],
-						uv[0][2][0], uv[0][2][1],
-						uv[0][0][0], uv[0][0][1],
-						uv[0][1][0], uv[0][1][1],
-						
-						uv[1][3][0], uv[1][3][1],
-						uv[1][2][0], uv[1][2][1],
-						uv[1][0][0], uv[1][0][1],
-						uv[1][1][0], uv[1][1][1],
-						
-						uv[2][3][0], uv[2][3][1],
-						uv[2][2][0], uv[2][2][1],
-						uv[2][0][0], uv[2][0][1],
-						uv[2][1][0], uv[2][1][1],
-						
-						uv[3][3][0], uv[3][3][1],
-						uv[3][2][0], uv[3][2][1],
-						uv[3][0][0], uv[3][0][1],
-						uv[3][1][0], uv[3][1][1],
-						
-						uv[4][3][0], uv[4][3][1],
-						uv[4][2][0], uv[4][2][1],
-						uv[4][0][0], uv[4][0][1],
-						uv[4][1][0], uv[4][1][1],
-						
-						uv[5][3][0], uv[5][3][1],
-						uv[5][2][0], uv[5][2][1],
-						uv[5][0][0], uv[5][0][1],
-						uv[5][1][0], uv[5][1][1]
-					]), 2
-				));
-				/* entityBlock.entityBlock.geometry.faceVertexUvs[0][0] = [ uv[0][3], uv[0][0], uv[0][2] ];
-				entityBlock.entityBlock.geometry.faceVertexUvs[0][1] = [ uv[0][0], uv[0][1], uv[0][2] ];
-				
-				entityBlock.entityBlock.geometry.faceVertexUvs[0][2] = [ uv[1][3], uv[1][0], uv[1][2] ];
-				entityBlock.entityBlock.geometry.faceVertexUvs[0][3] = [ uv[1][0], uv[1][1], uv[1][2] ];
-				
-				entityBlock.entityBlock.geometry.faceVertexUvs[0][4] = [ uv[2][3], uv[2][0], uv[2][2] ];
-				entityBlock.entityBlock.geometry.faceVertexUvs[0][5] = [ uv[2][0], uv[2][1], uv[2][2] ];
-				
-				entityBlock.entityBlock.geometry.faceVertexUvs[0][6] = [ uv[3][3], uv[3][0], uv[3][2] ];
-				entityBlock.entityBlock.geometry.faceVertexUvs[0][7] = [ uv[3][0], uv[3][1], uv[3][2] ];
-				
-				entityBlock.entityBlock.geometry.faceVertexUvs[0][8] = [ uv[4][3], uv[4][0], uv[4][2] ];
-				entityBlock.entityBlock.geometry.faceVertexUvs[0][9] = [ uv[4][0], uv[4][1], uv[4][2] ];
-				
-				entityBlock.entityBlock.geometry.faceVertexUvs[0][10] = [ uv[5][3], uv[5][0], uv[5][2] ];
-				entityBlock.entityBlock.geometry.faceVertexUvs[0][11] = [ uv[5][0], uv[5][1], uv[5][2] ]; */
-				
-				this.addEntity( entityBlock, {
-					x: x + (size.x0 + size.x1)/2 /100 -0.5,
-					y: y + (size.y0 + size.y1)/2 /100 -0.5,
-					z: z + (size.z0 + size.z1)/2 /100 -0.5
-				}, type ); //以模板建立
-				
-				// entityBlock.deleteTexture(); //删除贴图
+				this.add( entity, { x, y, z }, type ); //以模板建立
 				break;
 		}
 	}
