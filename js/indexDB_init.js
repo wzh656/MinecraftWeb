@@ -76,16 +76,8 @@ const DB = {
 	save(){
 		const data = {
 			type: 0,
-			pos: { //位置
-				x: deskgood.pos.x,
-				y: deskgood.pos.y,
-				z: deskgood.pos.z
-			},
-			v: { //速度
-				x: deskgood.v.x,
-				y: deskgood.v.y,
-				z: deskgood.v.z
-			},
+			pos: deskgood.pos.clone(), //位置
+			v: deskgood.v.clone(), //速度
 			look: { //朝向
 				x: deskgood.look.x,
 				y: deskgood.look.y

@@ -198,110 +198,87 @@ document.addEventListener("mousedown", function (e){
 		return;
 	
 	if (e.button == 0){ //左键（删除）
-		for (const obj of ray2D()){
-			if ( !(obj.object instanceof THREE.Mesh) ) continue;
+		for (const object of ray2D()){
+			if ( !(object.object instanceof THREE.Mesh) ) continue; //非物体
 			
-			let {x,y,z} = obj.object.position; //单位 px=cm
-			x = x/100, y = y/100, z = z/100; //单位 m
+			const obj = object.object.obj; //物体对象
 			
-			if ( map.get(x, y, z) &&
-				eval(map.get(x, y, z).get("attr", "block", "onLeftMouseDown")) === false
-			) return;
+			if ( obj && eval(obj.get("attr", "block", "onLeftMouseDown")) === false
+			) return; //处理事件
 			
-			if ( Math.sqrt(
-				(x*100 - deskgood.pos.x) **2+
-				(y*100 - deskgood.pos.y) **2+
-				(z*100 - deskgood.pos.z) **2
-			) >= deskgood.handLength) return; //距离>=手长
+			if ( object.object.position.distanceToSquared( deskgood.pos )
+				>= deskgood.handLength*deskgood.handLength
+			) return; //距离**2 >= 手长**2 单位:px=cm
 			
 			const free = !deskgood.hold[deskgood.choice]? deskgood.choice: deskgood.hold.indexOf(null);
 			if (free == -1){
-				console.warn("not free!")
+				console.warn("deskgood's hands is full!")
 				return print("拿不下方块", "两只手拿4m³方块已经够多了，反正我是拿不下了", 3);
 			}
-			const block = obj.object.block;
-			switch (block.type){
-				case "Block":
-					deskgood.hold.addOne(new Block({
-						name: block.name,
-						attr: block.attr
-					}), free); //放在手中
-					break;
-				case "EntityBlock":
-					deskgood.hold.addOne(new EntityBlock({
-						name: block.name,
-						attr: block.attr
-					}), free); //放在手中
-					break;
-				case "Entity":
-					deskgood.hold.addOne(new Entity({
-						name: block.name,
-						attr: block.attr
-					}), free); //放在手中
-					break;
-			}
 			
-			deskgood.remove( {x,y,z} ); //删除方块
+			deskgood.hold.addOne(new (eval(obj.type))({
+				name: obj.name,
+				attr: obj.attr
+			}), free); //放在手中
+			
+			deskgood.remove( obj ); //删除方块
 			
 			break;//跳出 寻找有效放置的 循环
 		}
 	}else if (e.button == 2){ //右键（放置）
-		if ( !(deskgood.hold[deskgood.choice] instanceof Block) ) return; //非方块
+		const hold = deskgood.hold[deskgood.choice];
+		if ( !(hold instanceof Block) &&
+			!(hold instanceof Entity) //非方块非实体
+		) return;
 		
-		for (const obj of ray2D()){
-			if ( !(obj.object instanceof THREE.Mesh) ) continue;
+		for (const object of ray2D()){
+			if ( !(object.object instanceof THREE.Mesh) ) continue; //非物体
 			
-			let {x,y,z} = obj.object.position; //单位 px=cm
-			x = x/100, y = y/100, z = z/100; //单位 m
+			const obj = object.object.obj, //物体对象
+				pos = object.object.position.clone(); //单位:px=cm
 			
-			if ( map.get(x, y, z) &&
-				eval(map.get(x, y, z).get("attr", "block", "onRightMouseDown")) === false
-			) return;
+			if ( obj && eval(obj.get("attr", "block", "onRightMouseDown")) === false
+			) return; //处理事件
 			
-			switch (obj.faceIndex){
+			switch (object.faceIndex){
 				case 0:
 				case 1:
-					x++;
+					pos.x++;
 					break;
 				case 2:
 				case 3:
-					x--;
+					pos.x--;
 					break;
 				case 4:
 				case 5:
-					y++;
+					pos.y++;
 					break;
 				case 6:
 				case 7:
-					y--;
+					pos.y--;
 					break;
 				case 8:
 				case 9:
-					z++;
+					pos.z++;
 					break;
 				case 10:
 				case 11:
-					z--;
+					pos.z--;
 					break;
 				default:
 					throw ["faceIndex wrong:", obj.faceIndex];
 			}
 			
-			if (Math.sqrt(
-				(x*100 - deskgood.pos.x) **2+
-				(y*100 - deskgood.pos.y) **2+
-				(z*100 - deskgood.pos.z) **2
-			) >= deskgood.handLength) return; //距离>=手长
+			if ( pos.distanceToSquared( deskgood.pos )
+				>= deskgood.handLength*deskgood.handLength
+			) return; //距离**2 >= 手长**2  单位:px=cm
 			
-			if ( !deskgood.hold[deskgood.choice] ) //空气
-				return;
+			if ( pos.clone().divideScalar(100)
+					.distanceToSquared( deskgood.pos.clone().divideScalar )
+				< 0.5*0.5 //距离**2 < 0.5**2 单位:m
+			)  return print("往头上放方块", "想窒息吗？还往头上放方块！"); //放到头上
 			
-			if ( Math.round(x) == Math.round(deskgood.pos.x/100) &&
-				Math.round(y) == Math.round(deskgood.pos.y/100) &&
-				Math.round(z) == Math.round(deskgood.pos.z/100)
-			) return print("往头上放方块", "想窒息吗？还往头上放方块！"); //放到头上
-			
-			deskgood.place(deskgood.hold[deskgood.choice], {x,y,z}); //放置方块
+			deskgood.place(deskgood.hold[deskgood.choice], pos); //放置方块
 			
 			deskgood.hold.delete(deskgood.choice); //删除手里的方块
 			
@@ -325,9 +302,9 @@ document.addEventListener("mousedown", function (e){
 			// if (!obj.faceIndex) continue;
 			if ( !(obj.object instanceof THREE.Mesh) ) continue;
 			
-			let {x,y,z} = obj.object.position; //单位 px=cm
+			let {x,y,z} = obj.object.position; //单位:px=cm
 			
-			x = x/100, y = y/100, z = z/100; //单位 m
+			x = x/100, y = y/100, z = z/100; //单位:m
 			
 			if ( map.get(x, y, z) &&
 				eval(map.get(x, y, z).get("attr", "block", "onLeftMouseUp")) === false

@@ -415,7 +415,7 @@ function render(){
 		const ρ = 1.25*rnd_error(), //空气密度/(kg/m³)
 			c = 0.4*rnd_error(), //空气阻力系数
 			s = [0.5, 0.2, 0.5], //面积/m²
-			v = [deskgood.v.x, deskgood.v.y, deskgood.v.z], //速度/(m/s)
+			v = deskgood.v.clone(), //速度/(m/s)
 			Fw = [], //空气阻力/N
 			m = 50, //质量/m
 			Aw = [] //空气阻力产生的加速度/(m/s²)

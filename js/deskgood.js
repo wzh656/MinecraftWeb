@@ -6,11 +6,7 @@ const delay_id = {
 	perloadChunk: null
 }, body_blocks = [];
 const deskgood = { //桌子好
-	v: {
-		x: 0,
-		y: 0,
-		z: 0
-	},
+	v: new THREE.Vector3(),
 	pos: camera.position,
 	/*size: {
 		"x+": 50,
@@ -675,7 +671,7 @@ const deskgood = { //桌子好
 	},
 	
 	// 放置方块
-	place(block, {x, y, z}){
+	place(block, pos){
 		/* 单位：m */
 		x = Math.round(x), y = Math.round(y), z = Math.round(z);
 		

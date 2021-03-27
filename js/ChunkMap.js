@@ -219,7 +219,7 @@ class ChunkMap{
 		block.block.mesh.position.y = y*100;
 		block.block.mesh.position.z = z*100;
 		
-		block.block.mesh.block = block;
+		block.block.mesh.obj = block;
 		
 		switch (block.type){
 			case "Block":
@@ -417,8 +417,35 @@ class ChunkMap{
 		}
 	}
 	
-	//删除方块
-	delete(x, y, z){
+	//删除物体
+	delete(obj){
+		const {x,y,z} = obj.position.clone().round(); //规范化
+		switch (obj.type){
+			case "Block": //方块
+				scene.remove( obj.block.mesh );
+				obj.deleteMesh();
+				
+				delete this.map[x][y][z];
+				if (this.map[x][y].every(v => !v))
+					delete this.map[x][y];
+				if (this.map[x].every(v => !v))
+					delete this.map[x];
+				
+				break;
+			case "EntityBlock": //实体方块
+			case "Entity": //实体
+				const cX = Math.round(x/this.size.x),
+					cZ = Math.round(z/this.size.z); //区块坐标
+				if ( !this.chunks[cX][cZ].entity.some((v, i, arr)=>{
+					if (v != obj) return false; //未找到
+					
+					scene.remove( obj.block.mesh );
+					obj.deleteMesh();
+					
+					delete arr[i];
+				}) ) console.warn("can't find entity", obj, "in chunk", cX, cZ); //找不到
+				break;
+		}
 		x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 		
 		if (!this.get(x,y,z)) // 没有方块(null)/不在范围(undefined)/加载中(false)

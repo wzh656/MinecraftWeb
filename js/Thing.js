@@ -60,7 +60,7 @@ class Thing{
 			//if (this_part === undefined) type=true;
 		}
 		return this_part===undefined? template_part: this_part;
-	};
+	}
 	//设置属性
 	set(...attr){
 		let this_part = this,
@@ -72,7 +72,7 @@ class Thing{
 		}
 		this_part[attr.pop()] = value;
 		return this;
-	};
+	}
 	//判断是否拥有属性
 	have(...attr){
 		let part = this;
@@ -81,7 +81,7 @@ class Thing{
 			if (part === undefined) return false;
 		}
 		return true;
-	};
+	}
 }
 Thing.prototype.TEMPLATES = []; //模板
 
@@ -169,7 +169,7 @@ class Block extends Thing{
 			this.set("block", "face", index, value);
 		}
 		return this;
-	};
+	}
 	deleteFace(index){
 		if (index === undefined){ //无索引（所有）
 			this.set("block", "face", []); //半保留
@@ -177,11 +177,11 @@ class Block extends Thing{
 			this.set("block", "face", index, null); //半保留
 		}
 		return this;
-	};
+	}
 	editParent(value){
 		this.set("block", "parent", value);
 		return this;
-	};
+	}
 	
 	// texture
 	setTexture(texture, index){
@@ -195,11 +195,11 @@ class Block extends Thing{
 			this.set("block", "texture", index, texture);
 		}
 		return this;
-	};
+	}
 	deleteTexture(index){
 		if (index === undefined){ //无索引（所有）
 			if ( this.have("block", "texture") )
-				for (const i of Object.values(this.get("block", "texture")))
+				for (const i of Object.values(this.block.texture))
 					i.dispose(); //清除内存
 			this.set("block", "texture", []); //半保留
 		}else{ //有索引（单个）
@@ -208,7 +208,7 @@ class Block extends Thing{
 			this.set("block", "texture", index, null); //半保留
 		}
 		return this;
-	};
+	}
 	
 	// material
 	makeMaterial(textures=this.get("block", "texture")/* material */){
@@ -225,32 +225,32 @@ class Block extends Thing{
 			new THREE.MeshLambertMaterial({ map:textures[5], transparent })
 		]); //材质对象 MeshLambertMaterial
 		return this;
-	};
+	}
 	deleteMaterial(){
 		if ( this.have("block", "material") )
-			for (const i of this.get("block", "material"))
+			for (const i of this.block.material)
 				i.dispose(); //清除内存
 		this.set("block", "material", null); //半保留
 		return this;
-	};
+	}
 	
 	// geometry
 	makeGeometry(x, y, z){
 		this.set("block", "geometry", new THREE.BoxBufferGeometry(x, y, z));
 		return this;
-	};
+	}
 	deleteGeometry(){
 		if ( this.have("block", "geometry") )
 			this.block.geometry.dispose();
 		this.set("block", "geometry", null); //半保留
 		return this;
-	};
+	}
 	
 	// mesh
 	makeMesh( geometry=this.get("block", "geometry") ){
 		if ( !this.have("block", "material") ){ //没有材质
 			const template = this.get("block", "material");
-			this.block.material = [];
+			this.set("block", "material", []);
 			for (let i=0; i<template.length; i++)
 				this.block.material[i] = template[i].clone();
 		}
@@ -265,16 +265,16 @@ class Block extends Thing{
 		mesh.userData.object = this;
 		this.set("block", "mesh", mesh); //网格模型对象Mesh
 		return this;
-	};
+	}
 	deleteMesh(index){
 		if ( this.have("block", "mesh") ){
-			for (const i of this.get("block", "mesh").material)
+			for (const i of this.block.mesh.material)
 				i.dispose();
-			this.get("block", "mesh").geometry.dispose(); //清除内存
+			this.block.mesh.geometry.dispose(); //清除内存
 		}
 		this.set("block", "mesh", null); //半保留
 		return this;
-	};
+	}
 }
 Block.prototype.type = "Block"; //名称
 Block.prototype.normalGeometry = new THREE.BoxBufferGeometry(100, 100, 100); //通用几何体
@@ -318,10 +318,10 @@ class Entity extends Thing{
 	}
 	deleteMaterial(){
 		if ( this.have("entity", "material") )
-			this.get("entity", "material").dispose(); //清除内存
+			this.entity.material.dispose(); //清除内存
 		this.set("entity", "material", null); //半保留
 		return this;
-	};
+	}
 	
 	// geometry
 	setGeometry(geometry){
@@ -330,10 +330,10 @@ class Entity extends Thing{
 	}
 	deleteGeometry(){
 		if ( this.have("entity", "geometry") )
-			this.get("entity", "geometry").dispose(); //清除内存
+			this.entity.geometry.dispose(); //清除内存
 		this.set("entity", "geometry", null); //半保留
 		return this;
-	};
+	}
 	
 	//mesh
 	makeMesh(){
@@ -346,12 +346,12 @@ class Entity extends Thing{
 	}
 	deleteMesh(){
 		if ( this.have("block", "mesh") ){
-			this.have("block", "mesh").material.dispose();
-			this.get("block", "mesh").geometry.dispose(); //清除内存
+			this.deleteMaterial();
+			this.deleteGeometry(); //清除内存
 		}
 		this.set("block", "mesh", null); //半保留
 		return this;
-	};
+	}
 }
 Entity.prototype.type = "Entity"; //名称
 
@@ -375,6 +375,56 @@ class EntityBlock extends Block{
 				if (opt.attr.entityBlock.size.z1) this.attr.entityBlock.size.z1 = opt.attr.entityBlock.size.z1;
 			}
 		}
+	}
+	
+	// material
+	setMaterial(material){
+		this.set("block", "material", material);
+		return this;
+	}
+	deleteMaterial(){
+		if ( this.have("block", "material") ){
+			const material = this.block.material;
+			if (material instanceof Array){ //数组
+				for (const i of material)
+					i.dispose(); //清除内存
+			}else{
+				material.dispose(); //直接清除
+			}
+		}
+			
+		this.set("block", "material", null); //半保留
+		return this;
+	}
+	
+	// geometry
+	setGeometry(geometry){
+		this.set("block", "geometry", geometry);
+		return this;
+	}
+	deleteGeometry(){
+		if ( this.have("block", "geometry") )
+			this.block.geometry.dispose();
+		this.set("block", "geometry", null); //半保留
+		return this;
+	}
+	
+	// mesh
+	makeMesh(){
+		const mesh = new THREE.Mesh(this.get("entity", "geometry"), this.get("entity", "material"));
+		mesh.castShadow = true;
+		mesh.receiveShadow = true;
+		mesh.userData.object = this;
+		this.set("block", "mesh", mesh); //网格模型对象Mesh
+		return this;
+	}
+	deleteMesh(index){
+		if ( this.have("block", "mesh") ){
+			this.deleteMaterial();
+			this.deleteGeometry();
+		}
+		this.set("block", "mesh", null); //半保留
+		return this;
 	}
 }
 EntityBlock.prototype.type = "EntityBlock"; //名称
