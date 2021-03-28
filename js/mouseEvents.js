@@ -201,9 +201,10 @@ document.addEventListener("mousedown", function (e){
 		for (const object of ray2D()){
 			if ( !(object.object instanceof THREE.Mesh) ) continue; //非物体
 			
-			const obj = object.object.obj; //物体对象
+			const thing = object.object.obj; //物体对象
 			
-			if ( obj && eval(obj.get("attr", "block", "onLeftMouseDown")) === false
+			if ( thing &&
+				eval(thing.get("attr", "block", "onLeftMouseDown")) === false
 			) return; //处理事件
 			
 			if ( object.object.position.distanceToSquared( deskgood.pos )
@@ -216,26 +217,23 @@ document.addEventListener("mousedown", function (e){
 				return print("拿不下方块", "两只手拿4m³方块已经够多了，反正我是拿不下了", 3);
 			}
 			
-			deskgood.hold.addOne(new (eval(obj.type))({
-				name: obj.name,
-				attr: obj.attr
-			}), free); //放在手中
+			deskgood.hold.addOne(thing.clone(), free); //克隆一个放在手中
 			
-			deskgood.remove( obj ); //删除方块
+			deskgood.remove( thing ); //删除方块
 			
 			break;//跳出 寻找有效放置的 循环
 		}
 	}else if (e.button == 2){ //右键（放置）
 		const hold = deskgood.hold[deskgood.choice];
 		if ( !(hold instanceof Block) &&
-			!(hold instanceof Entity) //非方块非实体
+			!(hold instanceof Entity) //非方块非实体（空气）
 		) return;
 		
 		for (const object of ray2D()){
 			if ( !(object.object instanceof THREE.Mesh) ) continue; //非物体
 			
 			const obj = object.object.obj, //物体对象
-				pos = object.object.position.clone(); //单位:px=cm
+				pos = object.object.position.clone().divideScalar(100); //单位:m
 			
 			if ( obj && eval(obj.get("attr", "block", "onRightMouseDown")) === false
 			) return; //处理事件
@@ -243,7 +241,7 @@ document.addEventListener("mousedown", function (e){
 			switch (object.faceIndex){
 				case 0:
 				case 1:
-					pos.x++;
+					pos.x++; //单位:m
 					break;
 				case 2:
 				case 3:
@@ -269,16 +267,16 @@ document.addEventListener("mousedown", function (e){
 					throw ["faceIndex wrong:", obj.faceIndex];
 			}
 			
-			if ( pos.distanceToSquared( deskgood.pos )
+			if ( pos.clone().multiplyScalar(100)
+					.distanceToSquared( deskgood.pos )
 				>= deskgood.handLength*deskgood.handLength
 			) return; //距离**2 >= 手长**2  单位:px=cm
 			
-			if ( pos.clone().divideScalar(100)
-					.distanceToSquared( deskgood.pos.clone().divideScalar )
+			if ( pos.distanceToSquared( deskgood.pos.clone().divideScalar )
 				< 0.5*0.5 //距离**2 < 0.5**2 单位:m
 			)  return print("往头上放方块", "想窒息吗？还往头上放方块！"); //放到头上
 			
-			deskgood.place(deskgood.hold[deskgood.choice], pos); //放置方块
+			deskgood.place(deskgood.hold[deskgood.choice], pos); //放置方块 单位:m
 			
 			deskgood.hold.delete(deskgood.choice); //删除手里的方块
 			

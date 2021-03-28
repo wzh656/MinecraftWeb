@@ -31,7 +31,7 @@ const DB = {
 		
 		db.readStep(TABLE.WORLD, {
 			index: "type",
-			range: ["only", 0],
+			range: ["only", 1],
 			dirt: "prev",
 			stepCallback: function(res){
 				console.log("存档read成功", res)
@@ -75,7 +75,7 @@ const DB = {
 	/* 保存存档 */
 	save(){
 		const data = {
-			type: 0,
+			type: 1,
 			pos: deskgood.pos.clone(), //位置
 			v: deskgood.v.clone(), //速度
 			look: { //朝向

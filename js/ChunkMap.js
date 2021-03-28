@@ -192,7 +192,7 @@ class ChunkMap{
 	
 	
 	//添加方块
-	add(block, {x,y,z}, type=true){
+	add(thing, {x,y,z}, type=true){
 		/* x,y,z 单位：m */
 		// let {type=true} = opt;
 		// x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
@@ -215,36 +215,36 @@ class ChunkMap{
 			}
 		}
 		
-		block.block.mesh.position.x = x*100;
-		block.block.mesh.position.y = y*100;
-		block.block.mesh.position.z = z*100;
+		thing.block.mesh.position.x = x*100;
+		thing.block.mesh.position.y = y*100;
+		thing.block.mesh.position.z = z*100;
 		
-		block.block.mesh.obj = block;
+		thing.block.mesh.obj = thing;
 		
-		switch (block.type){
+		switch (thing.type){
 			case "Block":
-				this.set(x, y, z, block);
+				this.set(x, y, z, thing);
 				break;
 			case "Entity":
 			case "EntityBlock":
 				const cX = Math.round(x/this.size.x),
 					cZ = Math.round(z/this.size.z); //区块
-				this.chunks[cX][cZ].entity.push(block);
+				this.chunks[cX][cZ].entity.push(thing);
 				break;
 		}
-		scene.add( block.block.mesh ); //网格模型添加到场景中
-		block.block.added = true;
+		scene.add( thing.block.mesh ); //网格模型添加到场景中
+		thing.block.added = true;
 	}
 	
 	//根据 模板和name 添加方块
-	addID(name, {x,y,z}, opt={}){
-		/* x,y,z 单位：m */
-		const {type=true, attr={}} = opt;
+	addID(thing, {x,y,z}, type=true){
+		/*  单位：m */
+		
 		/* if (typeof type != "boolean"){
 			[type, attr] = [undefined, type];
 		} */
 		// if (!attr.block) attr.block = {};
-		if (name == "空气"){ //添加空气
+		if (thing.name == "空气"){ //添加空气
 			x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 			if ( this.get(x, y, z) ){ //有方块（强制移除）
 				for (const i of this.get(x,y,z).block.mesh.material)
@@ -262,168 +262,157 @@ class ChunkMap{
 			return;
 		}
 		
-		switch (Thing.prototype.TEMPLATES[name].type){
-			case "Block":
-				if (attr.entityBlock){ //实体方块
-					const entityBlock = new EntityBlock({
-							name,
-							attr
-						}),
-						size = {
-							x0: entityBlock.get("attr", "entityBlock", "size", "x0"),
-							x1: entityBlock.get("attr", "entityBlock", "size", "x1"),
-							y0: entityBlock.get("attr", "entityBlock", "size", "y0"),
-							y1: entityBlock.get("attr", "entityBlock", "size", "y1"),
-							z0: entityBlock.get("attr", "entityBlock", "size", "z0"),
-							z1: entityBlock.get("attr", "entityBlock", "size", "z1"),
-						};
-					size.x0 = size.x0 || 0,
-					size.x1 = size.x1 || 100,
-					size.y0 = size.y0 || 0,
-					size.y1 = size.y1 || 100,
-					size.z0 = size.z0 || 0,
-					size.z1 = size.z1 || 100;
-					
-					size.x = size.x1 - size.x0,
-					size.y = size.y1 - size.y0,
-					size.z = size.z1 - size.z0; //长宽高
-					
-					const pos = [
-							[size.z0/100, size.y0/100, size.z1/100, size.y1/100],
-							[size.x0/100, size.z0/100, size.x1/100, size.z1/100],
-							[size.x0/100, size.y0/100, size.x1/100, size.y1/100]
-						],
-						uv = [
-							[	[ pos[0][0], pos[0][1] ],
-								[ pos[0][2], pos[0][1] ],
-								[ pos[0][2], pos[0][3] ],
-								[ pos[0][0], pos[0][3] ]	],
-							
-							[	[ pos[0][0], pos[0][1] ],
-								[ pos[0][2], pos[0][1] ],
-								[ pos[0][2], pos[0][3] ],
-								[ pos[0][0], pos[0][3] ]	],
-							
-							[	[ pos[1][0], pos[1][1] ],
-								[ pos[1][2], pos[1][1] ],
-								[ pos[1][2], pos[1][3] ],
-								[ pos[1][0], pos[1][3] ]	],
-							
-							[	[ pos[1][0], pos[1][1] ],
-								[ pos[1][2], pos[1][1] ],
-								[ pos[1][2], pos[1][3] ],
-								[ pos[1][0], pos[1][3] ]	],
-							
-							[	[ pos[2][0], pos[2][1] ],
-								[ pos[2][2], pos[2][1] ],
-								[ pos[2][2], pos[2][3] ],
-								[ pos[2][0], pos[2][3] ]	],
-							
-							[	[ pos[2][0], pos[2][1] ],
-								[ pos[2][2], pos[2][1] ],
-								[ pos[2][2], pos[2][3] ],
-								[ pos[2][0], pos[2][3] ]	]
-						];
-					/* for (const [i,face] of Object.entries(entityBlock.get("entityBlock", "face")) ){
-						entityBlock.setTexture(
-							new THREE.TextureLoader().load(
-								Img.clip(
-									( face[2]? //自定义
-										Img.scale(
-											Img.clip( Img.get(face[2]), face[0]*16, face[1]*16, 16, 16 ),
-										64, 64)
-									:
-										TEXTURES[ face[0] ][ face[1] ] ),
-									uv[i][0], uv[i][1], uv[i][2]-uv[i][0], uv[i][3]-uv[i][1]
-								).toDataURL("image/png")
-							), i
-						);
-					} */
-					entityBlock.deleteGeometry().makeGeometry(size.x, size.y, size.z).makeMesh();
-					entityBlock.block.geometry.setAttribute("uv", new THREE.BufferAttribute(
-						new Float32Array([
-							uv[0][3][0], uv[0][3][1],
-							uv[0][2][0], uv[0][2][1],
-							uv[0][0][0], uv[0][0][1],
-							uv[0][1][0], uv[0][1][1],
-							
-							uv[1][3][0], uv[1][3][1],
-							uv[1][2][0], uv[1][2][1],
-							uv[1][0][0], uv[1][0][1],
-							uv[1][1][0], uv[1][1][1],
-							
-							uv[2][3][0], uv[2][3][1],
-							uv[2][2][0], uv[2][2][1],
-							uv[2][0][0], uv[2][0][1],
-							uv[2][1][0], uv[2][1][1],
-							
-							uv[3][3][0], uv[3][3][1],
-							uv[3][2][0], uv[3][2][1],
-							uv[3][0][0], uv[3][0][1],
-							uv[3][1][0], uv[3][1][1],
-							
-							uv[4][3][0], uv[4][3][1],
-							uv[4][2][0], uv[4][2][1],
-							uv[4][0][0], uv[4][0][1],
-							uv[4][1][0], uv[4][1][1],
-							
-							uv[5][3][0], uv[5][3][1],
-							uv[5][2][0], uv[5][2][1],
-							uv[5][0][0], uv[5][0][1],
-							uv[5][1][0], uv[5][1][1]
-						]), 2
-					));
-					/* entityBlock.entityBlock.geometry.faceVertexUvs[0][0] = [ uv[0][3], uv[0][0], uv[0][2] ];
-					entityBlock.entityBlock.geometry.faceVertexUvs[0][1] = [ uv[0][0], uv[0][1], uv[0][2] ];
-					
-					entityBlock.entityBlock.geometry.faceVertexUvs[0][2] = [ uv[1][3], uv[1][0], uv[1][2] ];
-					entityBlock.entityBlock.geometry.faceVertexUvs[0][3] = [ uv[1][0], uv[1][1], uv[1][2] ];
-					
-					entityBlock.entityBlock.geometry.faceVertexUvs[0][4] = [ uv[2][3], uv[2][0], uv[2][2] ];
-					entityBlock.entityBlock.geometry.faceVertexUvs[0][5] = [ uv[2][0], uv[2][1], uv[2][2] ];
-					
-					entityBlock.entityBlock.geometry.faceVertexUvs[0][6] = [ uv[3][3], uv[3][0], uv[3][2] ];
-					entityBlock.entityBlock.geometry.faceVertexUvs[0][7] = [ uv[3][0], uv[3][1], uv[3][2] ];
-					
-					entityBlock.entityBlock.geometry.faceVertexUvs[0][8] = [ uv[4][3], uv[4][0], uv[4][2] ];
-					entityBlock.entityBlock.geometry.faceVertexUvs[0][9] = [ uv[4][0], uv[4][1], uv[4][2] ];
-					
-					entityBlock.entityBlock.geometry.faceVertexUvs[0][10] = [ uv[5][3], uv[5][0], uv[5][2] ];
-					entityBlock.entityBlock.geometry.faceVertexUvs[0][11] = [ uv[5][0], uv[5][1], uv[5][2] ]; */
-					
-					this.add( entityBlock, {
-						x: x + (size.x0 + size.x1)/2 /100 -0.5,
-						y: y + (size.y0 + size.y1)/2 /100 -0.5,
-						z: z + (size.z0 + size.z1)/2 /100 -0.5
-					}, type ); //以模板建立
-					
-					// entityBlock.deleteTexture(); //删除贴图
-				}else{ //普通方块
-					const block = new Block({
-						name,
-						attr
-					});
-					this.add( block.makeMesh(), {x,y,z}, type ); //以模板建立
-				}
-				break;
+		switch (thing.type){
+			case "Block": //普通方块
+				this.add( thing.makeMesh(), {x,y,z}, type ); //以模板建立
+			break;
 			
+			case "EntityBlock": //实体方块
+				const size = {
+					x0: thing.get("attr", "entityBlock", "size", "x0"),
+					x1: thing.get("attr", "entityBlock", "size", "x1"),
+					y0: thing.get("attr", "entityBlock", "size", "y0"),
+					y1: thing.get("attr", "entityBlock", "size", "y1"),
+					z0: thing.get("attr", "entityBlock", "size", "z0"),
+					z1: thing.get("attr", "entityBlock", "size", "z1"),
+				};
+				size.x0 = size.x0 || 0,
+				size.x1 = size.x1 || 100,
+				size.y0 = size.y0 || 0,
+				size.y1 = size.y1 || 100,
+				size.z0 = size.z0 || 0,
+				size.z1 = size.z1 || 100;
+				
+				size.x = size.x1 - size.x0,
+				size.y = size.y1 - size.y0,
+				size.z = size.z1 - size.z0; //长宽高
+				
+				const pos = [
+						[size.z0/100, size.y0/100, size.z1/100, size.y1/100],
+						[size.x0/100, size.z0/100, size.x1/100, size.z1/100],
+						[size.x0/100, size.y0/100, size.x1/100, size.y1/100]
+					],
+					uv = [
+						[	[ pos[0][0], pos[0][1] ],
+							[ pos[0][2], pos[0][1] ],
+							[ pos[0][2], pos[0][3] ],
+							[ pos[0][0], pos[0][3] ]	],
+						
+						[	[ pos[0][0], pos[0][1] ],
+							[ pos[0][2], pos[0][1] ],
+							[ pos[0][2], pos[0][3] ],
+							[ pos[0][0], pos[0][3] ]	],
+						
+						[	[ pos[1][0], pos[1][1] ],
+							[ pos[1][2], pos[1][1] ],
+							[ pos[1][2], pos[1][3] ],
+							[ pos[1][0], pos[1][3] ]	],
+						
+						[	[ pos[1][0], pos[1][1] ],
+							[ pos[1][2], pos[1][1] ],
+							[ pos[1][2], pos[1][3] ],
+							[ pos[1][0], pos[1][3] ]	],
+						
+						[	[ pos[2][0], pos[2][1] ],
+							[ pos[2][2], pos[2][1] ],
+							[ pos[2][2], pos[2][3] ],
+							[ pos[2][0], pos[2][3] ]	],
+						
+						[	[ pos[2][0], pos[2][1] ],
+							[ pos[2][2], pos[2][1] ],
+							[ pos[2][2], pos[2][3] ],
+							[ pos[2][0], pos[2][3] ]	]
+					];
+				/* for (const [i,face] of Object.entries(thing.get("entityBlock", "face")) ){
+					thing.setTexture(
+						new THREE.TextureLoader().load(
+							Img.clip(
+								( face[2]? //自定义
+									Img.scale(
+										Img.clip( Img.get(face[2]), face[0]*16, face[1]*16, 16, 16 ),
+									64, 64)
+								:
+									TEXTURES[ face[0] ][ face[1] ] ),
+								uv[i][0], uv[i][1], uv[i][2]-uv[i][0], uv[i][3]-uv[i][1]
+							).toDataURL("image/png")
+						), i
+					);
+				} */
+				thing.deleteGeometry().makeGeometry(size.x, size.y, size.z).makeMesh();
+				thing.block.geometry.setAttribute("uv", new THREE.BufferAttribute(
+					new Float32Array([
+						uv[0][3][0], uv[0][3][1],
+						uv[0][2][0], uv[0][2][1],
+						uv[0][0][0], uv[0][0][1],
+						uv[0][1][0], uv[0][1][1],
+						
+						uv[1][3][0], uv[1][3][1],
+						uv[1][2][0], uv[1][2][1],
+						uv[1][0][0], uv[1][0][1],
+						uv[1][1][0], uv[1][1][1],
+						
+						uv[2][3][0], uv[2][3][1],
+						uv[2][2][0], uv[2][2][1],
+						uv[2][0][0], uv[2][0][1],
+						uv[2][1][0], uv[2][1][1],
+						
+						uv[3][3][0], uv[3][3][1],
+						uv[3][2][0], uv[3][2][1],
+						uv[3][0][0], uv[3][0][1],
+						uv[3][1][0], uv[3][1][1],
+						
+						uv[4][3][0], uv[4][3][1],
+						uv[4][2][0], uv[4][2][1],
+						uv[4][0][0], uv[4][0][1],
+						uv[4][1][0], uv[4][1][1],
+						
+						uv[5][3][0], uv[5][3][1],
+						uv[5][2][0], uv[5][2][1],
+						uv[5][0][0], uv[5][0][1],
+						uv[5][1][0], uv[5][1][1]
+					]), 2
+				));
+				/* thing.thing.geometry.faceVertexUvs[0][0] = [ uv[0][3], uv[0][0], uv[0][2] ];
+				thing.thing.geometry.faceVertexUvs[0][1] = [ uv[0][0], uv[0][1], uv[0][2] ];
+				
+				thing.thing.geometry.faceVertexUvs[0][2] = [ uv[1][3], uv[1][0], uv[1][2] ];
+				thing.thing.geometry.faceVertexUvs[0][3] = [ uv[1][0], uv[1][1], uv[1][2] ];
+				
+				thing.thing.geometry.faceVertexUvs[0][4] = [ uv[2][3], uv[2][0], uv[2][2] ];
+				thing.thing.geometry.faceVertexUvs[0][5] = [ uv[2][0], uv[2][1], uv[2][2] ];
+				
+				thing.thing.geometry.faceVertexUvs[0][6] = [ uv[3][3], uv[3][0], uv[3][2] ];
+				thing.thing.geometry.faceVertexUvs[0][7] = [ uv[3][0], uv[3][1], uv[3][2] ];
+				
+				thing.thing.geometry.faceVertexUvs[0][8] = [ uv[4][3], uv[4][0], uv[4][2] ];
+				thing.thing.geometry.faceVertexUvs[0][9] = [ uv[4][0], uv[4][1], uv[4][2] ];
+				
+				thing.thing.geometry.faceVertexUvs[0][10] = [ uv[5][3], uv[5][0], uv[5][2] ];
+				thing.thing.geometry.faceVertexUvs[0][11] = [ uv[5][0], uv[5][1], uv[5][2] ]; */
+				
+				this.add( thing.makeMesh(), {
+					x: x + (size.x0 + size.x1)/2 /100 -0.5,
+					y: y + (size.y0 + size.y1)/2 /100 -0.5,
+					z: z + (size.z0 + size.z1)/2 /100 -0.5
+				}, type ); //以模板建立
+				break;
+				
 			case "Entity":
-				const entity = new ntity({
-					name,
-					attr
-				});
-				this.add( entity, { x, y, z }, type ); //以模板建立
+				this.add( thing, { x, y, z }, type ); //以模板建立
 				break;
 		}
 	}
 	
 	//删除物体
-	delete(obj){
-		const {x,y,z} = obj.position.clone().round(); //规范化
-		switch (obj.type){
+	delete(thing){
+		const {x,y,z} = thing.type=="entity"?
+			thing.entity.mesh.position.clone().divideScalar(100).round()
+			: thing.block.mesh.position.clone().divideScalar(100).round(); //规范化 单位:m
+		
+		switch (thing.type){
 			case "Block": //方块
-				scene.remove( obj.block.mesh );
-				obj.deleteMesh();
+				scene.remove( thing.block.mesh );
+				thing.deleteMesh();
 				
 				delete this.map[x][y][z];
 				if (this.map[x][y].every(v => !v))
@@ -437,31 +426,15 @@ class ChunkMap{
 				const cX = Math.round(x/this.size.x),
 					cZ = Math.round(z/this.size.z); //区块坐标
 				if ( !this.chunks[cX][cZ].entity.some((v, i, arr)=>{
-					if (v != obj) return false; //未找到
+					if (v != thing) return false; //未找到
 					
-					scene.remove( obj.block.mesh );
-					obj.deleteMesh();
+					scene.remove( thing.block.mesh );
+					thing.deleteMesh();
 					
 					delete arr[i];
-				}) ) console.warn("can't find entity", obj, "in chunk", cX, cZ); //找不到
+				}) ) console.warn("can't find entity", thing, "in chunk", cX, cZ); //找不到
 				break;
 		}
-		x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
-		
-		if (!this.get(x,y,z)) // 没有方块(null)/不在范围(undefined)/加载中(false)
-			return;
-		
-		/* for (const i of this.get(x,y,z).block.mesh.material)
-			i.dispose();
-		this.get(x,y,z).block.mesh.geometry.dispose(); //清除内存 */
-		scene.remove( this.get(x,y,z).block.mesh );
-		this.get(x,y,z).deleteMesh();
-		
-		delete this.map[x][y][z];
-		if (this.map[x][y].every(v => !v))
-			delete this.map[x][y];
-		if (this.map[x].every(v => !v))
-			delete this.map[x];
 	}
 	
 	
@@ -549,13 +522,10 @@ class ChunkMap{
 				get = new Block( this.perGet(x, y, z, edit||[]) ); //应该的方块
 			
 			if ( needLoad && this.getInitedChunks().some(v => v[0]==cX && v[1]==cZ) ){ //不可隐藏（有面true） 且 在加载区块内
-				this.addID(get.name, {
-					x,
-					y,
-					z,
-				}, {
+				this.addID(new Block({
+					name: get.name,
 					attr: get.attr
-				});
+				}), {x,y,z});
 				thisBlock = this.get(x,y,z); //加载后的this方块
 			}
 			if ( !thisBlock ) //undefined（无需加载） 或 null（加载为空气）
@@ -594,13 +564,10 @@ class ChunkMap{
 			];
 			
 			if (visibleValue.some(v => v) && this.getInitedChunks().some(v => v[0]==cX && v[1]==cZ)){ //不可隐藏（有面true） 且 在加载区块内
-				this.addID(get.id, {
-					x,
-					y,
-					z,
-				}, {
+				this.addID(new Block({
+					name: get.name,
 					attr: get.attr
-				});
+				}), {x,y,z});
 				thisBlock = this.get(x,y,z); //加载后的this方块
 			}
 			if (!thisBlock) //undefined（无需加载） 或 null（加载为空气）
@@ -623,13 +590,10 @@ class ChunkMap{
 			if (visibleValue.some(v => v) && this.getInitedChunks().some(v => v[0]==cX && v[1]==cZ)){ //不可隐藏（有面true） and 在加载区块内
 				let edit = this.edit[cX] && this.edit[cX][cZ];
 				let get = this.perGet(x, y, z, edit||[]);
-				this.addID(get.id, {
-					x,
-					y,
-					z,
-				}, {
+				this.addID(new Block({
+					name: get.name,
 					attr: get.attr
-				});
+				}), {x,y,z});
 				thisBlock = this.get(x,y,z);
 			}
 			if (!thisBlock) //undefined（仍未加载） or null（加载为空气）
@@ -642,13 +606,10 @@ class ChunkMap{
 			if (thisBlock === undefined && visibleValue.some(value => value)){ //未加载 且 不可隐藏（有面true）
 				let edit = this.edit[Math.round(x/map.size.x)] && this.edit[Math.round(x/map.size.x)][Math.round(z/map.size.z)];
 				let get = this.perGet(x, y, z, edit||[]);
-				this.addID(get.id, {
-					x,
-					y,
-					z,
-				}, {
+				this.addID(new Block({
+					name: get.name,
 					attr: get.attr
-				});
+				}), {x,y,z});
 				console.log(this.get(x,y,z), thisBlock)
 				thisBlock = this.get(x,y,z);
 				if (thisBlock === null) //空气
@@ -1425,9 +1386,10 @@ class ChunkMap{
 				if ( needLoad ){ //有面需显示
 					// if (y == 0) console.log(visibleValue)
 					
-					this.addID(block.name, {x, y, z}, {
+					this.addID(new Block({
+						name: block.name,
 						attr: block.attr
-					});
+					}), {x,y,z})
 					
 					const thisBlock = this.get(x, y, z),
 						material = thisBlock.block.material;
@@ -1452,11 +1414,9 @@ class ChunkMap{
 				}
 				
 			}else{ //空气
-				this.addID("空气", {
-					x,
-					y,
-					z
-				});
+				this.addID(new Block({
+					name: "空气"
+				}), {x,y,z});
 			}
 		}
 	}

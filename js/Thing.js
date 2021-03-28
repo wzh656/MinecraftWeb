@@ -82,7 +82,12 @@ class Thing{
 		}
 		return true;
 	}
+	//克隆
+	clone(){
+		return new this.constructor(this);
+	}
 }
+Thing.prototype.type = "Thing"; //名称
 Thing.prototype.TEMPLATES = []; //模板
 
 
@@ -281,82 +286,6 @@ Block.prototype.normalGeometry = new THREE.BoxBufferGeometry(100, 100, 100); //�
 
 
 /*
-* Entity实体类 继承Thing类
-*/
-class Entity extends Thing{
-	constructor(opt){
-		super(opt);
-		
-		this.entity = {};
-		if (opt.entity){
-			//material
-			if (opt.entity.material) this.entity.material = opt.entity.material; //材质
-			//geometry
-			if (opt.entity.geometry) this.entity.geometry = opt.entity.geometry; //几何体
-			//mesh
-			if (opt.entity.mesh) this.entity.mesh = opt.entity.mesh; //网格模型
-			
-			this.entity.added = false; //未加入scene
-		}
-		
-		this.attr = {};
-		if (opt.attr){
-			if (opt.attr.v){ //速度
-				this.attr.v = {};
-				if (opt.attr.v.x) this.attr.v = opt.attr.v.x;
-				if (opt.attr.v.y) this.attr.v = opt.attr.v.y;
-				if (opt.attr.v.z) this.attr.v = opt.attr.v.z;
-			}
-			
-		}
-	}
-	
-	// material
-	setMaterial(material){
-		this.set("entity", "material", material);
-		return this;
-	}
-	deleteMaterial(){
-		if ( this.have("entity", "material") )
-			this.entity.material.dispose(); //清除内存
-		this.set("entity", "material", null); //半保留
-		return this;
-	}
-	
-	// geometry
-	setGeometry(geometry){
-		this.set("entity", "geometry", geometry);
-		return this;
-	}
-	deleteGeometry(){
-		if ( this.have("entity", "geometry") )
-			this.entity.geometry.dispose(); //清除内存
-		this.set("entity", "geometry", null); //半保留
-		return this;
-	}
-	
-	//mesh
-	makeMesh(){
-		const mesh = new THREE.Mesh(this.get("entity", "geometry"), this.get("entity", "material"));
-		mesh.castShadow = true;
-		mesh.receiveShadow = true;
-		mesh.userData.object = this;
-		this.set("block", "mesh", mesh); //网格模型对象Mesh
-		return this;
-	}
-	deleteMesh(){
-		if ( this.have("block", "mesh") ){
-			this.deleteMaterial();
-			this.deleteGeometry(); //清除内存
-		}
-		this.set("block", "mesh", null); //半保留
-		return this;
-	}
-}
-Entity.prototype.type = "Entity"; //名称
-
-
-/*
 * EntityBlock实体方块类 继承Block类
 */
 class EntityBlock extends Block{
@@ -428,6 +357,82 @@ class EntityBlock extends Block{
 	}
 }
 EntityBlock.prototype.type = "EntityBlock"; //名称
+
+
+/*
+* Entity实体类 继承Thing类
+*/
+class Entity extends Thing{
+	constructor(opt){
+		super(opt);
+		
+		this.entity = {};
+		if (opt.entity){
+			//material
+			if (opt.entity.material) this.entity.material = opt.entity.material; //材质
+			//geometry
+			if (opt.entity.geometry) this.entity.geometry = opt.entity.geometry; //几何体
+			//mesh
+			if (opt.entity.mesh) this.entity.mesh = opt.entity.mesh; //网格模型
+			
+			this.entity.added = false; //未加入scene
+		}
+		
+		this.attr = {};
+		if (opt.attr){
+			if (opt.attr.v){ //速度
+				this.attr.v = {};
+				if (opt.attr.v.x) this.attr.v = opt.attr.v.x;
+				if (opt.attr.v.y) this.attr.v = opt.attr.v.y;
+				if (opt.attr.v.z) this.attr.v = opt.attr.v.z;
+			}
+			
+		}
+	}
+	
+	// material
+	setMaterial(material){
+		this.set("entity", "material", material);
+		return this;
+	}
+	deleteMaterial(){
+		if ( this.have("entity", "material") )
+			this.entity.material.dispose(); //清除内存
+		this.set("entity", "material", null); //半保留
+		return this;
+	}
+	
+	// geometry
+	setGeometry(geometry){
+		this.set("entity", "geometry", geometry);
+		return this;
+	}
+	deleteGeometry(){
+		if ( this.have("entity", "geometry") )
+			this.entity.geometry.dispose(); //清除内存
+		this.set("entity", "geometry", null); //半保留
+		return this;
+	}
+	
+	//mesh
+	makeMesh(){
+		const mesh = new THREE.Mesh(this.get("entity", "geometry"), this.get("entity", "material"));
+		mesh.castShadow = true;
+		mesh.receiveShadow = true;
+		mesh.userData.object = this;
+		this.set("entity", "mesh", mesh); //网格模型对象Mesh
+		return this;
+	}
+	deleteMesh(){
+		if ( this.have("entity", "mesh") ){
+			this.deleteMaterial();
+			this.deleteGeometry(); //清除内存
+		}
+		this.set("entity", "mesh", null); //半保留
+		return this;
+	}
+}
+Entity.prototype.type = "Entity"; //名称
 
 
 /*

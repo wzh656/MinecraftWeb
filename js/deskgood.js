@@ -671,21 +671,18 @@ const deskgood = { //桌子好
 	},
 	
 	// 放置方块
-	place(block, pos){
-		/* 单位：m */
-		x = Math.round(x), y = Math.round(y), z = Math.round(z);
+	place(thing, {x,y,z}){
+		/* 单位:m */
 		
-		if ( map.get(x, y, z) &&
-			eval(map.get(x, y, z).get("attr", "block", "onPut")) === false //放置事件
+		if ( thing &&
+			eval(thing.get("attr", "block", "onPut")) === false //放置事件
 		) return;
 		
-		console.log("deskgood.place", {x,y,z}, block.name, block.attr)
+		console.log("deskgood.place", {x,y,z}, thing)
 		
-		map.addID(block.name, {x,y,z}, {
-			attr: block.attr
-		});
+		map.addID(thing, {x,y,z});
 		
-		const attr = JSON.stringify(block.attr).slice(1,-1),
+		const attr = JSON.stringify(thing.attr).slice(1,-1),
 			cX = Math.round(x/map.size.x),
 			cZ = Math.round(z/map.size.z);
 		map.chunks[cX][cZ].edit = map.chunks[cX][cZ].edit.filter(v =>
@@ -702,7 +699,7 @@ const deskgood = { //桌子好
 			x,
 			y,
 			z,
-			name: block.name,
+			name: thing.name,
 			attr
 		}); //添加edit
 		map.updateRound(x, y, z); //刷新方块及周围
@@ -714,7 +711,7 @@ const deskgood = { //桌子好
 			x,
 			y,
 			z,
-			name: block.name,
+			name: thing.name,
 			attr
 		}, {
 			successCallback: function(){
@@ -741,24 +738,25 @@ const deskgood = { //桌子好
 				x,
 				y,
 				z,
-				block.id,
+				thing.id,
 				attr
 			])
 		});*/
 	},
 	
 	// 移除方块
-	remove({x, y, z}){
-		/* 单位：m */
-		x = Math.round(x), y = Math.round(y), z = Math.round(z);
+	remove(thing){
+		const {x,y,z} = thing.type=="entity"?
+			thing.entity.mesh.position.clone().divideScalar(100).round()
+			: thing.block.mesh.position.clone().divideScalar(100).round(); //规范化 单位:m
 		
-		if ( map.get(x, y, z) &&
-			eval(map.get(x, y, z).get("attr", "block", "onRemove")) === false //移除事件
+		if ( thing &&
+			eval(thing.get("attr", "block", "onRemove")) === false //移除事件
 		) return;
 		
-		console.log("deskgood.remove", {x,y,z}, map.get(x, y, z))
+		console.log("deskgood.remove", {x,y,z}, thing)
 		
-		map.delete(x, y, z); //删除方块
+		map.delete(thing); //删除方块
 		
 		const cX = Math.round(x/map.size.x),
 			cZ = Math.round(z/map.size.z);
