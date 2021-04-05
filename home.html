@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Copyleft by wzh 2020~2021 -->
+<!-- Copyright © 2020~2021 by wzh -->
 <html lang="zh">
 	<head>
 		<meta charset="UTF-8" />
@@ -107,6 +107,7 @@
 			transform: translateY(-50%);
 		}
 		
+		
 		/*INIT*/
 		.init{
 			position: absolute;
@@ -124,13 +125,29 @@
 			font-size: 4.6em;
 			margin: 0;
 		}
-		.init > button{
-			width: 66.6vw;
-			/* height: 10vw; */
+		.init button{
 			font-size: 3em;
 			margin: 0 auto;
-			/*font-family: zyyt, serif;*/
+			padding: 1vmax;
 		}
+		.init > div{
+			display: flex;
+			flex-direction: column;
+			justify-content: space-around;
+			margin: 0 auto;
+		}
+		.init > div > button{
+			width: calc(66vw + 3vmax * 2);
+		}
+		.init > div > div{
+			display: flex;
+			justify-content: space-around;
+		}
+		.init > div > div > button{
+			width: 33vw;
+			margin: 3vmax;
+		}
+		
 		
 		/* NEW WORLD */
 		.new_world{
@@ -170,6 +187,7 @@
 			margin: 3px;
 			font-size: 2em;
 		}
+		
 		
 		/* MORE */
 		.more{
@@ -228,6 +246,7 @@
 			padding-left: 2vw;
 		} */
 		
+		
 		/* ABOUT */
 		.about{
 			position: absolute;
@@ -253,6 +272,24 @@
 		.about > div{
 			padding: 2vmax;
 			margin: 3vmax;
+		}
+		
+		
+		/* COMMUNITY*/
+		.community{
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			top: 100%;
+			left: 0;
+			margin: 0;
+			background-color: white;
+			opacity: 0;
+		}
+		.community h1{
+			margin-top: 10vh;
+			font-size: 3em;
+			text-align: center;
 		}
 		</style>
 		
@@ -293,8 +330,13 @@
 	<body>
 		<section class="init" style="display: flex;">
 			<h1>我的世界</h1>
-			<button class="success">新的世界<p>New World</p></button>
-			<button class="info">关于<p>About</p></button>
+			<div>
+				<button class="success" id="new_world" >新的世界<p>New World</p></button>
+				<div>
+					<button class="info" id="community">社区<p>Community</p></button>
+					<button class="info" id="about">关于<p>About</p></button>
+				</div>
+			</div>
 		</section>
 		<section class="new_world" style="display: none;">
 			<h2>新的世界<p>NEW WORLD</p></h2>
@@ -398,7 +440,7 @@
 				</div>
 				<br style="clear:both;" />
 			</details>
-			<button class="warn">取消<p>Cancel</p></button>
+			<button class="warn back">取消<p>Cancel</p></button>
 			<button class="success">生成世界<p>OK</p></button>
 		</section>
 		<section class="about" style="display: none;">
@@ -412,20 +454,23 @@
 			</div>
 			<div>
 				<hr/>
-				<!-- 作者注：clone项目请保留作者和github/gitee链接 -->
 				开发者：@wzh656<br/>
 				<a class="newTable" href="https://github.com/wzh656/">Github</a><br/>
 				<a class="newTable" href="https://gitee.com/wzh656/">Gitee</a><br/>
+				<!-- 作者注：clone项目请保留作者和github/gitee链接 -->
 				<a class="newTable" href="https://gitter.im/wzh656/Minecraft?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge&amp;utm_content=badge">Gitter<img src="https://badges.gitter.im/wzh656/Minecraft.svg" alt="Join the chat at https://gitter.im/wzh656/Minecraft" /></a><br/>
 				邮箱：<a href="mailto:1826632591@qq.com?subject=关于《我的世界（仿）》">1826632591@qq.com</a><br/>
 				QQ：1826632591<a target="_blank" href="http://wpa.qq.com/msgrd?v=3&uin=1826632591&site=qq&menu=yes"><img border="0" src="http://wpa.qq.com/pa?p=2:1826632591:51" alt="点击这里给我发消息" title="点击这里给我发消息"/></a><br/>
 				<a href="http://chat.daovoice.io?id=cfb04fc0" onclick="if (typeof plus != undefined) plus.screen.lockOrientation('portrait-primary');">联系作者</a>
 			</div>
 			<hr/>
-			<center><button class="warn">返回<p>Back</p></button></center>
+			<center><button class="warn back">返回<p>Back</p></button></center>
 			<footer style="display: none;"><center>
 				<script language="javascript" src="http://count24.51yes.com/click.aspx?id=248466766&logo=1" charset="gb2312"></script>
 			</center></footer>
+		</section>
+		<section class="community" style="display: none;">
+			<h1>加载中……<p>Loading…</p></h1>
 		</section>
 <script>
 //input处理
@@ -589,14 +634,16 @@ function open(url="main.html"){
 
 //已有存档
 if (localStorage.getItem("我的世界_seed") !== null){
-	$(".init > button:eq(0)")[0].innerHTML = "开始游戏<p>START PLAYING</p>"
-	$(".init > button:eq(0)")[0].onclick = ()=>open();
+	$("#new_world")[0].innerHTML = "开始游戏<p>START PLAYING</p>"
+	$("#new_world")[0].onclick = ()=>open();
 }else{ //无存档
 	// getGeolocationPosition();
 }
 
+
+
 //新的世界
-$(".init > button:eq(0)")[0].onclick = function(){
+$("#new_world")[0].onclick = function(){
 	console.log("new_world", $(".init").css("display"), $(".new_world").css("display"), $("button").attr("disabled"));
 	
 	$("button").attr("disabled", "true");
@@ -625,14 +672,14 @@ $(".init > button:eq(0)")[0].onclick = function(){
 };
 //已有存档
 if (localStorage.getItem("我的世界_seed") !== null){
-	$(".init > button:eq(0)")[0].innerHTML = "开始游戏<p>START PLAYING</p>"
-	$(".init > button:eq(0)")[0].onclick = ()=>open();
+	$("#new_world")[0].innerHTML = "开始游戏<p>START PLAYING</p>"
+	$("#new_world")[0].onclick = ()=>open();
 }else{ //无存档
 	getGeolocationPosition();
 }
 
 //新的世界 取消
-$(".new_world > button:eq(0)").click(function(){
+$(".new_world button.back").click(function(){
 	console.log("init", $(".init").css("display"), $(".new_world").css("display"), $("button").attr("disabled"));
 	
 	$("button").attr("disabled", "true");
@@ -660,8 +707,9 @@ $(".new_world > button:eq(0)").click(function(){
 	console.log("init", "animate start", $(".init").css("display"), $(".new_world").css("display"), $("button").attr("disabled"));
 });
 
+
 //关于
-$(".init > button:eq(1)").click(function(){
+$("#about").click(function(){
 	console.log("about", $(".init").css("display"), $(".about").css("display"), $("button").attr("disabled"));
 	
 	$("button").attr("disabled", "true");
@@ -695,7 +743,7 @@ $(".init > button:eq(1)").click(function(){
 });
 
 //关于 取消
-$(".about > center > button:eq(0)").click(function(){
+$(".about button.back").click(function(){
 	console.log("init", $(".init").css("display"), $(".about").css("display"), $("button").attr("disabled"));
 	
 	$("button").attr("disabled", "true");
@@ -722,6 +770,37 @@ $(".about > center > button:eq(0)").click(function(){
 	
 	console.log("init", "animate start", $(".init").css("display"), $(".about").css("display"), $("button").attr("disabled"));
 });
+
+
+$("#community").click(function(){
+	location.href = "login.html";
+	console.log("community", $(".init").css("display"), $(".community").css("display"), $("button").attr("disabled"));
+	
+	$("button").attr("disabled", "true");
+	$(".init")
+		.css("left", "0%")
+		.css("opacity", "1")
+		.animate({
+			left: (Math.random(0,1,0)?"-":"") + "100%", //正负100%
+			opacity: 0
+		}, 1000, ()=>{
+			$(".init").css("display", "none");
+			$("button").removeAttr("disabled");
+			console.log("community", "animate end", $(".init").css("display"), $(".community").css("display"), $("button").attr("disabled"));
+		});
+	$(".community")
+		.css("top", (Math.random(0,1,0)?"-":"") + "100%") //正负100%
+		.css("opacity", "0")
+		.css("display", "block")
+		.animate({
+			top: "0%",
+			opacity: 1
+		}, 1000);
+	
+	console.log("community", "animate start", $(".init").css("display"), $(".community").css("display"), $("button").attr("disabled"));
+});
+
+
 
 //生成世界
 $(".new_world > button:eq(1)").click(function(){

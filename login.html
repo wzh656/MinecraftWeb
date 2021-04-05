@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<!-- Copyright © 2020~2021 by wzh -->
+<html lang="zh">
+	<head>
+		<meta charset="UTF-8" />
+		<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+		<title>我的世界</title>
+		
+		<!--icon-->
+		<link href="./img/icon.png" rel="icon" type="image/x-icon"/>
+		
+		<!-- 异步fonts加载 -->
+		<script src="https://staticfile.qnssl.com/webfont/1.6.16/webfontloader.js"></script>
+		<script>
+		if (typeof require != "undefined"){ //electron
+			console.log("electron")
+			document.write(`<link href="./css/fonts.css" rel="stylesheet" type="text/css" />`);
+			window.onload = function(){
+				console.log("onload")
+				$("body").addClass("wf-active");
+			}
+		}else{
+			WebFont.load({
+				google: {
+					families: ["kt", "st", "xs", "zyyt"],
+					api: "./css/fonts.css"
+				}
+			});
+		}
+		</script>
+
+		
+		<style>
+		/* 字体加载完成 */
+		.wf-active *{
+			font-family: zyyt, serif;
+			outline: none;
+		}
+		.wf-active h1,
+		.wf-active h2,
+		.wf-active h3,
+		.wf-active h4{
+			font-family: st, serif;
+		}
+		.wf-active p,
+		.wf-active label{
+			font-family: kt, serif;
+		}
+		.wf-active button{
+			font-family: xs, serif;
+			font-weight: bold;
+		}
+		
+		
+		/* 字体缩放方案 */
+		@media screen and (max-width:320px){
+			body {font-size: 0.8rem;}
+		}
+		@media screen and (min-width: 321px) and (max-width:481px){
+			body {font-size: 1rem;}
+		}
+		@media screen and (min-width: 481px) and (max-width:640px){
+			body {font-size: 1.1rem;}
+		}
+		@media screen and (min-width: 641px) and (max-width:800px){
+			body {font-size: 1.15rem;}
+		}
+		@media screen and (min-width: 801px) and (max-width:960px){
+			body {font-size: 1.25rem;}
+		}
+		@media screen and (min-width: 960px){
+			body {font-size: 1.3rem;}
+		}
+		
+		/* element */
+		html{
+			-moz-user-select: none;
+			-khtml-user-select: none;
+			user-select: none;
+		}
+		body{
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			margin: 0;
+		}
+		p{
+			margin: 0;
+			font-size: 0.36em;
+		}
+		button{
+			background-color: white;
+			border-radius: 6px;
+			transition: color 0.5s, background-color 0.5s;
+		}
+		button.success{
+			border: 3px solid #66aaff;
+		}
+		button.success:hover{
+			color: white;
+			background-color: #88aaff;
+		}
+		label{
+			font-weight: bold;
+		}
+		input{
+			height: 5vh;
+			font-size: 1.1em;
+			border: 1px solid #aaa;
+			border-radius: 3px;
+		}
+		
+		
+		section{
+			height: 100%;
+		}
+		h1{
+			text-align: center;
+			font-size: 3em;
+		}
+		
+		form > div{
+			padding: 1vmax;
+		}
+		form > div > input{
+			width: 100%;
+		}
+		
+		form > div:last-of-type{
+			display: flex;
+			flex-direction: column;
+		}
+		form > div > button{
+			font-size: 2em;
+			width: 76vw;
+			margin: 0 auto;
+		}
+		form > div > button:last-of-type{
+			font-size: 1.3em;
+		}
+		</style>
+		
+		<script src="./js/modules/jquery.min.js"></script>
+		<script>
+		if (typeof require != "undefined") //electron
+			window.$ = window.jQuery = require("./js/modules/jquery.min.js");
+		</script>
+		<script src="./js/modules/js+.js"></script>
+		
+		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
+		<script>
+		if ( /ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test( navigator.userAgent.toLowerCase() ) ){
+			//手机
+			eruda.init();
+			new VConsole();
+		}
+		</script>
+
+		<!-- DaoVoice -->
+		<script async defer>(function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/cfb04fc0.js","daovoice")</script>
+		<script async defer>
+		daovoice('init', {
+			app_id: "cfb04fc0"
+	 	});
+		daovoice('update');
+		</script>
+		
+		<!-- gitter -->
+		<script defer>
+		((window.gitter = {}).chat = {}).options = {
+			room: 'wzh656/Minecraft'
+		};
+		</script>
+		<script src="https://sidecar.gitter.im/dist/sidecar.v1.js" async defer></script>
+	</head>
+	<body>
+		<section class="login">
+			<h1>登录<p>LOGIN</p></h1>
+			<form>
+				<div>
+					<label>用户名：</label><br/><input name="name" placeholder="用户名" />
+				</div>
+				<div>
+					<label>密码：</label><br/><input name="password" placeholder="密码" type="password" />
+				</div>
+				<div>
+					<button class="success" type="submit">登录</button><br/>
+					<button class="success" type="button">还没有账号，前往注册</button>
+				</div>
+			</form>
+		</section>
+		
+		<section class="register">
+			<h1>注册<p>REGISTER</p></h1>
+			<form>
+				<div>
+					<label>用户名：</label><br/><input name="name" placeholder="用户名" /><br/>
+				</div>
+				<div>
+					<label>密码：</label><br/><input name="password" placeholder="密码" type="password" /><br/>
+				</div>
+				<div>
+					<label>再次重复密码：</label><br/><input name="password" placeholder="再次重复密码" type="password" /><br/>
+				</div>
+				<div>
+					<label>邮箱：</label><br/><input name="mail" placeholder="邮箱" /><br/>
+				</div>
+				<div>
+					<label>验证码：</label><br/><input name="verCode" placeholder="验证码" /><br/>
+				</div>
+				<div>
+					<label>QQ（选填）：</label><br/><input name="qq" placeholder="qq(选填)" /><br/>
+				</div>
+				<div>
+					<button class="success" type="submit">注册</button><br/>
+					<button class="success" type="button">已有账号，前往登录</button>
+				</div>
+			</form>
+		</section>
+
+<script>
+
+</script>
+	</body>
+</html>
