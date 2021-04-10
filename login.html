@@ -252,7 +252,9 @@ $("#login").click(function(){
 	const {name:{value:name}, password:{value:password}} = $("form")[0];
 	console.log(name, password)
 	for (const user of users){
-		if ()
+		if (user.name == name){
+			return;
+		}
 	}
 });
 
