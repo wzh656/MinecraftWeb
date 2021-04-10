@@ -89,16 +89,7 @@
 			font-size: 0.36em;
 		}
 		button{
-			background-color: white;
 			border-radius: 6px;
-			transition: color 0.5s, background-color 0.5s;
-		}
-		button.success{
-			border: 3px solid #66aaff;
-		}
-		button.success:hover{
-			color: white;
-			background-color: #88aaff;
 		}
 		label{
 			font-weight: bold;
@@ -115,6 +106,8 @@
 			height: 100%;
 		}
 		h1{
+			margin: 0;
+			padding: 3rem;
 			text-align: center;
 			font-size: 3em;
 		}
@@ -128,15 +121,28 @@
 		
 		form > div:last-of-type{
 			display: flex;
-			flex-direction: column;
 		}
 		form > div > button{
 			font-size: 2em;
-			width: 76vw;
+			width: 46vw;
 			margin: 0 auto;
 		}
+		form > div > button:first-of-type{
+			color: white;
+			background-color: #6af;
+			border: 3px solid #6af;
+		}
+		form > div > button:first-of-type:hover{
+			background-color: #59e;
+		}
+		
 		form > div > button:last-of-type{
-			font-size: 1.3em;
+			color: black;
+			background-color: #fff;
+			border: 3px solid #6af;
+		}
+		form > div > button:last-of-type:hover{
+			background-color: #eee;
 		}
 		</style>
 		
@@ -175,7 +181,7 @@
 		<script src="https://sidecar.gitter.im/dist/sidecar.v1.js" async defer></script>
 	</head>
 	<body>
-		<section class="login">
+		<section>
 			<h1>登录<p>LOGIN</p></h1>
 			<form>
 				<div>
@@ -185,42 +191,75 @@
 					<label>密码：</label><br/><input name="password" placeholder="密码" type="password" />
 				</div>
 				<div>
-					<button class="success" type="submit">登录</button><br/>
-					<button class="success" type="button">还没有账号，前往注册</button>
-				</div>
-			</form>
-		</section>
-		
-		<section class="register">
-			<h1>注册<p>REGISTER</p></h1>
-			<form>
-				<div>
-					<label>用户名：</label><br/><input name="name" placeholder="用户名" /><br/>
-				</div>
-				<div>
-					<label>密码：</label><br/><input name="password" placeholder="密码" type="password" /><br/>
-				</div>
-				<div>
-					<label>再次重复密码：</label><br/><input name="password" placeholder="再次重复密码" type="password" /><br/>
-				</div>
-				<div>
-					<label>邮箱：</label><br/><input name="mail" placeholder="邮箱" /><br/>
-				</div>
-				<div>
-					<label>验证码：</label><br/><input name="verCode" placeholder="验证码" /><br/>
-				</div>
-				<div>
-					<label>QQ（选填）：</label><br/><input name="qq" placeholder="qq(选填)" /><br/>
-				</div>
-				<div>
-					<button class="success" type="submit">注册</button><br/>
-					<button class="success" type="button">已有账号，前往登录</button>
+					<button class="success" type="button" id="login">登录</button>
+					<button class="success" type="button" id="register">注册</button>
 				</div>
 			</form>
 		</section>
 
 <script>
+//请求服务器
+function request(method, path="", value=""){
+	return new Promise((resolve, reject)=>{
+		console.log(method, path, value)
+		$.ajax({
+			url: "https://wzh.glitch.me/data/" + method,
+			data: {path, value},
+			type: "GET",
+			dataType: "jsonp",
+			success: (response, status, xhr)=>{
+				console.log({method, path, value}, response)
+				resolve(response);
+			}
+		});
+	});
+}
 
+const ROOT = "/MinecraftCommunity/",
+	USERS = ROOT + "users/",
+	CHAT = ROOT + "chat/default/",
+	users = [];
+
+async function main(){
+	let res;
+	
+	res = await request("makeDir", USERS);
+	if (res != true){
+		console.error("makeDir", USERS, res);
+		alert("操作错误\nresult:"+JSON.stringify(res));
+	}
+	
+	res = await request("makeDir", CHAT);
+	if (res != true){
+		console.error("makeDir", CHAT, res);
+		alert("操作错误\nresult:"+JSON.stringify(res));
+	}
+	
+	res = await request("readDir", USERS);
+	for (const user of res){
+		res = await request("readFile", USERS+user);
+		const lines = res.split("\n");
+		users.push({
+			name: lines[0],
+			password: lines[1]
+		});
+	}
+}
+main();
+
+
+$("#login").click(function(){
+	const {name:{value:name}, password:{value:password}} = $("form")[0];
+	console.log(name, password)
+	for (const user of users){
+		if ()
+	}
+});
+
+$("#register").click(function(){
+	const {name:{value:name}, password:{value:password}} = $("form")[0];
+	console.log(name, password)
+});
 </script>
 	</body>
 </html>
