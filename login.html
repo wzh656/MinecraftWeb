@@ -4,7 +4,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
-		<title>我的世界</title>
+		<title>我的世界 | 登录</title>
 		
 		<!--icon-->
 		<link href="./img/icon.png" rel="icon" type="image/x-icon"/>
@@ -28,7 +28,6 @@
 			});
 		}
 		</script>
-
 		
 		<style>
 		/* 字体加载完成 */
@@ -78,11 +77,8 @@
 			-khtml-user-select: none;
 			user-select: none;
 		}
-		body{
-			position: absolute;
-			width: 100%;
-			height: 100%;
-			margin: 0;
+		body, input{
+			background-color: #F6F6F6;
 		}
 		p{
 			margin: 0;
@@ -95,25 +91,24 @@
 			font-weight: bold;
 		}
 		input{
-			height: 5vh;
+			height: 6.8vw;
 			font-size: 1.1em;
 			border: 1px solid #aaa;
 			border-radius: 3px;
 		}
 		
 		
-		section{
+		#view{
 			height: 100%;
 		}
 		h1{
-			margin: 0;
-			padding: 3rem;
+			margin: 2.6rem;
 			text-align: center;
 			font-size: 3em;
 		}
 		
 		form > div{
-			padding: 1vmax;
+			padding: 1vw;
 		}
 		form > div > input{
 			width: 100%;
@@ -124,28 +119,57 @@
 		}
 		form > div > button{
 			font-size: 2em;
-			width: 46vw;
+			width: 46%;
 			margin: 0 auto;
 		}
 		form > div > button:first-of-type{
 			color: white;
-			background-color: #6af;
-			border: 3px solid #6af;
+			background-color: #1e9fff;
+			border: 3px solid #1e9fff;
 		}
 		form > div > button:first-of-type:hover{
-			background-color: #59e;
+			background-color: #0e8fef;
+			border: 3px solid #0e8fef;
 		}
 		
 		form > div > button:last-of-type{
-			color: black;
+			color: #1e9fff;
 			background-color: #fff;
-			border: 3px solid #6af;
+			border: 3px solid #1e9fff;
 		}
 		form > div > button:last-of-type:hover{
 			background-color: #eee;
 		}
+		
+		#messages{
+			position: absolute;
+			top: 0;
+			right: 0;
+			margin: 0.3rem;
+		}
+		#messages > article{
+			display: block;
+			width: 260px;
+			margin: 0.6rem;
+			padding: 0.3rem;
+			background-color: white;
+			border-radius: 1px;
+			box-shadow: 0 0 1px 2px rgba(160, 160, 160, 0.6);
+		}
+		#messages > article > h3{
+			margin: 0;
+			font-size: 1.36em;
+		}
+		#messages > article > p{
+			font-size: 1.2em;
+		}
 		</style>
 		
+		<!-- layui -->
+		<!--<link rel="stylesheet" href="https://unpkg.com/layui@2.6.4/dist/css/layui.css">-->
+		<script src="https://unpkg.com/layui@2.6.4/dist/layui.js"></script>
+		
+		<script src="./js/modules/sha512.js"></script>
 		<script src="./js/modules/jquery.min.js"></script>
 		<script>
 		if (typeof require != "undefined") //electron
@@ -162,26 +186,10 @@
 			new VConsole();
 		}
 		</script>
-
-		<!-- DaoVoice -->
-		<script async defer>(function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/cfb04fc0.js","daovoice")</script>
-		<script async defer>
-		daovoice('init', {
-			app_id: "cfb04fc0"
-	 	});
-		daovoice('update');
-		</script>
 		
-		<!-- gitter -->
-		<script defer>
-		((window.gitter = {}).chat = {}).options = {
-			room: 'wzh656/Minecraft'
-		};
-		</script>
-		<script src="https://sidecar.gitter.im/dist/sidecar.v1.js" async defer></script>
 	</head>
 	<body>
-		<section>
+		<section id="view" class="layui-main layui-unselect">
 			<h1>登录<p>LOGIN</p></h1>
 			<form>
 				<div>
@@ -190,13 +198,20 @@
 				<div>
 					<label>密码：</label><br/><input name="password" placeholder="密码" type="password" />
 				</div>
-				<div>
-					<button class="success" type="button" id="login">登录</button>
-					<button class="success" type="button" id="register">注册</button>
+				<div class="layui-btn-container">
+					<button class="success layui-btn layui-btn-primary layui-bg-blue" lay-submit lay-filter="login" type="button" id="login">登录</button>
+					<button class="success layui-btn layui-bg-gray" lay-submit lay-filter="login" type="button" id="register">注册</button>
 				</div>
 			</form>
 		</section>
-
+		
+		<section id="messages"></section>
+		
+		<!-- 流量统计 -->
+		<div style="display: none;">
+			<script language="javascript" src="http://count24.51yes.com/click.aspx?id=248466766&logo=12" charset="gb2312"></script>
+		</div>
+		
 <script>
 //请求服务器
 function request(method, path="", value=""){
@@ -213,6 +228,22 @@ function request(method, path="", value=""){
 			}
 		});
 	});
+}
+
+//消息
+function message(title, text, color="#3af", time=3){
+	const e = $("<article></article>")
+		.append( $("<h3></h3>")
+			.html(title)
+			.css("color", color)
+		)
+		.append( $("<p></p>").html(text) );
+	$("#messages").append(
+		e.css("marginLeft", "160px")
+		.hide()
+		.show("slow")
+		.animate({marginLeft: "0px"}, "slow")
+	);
 }
 
 const ROOT = "/MinecraftCommunity/",
@@ -240,27 +271,53 @@ async function main(){
 		res = await request("readFile", USERS+user);
 		const lines = res.split("\n");
 		users.push({
-			name: lines[0],
-			password: lines[1]
+			regTime: lines[0],
+			password: lines[1],
+			info: JSON.parse(lines[2])
 		});
 	}
 }
-main();
+let inited = false;
+main().then(() => init=true); //初始化完成
 
 
 $("#login").click(function(){
+	if (!init) return layer.msg("获取用户信息中……", {icon: 5});
 	const {name:{value:name}, password:{value:password}} = $("form")[0];
-	console.log(name, password)
-	for (const user of users){
-		if (user.name == name){
+	console.log("login", name, password)
+	
+	for (const user of users)
+		if (user.name == name && user.password == hex_sha512(hex_sha512(password))){
+			localStorage.setItem("name", name);
+			localStorage.setItem("password", hex_sha512(password));
+			layer.msg("登录成功！", {icon: 1});
+			location.href = "./community.html";
 			return;
 		}
-	}
+	
+	layer.msg("用户名或密码错误", {icon: 2});
 });
 
 $("#register").click(function(){
+	if (!init) return layer.msg("获取用户信息中……", {icon: 5});
 	const {name:{value:name}, password:{value:password}} = $("form")[0];
-	console.log(name, password)
+	console.log("register", name, password)
+	
+	for (const user of users)
+		if (user.name == name){
+			return layer.msg("该用户已存在", {icon: 5});
+		}
+	
+	request("writeFile", USERS+name,
+		+new Date()+"\n"+
+		hex_sha512(hex_sha512(password))+"\n"+
+		"{}"
+	).then(()=>{
+		localStorage.setItem("name", name);
+		localStorage.setItem("password", hex_sha512(password));
+		layer.msg("注册成功！", {icon: 1});
+		location.href = "./community.html";
+	});
 });
 </script>
 	</body>
