@@ -80,73 +80,33 @@
 			-moz-user-select: none;
 			-khtml-user-select: none;
 			user-select: none;
-			
-			text-align: center;
 		}
-		body, input{
+		body{
 			background-color: #f6f6f6;
+			text-align: center;
 		}
 		p{
 			margin: 0;
 			font-size: 0.36em;
 		}
-		label{
-			font-weight: bold;
-		}
-		input{
-			height: calc(1.2vw + 30px);
-			font-size: 1.1em;
-			border: 1px solid #aaa;
-			border-radius: 3px;
-		}
-		button{
-			border-radius: 6px;
-		}
-		a{
-			display: block;
-			margin: 1vw;
-		}
-		
-		
-		#view{
-			height: 100%;
-		}
 		h1{
 			margin: 2.6rem;
 			font-size: 3em;
 		}
+		button{
+			border-radius: 6px;
+		}
 		
-		form > div{
+		#newSection{
+			float: right;
+			font-size: 1.1em;
 			padding: 1vw;
-		}
-		form > div > input{
-			width: 100%;
-		}
-		
-		form > div:last-of-type{
-			display: flex;
-		}
-		form > div > button{
-			font-size: 2em;
-			width: 46%;
-			margin: 0 auto;
-		}
-		form > div > button:first-of-type{
-			color: white;
-			background-color: #1e9fff;
-			border: 3px solid #1e9fff;
-		}
-		form > div > button:first-of-type:hover{
-			background-color: #0e8fef;
-			border: 3px solid #0e8fef;
-		}
-		
-		form > div > button:last-of-type{
+			
 			color: #1e9fff;
 			background-color: #fff;
-			border: 3px solid #1e9fff;
+			border: 1px solid #1e9fff;
 		}
-		form > div > button:last-of-type:hover{
+		#newSection:hover{
 			background-color: #eee;
 		}
 		</style>
@@ -175,21 +135,12 @@
 		
 	</head>
 	<body>
-		<section id="view">
-			<h1>登录 & 注册<p>LOGIN & REGISTER</p></h1>
-			<form>
-				<div>
-					<label>用户名：</label><br/><input name="name" placeholder="用户名" />
-				</div>
-				<div>
-					<label>密码：</label><br/><input name="password" placeholder="密码" type="password" />
-				</div>
-				<div class="layui-btn-container">
-					<button class="success" type="submit" id="login">登录</button>
-					<button class="success" type="submit" id="register">注册</button>
-				</div>
-			</form>
-			<a href="javascript:tourist();">先随便逛逛（游客）</a>
+		<section>
+			<h1>社区<p>COMMUNITY</p></h1>
+			<button id="newSection" style="display: none;">新建板块</button>
+			<ul id="list">
+				<span>加载中……</span>
+			</ul>
 		</section>
 		
 		<!-- 流量统计 -->
@@ -215,9 +166,13 @@ function request(method, path="", value=""){
 	});
 }
 
+
 const ROOT = "/MinecraftCommunity/",
 	USERS = ROOT + "users/",
-	users = {};
+	CHAT = ROOT + "chat/default/",
+	users = [], //用户
+	sections = []; //板块
+let userName; //用户名
 
 async function main(){
 	let res;
@@ -239,88 +194,84 @@ async function main(){
 	for (const name of res){
 		res = await request("readFile", USERS+name);
 		const lines = res.split("\n");
-		users[name] = {
+		users.push({
+			name,
 			regTime: lines[0],
 			password: lines[1],
 			info: JSON.parse(lines[2])
+		});
+	}
+	
+	// 登录判断
+	if (localStorage.getItem("tourist") == "true"){ //游客模式
+		userName = false;
+	}else if (localStorage.getItem("name") && localStorage.getItem("password")){
+		const name = localStorage.getItem("name"),
+			password = localStorage.getItem("password");
+		for (const user of users)
+			if (user.name == name && user.password == hex_sha512(password)){ //密码正确
+				userName = name;
+				return $("#newSection").show();
+			}
+		layer.alert("登录错误！", {icon:2})
+		location.href = "login.html";
+	}
+	
+	//社区列表
+	res = await request("readDir", CHAT);
+	$("#list").empty();
+	for (const name of res){
+		const lines = (await request("readFile", CHAT+name)).split("\n");
+		sections[name] = {
+			creator: lines[0],
+			createTime: lines[1],
+			introduction: lines[2],
+			info: JSON.parse(lines[3])
 		};
+		$("#list").append(
+			$("<li></li>")
+			.html(name)
+			.click(()=>{
+				
+			})
+		);
 	}
 }
-let inited = false;
-main().then(() => init=true); //初始化完成
+main();
 
-//登录
-function login(){
-	if (!init) return layer.msg("获取用户信息中……", {icon: 5});
+function newSection(){
+	if (!userName) layer.msg("请先登录", {icon: 5});
 	
-	const {name:{value:name}, password:{value:password}} = $("form")[0];
-	
-	if (!name) return layer.msg("请输入用户名", {icon: 5});
-	if (!password) return layer.msg("请输入密码", {icon: 5});
-	
-	for (const [name,user] of Object.entries(users)){
-		if (user.name == name && user.password == hex_sha512(hex_sha512(password))){
-			localStorage.setItem("name", name);
-			localStorage.setItem("password", hex_sha512(password));
-			layer.msg("登录成功！", {icon: 1});
-			location.href = "./community.html";
-			layer.load(1, {shade: false});
-			return;
-		}
-	}
-	layer.msg("用户名或密码错误", {icon: 2});
-}
-//注册
-function register(){
-	if (!init) return layer.msg("获取用户信息中……", {icon: 5});
-	
-	const {name:{value:name}, password:{value:password}} = $("form")[0];
-	
-	if (!name) return layer.msg("请输入用户名", {icon: 5});
-	if (!password) return layer.msg("请输入密码", {icon: 5});
-	
-	for (const [name,user] of Object.entries(users)){
-		if (user.name == name){
-			return layer.msg("该用户已存在", {icon: 5});
-		}
-	
-	request("writeFile", USERS+name,
-		+new Date()+"\n"+
-		hex_sha512(hex_sha512(password))+"\n"+
-		"{}"
-	).then(()=>{
-		localStorage.setItem("name", name);
-		localStorage.setItem("password", hex_sha512(password));
-		layer.msg("注册成功！", {icon: 1});
-		location.href = "./community.html";
-		layer.load(1, {shade: false});
+	layer.prompt({title: "请输入名称"}, async function(name, index){
+		layer.prompt({title: "请输入介绍"}, async function(introduction, index){
+			layer.close(index);
+			
+			let res;
+			
+			res = await request("makeDir", CHAT+name);
+			if (res != true){
+				console.error("makeDir", USERS, res);
+				alert("操作错误\nresult:"+JSON.stringify(res));
+			}
+			
+			res = await request("writeFile", CHAT+name+"\info.dat",
+				userName+"\n"+
+				+new Date()+"\n"+
+				introduction+"\n"+
+				"{}"
+			);
+			if (res != true){
+				console.error("makeDir", USERS, res);
+				alert("操作错误\nresult:"+JSON.stringify(res));
+			}
+			
+			layer.msg("创建成功！", {icon: 1});
+			location.reload();
+		});
 	});
 }
-//游客模式
-function tourist(){
-	localStorage.setItem("tourist", "true");
-	location.href = "./community.html";
-	layer.load(1, {shade: 0.1});
-}
 
-$("form").submit(function(e){
-	login();
-	e.stopPropagation();
-	e.cancelBubble = true;
-	return false;
-});
-$("#login").click(function(e){
-	login();
-	e.stopPropagation();
-	e.cancelBubble = true;
-	return false;
-});
-$("#register").click(function(e){
-	register();
-	e.stopPropagation();
-	e.cancelBubble = true;
-	return false;
-});
+$("#newSection").click(newSection);
 </script>
 	</body>
 </html>
