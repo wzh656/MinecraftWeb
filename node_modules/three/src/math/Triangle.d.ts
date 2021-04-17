@@ -3,18 +3,23 @@ import { Vector3 } from './Vector3';
 import { Plane } from './Plane';
 import { Box3 } from './Box3';
 
-export interface SplineControlPoint {
-	x: number;
-	y: number;
-	z: number;
-}
-
 export class Triangle {
 
 	constructor( a?: Vector3, b?: Vector3, c?: Vector3 );
 
+	/**
+	 * @default new THREE.Vector3()
+	 */
 	a: Vector3;
+
+	/**
+	 * @default new THREE.Vector3()
+	 */
 	b: Vector3;
+
+	/**
+	 * @default new THREE.Vector3()
+	 */
 	c: Vector3;
 
 	set( a: Vector3, b: Vector3, c: Vector3 ): Triangle;
@@ -24,7 +29,7 @@ export class Triangle {
 		i1: number,
 		i2: number
 	): Triangle;
-	clone(): this;
+	clone(): Triangle;
 	copy( triangle: Triangle ): this;
 	getArea(): number;
 	getMidpoint( target: Vector3 ): Vector3;

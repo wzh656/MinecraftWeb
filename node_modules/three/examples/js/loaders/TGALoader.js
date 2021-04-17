@@ -1,9 +1,3 @@
-/**
- * @author Daosheng Mu / https://github.com/DaoshengMu/
- * @author mrdoob / http://mrdoob.com/
- * @author takahirox / https://github.com/takahirox/
- */
-
 THREE.TGALoader = function ( manager ) {
 
 	THREE.Loader.call( this, manager );
@@ -23,6 +17,7 @@ THREE.TGALoader.prototype = Object.assign( Object.create( THREE.Loader.prototype
 		var loader = new THREE.FileLoader( this.manager );
 		loader.setResponseType( 'arraybuffer' );
 		loader.setPath( this.path );
+		loader.setWithCredentials( this.withCredentials );
 
 		loader.load( url, function ( buffer ) {
 
@@ -540,7 +535,7 @@ THREE.TGALoader.prototype = Object.assign( Object.create( THREE.Loader.prototype
 
 		context.putImageData( imageData, 0, 0 );
 
-		return useOffscreen ? canvas.transferToImageBitmap() : canvas;
+		return canvas;
 
 	}
 

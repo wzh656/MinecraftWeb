@@ -3,7 +3,7 @@ import { Color } from './../math/Color';
 export interface IFog {
 	name: string;
 	color: Color;
-	clone(): this;
+	clone(): IFog;
 	toJSON(): any;
 }
 
@@ -12,8 +12,11 @@ export interface IFog {
  */
 export class Fog implements IFog {
 
-	constructor( hex: number, near?: number, far?: number );
+	constructor( color: Color | number | string, near?: number, far?: number );
 
+	/**
+	 * @default ''
+	 */
 	name: string;
 
 	/**
@@ -23,18 +26,19 @@ export class Fog implements IFog {
 
 	/**
 	 * The minimum distance to start applying fog. Objects that are less than 'near' units from the active camera won't be affected by fog.
+	 * @default 1
 	 */
 	near: number;
 
 	/**
 	 * The maximum distance at which fog stops being calculated and applied. Objects that are more than 'far' units away from the active camera won't be affected by fog.
-	 * Default is 1000.
+	 * @default 1000
 	 */
 	far: number;
 
 	readonly isFog: true;
 
-	clone(): this;
+	clone(): Fog;
 	toJSON(): any;
 
 }

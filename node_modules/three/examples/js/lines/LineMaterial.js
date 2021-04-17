@@ -1,12 +1,11 @@
 /**
- * @author WestLangley / http://github.com/WestLangley
- *
  * parameters = {
  *  color: <hex>,
  *  linewidth: <float>,
  *  dashed: <boolean>,
  *  dashScale: <float>,
  *  dashSize: <float>,
+ *  dashOffset: <float>,
  *  gapSize: <float>,
  *  resolution: <Vector2>, // to be set by renderer
  * }
@@ -18,6 +17,7 @@ THREE.UniformsLib.line = {
 	resolution: { value: new THREE.Vector2( 1, 1 ) },
 	dashScale: { value: 1 },
 	dashSize: { value: 1 },
+	dashOffset: { value: 0 },
 	gapSize: { value: 1 }, // todo FIX - maybe change to totalSize
 	opacity: { value: 1 }
 
@@ -186,6 +186,7 @@ THREE.ShaderLib[ 'line' ] = {
 		#ifdef USE_DASH
 
 			uniform float dashSize;
+			uniform float dashOffset;
 			uniform float gapSize;
 
 		#endif
@@ -208,7 +209,7 @@ THREE.ShaderLib[ 'line' ] = {
 
 				if ( vUv.y < - 1.0 || vUv.y > 1.0 ) discard; // discard endcaps
 
-				if ( mod( vLineDistance, dashSize + gapSize ) > dashSize ) discard; // todo - FIX
+				if ( mod( vLineDistance + dashOffset, dashSize + gapSize ) > dashSize ) discard; // todo - FIX
 
 			#endif
 
@@ -329,6 +330,24 @@ THREE.LineMaterial = function ( parameters ) {
 
 		},
 
+		dashOffset: {
+
+			enumerable: true,
+
+			get: function () {
+
+				return this.uniforms.dashOffset.value;
+
+			},
+
+			set: function ( value ) {
+
+				this.uniforms.dashOffset.value = value;
+
+			}
+
+		},
+
 		gapSize: {
 
 			enumerable: true,
@@ -393,4 +412,3 @@ THREE.LineMaterial.prototype = Object.create( THREE.ShaderMaterial.prototype );
 THREE.LineMaterial.prototype.constructor = THREE.LineMaterial;
 
 THREE.LineMaterial.prototype.isLineMaterial = true;
-

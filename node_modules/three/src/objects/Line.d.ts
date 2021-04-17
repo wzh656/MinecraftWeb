@@ -1,4 +1,3 @@
-import { Geometry } from './../core/Geometry';
 import { Material } from './../materials/Material';
 import { Raycaster } from './../core/Raycaster';
 import { Object3D } from './../core/Object3D';
@@ -8,18 +7,21 @@ import { Intersection } from '../core/Raycaster';
 export class Line extends Object3D {
 
 	constructor(
-		geometry?: Geometry | BufferGeometry,
-		material?: Material | Material[],
-		mode?: number
+		geometry?: BufferGeometry,
+		material?: Material | Material[]
 	);
 
-	geometry: Geometry | BufferGeometry;
+	geometry: BufferGeometry;
 	material: Material | Material[];
 
-	type: 'Line' | 'LineLoop' | 'LineSegments';
+	type: 'Line' | 'LineLoop' | 'LineSegments' | string;
 	readonly isLine: true;
+
+	morphTargetInfluences?: number[];
+	morphTargetDictionary?: { [key: string]: number };
 
 	computeLineDistances(): this;
 	raycast( raycaster: Raycaster, intersects: Intersection[] ): void;
+	updateMorphTargets(): void;
 
 }

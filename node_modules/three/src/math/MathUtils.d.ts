@@ -1,8 +1,7 @@
 import { Quaternion } from './Quaternion';
 
 /**
- *
- * @see <a href="https://github.com/mrdoob/three.js/blob/master/src/math/Math.js">src/math/Math.js</a>
+ * @see {@link https://github.com/mrdoob/three.js/blob/master/src/math/MathUtils.js|src/math/MathUtils.js}
  */
 export namespace MathUtils {
 	export const DEG2RAD: number;
@@ -64,6 +63,11 @@ export namespace MathUtils {
 	 */
 	export function randFloatSpread( range: number ): number;
 
+	/**
+	 * Deterministic pseudo-random float in the interval [ 0, 1 ].
+	 */
+	export function seededRandom( seed?: number ): number;
+
 	export function degToRad( degrees: number ): number;
 
 	export function radToDeg( radians: number ): number;
@@ -80,6 +84,27 @@ export namespace MathUtils {
 	 * @return {number}
 	 */
 	export function lerp( x: number, y: number, t: number ): number;
+
+	/**
+	 * Smoothly interpolate a number from x toward y in a spring-like
+	 * manner using the dt to maintain frame rate independent movement.
+	 *
+	 * @param x Current point.
+	 * @param y Target point.
+	 * @param lambda A higher lambda value will make the movement more sudden, and a lower value will make the movement more gradual.
+	 * @param dt Delta time in seconds.
+	 * @return {number}
+	 */
+	export function damp( x: number, y: number, lambda: number, dt: number ): number;
+
+	/**
+	 * Returns a value that alternates between 0 and length.
+	 *
+	 * @param x The value to pingpong.
+	 * @param length The positive value the function will pingpong to. Default is 1.
+	 * @return {number}
+	 */
+	export function pingpong( x: number, length?: number ): number;
 
 	/**
 	 * @deprecated Use {@link Math#floorPowerOfTwo .floorPowerOfTwo()}

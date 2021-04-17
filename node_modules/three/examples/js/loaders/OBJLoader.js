@@ -1,7 +1,3 @@
-/**
- * @author mrdoob / http://mrdoob.com/
- */
-
 THREE.OBJLoader = ( function () {
 
 	// o object_name | g group_name
@@ -12,6 +8,13 @@ THREE.OBJLoader = ( function () {
 	var material_use_pattern = /^usemtl /;
 	// usemap map_name
 	var map_use_pattern = /^usemap /;
+
+	var vA = new THREE.Vector3();
+	var vB = new THREE.Vector3();
+	var vC = new THREE.Vector3();
+
+	var ab = new THREE.Vector3();
+	var cb = new THREE.Vector3();
 
 	function ParserState() {
 
@@ -55,7 +58,8 @@ THREE.OBJLoader = ( function () {
 						vertices: [],
 						normals: [],
 						colors: [],
-						uvs: []
+						uvs: [],
+						hasUVIndices: false
 					},
 					materials: [],
 					smooth: true,
@@ -248,6 +252,27 @@ THREE.OBJLoader = ( function () {
 
 			},
 
+			addFaceNormal: function ( a, b, c ) {
+
+				var src = this.vertices;
+				var dst = this.object.geometry.normals;
+
+				vA.fromArray( src, a );
+				vB.fromArray( src, b );
+				vC.fromArray( src, c );
+
+				cb.subVectors( vC, vB );
+				ab.subVectors( vA, vB );
+				cb.cross( ab );
+
+				cb.normalize();
+
+				dst.push( cb.x, cb.y, cb.z );
+				dst.push( cb.x, cb.y, cb.z );
+				dst.push( cb.x, cb.y, cb.z );
+
+			},
+
 			addColor: function ( a, b, c ) {
 
 				var src = this.colors;
@@ -267,6 +292,16 @@ THREE.OBJLoader = ( function () {
 				dst.push( src[ a + 0 ], src[ a + 1 ] );
 				dst.push( src[ b + 0 ], src[ b + 1 ] );
 				dst.push( src[ c + 0 ], src[ c + 1 ] );
+
+			},
+
+			addDefaultUV: function () {
+
+				var dst = this.object.geometry.uvs;
+
+				dst.push( 0, 0 );
+				dst.push( 0, 0 );
+				dst.push( 0, 0 );
 
 			},
 
@@ -290,26 +325,43 @@ THREE.OBJLoader = ( function () {
 				this.addVertex( ia, ib, ic );
 				this.addColor( ia, ib, ic );
 
-				if ( ua !== undefined && ua !== '' ) {
-
-					var uvLen = this.uvs.length;
-					ia = this.parseUVIndex( ua, uvLen );
-					ib = this.parseUVIndex( ub, uvLen );
-					ic = this.parseUVIndex( uc, uvLen );
-					this.addUV( ia, ib, ic );
-
-				}
+				// normals
 
 				if ( na !== undefined && na !== '' ) {
 
-					// Normals are many times the same. If so, skip function call and parseInt.
 					var nLen = this.normals.length;
-					ia = this.parseNormalIndex( na, nLen );
 
-					ib = na === nb ? ia : this.parseNormalIndex( nb, nLen );
-					ic = na === nc ? ia : this.parseNormalIndex( nc, nLen );
+					ia = this.parseNormalIndex( na, nLen );
+					ib = this.parseNormalIndex( nb, nLen );
+					ic = this.parseNormalIndex( nc, nLen );
 
 					this.addNormal( ia, ib, ic );
+
+				} else {
+
+					this.addFaceNormal( ia, ib, ic );
+
+				}
+
+				// uvs
+
+				if ( ua !== undefined && ua !== '' ) {
+
+					var uvLen = this.uvs.length;
+
+					ia = this.parseUVIndex( ua, uvLen );
+					ib = this.parseUVIndex( ub, uvLen );
+					ic = this.parseUVIndex( uc, uvLen );
+
+					this.addUV( ia, ib, ic );
+
+					this.object.geometry.hasUVIndices = true;
+
+				} else {
+
+					// add placeholder values (for inconsistent face definitions)
+
+					this.addDefaultUV();
 
 				}
 
@@ -323,7 +375,10 @@ THREE.OBJLoader = ( function () {
 
 				for ( var vi = 0, l = vertices.length; vi < l; vi ++ ) {
 
-					this.addVertexPoint( this.parseVertexIndex( vertices[ vi ], vLen ) );
+					var index = this.parseVertexIndex( vertices[ vi ], vLen );
+
+					this.addVertexPoint( index );
+					this.addColor( index );
 
 				}
 
@@ -376,11 +431,31 @@ THREE.OBJLoader = ( function () {
 
 			var scope = this;
 
-			var loader = new THREE.FileLoader( scope.manager );
+			var loader = new THREE.FileLoader( this.manager );
 			loader.setPath( this.path );
+			loader.setRequestHeader( this.requestHeader );
+			loader.setWithCredentials( this.withCredentials );
 			loader.load( url, function ( text ) {
 
-				onLoad( scope.parse( text ) );
+				try {
+
+					onLoad( scope.parse( text ) );
+
+				} catch ( e ) {
+
+					if ( onError ) {
+
+						onError( e );
+
+					} else {
+
+						console.error( e );
+
+					}
+
+					scope.manager.itemError( url );
+
+				}
 
 			}, onProgress, onError );
 
@@ -521,10 +596,10 @@ THREE.OBJLoader = ( function () {
 
 				} else if ( lineFirstChar === 'l' ) {
 
-					var lineParts = line.substring( 1 ).trim().split( " " );
+					var lineParts = line.substring( 1 ).trim().split( ' ' );
 					var lineVertices = [], lineUVs = [];
 
-					if ( line.indexOf( "/" ) === - 1 ) {
+					if ( line.indexOf( '/' ) === - 1 ) {
 
 						lineVertices = lineParts;
 
@@ -532,10 +607,10 @@ THREE.OBJLoader = ( function () {
 
 						for ( var li = 0, llen = lineParts.length; li < llen; li ++ ) {
 
-							var parts = lineParts[ li ].split( "/" );
+							var parts = lineParts[ li ].split( '/' );
 
-							if ( parts[ 0 ] !== "" ) lineVertices.push( parts[ 0 ] );
-							if ( parts[ 1 ] !== "" ) lineUVs.push( parts[ 1 ] );
+							if ( parts[ 0 ] !== '' ) lineVertices.push( parts[ 0 ] );
+							if ( parts[ 1 ] !== '' ) lineUVs.push( parts[ 1 ] );
 
 						}
 
@@ -546,7 +621,7 @@ THREE.OBJLoader = ( function () {
 				} else if ( lineFirstChar === 'p' ) {
 
 					var lineData = line.substr( 1 ).trim();
-					var pointData = lineData.split( " " );
+					var pointData = lineData.split( ' ' );
 
 					state.addPointGeometry( pointData );
 
@@ -558,7 +633,7 @@ THREE.OBJLoader = ( function () {
 
 					// WORKAROUND: https://bugs.chromium.org/p/v8/issues/detail?id=2869
 					// var name = result[ 0 ].substr( 1 ).trim();
-					var name = ( " " + result[ 0 ].substr( 1 ).trim() ).substr( 1 );
+					var name = ( ' ' + result[ 0 ].substr( 1 ).trim() ).substr( 1 );
 
 					state.startObject( name );
 
@@ -636,155 +711,181 @@ THREE.OBJLoader = ( function () {
 			var container = new THREE.Group();
 			container.materialLibraries = [].concat( state.materialLibraries );
 
-			for ( var i = 0, l = state.objects.length; i < l; i ++ ) {
+			var hasPrimitives = ! ( state.objects.length === 1 && state.objects[ 0 ].geometry.vertices.length === 0 );
 
-				var object = state.objects[ i ];
-				var geometry = object.geometry;
-				var materials = object.materials;
-				var isLine = ( geometry.type === 'Line' );
-				var isPoints = ( geometry.type === 'Points' );
-				var hasVertexColors = false;
+			if ( hasPrimitives === true ) {
 
-				// Skip o/g line declarations that did not follow with any faces
-				if ( geometry.vertices.length === 0 ) continue;
+				for ( var i = 0, l = state.objects.length; i < l; i ++ ) {
 
-				var buffergeometry = new THREE.BufferGeometry();
+					var object = state.objects[ i ];
+					var geometry = object.geometry;
+					var materials = object.materials;
+					var isLine = ( geometry.type === 'Line' );
+					var isPoints = ( geometry.type === 'Points' );
+					var hasVertexColors = false;
 
-				buffergeometry.setAttribute( 'position', new THREE.Float32BufferAttribute( geometry.vertices, 3 ) );
+					// Skip o/g line declarations that did not follow with any faces
+					if ( geometry.vertices.length === 0 ) continue;
 
-				if ( geometry.normals.length > 0 ) {
+					var buffergeometry = new THREE.BufferGeometry();
 
-					buffergeometry.setAttribute( 'normal', new THREE.Float32BufferAttribute( geometry.normals, 3 ) );
+					buffergeometry.setAttribute( 'position', new THREE.Float32BufferAttribute( geometry.vertices, 3 ) );
 
-				} else {
+					if ( geometry.normals.length > 0 ) {
 
-					buffergeometry.computeVertexNormals();
-
-				}
-
-				if ( geometry.colors.length > 0 ) {
-
-					hasVertexColors = true;
-					buffergeometry.setAttribute( 'color', new THREE.Float32BufferAttribute( geometry.colors, 3 ) );
-
-				}
-
-				if ( geometry.uvs.length > 0 ) {
-
-					buffergeometry.setAttribute( 'uv', new THREE.Float32BufferAttribute( geometry.uvs, 2 ) );
-
-				}
-
-				// Create materials
-
-				var createdMaterials = [];
-
-				for ( var mi = 0, miLen = materials.length; mi < miLen; mi ++ ) {
-
-					var sourceMaterial = materials[ mi ];
-					var materialHash = sourceMaterial.name + '_' + sourceMaterial.smooth + '_' + hasVertexColors;
-					var material = state.materials[ materialHash ];
-
-					if ( this.materials !== null ) {
-
-						material = this.materials.create( sourceMaterial.name );
-
-						// mtl etc. loaders probably can't create line materials correctly, copy properties to a line material.
-						if ( isLine && material && ! ( material instanceof THREE.LineBasicMaterial ) ) {
-
-							var materialLine = new THREE.LineBasicMaterial();
-							THREE.Material.prototype.copy.call( materialLine, material );
-							materialLine.color.copy( material.color );
-							material = materialLine;
-
-						} else if ( isPoints && material && ! ( material instanceof THREE.PointsMaterial ) ) {
-
-							var materialPoints = new THREE.PointsMaterial( { size: 10, sizeAttenuation: false } );
-							THREE.Material.prototype.copy.call( materialPoints, material );
-							materialPoints.color.copy( material.color );
-							materialPoints.map = material.map;
-							material = materialPoints;
-
-						}
+						buffergeometry.setAttribute( 'normal', new THREE.Float32BufferAttribute( geometry.normals, 3 ) );
 
 					}
 
-					if ( material === undefined ) {
+					if ( geometry.colors.length > 0 ) {
 
-						if ( isLine ) {
-
-							material = new THREE.LineBasicMaterial();
-
-						} else if ( isPoints ) {
-
-							material = new THREE.PointsMaterial( { size: 1, sizeAttenuation: false } );
-
-						} else {
-
-							material = new THREE.MeshPhongMaterial();
-
-						}
-
-						material.name = sourceMaterial.name;
-						material.flatShading = sourceMaterial.smooth ? false : true;
-						material.vertexColors = hasVertexColors;
-
-						state.materials[ materialHash ] = material;
+						hasVertexColors = true;
+						buffergeometry.setAttribute( 'color', new THREE.Float32BufferAttribute( geometry.colors, 3 ) );
 
 					}
 
-					createdMaterials.push( material );
+					if ( geometry.hasUVIndices === true ) {
 
-				}
+						buffergeometry.setAttribute( 'uv', new THREE.Float32BufferAttribute( geometry.uvs, 2 ) );
 
-				// Create mesh
+					}
 
-				var mesh;
+					// Create materials
 
-				if ( createdMaterials.length > 1 ) {
+					var createdMaterials = [];
 
 					for ( var mi = 0, miLen = materials.length; mi < miLen; mi ++ ) {
 
 						var sourceMaterial = materials[ mi ];
-						buffergeometry.addGroup( sourceMaterial.groupStart, sourceMaterial.groupCount, mi );
+						var materialHash = sourceMaterial.name + '_' + sourceMaterial.smooth + '_' + hasVertexColors;
+						var material = state.materials[ materialHash ];
+
+						if ( this.materials !== null ) {
+
+							material = this.materials.create( sourceMaterial.name );
+
+							// mtl etc. loaders probably can't create line materials correctly, copy properties to a line material.
+							if ( isLine && material && ! ( material instanceof THREE.LineBasicMaterial ) ) {
+
+								var materialLine = new THREE.LineBasicMaterial();
+								THREE.Material.prototype.copy.call( materialLine, material );
+								materialLine.color.copy( material.color );
+								material = materialLine;
+
+							} else if ( isPoints && material && ! ( material instanceof THREE.PointsMaterial ) ) {
+
+								var materialPoints = new THREE.PointsMaterial( { size: 10, sizeAttenuation: false } );
+								THREE.Material.prototype.copy.call( materialPoints, material );
+								materialPoints.color.copy( material.color );
+								materialPoints.map = material.map;
+								material = materialPoints;
+
+							}
+
+						}
+
+						if ( material === undefined ) {
+
+							if ( isLine ) {
+
+								material = new THREE.LineBasicMaterial();
+
+							} else if ( isPoints ) {
+
+								material = new THREE.PointsMaterial( { size: 1, sizeAttenuation: false } );
+
+							} else {
+
+								material = new THREE.MeshPhongMaterial();
+
+							}
+
+							material.name = sourceMaterial.name;
+							material.flatShading = sourceMaterial.smooth ? false : true;
+							material.vertexColors = hasVertexColors;
+
+							state.materials[ materialHash ] = material;
+
+						}
+
+						createdMaterials.push( material );
 
 					}
 
-					if ( isLine ) {
+					// Create mesh
 
-						mesh = new THREE.LineSegments( buffergeometry, createdMaterials );
+					var mesh;
 
-					} else if ( isPoints ) {
+					if ( createdMaterials.length > 1 ) {
 
-						mesh = new THREE.Points( buffergeometry, createdMaterials );
+						for ( var mi = 0, miLen = materials.length; mi < miLen; mi ++ ) {
+
+							var sourceMaterial = materials[ mi ];
+							buffergeometry.addGroup( sourceMaterial.groupStart, sourceMaterial.groupCount, mi );
+
+						}
+
+						if ( isLine ) {
+
+							mesh = new THREE.LineSegments( buffergeometry, createdMaterials );
+
+						} else if ( isPoints ) {
+
+							mesh = new THREE.Points( buffergeometry, createdMaterials );
+
+						} else {
+
+							mesh = new THREE.Mesh( buffergeometry, createdMaterials );
+
+						}
 
 					} else {
 
-						mesh = new THREE.Mesh( buffergeometry, createdMaterials );
+						if ( isLine ) {
+
+							mesh = new THREE.LineSegments( buffergeometry, createdMaterials[ 0 ] );
+
+						} else if ( isPoints ) {
+
+							mesh = new THREE.Points( buffergeometry, createdMaterials[ 0 ] );
+
+						} else {
+
+							mesh = new THREE.Mesh( buffergeometry, createdMaterials[ 0 ] );
+
+						}
 
 					}
 
-				} else {
+					mesh.name = object.name;
 
-					if ( isLine ) {
-
-						mesh = new THREE.LineSegments( buffergeometry, createdMaterials[ 0 ] );
-
-					} else if ( isPoints ) {
-
-						mesh = new THREE.Points( buffergeometry, createdMaterials[ 0 ] );
-
-					} else {
-
-						mesh = new THREE.Mesh( buffergeometry, createdMaterials[ 0 ] );
-
-					}
+					container.add( mesh );
 
 				}
 
-				mesh.name = object.name;
+			} else {
 
-				container.add( mesh );
+				// if there is only the default parser state object with no geometry data, interpret data as point cloud
+
+				if ( state.vertices.length > 0 ) {
+
+					var material = new THREE.PointsMaterial( { size: 1, sizeAttenuation: false } );
+
+					var buffergeometry = new THREE.BufferGeometry();
+
+					buffergeometry.setAttribute( 'position', new THREE.Float32BufferAttribute( state.vertices, 3 ) );
+
+					if ( state.colors.length > 0 && state.colors[ 0 ] !== undefined ) {
+
+						buffergeometry.setAttribute( 'color', new THREE.Float32BufferAttribute( state.colors, 3 ) );
+						material.vertexColors = true;
+
+					}
+
+					var points = new THREE.Points( buffergeometry, material );
+					container.add( points );
+
+				}
 
 			}
 

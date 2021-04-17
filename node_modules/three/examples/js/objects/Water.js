@@ -1,10 +1,8 @@
 /**
- * @author jbouny / https://github.com/jbouny
- *
  * Work based on :
- * @author Slayvin / http://slayvin.net : Flat mirror for three.js
- * @author Stemkoski / http://www.adelphi.edu/~stemkoski : An implementation of water shader based on the flat mirror
- * @author Jonas Wagner / http://29a.ch/ && http://29a.ch/slides/2012/webglwater/ : Water shader explanations in WebGL
+ * http://slayvin.net : Flat mirror for three.js
+ * http://www.adelphi.edu/~stemkoski : An implementation of water shader based on the flat mirror
+ * http://29a.ch/ && http://29a.ch/slides/2012/webglwater/ : Water shader explanations in WebGL
  */
 
 THREE.Water = function ( geometry, options ) {
@@ -51,8 +49,7 @@ THREE.Water = function ( geometry, options ) {
 	var parameters = {
 		minFilter: THREE.LinearFilter,
 		magFilter: THREE.LinearFilter,
-		format: THREE.RGBFormat,
-		stencilBuffer: false
+		format: THREE.RGBFormat
 	};
 
 	var renderTarget = new THREE.WebGLRenderTarget( textureWidth, textureHeight, parameters );
@@ -69,17 +66,17 @@ THREE.Water = function ( geometry, options ) {
 			THREE.UniformsLib[ 'fog' ],
 			THREE.UniformsLib[ 'lights' ],
 			{
-				"normalSampler": { value: null },
-				"mirrorSampler": { value: null },
-				"alpha": { value: 1.0 },
-				"time": { value: 0.0 },
-				"size": { value: 1.0 },
-				"distortionScale": { value: 20.0 },
-				"textureMatrix": { value: new THREE.Matrix4() },
-				"sunColor": { value: new THREE.Color( 0x7F7F7F ) },
-				"sunDirection": { value: new THREE.Vector3( 0.70707, 0.70707, 0 ) },
-				"eye": { value: new THREE.Vector3() },
-				"waterColor": { value: new THREE.Color( 0x555555 ) }
+				'normalSampler': { value: null },
+				'mirrorSampler': { value: null },
+				'alpha': { value: 1.0 },
+				'time': { value: 0.0 },
+				'size': { value: 1.0 },
+				'distortionScale': { value: 20.0 },
+				'textureMatrix': { value: new THREE.Matrix4() },
+				'sunColor': { value: new THREE.Color( 0x7F7F7F ) },
+				'sunDirection': { value: new THREE.Vector3( 0.70707, 0.70707, 0 ) },
+				'eye': { value: new THREE.Vector3() },
+				'waterColor': { value: new THREE.Color( 0x555555 ) }
 			}
 		] ),
 
@@ -102,6 +99,8 @@ THREE.Water = function ( geometry, options ) {
 			'	vec4 mvPosition =  modelViewMatrix * vec4( position, 1.0 );',
 			'	gl_Position = projectionMatrix * mvPosition;',
 
+			'#include <beginnormal_vertex>',
+			'#include <defaultnormal_vertex>',
 			'#include <logdepthbuf_vertex>',
 			'#include <fog_vertex>',
 			'#include <shadowmap_vertex>',
@@ -193,17 +192,17 @@ THREE.Water = function ( geometry, options ) {
 		fog: fog
 	} );
 
-	material.uniforms[ "mirrorSampler" ].value = renderTarget.texture;
-	material.uniforms[ "textureMatrix" ].value = textureMatrix;
-	material.uniforms[ "alpha" ].value = alpha;
-	material.uniforms[ "time" ].value = time;
-	material.uniforms[ "normalSampler" ].value = normalSampler;
-	material.uniforms[ "sunColor" ].value = sunColor;
-	material.uniforms[ "waterColor" ].value = waterColor;
-	material.uniforms[ "sunDirection" ].value = sunDirection;
-	material.uniforms[ "distortionScale" ].value = distortionScale;
+	material.uniforms[ 'mirrorSampler' ].value = renderTarget.texture;
+	material.uniforms[ 'textureMatrix' ].value = textureMatrix;
+	material.uniforms[ 'alpha' ].value = alpha;
+	material.uniforms[ 'time' ].value = time;
+	material.uniforms[ 'normalSampler' ].value = normalSampler;
+	material.uniforms[ 'sunColor' ].value = sunColor;
+	material.uniforms[ 'waterColor' ].value = waterColor;
+	material.uniforms[ 'sunDirection' ].value = sunDirection;
+	material.uniforms[ 'distortionScale' ].value = distortionScale;
 
-	material.uniforms[ "eye" ].value = eye;
+	material.uniforms[ 'eye' ].value = eye;
 
 	scope.material = material;
 
@@ -282,7 +281,25 @@ THREE.Water = function ( geometry, options ) {
 
 		eye.setFromMatrixPosition( camera.matrixWorld );
 
-		//
+		// Render
+
+		if ( renderer.outputEncoding !== THREE.LinearEncoding ) {
+
+			console.warn( 'THREE.Water: WebGLRenderer must use LinearEncoding as outputEncoding.' );
+			scope.onBeforeRender = function () {};
+
+			return;
+
+		}
+
+		if ( renderer.toneMapping !== THREE.NoToneMapping ) {
+
+			console.warn( 'THREE.Water: WebGLRenderer must use NoToneMapping as toneMapping.' );
+			scope.onBeforeRender = function () {};
+
+			return;
+
+		}
 
 		var currentRenderTarget = renderer.getRenderTarget();
 

@@ -71,8 +71,8 @@
 			body {font-size: 1.3rem;}
 		}
 		/* 横屏 */
-		@media screen and (orientation:landscape) {
-			body {margin: 0 20vw;}
+		body.landscape{
+			margin: 0 20vw;
 		}
 		
 		/* element */
@@ -83,7 +83,6 @@
 		}
 		body{
 			background-color: #f6f6f6;
-			margin: 0;
 			text-align: center;
 		}
 		h1 > p{
@@ -154,6 +153,8 @@
 		/* chat */
 		#chat{
 			position: absolute;
+			top: 0;
+			left: 0;
 			display: flex;
 			flex-direction: column;
 			width: 100%;
@@ -256,7 +257,7 @@
 			padding: 0.2rem;
 			background-color: #e0edd3;
 			border-radius: 6px;
-			user-select: auto;
+			user-select: text;
 		}
 		
 		#chat > form{
@@ -320,7 +321,7 @@
 		<!-- 列表界面 -->
 		<section id="list">
 			<h1>社区<p>COMMUNITY</p></h1>
-			<button id="newSection" style="display: none;">新建板块</button><br/>
+			<button id="newSection" style="display: none;">新建板块</button><br/><br/>
 			<ul id="sectionsList">
 				<span>加载中……</span>
 			</ul>
@@ -336,7 +337,7 @@
 				<span>获取中……</span>
 			</ul>
 			<form style="display: none;">
-				<textarea id="message" contenteditable></textarea>
+				<textarea id="message" placeholder="（支持markdown和html格式）" contenteditable></textarea>
 				<button type="button" id="send">发送</button>
 			</form>
 		</section>
@@ -350,6 +351,9 @@
 		</div>
 		
 <script>
+if (window.innerWidth > window.innerHeight)
+	$("body").addClass("landscape"); //横屏
+
 //请求服务器
 function request(method, path="", value=""){
 	return new Promise((resolve, reject)=>{

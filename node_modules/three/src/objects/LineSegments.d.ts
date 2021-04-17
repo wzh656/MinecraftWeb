@@ -1,4 +1,3 @@
-import { Geometry } from './../core/Geometry';
 import { Material } from './../materials/Material';
 import { Line } from './Line';
 import { BufferGeometry } from '../core/BufferGeometry';
@@ -15,12 +14,14 @@ export const LinePieces: number;
 export class LineSegments extends Line {
 
 	constructor(
-		geometry?: Geometry | BufferGeometry,
-		material?: Material | Material[],
-		mode?: number
+		geometry?: BufferGeometry,
+		material?: Material | Material[]
 	);
 
-	type: 'LineSegments';
+	/**
+	 * @default 'LineSegments'
+	 */
+	type: 'LineSegments' | string;
 	readonly isLineSegments: true;
 
 }

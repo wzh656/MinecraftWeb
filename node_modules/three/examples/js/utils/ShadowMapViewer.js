@@ -1,6 +1,4 @@
 /**
- * @author arya-s / https://github.com/arya-s
- *
  * This is a helper for visualising a given light's shadow map.
  * It works for shadow casting lights: DirectionalLight and SpotLight.
  * It renders out the shadow map and displays it on a HUD.
@@ -55,7 +53,7 @@ THREE.ShadowMapViewer = function ( light ) {
 		vertexShader: shader.vertexShader,
 		fragmentShader: shader.fragmentShader
 	} );
-	var plane = new THREE.PlaneBufferGeometry( frame.width, frame.height );
+	var plane = new THREE.PlaneGeometry( frame.width, frame.height );
 	var mesh = new THREE.Mesh( plane, material );
 
 	scene.add( mesh );
@@ -87,7 +85,7 @@ THREE.ShadowMapViewer = function ( light ) {
 		var labelMaterial = new THREE.MeshBasicMaterial( { map: labelTexture, side: THREE.DoubleSide } );
 		labelMaterial.transparent = true;
 
-		var labelPlane = new THREE.PlaneBufferGeometry( labelCanvas.width, labelCanvas.height );
+		var labelPlane = new THREE.PlaneGeometry( labelCanvas.width, labelCanvas.height );
 		labelMesh = new THREE.Mesh( labelPlane, labelMaterial );
 
 		scene.add( labelMesh );

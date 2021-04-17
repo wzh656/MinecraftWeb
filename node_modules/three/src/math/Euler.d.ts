@@ -6,16 +6,31 @@ export class Euler {
 
 	constructor( x?: number, y?: number, z?: number, order?: string );
 
+	/**
+	 * @default 0
+	 */
 	x: number;
+
+	/**
+	 * @default 0
+	 */
 	y: number;
+
+	/**
+	 * @default 0
+	 */
 	z: number;
+
+	/**
+	 * @default THREE.Euler.DefaultOrder
+	 */
 	order: string;
 	readonly isEuler: true;
 
 	_onChangeCallback: Function;
 
 	set( x: number, y: number, z: number, order?: string ): Euler;
-	clone(): this;
+	clone(): Euler;
 	copy( euler: Euler ): this;
 	setFromRotationMatrix( m: Matrix4, order?: string ): Euler;
 	setFromQuaternion( q: Quaternion, order?: string ): Euler;

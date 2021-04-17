@@ -1,16 +1,14 @@
 import { DefaultLoadingManager } from './LoadingManager.js';
 
-/**
- * @author alteredq / http://alteredqualia.com/
- */
-
 function Loader( manager ) {
 
 	this.manager = ( manager !== undefined ) ? manager : DefaultLoadingManager;
 
 	this.crossOrigin = 'anonymous';
+	this.withCredentials = false;
 	this.path = '';
 	this.resourcePath = '';
+	this.requestHeader = {};
 
 }
 
@@ -20,7 +18,7 @@ Object.assign( Loader.prototype, {
 
 	loadAsync: function ( url, onProgress ) {
 
-		var scope = this;
+		const scope = this;
 
 		return new Promise( function ( resolve, reject ) {
 
@@ -39,6 +37,13 @@ Object.assign( Loader.prototype, {
 
 	},
 
+	setWithCredentials: function ( value ) {
+
+		this.withCredentials = value;
+		return this;
+
+	},
+
 	setPath: function ( path ) {
 
 		this.path = path;
@@ -49,6 +54,13 @@ Object.assign( Loader.prototype, {
 	setResourcePath: function ( resourcePath ) {
 
 		this.resourcePath = resourcePath;
+		return this;
+
+	},
+
+	setRequestHeader: function ( requestHeader ) {
+
+		this.requestHeader = requestHeader;
 		return this;
 
 	}

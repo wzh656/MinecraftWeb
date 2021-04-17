@@ -1,19 +1,18 @@
-import { Geometry } from './../core/Geometry';
-import { PolyhedronBufferGeometry } from './PolyhedronGeometry';
+import { PolyhedronGeometry } from './PolyhedronGeometry';
 
-export class DodecahedronBufferGeometry extends PolyhedronBufferGeometry {
+export class DodecahedronGeometry extends PolyhedronGeometry {
 
+	/**
+	 * @param [radius=1]
+	 * @param [detail=0]
+	 */
 	constructor( radius?: number, detail?: number );
+
+	/**
+	 * @default 'DodecahedronGeometry'
+	 */
+	type: string;
 
 }
 
-export class DodecahedronGeometry extends Geometry {
-
-	constructor( radius?: number, detail?: number );
-
-	parameters: {
-		radius: number;
-		detail: number;
-	};
-
-}
+export { DodecahedronGeometry as DodecahedronBufferGeometry };
