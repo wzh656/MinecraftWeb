@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Copyright © 2020~2021 by wzh -->
+<!-- Copyleft 2020~2021 by wzh -->
 <html lang="zh">
 	<head>
 		<meta charset="UTF-8" />
@@ -80,8 +80,6 @@
 			-moz-user-select: none;
 			-khtml-user-select: none;
 			user-select: none;
-			
-			text-align: center;
 		}
 		body, input{
 			background-color: #f6f6f6;
@@ -105,6 +103,7 @@
 		a{
 			display: block;
 			margin: 1vw;
+			text-align: center;
 		}
 		
 		
@@ -114,6 +113,7 @@
 		h1{
 			margin: 2.6rem;
 			font-size: 3em;
+			text-align: center;
 		}
 		
 		form > div{
@@ -148,6 +148,17 @@
 		}
 		form > div > button:last-of-type:hover{
 			background-color: #eee;
+		}
+		
+		/* noscript */
+		noscript{
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: #fffae8;
+			text-align: center;
 		}
 		</style>
 		
@@ -192,7 +203,10 @@
 			<a href="javascript:tourist();">先随便逛逛（游客）</a>
 		</section>
 		
-		<!-- 流量统计 -->
+		<!-- 1:不支持js -->
+		<noscript  style="z-index: 1;"><h1>你的浏览器不支持JavaScript，无法运行！</h1></noscript>
+		
+		<!-- none:流量统计 -->
 		<div style="display: none;">
 			<script language="javascript" src="http://count24.51yes.com/click.aspx?id=248466766&logo=12" charset="gb2312"></script>
 		</div>
@@ -200,7 +214,7 @@
 <script>
 //请求服务器
 function request(method, path="", value=""){
-	return new Promise((resolve, reject)=>{
+	return new Promise((resolve, reject) => {
 		console.log(method, path, value)
 		$.ajax({
 			url: "https://wzh.glitch.me/data/" + method,
@@ -217,6 +231,7 @@ function request(method, path="", value=""){
 
 const ROOT = "/MinecraftCommunity/",
 	USERS = ROOT + "users/",
+	CHAT = ROOT + "chat/",
 	users = {};
 
 async function main(){
@@ -240,7 +255,7 @@ async function main(){
 		res = await request("readFile", USERS+name);
 		const lines = res.split("\n");
 		users[name] = {
-			regTime: lines[0],
+			regTime: new Date(+lines[0]),
 			password: lines[1],
 			info: JSON.parse(lines[2])
 		};
@@ -258,14 +273,13 @@ function login(){
 	if (!name) return layer.msg("请输入用户名", {icon: 5});
 	if (!password) return layer.msg("请输入密码", {icon: 5});
 	
-	for (const [name,user] of Object.entries(users)){
-		if (user.name == name && user.password == hex_sha512(hex_sha512(password))){
+	for (const [iname,user] of Object.entries(users)){
+		if (iname == name && user.password == hex_sha512(hex_sha512(password))){
 			localStorage.setItem("name", name);
 			localStorage.setItem("password", hex_sha512(password));
 			layer.msg("登录成功！", {icon: 1});
 			location.href = "./community.html";
-			layer.load(1, {shade: false});
-			return;
+			return layer.load(1);
 		}
 	}
 	layer.msg("用户名或密码错误", {icon: 2});
@@ -279,8 +293,8 @@ function register(){
 	if (!name) return layer.msg("请输入用户名", {icon: 5});
 	if (!password) return layer.msg("请输入密码", {icon: 5});
 	
-	for (const [name,user] of Object.entries(users)){
-		if (user.name == name){
+	for (const iname in users)
+		if (iname == name){
 			return layer.msg("该用户已存在", {icon: 5});
 		}
 	
@@ -288,19 +302,19 @@ function register(){
 		+new Date()+"\n"+
 		hex_sha512(hex_sha512(password))+"\n"+
 		"{}"
-	).then(()=>{
+	).then(() => {
 		localStorage.setItem("name", name);
 		localStorage.setItem("password", hex_sha512(password));
 		layer.msg("注册成功！", {icon: 1});
 		location.href = "./community.html";
-		layer.load(1, {shade: false});
+		layer.load(1);
 	});
 }
 //游客模式
 function tourist(){
 	localStorage.setItem("tourist", "true");
 	location.href = "./community.html";
-	layer.load(1, {shade: 0.1});
+	layer.load(1);
 }
 
 $("form").submit(function(e){

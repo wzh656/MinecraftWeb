@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- Copyright © 2020~2021 by wzh -->
+<!-- Copyleft 2020~2021 by wzh -->
 <html lang="zh">
 	<head>
 		<meta charset="UTF-8" />
 		<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
-		<title>我的世界 | 登录&注册</title>
+		<title>我的世界 | 社区</title>
 		
 		<!--icon-->
 		<link href="./img/icon.png" rel="icon" type="image/x-icon"/>
@@ -83,22 +83,37 @@
 		}
 		body{
 			background-color: #f6f6f6;
+			margin: 0;
 			text-align: center;
 		}
-		p{
+		h1 > p{
 			margin: 0;
 			font-size: 0.36em;
 		}
-		h1{
+		section > h1{
 			margin: 2.6rem;
 			font-size: 3em;
 		}
 		button{
 			border-radius: 6px;
 		}
+		code{
+			background-color: rgba(236, 236, 236, 0.8);
+		}
+		blockquote{
+			background-color: rgba(236, 236, 236, 0.8);
+		}
+		blockquote:before{
+			width: 0.2rem;
+			height: 100%;
+			background-color: #aaa;
+		}
 		
+		
+		/* list */
 		#newSection{
 			float: right;
+			margin-right: 1rem;
 			font-size: 1.1em;
 			padding: 1vw;
 			
@@ -109,6 +124,172 @@
 		#newSection:hover{
 			background-color: #eee;
 		}
+		
+		#sectionsList{
+			margin: 0;
+			padding: 0;
+		}
+		#sectionsList > li{
+			display: block;
+			margin: 1rem;
+			padding: 0.6rem;
+			
+			background-color: #cef;
+			border: 1px solid #6af;
+			border-radius: 6px;
+			transition: background-color 0.5s, border-color 0.5s;
+		}
+		#sectionsList > li:hover{
+			background-color: #cfe;
+			border: 1px solid #6fa;
+		}
+		#sectionsList > li:active{
+			background-color: #bed;
+		}
+		#sectionsList > li > span, #sections > li > time{
+			display: block;
+		}
+		
+		
+		/* chat */
+		#chat{
+			position: absolute;
+			display: flex;
+			flex-direction: column;
+			width: 100%;
+			height: 100%;
+			background-color: #fffae8;
+		}
+		
+		#chat > header{
+			flex: none;
+			/*height: 2rem;*/
+			padding: 0.6rem;
+			background-color: #cef;
+		}
+		#chat > header > span{
+			position: absolute;
+			display: inline;
+			left: 0.1rem;
+			height: 2rem;
+			
+			border: none;
+			font-size: 1.2em;
+			line-height: 2rem;
+		}
+		#chat > header > h2{
+			display: inline;
+			margin: 0;
+			
+			font-size: 1.6em;
+			line-height: 2rem;
+		}
+		
+		#messagesList{
+			width: 100%;
+			height: 100%;
+			overflow-y: auto;
+			margin: 0;
+			padding: 0;
+			border-radius: 6px;
+		}
+		#messagesList > li{
+			display: flex;
+			flex-direction: column;
+			margin: 0.6rem;
+			padding: 0;
+		}
+		#messagesList > li > time{ /* time */
+			display: inline-block;
+			margin: 0 auto;
+			padding: 0.1rem 0.2rem;
+			
+			background-color: rgba(236, 236, 236, 0.8);
+			border-radius: 10px;
+			font-size: 0.8em;
+		}
+		#messagesList > li > div{ /* main */
+			display: flex;
+			text-align: left;
+		}
+		#messagesList > li.right > div{
+			flex-direction: row-reverse;
+		}
+		#messagesList > li > div > span{ /* icon */
+			display: inline-block;
+			width: 1.6rem;
+			height: 1.6rem;
+			margin: 0.2rem;
+			
+			background-color: #d3e0ed;
+			border-radius: 1.6rem;
+			font-size: 1.1em;
+			text-align: center;
+		}
+		#messagesList > li > div > span.v:after{
+			content: "V";
+			position: relative;
+			top: -1.6rem;
+			left: 1.6rem;
+			display: block;
+			width: 0.6rem;
+			height: 0.6rem;
+			color: white;
+			background-color: #00f;
+			border-radius: 0.6rem;
+			font-size: 0.3em;
+		}
+		#messagesList > li > div > div{ /* name,message */
+			display: inline-flex;
+			flex-direction: column;
+		}
+		#messagesList > li > div > div > span{ /* name */
+			margin: 0.1rem;
+			color: grey;
+			font-size: 0.8em;
+		}
+		#messagesList > li.right > div > div > span{
+			text-align: right;
+		}
+		#messagesList > li > div > div > article{ /* message */
+			margin: 0.1rem;
+			padding: 0.2rem;
+			background-color: #e0edd3;
+			border-radius: 6px;
+			user-select: auto;
+		}
+		
+		#chat > form{
+			display: flex;
+			flex: none;
+			height: 3rem;
+		}
+		#chat > form > textarea{
+			width: 100%;
+			height: 2.6rem;
+			margin: 0 0.1rem;
+			background-color: white;
+			border: 1px solid #6af;
+			border-radius: 3px;
+			text-align: left;
+		}
+		#chat > form > button{
+			flex: none;
+			background-color: white;
+			border: 1px solid #1e9fff;
+		}
+		
+		
+		/* noscript */
+		noscript{
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: #fffae8;
+			text-align: center;
+		}
 		</style>
 		
 		<!-- layui -->
@@ -116,6 +297,7 @@
 		<script src="https://unpkg.com/layui@2.6.4/dist/layui.js"></script>
 		
 		<script src="./js/modules/sha512.js"></script>
+		<script src="https://cdn.bootcdn.net/ajax/libs/marked/2.0.1/marked.min.js"></script>
 		<script src="./js/modules/jquery.min.js"></script>
 		<script>
 		if (typeof require != "undefined") //electron
@@ -135,15 +317,34 @@
 		
 	</head>
 	<body>
-		<section>
+		<!-- 列表界面 -->
+		<section id="list">
 			<h1>社区<p>COMMUNITY</p></h1>
-			<button id="newSection" style="display: none;">新建板块</button>
-			<ul id="list">
+			<button id="newSection" style="display: none;">新建板块</button><br/>
+			<ul id="sectionsList">
 				<span>加载中……</span>
 			</ul>
 		</section>
 		
-		<!-- 流量统计 -->
+		<!-- 聊天界面 -->
+		<section id="chat" style="display: none;">
+			<header>
+				<span class="back">〈返回</span>
+				<h2></h2>
+			</header>
+			<ul id="messagesList">
+				<span>获取中……</span>
+			</ul>
+			<form style="display: none;">
+				<textarea id="message" contenteditable></textarea>
+				<button type="button" id="send">发送</button>
+			</form>
+		</section>
+		
+		<!-- 1:不支持js -->
+		<noscript  style="z-index: 1;"><h1>你的浏览器不支持JavaScript，无法运行！</h1></noscript>
+		
+		<!-- none:流量统计 -->
 		<div style="display: none;">
 			<script language="javascript" src="http://count24.51yes.com/click.aspx?id=248466766&logo=12" charset="gb2312"></script>
 		</div>
@@ -161,117 +362,279 @@ function request(method, path="", value=""){
 			success: (response, status, xhr)=>{
 				console.log({method, path, value}, response)
 				resolve(response);
+			},
+			error: (response, status, xhr)=>{
+				alert(`请求错误！\nstatus: ${status}\nresponse: ${response}`);
+				reject(response, status, xhr);
 			}
 		});
 	});
 }
+
 
 
 const ROOT = "/MinecraftCommunity/",
 	USERS = ROOT + "users/",
-	CHAT = ROOT + "chat/default/",
-	users = [], //用户
-	sections = []; //板块
-let userName; //用户名
+	CHAT = ROOT + "chat/",
+	INITFILE = "/info.ini",
+	sections = {}; //板块
+
+let user, //用户名
+	sectionName, //板块名
+	updater; //板块聊天记录更新
 
 async function main(){
+	const waitLayerId = layer.load(0);
 	let res;
+	
 	
 	// 初始化获取用户信息
 	res = await request("makeDir", USERS);
-	if (res != true){
+	if (res !== true){
 		console.error("makeDir", USERS, res);
-		alert("操作错误\nresult:"+JSON.stringify(res));
+		return alert("操作错误！\nmethod: makeDir\nresult:"+JSON.stringify(res));
 	}
 	
 	res = await request("makeDir", CHAT);
-	if (res != true){
+	if (res !== true){
 		console.error("makeDir", CHAT, res);
-		alert("操作错误\nresult:"+JSON.stringify(res));
+		return alert("操作错误！\nmethod: makeDir\nresult:"+JSON.stringify(res));
 	}
 	
-	res = await request("readDir", USERS);
-	for (const name of res){
-		res = await request("readFile", USERS+name);
-		const lines = res.split("\n");
-		users.push({
-			name,
-			regTime: lines[0],
-			password: lines[1],
-			info: JSON.parse(lines[2])
-		});
-	}
 	
 	// 登录判断
 	if (localStorage.getItem("tourist") == "true"){ //游客模式
-		userName = false;
+		user = false;
+	
 	}else if (localStorage.getItem("name") && localStorage.getItem("password")){
 		const name = localStorage.getItem("name"),
 			password = localStorage.getItem("password");
-		for (const user of users)
-			if (user.name == name && user.password == hex_sha512(password)){ //密码正确
-				userName = name;
-				return $("#newSection").show();
+		
+		if (await request("exists", USERS+name) == true){ //用户存在
+			res = await request("readFile", USERS+name);
+			const lines = res.split("\n");
+			if (lines[1] == hex_sha512(password)){ //密码正确
+				user = {
+					name,
+					regTime: new Date(+lines[0]),
+					password: lines[1],
+					info: JSON.parse(lines[2] || "{}")
+				};
+				$("#newSection").show(); //允许创建板块
+				$("#chat > form").show(); //允许发送消息
+			}else{
+				layer.alert("登录错误！", {icon:2, closeBtn:0}, function(){
+					location.href = "login.html";
+				});
 			}
-		layer.alert("登录错误！", {icon:2})
-		location.href = "login.html";
+		}else{
+			layer.alert("登录错误！", {icon:2, closeBtn:0}, function(){
+				location.href = "login.html";
+			});
+		}
+	
+	}else{
+		layer.alert("请先登录！", {icon:5, closeBtn:0}, function(){
+			location.href = "login.html";
+		});
 	}
+	
 	
 	//社区列表
 	res = await request("readDir", CHAT);
-	$("#list").empty();
+	$("#sectionsList").empty();
 	for (const name of res){
-		const lines = (await request("readFile", CHAT+name)).split("\n");
+		const lines = (await request("readFile", CHAT+name+INITFILE)).split("\n");
 		sections[name] = {
 			creator: lines[0],
-			createTime: lines[1],
-			introduction: lines[2],
-			info: JSON.parse(lines[3])
+			createTime: new Date(+lines[1]),
+			info: JSON.parse(lines[2] || "{}")
 		};
-		$("#list").append(
+		$("#sectionsList").append(
 			$("<li></li>")
-			.html(name)
-			.click(()=>{
-				
-			})
+			.append(
+				$("<h3></h3>").html(name)
+			)
+			.append(
+				$("<span></span>").html( "创建者："+sections[name].creator )
+			)
+			.append(
+				$("<time></time>").html( "创建时间："+sections[name].createTime.format("MM月dd日") )
+			)
+			.click(() => {sectionName=name; openSection();})
 		);
 	}
+	
+	
+	layer.close(waitLayerId);
 }
 main();
 
+
+//新建板块
 function newSection(){
-	if (!userName) layer.msg("请先登录", {icon: 5});
+	if (!user) return layer.msg("请先登录", {icon: 5});
 	
 	layer.prompt({title: "请输入名称"}, async function(name, index){
-		layer.prompt({title: "请输入介绍"}, async function(introduction, index){
-			layer.close(index);
-			
-			let res;
-			
-			res = await request("makeDir", CHAT+name);
-			if (res != true){
-				console.error("makeDir", USERS, res);
-				alert("操作错误\nresult:"+JSON.stringify(res));
-			}
-			
-			res = await request("writeFile", CHAT+name+"\info.dat",
-				userName+"\n"+
-				+new Date()+"\n"+
-				introduction+"\n"+
-				"{}"
-			);
-			if (res != true){
-				console.error("makeDir", USERS, res);
-				alert("操作错误\nresult:"+JSON.stringify(res));
-			}
-			
-			layer.msg("创建成功！", {icon: 1});
-			location.reload();
-		});
+		layer.close(index);
+		
+		let res;
+		
+		res = await request("makeDir", CHAT+name);
+		if (res !== true){
+			console.error("makeDir", CHAT+name, res);
+			return alert("操作错误！\nmethod: makeDir\nresult:"+JSON.stringify(res));
+		}
+		
+		res = await request("writeFile", CHAT+name+INITFILE,
+			user.name+"\n"+
+			+new Date()+"\n"+
+			"{}"
+		);
+		if (res !== true){
+			console.error("makeDir", CHAT+name+INITFILE, res);
+			return alert("操作错误！\nmethod: makeDir\nresult:"+JSON.stringify(res));
+		}
+		
+		layer.msg("创建成功！", {icon: 1});
+		location.reload();
 	});
 }
 
+//打开板块
+async function openSection(){
+	$("#chat > header > h2").html(sectionName);
+	$("#chat").slideDown("slow");
+	$("#list").slideUp("slow");
+	
+	$("#messagesList").empty()
+		.append( $("<span>加载中……</span>") )
+	
+	let res;
+	res = await request("readDir", CHAT+sectionName);
+	const dates = res.filter(v => v.slice(-4)==".dat").sort().reverse().map(v => v.slice(0,-4));
+	console.log("dates", dates)
+	
+	$("#messagesList").empty();
+	for (const date of dates)
+		update(date);
+	
+	updater = setInterval(update, 10*1000); //10s
+}
+
+//关闭板块
+function closeSection(){
+	clearTimeout(updater);
+	$("#chat").slideUp("slow");
+	$("#list").slideDown("slow");
+}
+
+//发送消息
+async function sendMessage(){
+	if (!user) return layer.msg("请先登录", {icon: 5});
+	if (!$("#message").val()) return; //无输入
+	
+	const waitLayerId = layer.load(2);
+	
+	const message = marked( $("#message").val() ).replace(/\n+/g, "").replace(/<script[\s\S]+<\/script>/g, ""),
+		file = CHAT+sectionName+"/"+new Date().format("yyyy-MM-dd")+".dat",
+		value = +new Date()+"\n"+
+			user.name+"\n"+
+			message+"\n"+
+			"{}";
+	
+	let res;
+	res = await request("exists", file);
+	if (res === true){ //已存在，追加文件
+		res = await request("appendFile", file, "\n"+value);
+		if (res !== true){
+			console.error("appendFile", file, res);
+			return alert("操作错误！\nmethod: appendFile\nresult:"+JSON.stringify(res));
+		}
+	}else if (res === false){ //不存在，写入文件
+		res = await request("writeFile", file, value);
+		if (res !== true){
+			console.error("writeFile", file, res);
+			return alert("操作错误！\nmethod: writeFile\nresult:"+JSON.stringify(res));
+		}
+	}
+	$("#message").empty(); //清除发送框内容
+	update();
+	
+	layer.close(waitLayerId);
+}
+
+//更新聊天消息
+async function update(date=new Date().format("yyyy-MM-dd")){
+	const file = CHAT+sectionName+"/"+date+".dat";
+	
+	if (await request("exists", file) !== true) return; //无聊天记录
+	
+	const res = await request("readFile", file),
+		lines = res.split("\n");
+	
+	for (const e of $("#messagesList > li")){ //移除当天消息
+		const child = $(e);
+		if (new Date(+child.data("time")).format("yyyy-MM-dd") == date)
+			child.remove();
+	}
+	
+	let last=null, lastDis=Infinity;
+	for (const e of $("#messagesList > li")){ //寻找前一条消息
+		const time = +$(e).data("time"),
+			dis = new Date(date)-time;
+		if (dis < lastDis && dis > 0){
+			last = $(e);
+			lastDis = dis;
+		}
+	}
+	
+	for (let i=lines.length-4; i>=0; i-=4){
+		const data = {
+			time: new Date(+lines[i]),
+			name: lines[+i+1],
+			message: lines[+i+2],
+			info: JSON.parse(lines[+i+3] || "{}")
+		};
+		console.log(date, i, data)
+		
+		const e = $("<li></li>")
+			.data("time", +data.time)
+			.addClass(data.name==user.name? "right": "left")
+			.append(
+				$("<time></time>").html( data.time.format("yyyy/MM/dd hh:mm:ss") )
+			)
+			.append( //main
+				$("<div></div>")
+				.append( //icon
+					$("<span></span>").html( data.name.substr(0,1) )
+						.addClass( data.name=="wzh"? "v": ""  )
+				)
+				.append( //name, message
+					$("<div></div>")
+					.append( //name
+						$("<span></span>").html( data.name )
+					)
+					.append( //message
+						$("<article>"+data.message+"</article>")
+					)
+				)
+			);
+		if ( last ){
+			last.after(e);
+		}else{
+			$("#messagesList").prepend(e);
+		}
+		
+	}
+}
+
+//新建板块
 $("#newSection").click(newSection);
+//返回
+$("#chat .back").click(closeSection);
+//发送消息
+$("#send").click(sendMessage);
 </script>
 	</body>
 </html>

@@ -1,5 +1,16 @@
 <!DOCTYPE html>
-<!-- Copyright © 2020~2021 by wzh -->
+<!--
+　┐ ├┬─┐ ┌──┼┼┐
+　│ ││　 ┌──┼┼┐
+│╯├─┐ ╭──┴╯			W
+└╯│    ┌────┐			Z
+　│　├─┐ ├────┤			H
+　╰┘└　 └────╯
+Copyleft by wzh 2020~2021
+允许非商业用途的阅读、使用、复制、分发代码，
+修改借鉴代码和派生作品请告知作者，
+欢迎为代码的完善和新的功能提出建议或想法。
+-->
 <html lang="zh">
 	<head>
 		<meta charset="UTF-8" />
@@ -291,7 +302,22 @@
 			font-size: 3em;
 			text-align: center;
 		}
+		
+		/* noscript */
+		noscript{
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: #fffae8;
+			text-align: center;
+		}
 		</style>
+		
+		<!-- layui -->
+		<!--<link rel="stylesheet" href="https://unpkg.com/layui@2.6.4/dist/css/layui.css">-->
+		<script src="https://unpkg.com/layui@2.6.4/dist/layui.js"></script>
 		
 		<script src="./js/modules/jquery.min.js"></script>
 		<script>
@@ -328,6 +354,7 @@
 		<script src="https://sidecar.gitter.im/dist/sidecar.v1.js" async defer></script>
 	</head>
 	<body>
+		<!-- 初始页 -->
 		<section class="init" style="display: flex;">
 			<h1>我的世界</h1>
 			<div>
@@ -338,6 +365,8 @@
 				</div>
 			</div>
 		</section>
+		
+		<!-- 新的世界 -->
 		<section class="new_world" style="display: none;">
 			<h2>新的世界<p>NEW WORLD</p></h2>
 			<label for="seed">种子(seed)：</label><input name="seed" id="seed" placeholder="不输入则随机生成" autofocus />
@@ -443,17 +472,12 @@
 			<button class="warn back">取消<p>Cancel</p></button>
 			<button class="success">生成世界<p>OK</p></button>
 		</section>
+		
+		<!-- 关于 -->
 		<section class="about" style="display: none;">
 			<h2>关于<p>ABOUT</p></h2>
-			<div style="font-family: kt;">
-				&nbsp;&nbsp;&nbsp;&nbsp;本游戏是一个依据《我的世界》游戏精神<b>仿制</b>（注：不是复制）的网页版游戏，目前仍处于初级发展阶段。<br/>
-				&nbsp;&nbsp;&nbsp;&nbsp;本游戏的灵感仅来源于数亿年前宇宙另一侧的一次蝴蝶效应扰动。<br/>
-				&nbsp;&nbsp;&nbsp;&nbsp;忆往事：去年(2020)5月网课时，偶遇Three.js，顿时灵感大作，码思泉涌，故本游戏终得诞生。<br/>
-				<font style="font-family: st;">&nbsp;&nbsp;&nbsp;&nbsp;往事不堪回首，前行之路可期。今年2021，愿新的一年里，终能不负所期！</font><br/>
-				<span style="float: right;">——2020年1月2日</span>
-			</div>
 			<div>
-				<hr/>
+				<h3>联系作者</h3>
 				开发者：@wzh656<br/>
 				<a class="newTable" href="https://github.com/wzh656/">Github</a><br/>
 				<a class="newTable" href="https://gitee.com/wzh656/">Gitee</a><br/>
@@ -469,9 +493,10 @@
 				<script language="javascript" src="http://count24.51yes.com/click.aspx?id=248466766&logo=1" charset="gb2312"></script>
 			</center></footer>
 		</section>
-		<section class="community" style="display: none;">
-			<h1>加载中……<p>Loading…</p></h1>
-		</section>
+		
+		<!-- 1:不支持js -->
+		<noscript style="z-index: 1;"><h1>你的浏览器不支持JavaScript，无法运行！</h1></noscript>
+		
 <script>
 //input处理
 for (const i of $(".more input"))
@@ -621,11 +646,7 @@ $("a.newTable").click(function(){
 
 //打开页面
 function open(url="main.html"){
-	const msg = $("<dialog>加载中……</dialog>");
-	$(document.body).append(
-		msg.attr("open", "true").hide()
-	);
-	msg.fadeIn("fast");
+	layer.load(1);
 	console.log(url)
 	location.href = url;
 	
@@ -772,32 +793,10 @@ $(".about button.back").click(function(){
 });
 
 
+//社区
 $("#community").click(function(){
+	layer.load(1);
 	location.href = "login.html";
-	console.log("community", $(".init").css("display"), $(".community").css("display"), $("button").attr("disabled"));
-	
-	$("button").attr("disabled", "true");
-	$(".init")
-		.css("left", "0%")
-		.css("opacity", "1")
-		.animate({
-			left: (Math.random(0,1,0)?"-":"") + "100%", //正负100%
-			opacity: 0
-		}, 1000, ()=>{
-			$(".init").css("display", "none");
-			$("button").removeAttr("disabled");
-			console.log("community", "animate end", $(".init").css("display"), $(".community").css("display"), $("button").attr("disabled"));
-		});
-	$(".community")
-		.css("top", (Math.random(0,1,0)?"-":"") + "100%") //正负100%
-		.css("opacity", "0")
-		.css("display", "block")
-		.animate({
-			top: "0%",
-			opacity: 1
-		}, 1000);
-	
-	console.log("community", "animate start", $(".init").css("display"), $(".community").css("display"), $("button").attr("disabled"));
 });
 
 
