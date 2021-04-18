@@ -53,22 +53,13 @@
 		
 		/* 字体缩放方案 */
 		@media screen and (max-width:320px){
-			body {font-size: 0.8rem;}
+			body {font-size: calc(0.02 * 320px + 5px);}
 		}
-		@media screen and (min-width: 321px) and (max-width:481px){
-			body {font-size: 1rem;}
-		}
-		@media screen and (min-width: 481px) and (max-width:640px){
-			body {font-size: 1.1rem;}
-		}
-		@media screen and (min-width: 641px) and (max-width:800px){
-			body {font-size: 1.15rem;}
-		}
-		@media screen and (min-width: 801px) and (max-width:960px){
-			body {font-size: 1.25rem;}
+		body{
+			font-size: calc(2vw + 5px);
 		}
 		@media screen and (min-width: 960px){
-			body {font-size: 1.3rem;}
+			body {font-size: calc(0.02 * 960px + 5px);}
 		}
 		/* 横屏 */
 		body.landscape{
@@ -123,32 +114,52 @@
 			width: 100%;
 		}
 		
+		
 		form > div:last-of-type{
 			display: flex;
+			flex-direction: column;
 		}
-		form > div > button{
+		form > div:last-of-type > div{
+			display: flex;
+		}
+		form > div:last-of-type button{
 			font-size: 2em;
 			width: 46%;
 			margin: 0 auto;
+			transition: background-color 0.3s;
 		}
-		form > div > button:first-of-type{
+		
+		#login{
 			color: white;
 			background-color: #1e9fff;
 			border: 3px solid #1e9fff;
 		}
-		form > div > button:first-of-type:hover{
+		#login:hover{
 			background-color: #0e8fef;
 			border: 3px solid #0e8fef;
 		}
 		
-		form > div > button:last-of-type{
+		#register{
 			color: #1e9fff;
 			background-color: #fff;
 			border: 3px solid #1e9fff;
 		}
-		form > div > button:last-of-type:hover{
+		#register:hover{
 			background-color: #eee;
 		}
+		
+		#back{
+			width: 96%;
+			margin: 1rem auto;
+			
+			color: #ff9f1e;
+			background-color: #fff;
+			border: 3px solid #ff9f1e;
+		}
+		#back:hover{
+			background-color: #eee;
+		}
+		
 		
 		/* noscript */
 		noscript{
@@ -195,9 +206,12 @@
 				<div>
 					<label>密码：</label><br/><input name="password" placeholder="密码" type="password" />
 				</div>
-				<div class="layui-btn-container">
-					<button class="success" type="submit" id="login">登录</button>
-					<button class="success" type="submit" id="register">注册</button>
+				<div>
+					<div>
+						<button class="success" type="submit" id="login">登录</button>
+						<button class="success" type="button" id="register">注册</button>
+					</div>
+					<button class="warn" type="button" id="back">返回</button>
 				</div>
 			</form>
 			<a href="javascript:tourist();">先随便逛逛（游客）</a>
@@ -214,8 +228,13 @@
 <script>
 if (window.innerWidth > window.innerHeight)
 	$("body").addClass("landscape"); //横屏
+$(window).resize(function(){
+	if (window.innerWidth < window.innerHeight)
+		$("body").removeClass("landscape"); //取消横屏
+});
+</script>
 
-
+<script>
 //请求服务器
 function request(method, path="", value=""){
 	return new Promise((resolve, reject) => {
@@ -232,6 +251,8 @@ function request(method, path="", value=""){
 		});
 	});
 }
+
+
 
 const ROOT = "/MinecraftCommunity/",
 	USERS = ROOT + "users/",
@@ -266,11 +287,12 @@ async function main(){
 	}
 }
 let inited = false;
-main().then(() => init=true); //初始化完成
+main().then(() => inited=true); //初始化完成
 
-//登录
+
+// 登录
 function login(){
-	if (!init) return layer.msg("获取用户信息中……", {icon: 5});
+	if (!inited) return layer.msg("获取用户信息中……", {icon: 5});
 	
 	const {name:{value:name}, password:{value:password}} = $("form")[0];
 	
@@ -279,8 +301,8 @@ function login(){
 	
 	for (const [iname,user] of Object.entries(users)){
 		if (iname == name && user.password == hex_sha512(hex_sha512(password))){
-			localStorage.setItem("name", name);
-			localStorage.setItem("password", hex_sha512(password));
+			localStorage.setItem("MinecraftCommunity-name", name);
+			localStorage.setItem("MinecraftCommunity-password", hex_sha512(password));
 			layer.msg("登录成功！", {icon: 1});
 			location.href = "./community.html";
 			return layer.load(1);
@@ -288,9 +310,10 @@ function login(){
 	}
 	layer.msg("用户名或密码错误", {icon: 2});
 }
-//注册
+
+// 注册
 function register(){
-	if (!init) return layer.msg("获取用户信息中……", {icon: 5});
+	if (!inited) return layer.msg("获取用户信息中……", {icon: 5});
 	
 	const {name:{value:name}, password:{value:password}} = $("form")[0];
 	
@@ -307,19 +330,28 @@ function register(){
 		hex_sha512(hex_sha512(password))+"\n"+
 		"{}"
 	).then(() => {
-		localStorage.setItem("name", name);
-		localStorage.setItem("password", hex_sha512(password));
+		localStorage.setItem("MinecraftCommunity-name", name);
+		localStorage.setItem("MinecraftCommunity-password", hex_sha512(password));
 		layer.msg("注册成功！", {icon: 1});
 		location.href = "./community.html";
 		layer.load(1);
 	});
 }
-//游客模式
+
+// 游客模式
 function tourist(){
-	localStorage.setItem("tourist", "true");
+	localStorage.setItem("MinecraftCommunity-tourist", "true");
 	location.href = "./community.html";
 	layer.load(1);
 }
+
+// 退出
+function back(){
+	location.href = "./home.html";
+	layer.load(1);
+}
+
+
 
 $("form").submit(function(e){
 	login();
@@ -339,6 +371,7 @@ $("#register").click(function(e){
 	e.cancelBubble = true;
 	return false;
 });
+$("#back").click(back);
 </script>
 	</body>
 </html>

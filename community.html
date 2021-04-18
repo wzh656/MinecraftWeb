@@ -53,22 +53,13 @@
 		
 		/* 字体缩放方案 */
 		@media screen and (max-width:320px){
-			body {font-size: 0.8rem;}
+			body {font-size: calc(0.02 * 320px + 5px);}
 		}
-		@media screen and (min-width: 321px) and (max-width:481px){
-			body {font-size: 1rem;}
-		}
-		@media screen and (min-width: 481px) and (max-width:640px){
-			body {font-size: 1.1rem;}
-		}
-		@media screen and (min-width: 641px) and (max-width:800px){
-			body {font-size: 1.15rem;}
-		}
-		@media screen and (min-width: 801px) and (max-width:960px){
-			body {font-size: 1.25rem;}
+		body{
+			font-size: calc(2vw + 5px);
 		}
 		@media screen and (min-width: 960px){
-			body {font-size: 1.3rem;}
+			body {font-size: calc(0.02 * 960px + 5px);}
 		}
 		/* 横屏 */
 		body.landscape{
@@ -109,7 +100,25 @@
 		}
 		
 		
-		/* list */
+		/* button */
+		#exit, #newSection{
+			transition: background-color 0.3s;
+		}
+		
+		#exit{
+			float: right;
+			margin-right: 1rem;
+			font-size: 1.1em;
+			padding: 1vw;
+			
+			color: #ff1e9f;
+			background-color: #fff;
+			border: 1px solid #ff1e9f;
+		}
+		#exit:hover{
+			background-color: #eee;
+		}
+		
 		#newSection{
 			float: right;
 			margin-right: 1rem;
@@ -124,6 +133,8 @@
 			background-color: #eee;
 		}
 		
+		
+		/* list */
 		#sectionsList{
 			margin: 0;
 			padding: 0;
@@ -218,27 +229,31 @@
 		}
 		#messagesList > li > div > span{ /* icon */
 			display: inline-block;
-			width: 1.6rem;
-			height: 1.6rem;
+			width: 2rem;
+			height: 2rem;
 			margin: 0.2rem;
 			
 			background-color: #d3e0ed;
-			border-radius: 1.6rem;
+			border-radius: 50%;
 			font-size: 1.1em;
 			text-align: center;
+			line-height: 2rem;
 		}
 		#messagesList > li > div > span.v:after{
 			content: "V";
 			position: relative;
-			top: -1.6rem;
-			left: 1.6rem;
+			top: -2rem;
+			left: 2rem;
 			display: block;
 			width: 0.6rem;
 			height: 0.6rem;
+			
 			color: white;
 			background-color: #00f;
-			border-radius: 0.6rem;
+			border-radius: 50%;
 			font-size: 0.3em;
+			text-align: center;
+			line-height: 0.6rem;
 		}
 		#messagesList > li > div > div{ /* name,message */
 			display: inline-flex;
@@ -321,6 +336,7 @@
 		<!-- 列表界面 -->
 		<section id="list">
 			<h1>社区<p>COMMUNITY</p></h1>
+			<button id="exit">退出登录</button>
 			<button id="newSection" style="display: none;">新建板块</button><br/><br/>
 			<ul id="sectionsList">
 				<span>加载中……</span>
@@ -337,7 +353,7 @@
 				<span>获取中……</span>
 			</ul>
 			<form style="display: none;">
-				<textarea id="message" placeholder="（支持markdown和html格式）" contenteditable></textarea>
+				<textarea id="message" placeholder="shift+回车发送（支持markdown和html格式）" contenteditable></textarea>
 				<button type="button" id="send">发送</button>
 			</form>
 		</section>
@@ -353,7 +369,13 @@
 <script>
 if (window.innerWidth > window.innerHeight)
 	$("body").addClass("landscape"); //横屏
+$(window).resize(function(){
+	if (window.innerWidth < window.innerHeight)
+		$("body").removeClass("landscape"); //取消横屏
+});
+</script>
 
+<script>
 //请求服务器
 function request(method, path="", value=""){
 	return new Promise((resolve, reject)=>{
@@ -392,7 +414,7 @@ async function main(){
 	let res;
 	
 	
-	// 初始化获取用户信息
+	//初始化获取用户信息
 	res = await request("makeDir", USERS);
 	if (res !== true){
 		console.error("makeDir", USERS, res);
@@ -406,13 +428,13 @@ async function main(){
 	}
 	
 	
-	// 登录判断
-	if (localStorage.getItem("tourist") == "true"){ //游客模式
+	//登录判断
+	if (localStorage.getItem("MinecraftCommunity-tourist") == "true"){ //游客模式
 		user = false;
 	
-	}else if (localStorage.getItem("name") && localStorage.getItem("password")){
-		const name = localStorage.getItem("name"),
-			password = localStorage.getItem("password");
+	}else if (localStorage.getItem("MinecraftCommunity-name") && localStorage.getItem("MinecraftCommunity-password")){
+		const name = localStorage.getItem("MinecraftCommunity-name"),
+			password = localStorage.getItem("MinecraftCommunity-password");
 		
 		if (await request("exists", USERS+name) == true){ //用户存在
 			res = await request("readFile", USERS+name);
@@ -475,7 +497,15 @@ async function main(){
 main();
 
 
-//新建板块
+function exit(){
+	layer.load(1);
+	localStorage.removeItem("MinecraftCommunity-name");
+	localStorage.removeItem("MinecraftCommunity-password");
+	localStorage.removeItem("MinecraftCommunity-tourist");
+	location.href = "./login.html";
+}
+
+// 新建板块
 function newSection(){
 	if (!user) return layer.msg("请先登录", {icon: 5});
 	
@@ -505,7 +535,8 @@ function newSection(){
 	});
 }
 
-//打开板块
+
+// 打开板块
 async function openSection(){
 	$("#chat > header > h2").html(sectionName);
 	$("#chat").slideDown("slow");
@@ -526,14 +557,16 @@ async function openSection(){
 	updater = setInterval(update, 10*1000); //10s
 }
 
-//关闭板块
+
+// 关闭板块
 function closeSection(){
 	clearTimeout(updater);
 	$("#chat").slideUp("slow");
 	$("#list").slideDown("slow");
 }
 
-//发送消息
+
+// 发送消息
 async function sendMessage(){
 	if (!user) return layer.msg("请先登录", {icon: 5});
 	if (!$("#message").val()) return; //无输入
@@ -562,13 +595,14 @@ async function sendMessage(){
 			return alert("操作错误！\nmethod: writeFile\nresult:"+JSON.stringify(res));
 		}
 	}
-	$("#message").empty(); //清除发送框内容
+	$("#message").val(""); //清除发送框内容
 	update();
 	
 	layer.close(waitLayerId);
 }
 
-//更新聊天消息
+
+// 更新聊天消息
 async function update(date=new Date().format("yyyy-MM-dd")){
 	const file = CHAT+sectionName+"/"+date+".dat";
 	
@@ -633,12 +667,24 @@ async function update(date=new Date().format("yyyy-MM-dd")){
 	}
 }
 
+
+
+//退出登录
+$("#exit").click(exit);
 //新建板块
 $("#newSection").click(newSection);
 //返回
 $("#chat .back").click(closeSection);
 //发送消息
 $("#send").click(sendMessage);
+$("#message").keydown(function(e){
+	if (e.keyCode == 13 && e.shiftKey){
+		sendMessage(); //shift+回车
+		e.stopPropagation();
+		e.cancelBubble = true;
+		return false;
+	}
+});
 </script>
 	</body>
 </html>
