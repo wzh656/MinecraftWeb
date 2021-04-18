@@ -7,14 +7,14 @@
 [![latest-release](https://img.shields.io/github/v/release/wzh656/MinecraftWeb?include_prereleases&labelColor=aaa&style=plastic&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACdUlEQVRYR9VWgTFDQRCNClCBqAAVkApQgagAFYgKUIGoABWIClCBqAAV8N6fe5n9m73LzZcZ42Z27udu9927t3t3Wen9cVv54/V7JQJrIHcCO00k79GfwT4XkGbcJewg+V2hv87F5QgQ5BG27RZ7we9BgUQ/xbG3LRuXI8Dd7sO+zE44tgoj2E5GBc5twd5hQ6Mc4xh/6OMiApTuLjkeox+nbzt+gbGRA+Pv8zRGlSbpmylkSthIgERmLSIwxewGjLvou0U0xzrYhKke6PeWfF/R+9Qpjj3jsgSGmLlJsywcFaAC7G6sCiM4aPdWNcWxEFnQbC0VvAITOOwmR+aZObWtjx/aqd0NlWCe2dZh/qTsYYxFzfYA0wlpHUMLzuLjSYgaF2aK2Lgb+km1SH5hfBswpoE4LQJW3ifMkXXUxhg8ShO3qdfvKG3CmOBD6vI+YVpaBKxDVOUCskQltdSaq3KzgxG+VSezNNgasBKVgKiM8ukViupGPvYYzzYvAh60BMTdfmTSU7ra/RrNXaEAK49PTbSWrXrNlwpQPlblJs0ioKuXjjVAtl4EXipc+UzxoRPU1IEI2IkaoIhA6QSIgI3jmpsiYKVpXRSZXPuU0a10ciICTapJwBdHDVBEILqCPX8fNyABfzxqCAwRp9tPi9gXMCNc84LqLqDPIQnMDWKs9WQGaF41utQQ8MQvIgI1QF0JzKWbBCYw3dG1O4kIRK+gF8/HPXUl0AeynmUtUroF5VNFYPZU5iopjdujy6EaAvyn9GxwGwWmMN1OtUD060LAx72QwDKAOhP/1wQWlEh2uqX4bxRYGoGuQEuJqzk6S1koB/IDAjacvLF4OQ0AAAAASUVORK5CYII=)](https://github.com/wzh656/MinecraftWeb/releases/download/1.2.0-alpha/Minecraft-v1.2.0-alpha-full.apk)
 [![downloads](https://img.shields.io/github/downloads/wzh656/MinecraftWeb/total?style=plastic&labelColor=aaa&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACdElEQVRYR7WWjVEjMQyFoQLogFDBQQUsFRxUcKEDqIBQAUcFt1QAqYBQwR0VEDqACuB9nvWNI6T1Jiya0SS2ZelZv7u9tT4d6MqemN+S/mnxIuZ3MG0PlGwk91N8Ip5U7ix1fi+eixc1/TUAGLsUT2uKgvNW+1diQLnUBwCjfzY0bK+daQMwnygCgPCvkYxnNegEyAp5AL7DeAjCAphJkph/J5ET2ElUAmi0fjCWL7TGI2T/VHw0ENmj5H6LF+Jz51HH3dkKgKU2qe+S/gt2m4Cg/ql15EuadGcYpQwzNfpjH8bdfQSyB1DsZTxC1pCxW116ALiUKiMDwIh9PULWA1VrjkAEIHkBABPxc6B5DADkz12gPwEgSa4dgVvtEZoxqJUSr69cAGAh9rJ7jPhn8CTuX+cljxEAphqhGZPeIwDugYSbMa1LF6X7w+h8xQMeAIQPRwbg2Ul9wD3Qfm1Ur4svBBAlIR5Y6+umBxHhtN0Q8ZSEtE2+diytDI11n2vkW629Mpz39YHXLg+WXzQelSBqUx+YiKNOSAhOxZuCwDiu3w0ekTohtBDnZvTU7eWSwROM1hsx/4cQj8LldNnIOCO78aYhOcGkasS2h+MRLqLYo1abALef7J4snr0vS630Qu4D3pxIYzQAMNX+kA/Z9Hp0lABwW5kL2RAgZuIdMeFhui0DAH0Jl6+8dR5KOmyzKV+AAL1gaNyzgaix5fMVD3rdrnT7JlXQB+BT+KJ2a2MJEDxBRtdmRATAzZ2+fk+StGL7qVabERYAo528cdt6TRkvJiQwSejljc3HDIBko3/MrEC5rgEoZQkLgFDaR4AlXHivSh+QhoYeN6Q7yAAAAABJRU5ErkJggg==)](https://github.com/wzh656/MinecraftWeb/zipball/master)
 
-![修改日期-2021.3.6](https://img.shields.io/badge/修改日期-2021.3.6-blueviolet)
+![修改日期-2021.4.18](https://img.shields.io/badge/修改日期-2021.4.18-blueviolet)
 
 
 
 > # 运行(Run)
 
 1. 手机版(Android apk软件)/电脑Windows版(electron实现)运行
-	> 注：由于项目进入慢速发展阶段，从最新版本(v1.2.0-alpha)发布(2020.12.14)至今一直没有稳定版本
+	> 注：由于项目进入慢速发展阶段，自最新版本(v1.2.0-alpha)发布(2020.12.14)至今一直没有稳定版本
 	
     国内链接: [腾讯微云永久下载链接(v1.1.0+,apk&electron)](https://share.weiyun.com/WkQTgj8H)
     | 版本(version)	| Android版下载(apk)																																		| Windows下载(electron)																		| Github查看(release)									|
@@ -35,7 +35,7 @@
     > 也可以点击关闭，直接竖屏运行（可能界面显示会有些奇怪）
 	
 	### 派生网站
-	> 由其他作者clone项目产生的网站
+	> 由其他作者clone项目部署产生的网站
 	+ [https://jason-bowen-zheng.gitee.io/MinecraftWeb/](https://jason-bowen-zheng.gitee.io/MinecraftWeb/home.html)
 	+ [https://webmc.minecraft.net.xmsmi.cn/](https://webmc.minecraft.net.xmsmi.cn/)
 	+ [https://mc.games.lancex.top/](https://mc.games.lancex.top/)
@@ -127,7 +127,19 @@
     手机调试工具，点击右下角即可看到一堆输出，可以调试html+css+js，也可以运行JavaScript代码，等效于*命令方块*
 
 
-## （四）功能 & 计划
+## （四）社区(Community)
+### 关于服务器
+为节约服务器资源，服务器闲时自动休眠，首次加载信息需要较长时间为正常现象。
+
+### 关于账号
+加入我的世界社区需先注册账号（仅需账号密码），密码使用sha加密保存。  
+如果不登录也可以使用游客模式浏览留言。
+
+### 关于板块
+任何已登录用户可以创建自己的板块，并在任何板块发表text/markdown/html格式留言，提出建议
+
+
+## （五）功能 & 计划
 ### 部分值得一提的功能
 1. [x] 通过 `F=ma`, `v=at`, `s=vt` 等物理公式计算玩家位置
 2. [x] 考虑空气阻力 `f = 1/2*CρSV²` 对玩家的影响
@@ -155,17 +167,17 @@
 > 注：计划赶不上变化
 
 
-## （五）感谢(thanks)
+## （六）感谢(thanks)
 + 感谢“*卓佳浩*”和“*deskgood*”对本项目的大力支持鼓励
 
 + [*@jason-bowen-zheng*](https://github.com/jason-bowen-zheng)提供了一些交流与建议
 
 
-## （六）关于代码
+## （七）关于代码
 允许非商业用途的阅读、使用、复制、分发代码，  
 修改借鉴代码和派生作品请先告知作者，  
 欢迎为代码的完善和新的功能提出建议或想法。
 
 
-## （七）更多(more)
+## （八）更多(more)
 更多*特性*请自行[运行尝试](#运行)或*在代码中领悟*
