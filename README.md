@@ -13,7 +13,9 @@
 
 > # 运行(Run)
 
-1. 手机版(Android apk软件)/电脑Windows版(electron实现)运行  
+1. 手机版(Android apk软件)/电脑Windows版(electron实现)运行
+	> 注：由于项目进入慢速发展阶段，从最新版本(v1.2.0-alpha)发布(2020.12.14)至今一直没有稳定版本
+	
     国内链接: [腾讯微云永久下载链接(v1.1.0+,apk&electron)](https://share.weiyun.com/WkQTgj8H)
     | 版本(version)	| Android版下载(apk)																																		| Windows下载(electron)																		| Github查看(release)									|
     | -----------------	| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	| ------------------------------------------------------------------------------------------------------	|
@@ -25,13 +27,19 @@
     | v0.4.0-alpha	| [完整版(23.85MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v0.4.0-alpha/Minecraft-full.apk)，[简化版(5.34MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v0.4.0-alpha/Minecraft-simplified.apk)				| 未打包(unpackaged)																		| [release](https://github.com/wzh656/MinecraftWeb/releases/tag/v0.4.0-alpha)	|
     | v0.3.2-alpha	| [原始版(0.89MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v0.3.2-alpha/Minecraft_v0.3.2-alpha.apk)																				| 未打包(unpackaged)																		| [release](https://github.com/wzh656/MinecraftWeb/releases/tag/v0.3.2-alpha)	|
 
-2. 网页版运行：当前可以直接访问 <https://wzh656.github.io/MinecraftWeb/home.html> 运行。,
+2. 网页版运行：当前可以直接访问 <https://wzh656.github.io/MinecraftWeb/home.html> 运行。
     > 注意
     > 1. GitHub是国外网站，网络不好将**无法访问**
-    > 2. 部分旧版浏览器可能不支持（推荐使用google chrome浏览器以便正常运行）
+    > 2. 部分旧版浏览器可能不支持（推荐使用Chrome最新版浏览器以便正常运行）
     > 3. 竖屏运行时会有一个提示使用横屏或者下载，如果浏览器支持横屏，可以将手机横屏使用；
     > 也可以点击关闭，直接竖屏运行（可能界面显示会有些奇怪）
-
+	
+	### 派生网站
+	> 由其他作者clone项目产生的网站
+	+ [https://jason-bowen-zheng.gitee.io/MinecraftWeb/](https://jason-bowen-zheng.gitee.io/MinecraftWeb/home.html)
+	+ [https://webmc.minecraft.net.xmsmi.cn/](https://webmc.minecraft.net.xmsmi.cn/)
+	+ [https://mc.games.lancex.top/](https://mc.games.lancex.top/)
+	
 3. git clone：当然也可以直接克隆仓库，
     然后用浏览器（推荐Chrome）直接运行`home.html`（也可以放到服务器环境打开），
     如果`npm`安装了`electron`也可以用`electron`:
@@ -42,21 +50,22 @@
 > # 介绍 (Introduction)
 
 ## （零）序
-本游戏是基于《我的世界》游戏思想的仿造，仿造原则是：  
+本项目是基于《我的世界》游戏思想的仿造，仿造原则是：  
 在原版基础上**增加游戏真实性**（比如在物理和化学方面），但拒绝完全复制（体现在“*仿*”字），故名之***真实性原则***。
-《我的世界》风格的界面只是一个*载体*和*躯壳*，却不是真正的*灵魂*所在，一切的一切只是面壁者透露出的*表象*。
+《我的世界》风格的界面只是一个*载体*和*躯壳*，却不是真正的*灵魂*所在。
 
 ### 战略方针
-目前，本游戏仍处在初级发展阶段，bug和性能方面都不是很好。对此，根据*真实性原则*，需要坚持*三个战略*（总称*改革优化创新战略*）：
+目前，本项目仍处在初级发展阶段，bug和性能方面都不是很好。对此，根据*真实性原则*，需要坚持*三个战略*（总称*改革优化创新战略*）：
 1. ***改革***：泛指修bug与代码体系修改；
 3. ***优化***：泛指不断提高运行速度，增加FPS，减小CPU及内存占用等；
 2. ***创新***：泛指不断发展新功能。
 
-目前阶段，这三个战略缺一不可，并且是当前发展中需长期坚持的主要及重要战略。
+目前，由于中考逼近，本项目已进入慢速发展阶段，游戏主体部分发展缓慢，并将持续至六月下旬。
+<!-- 目前阶段，这三个战略缺一不可，并且是当前发展中需长期坚持的主要及重要战略。 -->
 
 
 ## （一）总述
-本游戏使用JavaScript(ES6+)+HTML(HTML5)+CSS(CSS3)编写，利用WebGL技术，依赖Three.js进行更便捷的3D渲染。  
+本项目使用JavaScript(ES6+)+HTML(HTML5)+CSS(CSS3)编写，利用WebGL技术，依赖Three.js进行更便捷的3D渲染。  
 > 之所以选择JavaScript+HTML+CSS是因为便于绘制图形化界面（HTML5+CSS3），并易于打包成EXE(electron)和APK(HTML5+)以兼容各个平台
 
 规定：游戏中的每1px为1cm，每100px为1m，每个*普通方块*为边长1m=100cm=100px的立方体。
@@ -147,7 +156,7 @@
 
 
 ## （五）感谢(thanks)
-+ 感谢“*卓佳浩*”和“*deskgood*”对本游戏的大力支持鼓励
++ 感谢“*卓佳浩*”和“*deskgood*”对本项目的大力支持鼓励
 
 + [*@jason-bowen-zheng*](https://github.com/jason-bowen-zheng)提供了一些交流与建议
 
@@ -159,5 +168,4 @@
 
 
 ## （七）更多(more)
-*画面庞杂精细的《清明上河图》的信息量远不如几朵飘渺的白云背后的信息量。* 同样，一个内容复杂的文档不如一张简洁的白纸深处隐藏的信息量大。  
-为了保留神秘感，则仅介绍至此，文档可能长时间不会有较大更新，更多*特性*请自行[运行尝试](#运行)或*在代码中领悟*
+更多*特性*请自行[运行尝试](#运行)或*在代码中领悟*
