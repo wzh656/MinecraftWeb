@@ -164,7 +164,7 @@ renderer.render(scene, camera);
 
 renderer.color = {
 	get clearColor(){
-		return renderer.getClearColor();
+		return renderer.getClearColor(new THREE.Color());
 	},
 	set clearColor(value){
 		console.log("set clear color:", value);

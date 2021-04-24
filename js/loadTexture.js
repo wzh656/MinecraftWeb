@@ -1,8 +1,6 @@
-/**
-* 创建网格模型
-*/
+// 加载贴图
 let TEXTURES;
-(async function(){
+async function loadTextures(){
 	const keys = Object.keys(TEMPLATES);
 	TEXTURES = Img.grid(await Img.get("./img/textures/textures.png"), 16, 16);
 	for (const i of keys.slice(1)){ //除去空气
@@ -32,7 +30,8 @@ let TEXTURES;
 		
 		try_start_load(); //加载区块
 	}, 0);
-})();
+}
+loadTextures();
 
 
 // TextureLoader创建一个纹理加载器对象，可以加载图片作为几何体纹理
