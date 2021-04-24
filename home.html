@@ -66,22 +66,13 @@ Copyleft by wzh 2020~2021
 		
 		/* 字体缩放方案 */
 		@media screen and (max-width:320px){
-			body {font-size: 0.8rem;}
+			body {font-size: calc(0.018 * 320px + 6px);}
 		}
-		@media screen and (min-width: 321px) and (max-width:481px){
-			body {font-size: 1rem;}
-		}
-		@media screen and (min-width: 481px) and (max-width:640px){
-			body {font-size: 1.1rem;}
-		}
-		@media screen and (min-width: 641px) and (max-width:800px){
-			body {font-size: 1.15rem;}
-		}
-		@media screen and (min-width: 801px) and (max-width:960px){
-			body {font-size: 1.25rem;}
+		body{
+			font-size: calc(1.8vw + 6px);
 		}
 		@media screen and (min-width: 960px){
-			body {font-size: 1.3rem;}
+			body {font-size: calc(0.018 * 960px + 6px);}
 		}
 		
 		/* element */
@@ -137,7 +128,7 @@ Copyleft by wzh 2020~2021
 			margin: 0;
 		}
 		.init button{
-			font-size: 3em;
+			font-size: 2.8em;
 			margin: 0 auto;
 			padding: 1vmax;
 		}
@@ -542,10 +533,10 @@ function inputValueToDate(date){
 	return new Date(year, mouth-1, day, hour, minute);
 }
 $(".more > .time-position > input[name='time']")
-	.val( dateToInputValue( (new Date()).setFullYear(3000) ) )
+	.val( new Date(new Date().setFullYear(3000)).format("yyyy-MM-ddThh:mm") )
 	.change(function(){
 		if (!this.value)
-			this.value = dateToInputValue( (new Date()).setFullYear(3000) );
+			this.value = new Date(new Date().setFullYear(3000)).format("yyyy-MM-ddThh:mm");
 	});
 
 //position
@@ -698,13 +689,6 @@ $("#new_world")[0].onclick = function(){
 	
 	console.log("new_world", "animate start", $(".init").css("display"), $(".new_world").css("display"), $("button").attr("disabled"));
 };
-//已有存档
-if (localStorage.getItem("我的世界_seed") !== null){
-	$("#new_world")[0].innerHTML = "开始游戏<p>START PLAYING</p>"
-	$("#new_world")[0].onclick = ()=>open();
-}else{ //无存档
-	getGeolocationPosition();
-}
 
 //新的世界 取消
 $(".new_world button.back").click(function(){
