@@ -1,10 +1,3 @@
-/**
- * @author Filipe Caixeta / http://filipecaixeta.com.br
- * @author Mugen87 / https://github.com/Mugen87
- *
- * Description: A THREE loader for PCD ascii and binary files.
- */
-
 THREE.PCDLoader = function ( manager ) {
 
 	THREE.Loader.call( this, manager );
@@ -25,6 +18,8 @@ THREE.PCDLoader.prototype = Object.assign( Object.create( THREE.Loader.prototype
 		var loader = new THREE.FileLoader( scope.manager );
 		loader.setPath( scope.path );
 		loader.setResponseType( 'arraybuffer' );
+		loader.setRequestHeader( scope.requestHeader );
+		loader.setWithCredentials( scope.withCredentials );
 		loader.load( url, function ( data ) {
 
 			try {
@@ -39,9 +34,11 @@ THREE.PCDLoader.prototype = Object.assign( Object.create( THREE.Loader.prototype
 
 				} else {
 
-					throw e;
+					console.error( e );
 
 				}
+
+				scope.manager.itemError( url );
 
 			}
 

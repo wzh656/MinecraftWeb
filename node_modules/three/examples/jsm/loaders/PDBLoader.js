@@ -1,14 +1,9 @@
-/**
- * @author alteredq / http://alteredqualia.com/
- * @author Mugen87 / https://github.com/Mugen87
- */
-
 import {
 	BufferGeometry,
 	FileLoader,
 	Float32BufferAttribute,
 	Loader
-} from "../../../build/three.module.js";
+} from '../../../build/three.module.js';
 
 var PDBLoader = function ( manager ) {
 
@@ -26,9 +21,29 @@ PDBLoader.prototype = Object.assign( Object.create( Loader.prototype ), {
 
 		var loader = new FileLoader( scope.manager );
 		loader.setPath( scope.path );
+		loader.setRequestHeader( scope.requestHeader );
+		loader.setWithCredentials( scope.withCredentials );
 		loader.load( url, function ( text ) {
 
-			onLoad( scope.parse( text ) );
+			try {
+
+				onLoad( scope.parse( text ) );
+
+			} catch ( e ) {
+
+				if ( onError ) {
+
+					onError( e );
+
+				} else {
+
+					console.error( e );
+
+				}
+
+				scope.manager.itemError( url );
+
+			}
 
 		}, onProgress, onError );
 

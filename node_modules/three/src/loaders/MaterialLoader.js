@@ -8,10 +8,6 @@ import { FileLoader } from './FileLoader.js';
 import { Loader } from './Loader.js';
 import * as Materials from '../materials/Materials.js';
 
-/**
- * @author mrdoob / http://mrdoob.com/
- */
-
 function MaterialLoader( manager ) {
 
 	Loader.call( this, manager );
@@ -26,13 +22,33 @@ MaterialLoader.prototype = Object.assign( Object.create( Loader.prototype ), {
 
 	load: function ( url, onLoad, onProgress, onError ) {
 
-		var scope = this;
+		const scope = this;
 
-		var loader = new FileLoader( scope.manager );
+		const loader = new FileLoader( scope.manager );
 		loader.setPath( scope.path );
+		loader.setRequestHeader( scope.requestHeader );
+		loader.setWithCredentials( scope.withCredentials );
 		loader.load( url, function ( text ) {
 
-			onLoad( scope.parse( JSON.parse( text ) ) );
+			try {
+
+				onLoad( scope.parse( JSON.parse( text ) ) );
+
+			} catch ( e ) {
+
+				if ( onError ) {
+
+					onError( e );
+
+				} else {
+
+					console.error( e );
+
+				}
+
+				scope.manager.itemError( url );
+
+			}
 
 		}, onProgress, onError );
 
@@ -40,7 +56,7 @@ MaterialLoader.prototype = Object.assign( Object.create( Loader.prototype ), {
 
 	parse: function ( json ) {
 
-		var textures = this.textures;
+		const textures = this.textures;
 
 		function getTexture( name ) {
 
@@ -54,16 +70,16 @@ MaterialLoader.prototype = Object.assign( Object.create( Loader.prototype ), {
 
 		}
 
-		var material = new Materials[ json.type ]();
+		const material = new Materials[ json.type ]();
 
 		if ( json.uuid !== undefined ) material.uuid = json.uuid;
 		if ( json.name !== undefined ) material.name = json.name;
-		if ( json.color !== undefined ) material.color.setHex( json.color );
+		if ( json.color !== undefined && material.color !== undefined ) material.color.setHex( json.color );
 		if ( json.roughness !== undefined ) material.roughness = json.roughness;
 		if ( json.metalness !== undefined ) material.metalness = json.metalness;
 		if ( json.sheen !== undefined ) material.sheen = new Color().setHex( json.sheen );
-		if ( json.emissive !== undefined ) material.emissive.setHex( json.emissive );
-		if ( json.specular !== undefined ) material.specular.setHex( json.specular );
+		if ( json.emissive !== undefined && material.emissive !== undefined ) material.emissive.setHex( json.emissive );
+		if ( json.specular !== undefined && material.specular !== undefined ) material.specular.setHex( json.specular );
 		if ( json.shininess !== undefined ) material.shininess = json.shininess;
 		if ( json.clearcoat !== undefined ) material.clearcoat = json.clearcoat;
 		if ( json.clearcoatRoughness !== undefined ) material.clearcoatRoughness = json.clearcoatRoughness;
@@ -135,9 +151,9 @@ MaterialLoader.prototype = Object.assign( Object.create( Loader.prototype ), {
 
 		if ( json.uniforms !== undefined ) {
 
-			for ( var name in json.uniforms ) {
+			for ( const name in json.uniforms ) {
 
-				var uniform = json.uniforms[ name ];
+				const uniform = json.uniforms[ name ];
 
 				material.uniforms[ name ] = {};
 
@@ -165,6 +181,7 @@ MaterialLoader.prototype = Object.assign( Object.create( Loader.prototype ), {
 
 					case 'm3':
 						material.uniforms[ name ].value = new Matrix3().fromArray( uniform.value );
+						break;
 
 					case 'm4':
 						material.uniforms[ name ].value = new Matrix4().fromArray( uniform.value );
@@ -185,7 +202,7 @@ MaterialLoader.prototype = Object.assign( Object.create( Loader.prototype ), {
 
 		if ( json.extensions !== undefined ) {
 
-			for ( var key in json.extensions ) {
+			for ( const key in json.extensions ) {
 
 				material.extensions[ key ] = json.extensions[ key ];
 
@@ -216,7 +233,7 @@ MaterialLoader.prototype = Object.assign( Object.create( Loader.prototype ), {
 		if ( json.normalMapType !== undefined ) material.normalMapType = json.normalMapType;
 		if ( json.normalScale !== undefined ) {
 
-			var normalScale = json.normalScale;
+			let normalScale = json.normalScale;
 
 			if ( Array.isArray( normalScale ) === false ) {
 
@@ -260,6 +277,9 @@ MaterialLoader.prototype = Object.assign( Object.create( Loader.prototype ), {
 		if ( json.clearcoatRoughnessMap !== undefined ) material.clearcoatRoughnessMap = getTexture( json.clearcoatRoughnessMap );
 		if ( json.clearcoatNormalMap !== undefined ) material.clearcoatNormalMap = getTexture( json.clearcoatNormalMap );
 		if ( json.clearcoatNormalScale !== undefined ) material.clearcoatNormalScale = new Vector2().fromArray( json.clearcoatNormalScale );
+
+		if ( json.transmission !== undefined ) material.transmission = json.transmission;
+		if ( json.transmissionMap !== undefined ) material.transmissionMap = getTexture( json.transmissionMap );
 
 		return material;
 

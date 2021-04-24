@@ -1,7 +1,12 @@
 import { KeyframeTrack } from './KeyframeTrack';
+import { Vector3 } from './../math/Vector3';
 import { Bone } from './../objects/Bone';
-import { MorphTarget } from '../core/Geometry';
 import { AnimationBlendMode } from '../constants';
+
+interface MorphTarget {
+	name: string;
+	vertices: Vector3[];
+}
 
 export class AnimationClip {
 
@@ -9,7 +14,15 @@ export class AnimationClip {
 
 	name: string;
 	tracks: KeyframeTrack[];
+
+	/**
+	 * @default THREE.NormalAnimationBlendMode
+	 */
 	blendMode: AnimationBlendMode;
+
+	/**
+	 * @default -1
+	 */
 	duration: number;
 	uuid: string;
 	results: any[];
@@ -19,6 +32,7 @@ export class AnimationClip {
 	validate(): boolean;
 	optimize(): AnimationClip;
 	clone(): AnimationClip;
+	toJSON( clip: AnimationClip ): any;
 
 	static CreateFromMorphTargetSequence(
 		name: string,
@@ -37,6 +51,6 @@ export class AnimationClip {
 		animation: any,
 		bones: Bone[]
 	): AnimationClip;
-	static toJSON(): any;
+	static toJSON( clip: AnimationClip ): any;
 
 }

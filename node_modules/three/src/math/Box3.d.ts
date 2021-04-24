@@ -10,8 +10,15 @@ export class Box3 {
 
 	constructor( min?: Vector3, max?: Vector3 );
 
-	max: Vector3;
+	/**
+	 * @default new THREE.Vector3( + Infinity, + Infinity, + Infinity )
+	 */
 	min: Vector3;
+
+	/**
+	 * @default new THREE.Vector3( - Infinity, - Infinity, - Infinity )
+	 */
+	max: Vector3;
 	readonly isBox3: true;
 
 	set( min: Vector3, max: Vector3 ): this;
@@ -20,7 +27,7 @@ export class Box3 {
 	setFromPoints( points: Vector3[] ): this;
 	setFromCenterAndSize( center: Vector3, size: Vector3 ): this;
 	setFromObject( object: Object3D ): this;
-	clone(): this;
+	clone(): Box3;
 	copy( box: Box3 ): this;
 	makeEmpty(): this;
 	isEmpty(): boolean;
@@ -32,7 +39,7 @@ export class Box3 {
 	expandByObject( object: Object3D ): this;
 	containsPoint( point: Vector3 ): boolean;
 	containsBox( box: Box3 ): boolean;
-	getParameter( point: Vector3 ): Vector3;
+	getParameter( point: Vector3, target: Vector3 ): Vector3;
 	intersectsBox( box: Box3 ): boolean;
 	intersectsSphere( sphere: Sphere ): boolean;
 	intersectsPlane( plane: Plane ): boolean;

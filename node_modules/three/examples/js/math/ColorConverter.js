@@ -1,8 +1,3 @@
-/**
- * @author bhouston / http://exocortex.com/
- * @author zz85 / http://github.com/zz85
- */
-
 THREE.ColorConverter = {
 
 	setHSV: function ( color, h, s, v ) {

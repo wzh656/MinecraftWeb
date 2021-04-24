@@ -9,15 +9,23 @@ export class Plane {
 
 	constructor( normal?: Vector3, constant?: number );
 
+	/**
+	 * @default new THREE.Vector3( 1, 0, 0 )
+	 */
 	normal: Vector3;
+
+	/**
+	 * @default 0
+	 */
 	constant: number;
+
 	readonly isPlane: true;
 
 	set( normal: Vector3, constant: number ): Plane;
 	setComponents( x: number, y: number, z: number, w: number ): Plane;
 	setFromNormalAndCoplanarPoint( normal: Vector3, point: Vector3 ): Plane;
 	setFromCoplanarPoints( a: Vector3, b: Vector3, c: Vector3 ): Plane;
-	clone(): this;
+	clone(): Plane;
 	copy( plane: Plane ): this;
 	normalize(): Plane;
 	negate(): Plane;

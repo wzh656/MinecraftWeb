@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<!-- Copyleft 2020~2021 by wzh -->
+<html lang="zh">
+	<head>
+		<meta charset="UTF-8" />
+		<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+		<title>我的世界 | 登录&注册</title>
+		
+		<!--icon-->
+		<link href="./img/icon.png" rel="icon" type="image/x-icon"/>
+		
+		<!-- 异步fonts加载 -->
+		<script src="https://staticfile.qnssl.com/webfont/1.6.16/webfontloader.js"></script>
+		<script>
+		if (typeof require != "undefined"){ //electron
+			console.log("electron")
+			document.write(`<link href="./css/fonts.css" rel="stylesheet" type="text/css" />`);
+			window.onload = function(){
+				console.log("onload")
+				$("body").addClass("wf-active");
+			}
+		}else{
+			WebFont.load({
+				google: {
+					families: ["kt", "st", "xs", "zyyt"],
+					api: "./css/fonts.css"
+				}
+			});
+		}
+		</script>
+		
+		<style>
+		/* 字体加载完成 */
+		.wf-active *{
+			font-family: zyyt, serif;
+			outline: none;
+		}
+		.wf-active h1,
+		.wf-active h2,
+		.wf-active h3,
+		.wf-active h4{
+			font-family: st, serif;
+		}
+		.wf-active p,
+		.wf-active label{
+			font-family: kt, serif;
+		}
+		.wf-active button{
+			font-family: xs, serif;
+			font-weight: bold;
+		}
+		
+		
+		/* 字体缩放方案 */
+		@media screen and (max-width:320px){
+			body {font-size: calc(0.016 * 320px + 9px);}
+		}
+		body{
+			font-size: calc(1.6vw + 9px);
+		}
+		@media screen and (min-width: 960px){
+			body {font-size: calc(0.016 * 960px + 9px);}
+		}
+		/* 横屏 */
+		body.landscape{
+			margin: 0 20vw;
+		}
+		
+		/* element */
+		html{
+			-moz-user-select: none;
+			-khtml-user-select: none;
+			user-select: none;
+		}
+		body, input{
+			background-color: #f6f6f6;
+		}
+		p{
+			margin: 0;
+			font-size: 0.36em;
+		}
+		label{
+			font-weight: bold;
+		}
+		input{
+			height: calc(1.2vw + 30px);
+			font-size: 1.1em;
+			padding: 0.1rem;
+			border: 1px solid #aaa;
+			border-radius: 3px;
+		}
+		button{
+			border-radius: 6px;
+		}
+		a{
+			display: block;
+			margin: 1vw;
+			text-align: center;
+		}
+		
+		
+		#view{
+			height: 100%;
+		}
+		h1{
+			margin: 2.6rem;
+			font-size: 2.6em;
+			text-align: center;
+		}
+		
+		form > div{
+			padding: 1vw;
+		}
+		form > div > input{
+			width: 100%;
+		}
+		
+		
+		form > div:last-of-type{
+			display: flex;
+			flex-direction: column;
+		}
+		form > div:last-of-type > div{
+			display: flex;
+		}
+		form > div:last-of-type button{
+			font-size: 2em;
+			width: 46%;
+			margin: 0 auto;
+			transition: background-color 0.3s;
+		}
+		
+		#login{
+			color: white;
+			background-color: #1e9fff;
+			border: 3px solid #1e9fff;
+		}
+		#login:hover{
+			background-color: #0e8fef;
+			border: 3px solid #0e8fef;
+		}
+		
+		#register{
+			color: #1e9fff;
+			background-color: #fff;
+			border: 3px solid #1e9fff;
+		}
+		#register:hover{
+			background-color: #eee;
+		}
+		
+		#back{
+			width: 96%;
+			margin: 1rem auto;
+			
+			color: #ff9f1e;
+			background-color: #fff;
+			border: 3px solid #ff9f1e;
+		}
+		#back:hover{
+			background-color: #eee;
+		}
+		
+		
+		/* noscript */
+		noscript{
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: #fffae8;
+			text-align: center;
+		}
+		</style>
+		
+		<!-- layui -->
+		<!--<link rel="stylesheet" href="https://unpkg.com/layui@2.6.4/dist/css/layui.css">-->
+		<script src="https://unpkg.com/layui@2.6.4/dist/layui.js"></script>
+		
+		<script src="./js/modules/sha512.js"></script>
+		<script src="./js/modules/jquery.min.js"></script>
+		<script>
+		if (typeof require != "undefined") //electron
+			window.$ = window.jQuery = require("./js/modules/jquery.min.js");
+		</script>
+		<script src="./js/modules/js+.js"></script>
+		
+		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
+		<script>
+		if ( /ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test( navigator.userAgent.toLowerCase() ) ){
+			//手机
+			eruda.init();
+			new VConsole();
+		}
+		</script>
+		
+	</head>
+	<body>
+		<section id="view">
+			<h1>登录 & 注册<p>LOGIN & REGISTER</p></h1>
+			<form>
+				<div>
+					<label>用户名：</label><br/><input name="name" placeholder="用户名" />
+				</div>
+				<div>
+					<label>密码：</label><br/><input name="password" placeholder="密码" type="password" />
+				</div>
+				<div>
+					<div>
+						<button class="success" type="submit" id="login">登录</button>
+						<button class="success" type="button" id="register">注册</button>
+					</div>
+					<button class="warn" type="button" id="back">返回</button>
+				</div>
+			</form>
+			<a href="javascript:tourist();">先随便逛逛（游客）</a>
+		</section>
+		
+		<!-- 1:不支持js -->
+		<noscript  style="z-index: 1;"><h1>你的浏览器不支持JavaScript，无法运行！</h1></noscript>
+		
+		<!-- none:流量统计 -->
+		<div style="display: none;">
+			<script language="javascript" src="http://count24.51yes.com/click.aspx?id=248466766&logo=12" charset="gb2312"></script>
+		</div>
+		
+<script>
+if (window.innerWidth > window.innerHeight)
+	$("body").addClass("landscape"); //横屏
+$(window).resize(function(){
+	if (window.innerWidth < window.innerHeight)
+		$("body").removeClass("landscape"); //取消横屏
+});
+</script>
+
+<script>
+//请求服务器
+function request(method, path="", value=""){
+	return new Promise((resolve, reject) => {
+		console.log(method, path, value)
+		$.ajax({
+			url: "https://wzh.glitch.me/data/" + method,
+			data: {path, value},
+			type: "GET",
+			dataType: "jsonp",
+			success: (response, status, xhr)=>{
+				console.log({method, path, value}, response)
+				resolve(response);
+			}
+		});
+	});
+}
+
+
+
+const ROOT = "/MinecraftCommunity/",
+	USERS = ROOT + "users/",
+	CHAT = ROOT + "chat/",
+	users = {};
+
+async function main(){
+	let res;
+	
+	// 初始化获取用户信息
+	res = await request("makeDir", USERS);
+	if (res != true){
+		console.error("makeDir", USERS, res);
+		alert("操作错误\nresult:"+JSON.stringify(res));
+	}
+	
+	res = await request("makeDir", CHAT);
+	if (res != true){
+		console.error("makeDir", CHAT, res);
+		alert("操作错误\nresult:"+JSON.stringify(res));
+	}
+	
+	res = await request("readDir", USERS);
+	for (const name of res){
+		res = await request("readFile", USERS+name);
+		const lines = res.split("\n");
+		users[name] = {
+			regTime: new Date(+lines[0]),
+			password: lines[1],
+			info: JSON.parse(lines[2])
+		};
+	}
+}
+let inited = false;
+main().then(() => inited=true); //初始化完成
+
+
+// 登录
+function login(){
+	if (!inited) return layer.msg("获取用户信息中……", {icon: 5});
+	
+	const {name:{value:name}, password:{value:password}} = $("form")[0];
+	
+	if (!name) return layer.msg("请输入用户名", {icon: 5});
+	if (!password) return layer.msg("请输入密码", {icon: 5});
+	
+	for (const [iname,user] of Object.entries(users)){
+		if (iname == name && user.password == hex_sha512(hex_sha512(password))){
+			localStorage.setItem("MinecraftCommunity-name", name);
+			localStorage.setItem("MinecraftCommunity-password", hex_sha512(password));
+			layer.msg("登录成功！", {icon: 1});
+			location.href = "./community.html";
+			return layer.load(1);
+		}
+	}
+	layer.msg("用户名或密码错误", {icon: 2});
+}
+
+// 注册
+function register(){
+	if (!inited) return layer.msg("获取用户信息中……", {icon: 5});
+	
+	const {name:{value:name}, password:{value:password}} = $("form")[0];
+	
+	if (!name) return layer.msg("请输入用户名", {icon: 5});
+	if (!password) return layer.msg("请输入密码", {icon: 5});
+	
+	for (const iname in users)
+		if (iname == name){
+			return layer.msg("该用户已存在", {icon: 5});
+		}
+	
+	request("writeFile", USERS+name,
+		+new Date()+"\n"+
+		hex_sha512(hex_sha512(password))+"\n"+
+		"{}"
+	).then(() => {
+		localStorage.setItem("MinecraftCommunity-name", name);
+		localStorage.setItem("MinecraftCommunity-password", hex_sha512(password));
+		layer.msg("注册成功！", {icon: 1});
+		location.href = "./community.html";
+		layer.load(1);
+	});
+}
+
+// 游客模式
+function tourist(){
+	localStorage.setItem("MinecraftCommunity-tourist", "true");
+	location.href = "./community.html";
+	layer.load(1);
+}
+
+// 退出
+function back(){
+	location.href = "./home.html";
+	layer.load(1);
+}
+
+
+
+$("form").submit(function(e){
+	login();
+	e.stopPropagation();
+	e.cancelBubble = true;
+	return false;
+});
+$("#login").click(function(e){
+	login();
+	e.stopPropagation();
+	e.cancelBubble = true;
+	return false;
+});
+$("#register").click(function(e){
+	register();
+	e.stopPropagation();
+	e.cancelBubble = true;
+	return false;
+});
+$("#back").click(back);
+</script>
+	</body>
+</html>

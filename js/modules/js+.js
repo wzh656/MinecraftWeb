@@ -34,6 +34,25 @@ Number.prototype.padding = function(start, end){
 	return symbol + part[0] + (part[1] ?"." + part[1] :"");
 }
 
+// 保留小数位数
+{
+	const round = Math.round;
+	Math.round = function (n=0, s){
+		if (s !== undefined) return round(n*10**s)/10**s;
+		return round(n);
+	};
+	
+	const random = Math.random;
+	Math.random = function (max=1, min, s){
+		if (min !== undefined){
+			if (s !== undefined) return Math.round( random()*(max-min)+min, s );
+			return random()*(max-min)+min;
+		};
+		return random()*max;
+	}
+}
+
+
 //Map遍历Object
 Object.map = function(object, f=v=>v){
 	const obj = {};
@@ -60,20 +79,28 @@ Object.every = function(object, f=v=>v){
 	return true;
 }
 
-// 保留小数位数
-{
-	const round = Math.round;
-	Math.round = function (n=0, s){
-		if (s !== undefined) return round(n*10**s)/10**s;
-		return round(n);
-	};
-	
-	const random = Math.random;
-	Math.random = function (max=1, min, s){
-		if (min !== undefined){
-			if (s !== undefined) return Math.round( random()*(max-min)+min, s );
-			return random()*(max-min)+min;
-		};
-		return random()*max;
-	}
+
+//格式化日期
+Date.prototype.format = function(fmt){
+	const o = {	 
+		"M+": this.getMonth()+1,					//月份
+		"d+": this.getDate(),						//日
+		"h+": this.getHours(),						//小时
+		"m+": this.getMinutes(),					//分
+		"s+": this.getSeconds(),					//秒
+		"q+": Math.floor((this.getMonth()+3)/3),	//季度
+		"S": this.getMilliseconds()					//毫秒
+	};	 
+	if ( /(y+)/.test(fmt) )	 
+		fmt = fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));	 
+	for (const k in o)	 
+		if ( new RegExp("("+ k +")").test(fmt) )
+			fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));	 
+	return fmt;	 
+}
+
+function GetQueryString(name){
+	var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+	var r = window.location.search.substr(1).match(reg);
+	if(r!=null)return decodeURIComponent(r[2]); return null;
 }

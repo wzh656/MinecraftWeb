@@ -1,7 +1,3 @@
-/**
- * @author WestLangley / http://github.com/WestLangley
- */
-
 THREE.LightProbeGenerator = {
 
 	// https://www.ppsloan.org/publications/StupidSH36.pdf

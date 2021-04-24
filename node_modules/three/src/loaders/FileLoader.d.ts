@@ -7,8 +7,6 @@ export class FileLoader extends Loader {
 
 	mimeType: undefined | MimeType;
 	responseType: undefined |string;
-	withCredentials: undefined |string;
-	requestHeader: undefined | { [header: string]: string };
 
 	load(
 		url: string,
@@ -16,9 +14,8 @@ export class FileLoader extends Loader {
 		onProgress?: ( request: ProgressEvent ) => void,
 		onError?: ( event: ErrorEvent ) => void
 	): any;
+	loadAsync( url: string, onProgress?: ( event: ProgressEvent ) => void ): Promise<string | ArrayBuffer>;
 	setMimeType( mimeType: MimeType ): FileLoader;
 	setResponseType( responseType: string ): FileLoader;
-	setWithCredentials( value: boolean ): FileLoader;
-	setRequestHeader( value: { [header: string]: string } ): FileLoader;
 
 }

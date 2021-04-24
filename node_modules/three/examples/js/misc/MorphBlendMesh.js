@@ -1,7 +1,3 @@
-/**
- * @author alteredq / http://alteredqualia.com/
- */
-
 THREE.MorphBlendMesh = function ( geometry, material ) {
 
 	THREE.Mesh.call( this, geometry, material );
@@ -222,7 +218,7 @@ THREE.MorphBlendMesh.prototype = Object.assign( Object.create( THREE.Mesh.protot
 
 		} else {
 
-			console.warn( "THREE.MorphBlendMesh: animation[" + name + "] undefined in .playAnimation()" );
+			console.warn( 'THREE.MorphBlendMesh: animation[' + name + '] undefined in .playAnimation()' );
 
 		}
 

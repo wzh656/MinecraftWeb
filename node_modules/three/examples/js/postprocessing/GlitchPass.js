@@ -1,12 +1,8 @@
-/**
- * @author alteredq / http://alteredqualia.com/
- */
-
 THREE.GlitchPass = function ( dt_size ) {
 
 	THREE.Pass.call( this );
 
-	if ( THREE.DigitalGlitch === undefined ) console.error( "THREE.GlitchPass relies on THREE.DigitalGlitch" );
+	if ( THREE.DigitalGlitch === undefined ) console.error( 'THREE.GlitchPass relies on THREE.DigitalGlitch' );
 
 	var shader = THREE.DigitalGlitch;
 	this.uniforms = THREE.UniformsUtils.clone( shader.uniforms );
@@ -14,7 +10,7 @@ THREE.GlitchPass = function ( dt_size ) {
 	if ( dt_size == undefined ) dt_size = 64;
 
 
-	this.uniforms[ "tDisp" ].value = this.generateHeightmap( dt_size );
+	this.uniforms[ 'tDisp' ].value = this.generateHeightmap( dt_size );
 
 
 	this.material = new THREE.ShaderMaterial( {
@@ -37,7 +33,7 @@ THREE.GlitchPass.prototype = Object.assign( Object.create( THREE.Pass.prototype 
 
 	render: function ( renderer, writeBuffer, readBuffer /*, deltaTime, maskActive */ ) {
 
-		this.uniforms[ "tDiffuse" ].value = readBuffer.texture;
+		this.uniforms[ 'tDiffuse' ].value = readBuffer.texture;
 		this.uniforms[ 'seed' ].value = Math.random();//default seeding
 		this.uniforms[ 'byp' ].value = 0;
 

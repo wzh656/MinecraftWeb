@@ -1,7 +1,3 @@
-/**
- * @author mrdoob / http://mrdoob.com/
- */
-
 THREE.MD2Loader = function ( manager ) {
 
 	THREE.Loader.call( this, manager );
@@ -19,9 +15,29 @@ THREE.MD2Loader.prototype = Object.assign( Object.create( THREE.Loader.prototype
 		var loader = new THREE.FileLoader( scope.manager );
 		loader.setPath( scope.path );
 		loader.setResponseType( 'arraybuffer' );
+		loader.setRequestHeader( scope.requestHeader );
+		loader.setWithCredentials( scope.withCredentials );
 		loader.load( url, function ( buffer ) {
 
-			onLoad( scope.parse( buffer ) );
+			try {
+
+				onLoad( scope.parse( buffer ) );
+
+			} catch ( e ) {
+
+				if ( onError ) {
+
+					onError( e );
+
+				} else {
+
+					console.error( e );
+
+				}
+
+				scope.manager.itemError( url );
+
+			}
 
 		}, onProgress, onError );
 
