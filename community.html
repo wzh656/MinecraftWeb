@@ -232,6 +232,7 @@
 			width: 2rem;
 			height: 2rem;
 			margin: 0.2rem;
+			flex: none;
 			
 			background-color: #d3e0ed;
 			border-radius: 50%;
@@ -272,7 +273,11 @@
 			padding: 0.2rem;
 			background-color: #e0edd3;
 			border-radius: 6px;
-			user-select: text;
+			user-select: text; /* 可复制 */
+			word-break: break-all; /* 自动换行 */
+		}
+		#messagesList > li > div > div > article > *:not(h1, h2, h3, h4, h5, h6){
+			font-family: zyyt; /* 字体修正 */
 		}
 		
 		#chat > form{

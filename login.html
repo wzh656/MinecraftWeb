@@ -287,13 +287,21 @@ async function main(){
 		};
 	}
 }
-let inited = false;
-main().then(() => inited=true); //初始化完成
+let inited = false,
+	finishCallback = false;
+main().then(() => {
+	inited=true;
+	if (finishCallback)
+		layer.msg("获取用户信息成功！", {icon: 1});
+}); //初始化完成
 
 
 // 登录
 function login(){
-	if (!inited) return layer.msg("获取用户信息中……", {icon: 5});
+	if (!inited){
+		finishCallback = true;
+		return layer.msg("获取用户信息中……\n（服务器启动需较长时间，请稍后重试）", {icon: 5});
+	}
 	
 	const {name:{value:name}, password:{value:password}} = $("form")[0];
 	
@@ -314,7 +322,10 @@ function login(){
 
 // 注册
 function register(){
-	if (!inited) return layer.msg("获取用户信息中……", {icon: 5});
+	if (!inited){
+		finishCallback = true;
+		return layer.msg("获取用户信息中……\n（服务器启动需较长时间，请稍后重试）", {icon: 5});
+	}
 	
 	const {name:{value:name}, password:{value:password}} = $("form")[0];
 	
