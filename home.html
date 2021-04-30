@@ -95,7 +95,8 @@ Copyleft by wzh 2020~2021
 			margin: 0;
 			overflow: hidden;
 		}
-		p{
+		small{
+			display: block;
 			font-size: 0.36em;
 			margin: 0;
 		}
@@ -350,17 +351,17 @@ Copyleft by wzh 2020~2021
 		<section class="init" style="display: flex;">
 			<h1>我的世界</h1>
 			<div>
-				<button class="success" id="new_world" >新的世界<p>New World</p></button>
+				<button class="success" id="new_world" >新的世界<small>New World</small></button>
 				<div>
-					<button class="info" id="community">社区<p>Community</p></button>
-					<button class="info" id="about">关于<p>About</p></button>
+					<button class="info" id="community">社区<small>Community</small></button>
+					<button class="info" id="about">关于<small>About</small></button>
 				</div>
 			</div>
 		</section>
 		
 		<!-- 新的世界 -->
 		<section class="new_world" style="display: none;">
-			<h2>新的世界<p>NEW WORLD</p></h2>
+			<h2>新的世界<small>NEW WORLD</small></h2>
 			<label for="seed">种子(seed)：</label><input name="seed" id="seed" placeholder="不输入则随机生成" autofocus />
 			<br/>
 			<details class="more">
@@ -376,7 +377,7 @@ Copyleft by wzh 2020~2021
 					坐标原点经度：<br/>
 					-180°(E)<input type="range" min="-180" max="180" value="116" step="0.00001" name="longitude" />180°(S)
 					<input type="number" min="-180" max="180" step="0.00001" value="116" style="width: 16vw;" />°<br/>
-					<button class="success" style="width: 96%; font-size: 2vmax;">重新获取地理位置<p>注意：请先打开GPS开关</p></button>
+					<button class="success" style="width: 96%; font-size: 2vmax;">重新获取地理位置<small>注意：请先打开GPS开关</small></button>
 				</fieldset>
 				<fieldset class="height">
 					<legend>高度(height)</legend>
@@ -461,13 +462,13 @@ Copyleft by wzh 2020~2021
 				</div>
 				<br style="clear:both;" />
 			</details>
-			<button class="warn back">取消<p>Cancel</p></button>
-			<button class="success">生成世界<p>OK</p></button>
+			<button class="warn back">取消<small>Cancel</small></button>
+			<button class="success">生成世界<small>OK</small></button>
 		</section>
 		
 		<!-- 关于 -->
 		<section class="about" style="display: none;">
-			<h2>关于<p>ABOUT</p></h2>
+			<h2>关于<small>ABOUT</small></h2>
 			<div>
 				<h3>回首往事</h3>
 				<hr/>
@@ -487,7 +488,7 @@ Copyleft by wzh 2020~2021
 				<a href="http://chat.daovoice.io?id=cfb04fc0" onclick="if (typeof plus != undefined) plus.screen.lockOrientation('portrait-primary');">联系作者</a>
 			</div>
 			<hr/>
-			<center><button class="warn back">返回<p>Back</p></button></center>
+			<center><button class="warn back">返回<small>Back</small></button></center>
 			<footer style="display: none;"><center>
 				<script language="javascript" src="http://count24.51yes.com/click.aspx?id=248466766&logo=1" charset="gb2312"></script>
 			</center></footer>
@@ -654,7 +655,7 @@ function open(url="main.html"){
 
 //已有存档
 if (localStorage.getItem("我的世界_seed") !== null){
-	$("#new_world")[0].innerHTML = "开始游戏<p>START PLAYING</p>"
+	$("#new_world")[0].innerHTML = "开始游戏<small>START PLAYING</small>"
 	$("#new_world")[0].onclick = ()=>open();
 }else{ //无存档
 	// getGeolocationPosition();

@@ -30,27 +30,6 @@
 		</script>
 		
 		<style>
-		/* 字体加载完成 */
-		.wf-active *{
-			font-family: zyyt, serif;
-			outline: none;
-		}
-		.wf-active h1,
-		.wf-active h2,
-		.wf-active h3,
-		.wf-active h4{
-			font-family: st, serif;
-		}
-		.wf-active p,
-		.wf-active label{
-			font-family: kt, serif;
-		}
-		.wf-active button{
-			font-family: xs, serif;
-			font-weight: bold;
-		}
-		
-		
 		/* 字体缩放方案 */
 		@media screen and (max-width:320px){
 			body {font-size: calc(0.016 * 320px + 9px);}
@@ -76,12 +55,13 @@
 			background-color: #f6f6f6;
 			text-align: center;
 		}
-		h1 > p{
+		small{
+			display: block;
 			margin: 0;
 			font-size: 0.36em;
 		}
 		section > h1{
-			margin: 2.6rem;
+			margin: 2rem;
 			font-size: 3em;
 		}
 		button{
@@ -93,10 +73,13 @@
 		blockquote{
 			background-color: rgba(236, 236, 236, 0.8);
 		}
-		blockquote:before{
+		/*blockquote:before{
 			width: 0.2rem;
 			height: 100%;
 			background-color: #aaa;
+		}*/
+		textarea{
+			resize: none;
 		}
 		
 		
@@ -164,8 +147,8 @@
 		/* chat */
 		#chat{
 			position: absolute;
-			top: 0;
 			left: 0;
+			top: 0;
 			display: flex;
 			flex-direction: column;
 			width: 100%;
@@ -175,13 +158,13 @@
 		
 		#chat > header{
 			flex: none;
-			/*height: 2rem;*/
+			height: 2rem;
 			padding: 0.6rem;
 			background-color: #cef;
 		}
-		#chat > header > span{
+		#chat > header > span{ /* 返回 */
 			position: absolute;
-			display: inline;
+			display: inline-block;
 			left: 0.1rem;
 			height: 2rem;
 			
@@ -189,10 +172,11 @@
 			font-size: 1.2em;
 			line-height: 2rem;
 		}
+		#chat > header > span:active{
+			background-color: #bde;
+		}
 		#chat > header > h2{
-			display: inline;
 			margin: 0;
-			
 			font-size: 1.6em;
 			line-height: 2rem;
 		}
@@ -276,7 +260,7 @@
 			user-select: text; /* 可复制 */
 			word-break: break-all; /* 自动换行 */
 		}
-		#messagesList > li > div > div > article > *:not(h1, h2, h3, h4, h5, h6){
+		#messagesList > li > div > div > article > *{
 			font-family: zyyt; /* 字体修正 */
 		}
 		
@@ -284,11 +268,11 @@
 			display: flex;
 			flex: none;
 			height: 3rem;
+			margin: 1px;
 		}
 		#chat > form > textarea{
 			width: 100%;
 			height: 2.6rem;
-			margin: 0 0.1rem;
 			background-color: white;
 			border: 1px solid #6af;
 			border-radius: 3px;
@@ -296,8 +280,14 @@
 		}
 		#chat > form > button{
 			flex: none;
-			background-color: white;
-			border: 1px solid #1e9fff;
+			width: 3.6rem;
+			
+			border: 1px solid #6af;
+			font-size: 1em;
+			background-color: #cef;
+		}
+		#chat > form > button:active{
+			background-color: #bde;
 		}
 		
 		
@@ -340,7 +330,7 @@
 	<body>
 		<!-- 列表界面 -->
 		<section id="list">
-			<h1>社区<p>COMMUNITY</p></h1>
+			<h1>社区<small>COMMUNITY</small></h1>
 			<button id="exit">退出登录</button>
 			<button id="newSection" style="display: none;">新建板块</button><br/><br/>
 			<ul id="sectionsList">
@@ -358,7 +348,7 @@
 				<span>获取中……</span>
 			</ul>
 			<form style="display: none;">
-				<textarea id="message" placeholder="shift+回车发送（支持markdown和html格式）" contenteditable></textarea>
+				<textarea id="message" placeholder="shift+Enter发送（支持markdown/html格式）" contenteditable></textarea>
 				<button type="button" id="send">发送</button>
 			</form>
 		</section>
@@ -574,7 +564,7 @@ function closeSection(){
 // 发送消息
 async function sendMessage(){
 	if (!user) return layer.msg("请先登录", {icon: 5});
-	if (!$("#message").val()) return; //无输入
+	if (!$("#message").val()) return update(); //无输入 刷新
 	
 	const waitLayerId = layer.load(2);
 	

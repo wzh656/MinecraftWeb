@@ -30,27 +30,6 @@
 		</script>
 		
 		<style>
-		/* 字体加载完成 */
-		.wf-active *{
-			font-family: zyyt, serif;
-			outline: none;
-		}
-		.wf-active h1,
-		.wf-active h2,
-		.wf-active h3,
-		.wf-active h4{
-			font-family: st, serif;
-		}
-		.wf-active p,
-		.wf-active label{
-			font-family: kt, serif;
-		}
-		.wf-active button{
-			font-family: xs, serif;
-			font-weight: bold;
-		}
-		
-		
 		/* 字体缩放方案 */
 		@media screen and (max-width:320px){
 			body {font-size: calc(0.016 * 320px + 9px);}
@@ -75,7 +54,8 @@
 		body, input{
 			background-color: #f6f6f6;
 		}
-		p{
+		small{
+			display: block;
 			margin: 0;
 			font-size: 0.36em;
 		}
@@ -124,7 +104,7 @@
 			display: flex;
 		}
 		form > div:last-of-type button{
-			font-size: 2em;
+			font-size: 1.6em;
 			width: 46%;
 			margin: 0 auto;
 			transition: background-color 0.3s;
@@ -199,7 +179,7 @@
 	</head>
 	<body>
 		<section id="view">
-			<h1>登录 & 注册<p>LOGIN & REGISTER</p></h1>
+			<h1>登录 & 注册<small>LOGIN & REGISTER</small></h1>
 			<form>
 				<div>
 					<label>用户名：</label><br/><input name="name" placeholder="用户名" />
@@ -209,13 +189,13 @@
 				</div>
 				<div>
 					<div>
-						<button class="success" type="submit" id="login">登录</button>
-						<button class="success" type="button" id="register">注册</button>
+						<button class="success" type="submit" id="login">登录<small>Login</small></button>
+						<button class="success" type="button" id="register">注册<small>Register</small></button>
 					</div>
-					<button class="warn" type="button" id="back">返回</button>
+					<button class="warn" type="button" id="back">返回<small>Back</small></button>
 				</div>
 			</form>
-			<a href="javascript:tourist();">先随便逛逛（游客）</a>
+			<a id="tourist" href="javascript:void(0);">先随便逛逛（游客）</a>
 		</section>
 		
 		<!-- 1:不支持js -->
@@ -366,24 +346,25 @@ function back(){
 
 
 $("form").submit(function(e){
-	login();
+	login(); //登录
 	e.stopPropagation();
 	e.cancelBubble = true;
 	return false;
 });
 $("#login").click(function(e){
-	login();
+	login(); //登录
 	e.stopPropagation();
 	e.cancelBubble = true;
 	return false;
 });
 $("#register").click(function(e){
-	register();
+	register(); //注册
 	e.stopPropagation();
 	e.cancelBubble = true;
 	return false;
 });
-$("#back").click(back);
+$("#tourist").click(tourist); //游客
+$("#back").click(back); //返回
 </script>
 	</body>
 </html>

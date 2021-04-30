@@ -39,3 +39,33 @@
 	font-family:huawei; /*HUAWEI*//*
 	src:url("../fonts/huawei.ttf");
 }*/
+
+
+/* 字体加载完成 */
+.wf-active *{
+	font-family: zyyt, serif;
+	outline: none;
+}
+.wf-active h1,
+.wf-active h2,
+.wf-active h3,
+.wf-active h4,
+.wf-active h5,
+.wf-active h6,
+.wf-active h1 *,
+.wf-active h2 *,
+.wf-active h3 *,
+.wf-active h4 *,
+.wf-active h5 *,
+.wf-active h6 *{
+	font-family: st, serif;
+}
+.wf-active label,
+.wf-active label *{
+	font-family: kt, serif;
+}
+.wf-active button,
+.wf-active button *{
+	font-family: xs, serif;
+	font-weight: bold;
+}
