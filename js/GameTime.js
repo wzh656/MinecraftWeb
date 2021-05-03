@@ -6,16 +6,21 @@ class GameTime{
 		this.stop = stop;
 		this.onChangeSpeed = {};
 	}
-	getTime(){ //获取时间
+	
+	//获取时间
+	getTime(){
 		if (isNaN(time.game)) deskgood.die("穿越时空，到达时间之尾");
 		return new Date( this.game + (new Date()-this.date) * this.getSpeed() );
 	}
-	setTime(time){ //修改时间
+	//修正时间
+	setTime(time){
 		this.game = +time;
 		this.date = +new Date();
+		return this;
 	}
 	
-	setSpeed(speed=1){ //修改时间流速
+	//修改时间流速
+	setSpeed(speed=1){
 		const v0 = this.getSpeed();
 		
 		this.game = +this.getTime();
@@ -29,7 +34,13 @@ class GameTime{
 		
 		return this;
 	}
-	stopTime(){ //暂停时间
+	//获取时间流速
+	getSpeed(){
+		return this.stop? 0: this.speed;
+	}
+	
+	//暂停时间
+	stopTime(){
 		const v0 = this.getSpeed();
 		
 		this.game = +this.getTime();
@@ -43,32 +54,40 @@ class GameTime{
 		
 		return this;
 	}
-	getSpeed(){ //获取时间流速
-		return this.stop? 0: this.speed;
+	//设置时间是否暂停
+	setStop(stop){
+		if (this.stop != stop)
+			this.stopTime(); //暂停
+		return this;
 	}
 	
-	
-	addChangeSpeedListener(key, func){ //添加事件
+	//添加事件
+	addChangeSpeedListener(key, func){
 		this.onChangeSpeed[key] = func;
-		
 		return this;
 	}
-	removeChangeSpeedListener(key){ //移除事件
+	//移除事件
+	removeChangeSpeedListener(key){
 		delete this.onChangeSpeed[key];
-		
 		return this;
+	}
+	//分配不重复的key
+	newChangeSpeedKey(){
+		let key = Math.random().toString(36).substr(2); //随机生成key
+		while (this.onChangeSpeed[key])
+			key = Math.random().toString(36).substr(2);
+		return key;
 	}
 	
 	setTimeout(func, delay){
-		let time = +new Date()+delay,
-			key = Math.random().toString(36).substr(2); //随机生成key
-		while (this.onChangeSpeed[key])
-			key = Math.random().toString(36).substr(2);
+		const time = +new Date()+delay,
+			key = this.newChangeSpeedKey(); //随机生成key
 		
 		let id = setTimeout(()=>{
 			func( this.getSpeed() );
 			this.removeChangeSpeedListener(key); //删除监听
 		}, delay/this.getSpeed());
+		
 		this.addChangeSpeedListener(key, (speed)=>{ //添加监听
 			if (+new Date() < time){ //未达到目标时间
 				clearTimeout(id);
@@ -76,7 +95,7 @@ class GameTime{
 					func( speed );
 					this.removeChangeSpeedListener(key); //删除监听
 				}, (time-new Date())/speed );
-			}else{
+			}else{ //已达到目标时间
 				this.removeChangeSpeedListener(key); //删除监听
 			}
 		});
@@ -85,9 +104,7 @@ class GameTime{
 	}
 	
 	setInterval(func, step){
-		let key = Math.random().toString(36).substr(2);
-		while (this.onChangeSpeed[key])
-			key = Math.random().toString(36).substr(2);
+		const key = this.newChangeSpeedKey();
 		
 		//console.log(step, this.getSpeed(), step/this.getSpeed())
 		let id = setInterval(
