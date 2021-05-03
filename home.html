@@ -316,7 +316,7 @@ Copyleft by wzh 2020~2021
 		if (typeof require != "undefined") //electron
 			window.$ = window.jQuery = require("./js/modules/jquery.min.js");
 		</script>
-		<script src="./js/modules/js+.js"></script>
+		<script src="./js/modules/js_plus.js"></script>
 		
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
@@ -652,14 +652,6 @@ function open(url="main.html"){
 	return false;
 }
 
-//已有存档
-if (localStorage.getItem("我的世界_seed") !== null){
-	$("#new_world")[0].innerHTML = "开始游戏<p>START PLAYING</p>"
-	$("#new_world")[0].onclick = ()=>open();
-}else{ //无存档
-	// getGeolocationPosition();
-}
-
 
 
 //新的世界
@@ -793,10 +785,18 @@ $("#community").click(function(){
 
 
 
+//已有存档
+if (localStorage.getItem("我的世界_seed") !== null){
+	$("#new_world")[0].innerHTML = "开始游戏<p>PLAY</p>"
+	$("#new_world")[0].onclick = ()=>open();
+}else{ //无存档
+	// getGeolocationPosition();
+}
+
+
 //生成世界
 $(".new_world > button:eq(1)").click(function(){
-	const
-		time = +inputValueToDate( $(".more > .time-position > input[name='time']").val() )
+	const time = +inputValueToDate( $(".more > .time-position > input[name='time']").val() )
 		position = {
 			latitude: +$(".more > .time-position > input[name='latitude']").val(),
 			longitude: +$(".more > .time-position > input[name='longitude']").val()

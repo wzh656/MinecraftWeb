@@ -219,8 +219,6 @@ class ChunkMap{
 		thing.block.mesh.position.y = y*100;
 		thing.block.mesh.position.z = z*100;
 		
-		thing.block.mesh.obj = thing;
-		
 		switch (thing.type){
 			case "Block":
 				this.set(x, y, z, thing);
@@ -269,20 +267,13 @@ class ChunkMap{
 			
 			case "EntityBlock": //实体方块
 				const size = {
-					x0: thing.get("attr", "entityBlock", "size", "x0"),
-					x1: thing.get("attr", "entityBlock", "size", "x1"),
-					y0: thing.get("attr", "entityBlock", "size", "y0"),
-					y1: thing.get("attr", "entityBlock", "size", "y1"),
-					z0: thing.get("attr", "entityBlock", "size", "z0"),
-					z1: thing.get("attr", "entityBlock", "size", "z1"),
+					x0: thing.get("attr", "entityBlock", "size", "x0") || 0,
+					x1: thing.get("attr", "entityBlock", "size", "x1") || 100,
+					y0: thing.get("attr", "entityBlock", "size", "y0") || 0,
+					y1: thing.get("attr", "entityBlock", "size", "y1") || 100,
+					z0: thing.get("attr", "entityBlock", "size", "z0") || 0,
+					z1: thing.get("attr", "entityBlock", "size", "z1") || 100
 				};
-				size.x0 = size.x0 || 0,
-				size.x1 = size.x1 || 100,
-				size.y0 = size.y0 || 0,
-				size.y1 = size.y1 || 100,
-				size.z0 = size.z0 || 0,
-				size.z1 = size.z1 || 100;
-				
 				size.x = size.x1 - size.x0,
 				size.y = size.y1 - size.y0,
 				size.z = size.z1 - size.z0; //长宽高
@@ -394,7 +385,7 @@ class ChunkMap{
 					x: x + (size.x0 + size.x1)/2 /100 -0.5,
 					y: y + (size.y0 + size.y1)/2 /100 -0.5,
 					z: z + (size.z0 + size.z1)/2 /100 -0.5
-				}, type ); //以模板建立
+				}, type ); //以模板建立 单位：m
 				break;
 				
 			case "Entity":

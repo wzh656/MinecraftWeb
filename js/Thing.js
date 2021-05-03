@@ -216,6 +216,10 @@ class Block extends Thing{
 	}
 	
 	// material
+	setMaterial(material){
+		this.set("block", "material", material);
+		return this;
+	}
 	makeMaterial(textures=this.get("block", "texture")/* material */){
 		/* if (material)
 			return this.set("block", "material", material.map( v => v.clone() )); */
@@ -232,21 +236,30 @@ class Block extends Thing{
 		return this;
 	}
 	deleteMaterial(){
-		if ( this.have("block", "material") )
-			for (const i of this.block.material)
-				i.dispose(); //清除内存
+		if ( this.have("block", "material") ) //清除内存
+			if (this.block.material instanceof Array){ //数组
+				this.block.material.forEach(v => v.dispose())
+			}else{ //单个
+				this.block.material.dispose();
+			}
+		
 		this.set("block", "material", null); //半保留
 		return this;
 	}
 	
 	// geometry
+	setGeometry(geometry){
+		this.set("block", "geometry", geometry);
+		return this;
+	}
 	makeGeometry(x, y, z){
 		this.set("block", "geometry", new THREE.BoxBufferGeometry(x, y, z));
 		return this;
 	}
 	deleteGeometry(){
 		if ( this.have("block", "geometry") )
-			this.block.geometry.dispose();
+			this.block.geometry.dispose(); //清除内存
+		
 		this.set("block", "geometry", null); //半保留
 		return this;
 	}
@@ -267,16 +280,20 @@ class Block extends Thing{
 		}
 		mesh.castShadow = true;
 		mesh.receiveShadow = true;
-		mesh.userData.object = this;
+		mesh.userData.thingObject = this; //物体对象
 		this.set("block", "mesh", mesh); //网格模型对象Mesh
 		return this;
 	}
 	deleteMesh(index){
 		if ( this.have("block", "mesh") ){
-			for (const i of this.block.mesh.material)
-				i.dispose();
+			if (this.block.mesh.material instanceof Array){ //数组
+				this.block.mesh.material.forEach(v => v.dispose())
+			}else{ //单个
+				this.block.mesh.material.dispose();
+			}
 			this.block.mesh.geometry.dispose(); //清除内存
 		}
+		
 		this.set("block", "mesh", null); //半保留
 		return this;
 	}
@@ -304,56 +321,6 @@ class EntityBlock extends Block{
 				if (opt.attr.entityBlock.size.z1) this.attr.entityBlock.size.z1 = opt.attr.entityBlock.size.z1;
 			}
 		}
-	}
-	
-	// material
-	setMaterial(material){
-		this.set("block", "material", material);
-		return this;
-	}
-	deleteMaterial(){
-		if ( this.have("block", "material") ){
-			const material = this.block.material;
-			if (material instanceof Array){ //数组
-				for (const i of material)
-					i.dispose(); //清除内存
-			}else{
-				material.dispose(); //直接清除
-			}
-		}
-			
-		this.set("block", "material", null); //半保留
-		return this;
-	}
-	
-	// geometry
-	setGeometry(geometry){
-		this.set("block", "geometry", geometry);
-		return this;
-	}
-	deleteGeometry(){
-		if ( this.have("block", "geometry") )
-			this.block.geometry.dispose();
-		this.set("block", "geometry", null); //半保留
-		return this;
-	}
-	
-	// mesh
-	makeMesh(){
-		const mesh = new THREE.Mesh(this.get("entity", "geometry"), this.get("entity", "material"));
-		mesh.castShadow = true;
-		mesh.receiveShadow = true;
-		mesh.userData.object = this;
-		this.set("block", "mesh", mesh); //网格模型对象Mesh
-		return this;
-	}
-	deleteMesh(index){
-		if ( this.have("block", "mesh") ){
-			this.deleteMaterial();
-			this.deleteGeometry();
-		}
-		this.set("block", "mesh", null); //半保留
-		return this;
 	}
 }
 EntityBlock.prototype.type = "EntityBlock"; //名称
@@ -419,7 +386,7 @@ class Entity extends Thing{
 		const mesh = new THREE.Mesh(this.get("entity", "geometry"), this.get("entity", "material"));
 		mesh.castShadow = true;
 		mesh.receiveShadow = true;
-		mesh.userData.object = this;
+		mesh.userData.thingObject = this;
 		this.set("entity", "mesh", mesh); //网格模型对象Mesh
 		return this;
 	}

@@ -22,12 +22,9 @@ document.addEventListener("keydown", function (e){
 		$("#"+stop).css("display", "none");
 		console.log(stop, ":close");
 		stop = false;
-		document.exitPointerLock();
+		PointerLock.unlock();
 		//手动更新锁定情况
-		if ( document.pointerLockElement === document.body ||
-			document.mozPointerLockElement === document.body ||
-			document.webkitPointerLockElement === document.body
-		){ //已锁定
+		if ( PointerLock.isLocked() ){ //已锁定
 			console.log("pointerLock yes");
 			stop = false;
 			$("#help").css("display", "none");
@@ -49,7 +46,7 @@ document.addEventListener("keydown", function (e){
 				console.log("Pause-Break", stop0, "changeTo", stop);
 			}else{ //无抵抗窗口 继续
 				const stop0 = stop;
-				document.body.requestPointerLock();
+				PointerLock.lock();
 				stop = false;
 				$("#setting").css("display", "none");
 				console.log("Pause-Break", stop0, "changeTo", stop);
@@ -59,7 +56,7 @@ document.addEventListener("keydown", function (e){
 			stop = true;
 			// $("#game,#mouse").css("cursor", "default");
 			DB.save();
-			document.exitPointerLock();
+			PointerLock.unlock();
 			$("#setting").css("display", "inline-block");
 			console.log("Pause-Break", stop0, "changeTo", stop);
 		}
@@ -105,7 +102,7 @@ document.addEventListener("keydown", function (e){
 		stop = true;
 		// $("#game,#mouse").css("cursor", "default");
 		DB.save();
-		document.exitPointerLock();
+		PointerLock.unlock();
 		
 		return false;
 	}

@@ -361,7 +361,7 @@ const deskgood = { //桌子好
 				{x: 1},
 				0,
 				x+66
-			).filter(value => value.object.userData.object.get("attr", "block", "through") != true); //过滤透明方块
+			).filter(value => value.object.userData.thingObject.get("attr", "block", "through") != true); //过滤透明方块
 			if (objs.length){ //被阻挡
 				const fx = Math.min(...objs.map(v => v.point.x))-16; //获取碰撞点，计算移动位置
 				rt[0] = fx-(deskgood.pos.x+x);
@@ -376,7 +376,7 @@ const deskgood = { //桌子好
 				{x: 1},
 				0,
 				x+66
-			).filter(value => value.object.userData.object.get("attr", "block", "through") != true); //过滤透明方块
+			).filter(value => value.object.userData.thingObject.get("attr", "block", "through") != true); //过滤透明方块
 			if (objs.length){ //被阻挡
 				const fx = Math.min(...objs.map(v => v.point.x))-16; //获取碰撞点，计算移动位置
 				rt[0] = fx-(deskgood.pos.x+x);
@@ -392,7 +392,7 @@ const deskgood = { //桌子好
 				{x: -1},
 				0,
 				-x+66
-			).filter(value => value.object.userData.object.get("attr", "block", "through") != true); //过滤透明方块
+			).filter(value => value.object.userData.thingObject.get("attr", "block", "through") != true); //过滤透明方块
 			if (objs.length){ //被阻挡
 				const fx = Math.max(...objs.map(v => v.point.x))+16; //获取碰撞点，计算移动位置
 				rt[0] = fx-(deskgood.pos.x+x);
@@ -408,7 +408,7 @@ const deskgood = { //桌子好
 				{x: -1},
 				0,
 				-x+66
-			).filter(value => value.object.userData.object.get("attr", "block", "through") != true); //过滤透明方块
+			).filter(value => value.object.userData.thingObject.get("attr", "block", "through") != true); //过滤透明方块
 			if (objs.length){ //被阻挡
 				const fx = Math.max(...objs.map(v => v.point.x))+16; //获取碰撞点，计算移动位置
 				rt[0] = fx-(deskgood.pos.x+x);
@@ -427,7 +427,7 @@ const deskgood = { //桌子好
 				{y: 1},
 				0,
 				y
-			).filter(value => value.object.userData.object.get("attr", "block", "through") != true); //过滤透明方块
+			).filter(value => value.object.userData.thingObject.get("attr", "block", "through") != true); //过滤透明方块
 			if (objs.length){ //被阻挡
 				/*const fy = Math.min(...ray3D(
 					{y: deskgood.pos.y+50},
@@ -445,7 +445,7 @@ const deskgood = { //桌子好
 				{y: -1},
 				0,
 				-y
-			).filter(value => value.object.userData.object.get("attr", "block", "through") != true); //过滤透明方块
+			).filter(value => value.object.userData.thingObject.get("attr", "block", "through") != true); //过滤透明方块
 			if (objs.length){ //被阻挡
 				/*const fy = Math.max(...ray3D(
 					{y: deskgood.pos.y-150},
@@ -467,7 +467,7 @@ const deskgood = { //桌子好
 				{z: 1},
 				0,
 				z+66
-			).filter(value => value.object.userData.object.get("attr", "block", "through") != true); //过滤透明方块
+			).filter(value => value.object.userData.thingObject.get("attr", "block", "through") != true); //过滤透明方块
 			if (objs.length){ //被阻挡
 				const fz = Math.min(...objs.map(v => v.point.z))-16; //获取碰撞点，计算移动位置
 				rt[2] = fz-(deskgood.pos.z+z);
@@ -482,7 +482,7 @@ const deskgood = { //桌子好
 				{z: 1},
 				0,
 				z+66
-			).filter(value => value.object.userData.object.get("attr", "block", "through") != true); //过滤透明方块
+			).filter(value => value.object.userData.thingObject.get("attr", "block", "through") != true); //过滤透明方块
 			if (objs.length){ //被阻挡
 				const fz = Math.min(...objs.map(v => v.point.z))-16; //获取碰撞点，计算移动位置
 				rt[2] = fz-(deskgood.pos.z+z);
@@ -498,7 +498,7 @@ const deskgood = { //桌子好
 				{z: -1},
 				0,
 				-z+66
-			).filter(value => value.object.userData.object.get("attr", "block", "through") != true); //过滤透明方块
+			).filter(value => value.object.userData.thingObject.get("attr", "block", "through") != true); //过滤透明方块
 			if (objs.length){ //被阻挡
 				const fz = Math.max(...objs.map(v => v.point.z))+16; //获取碰撞点，计算移动位置
 				rt[2] = fz-(deskgood.pos.z+z);
@@ -514,7 +514,7 @@ const deskgood = { //桌子好
 				{z: -1},
 				0,
 				-z+66
-			).filter(value => value.object.userData.object.get("attr", "block", "through") != true); //过滤透明方块
+			).filter(value => value.object.userData.thingObject.get("attr", "block", "through") != true); //过滤透明方块
 			if (objs.length){ //被阻挡
 				const fz = Math.max(...objs.map(v => v.point.z))+16; //获取碰撞点，计算移动位置
 				rt[2] = fz-(deskgood.pos.z+z);

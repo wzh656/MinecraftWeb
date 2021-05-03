@@ -198,16 +198,16 @@ document.addEventListener("mousedown", function (e){
 		return;
 	
 	if (e.button == 0){ //左键（删除）
-		for (const object of ray2D()){
-			if ( !(object.object instanceof THREE.Mesh) ) continue; //非物体
+		for (const obj of ray2D()){
+			if ( !(obj.object instanceof THREE.Mesh) ) continue; //非物体
 			
-			const thing = object.object.obj; //物体对象
+			const thing = obj.object.userData.thingObject; //物体对象
 			
 			if ( thing &&
 				eval(thing.get("attr", "block", "onLeftMouseDown")) === false
 			) return; //处理事件
 			
-			if ( object.object.position.distanceToSquared( deskgood.pos )
+			if ( obj.object.position.distanceToSquared( deskgood.pos )
 				>= deskgood.handLength*deskgood.handLength
 			) return; //距离**2 >= 手长**2 单位:px=cm
 			
@@ -229,16 +229,17 @@ document.addEventListener("mousedown", function (e){
 			!(hold instanceof Entity) //非方块非实体（空气）
 		) return;
 		
-		for (const object of ray2D()){
-			if ( !(object.object instanceof THREE.Mesh) ) continue; //非物体
+		for (const obj of ray2D()){
+			if ( !(obj.object instanceof THREE.Mesh) ) continue; //非物体
 			
-			const obj = object.object.obj, //物体对象
-				pos = object.object.position.clone().divideScalar(100); //单位:m
+			const thing = obj.object.userData.thingObject, //物体对象
+				pos = obj.object.position.clone().divideScalar(100); //单位:m
 			
-			if ( obj && eval(obj.get("attr", "block", "onRightMouseDown")) === false
+			if ( thing &&
+				eval(thing.get("attr", "block", "onRightMouseDown")) === false
 			) return; //处理事件
 			
-			switch (object.faceIndex){
+			switch (obj.faceIndex){
 				case 0:
 				case 1:
 					pos.x++; //单位:m

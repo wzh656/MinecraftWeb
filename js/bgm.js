@@ -1,3 +1,4 @@
+/* 播放BGM */
 function playBGM(){
 	const bgm = $("#bgm")[0];
 	if ( bgm.paused ){
