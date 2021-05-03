@@ -59,18 +59,6 @@ directionalLight.shadow.camera.left = -200*100;
 directionalLight.shadow.camera.right = 200*100;
 directionalLight.shadow.camera.top = 200*100;
 directionalLight.shadow.camera.bottom = -200*100;
-setTimeout(function(){
-	message("设备性能提示",
-	`<font style="font-size:16px">`+
-		`如果设备`+
-			`<b>性能差</b>`+
-			`，使用光影效果将会导致`+
-			`<b>卡顿</b>。`+
-			`<button onclick="directionalLight.castShadow=false;message('关闭光影','妈妈再也不用担心手机卡还发烫了（只担心画质丑的一批）', 3);">`+
-				`点此可关闭光影`+
-			`</button>`+
-		`</font>`, 5);
-},1000);
 /* document.addEventListener("plusready", function(){
 	plus.nativeUI.toast(
 		

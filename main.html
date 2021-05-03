@@ -994,7 +994,7 @@ if (device < 0){ //手机
 		if (typeof stop == "string")
 			return;
 		
-		if ( isPointerLocked() ){ //已锁定 继续
+		if ( PointerLock.isLocked() ){ //已锁定 继续
 			console.log("pointerLock yes");
 			stop = false;
 			time.setStop(stop);
@@ -1125,6 +1125,7 @@ document.oncontextmenu = function(e){
 		<script src="./js/deskgood.js"></script> <!-- 初始化角色deskgood；需置于ThingGroup后 -->
 		<script src="./js/bagView.js"></script> <!-- 角色deskgood背包旋转视图 -->
 		
+		<script src="./js/events.js"></script> <!-- 键盘key事件 -->
 		<script src="./js/keyEvents.js"></script> <!-- 键盘key事件 -->
 		<script src="./js/mouseEvents.js"></script> <!-- 鼠标mouse事件 -->
 		<script src="./js/touchEvents.js"></script> <!-- 触摸touch事件 -->

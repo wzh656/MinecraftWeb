@@ -1,17 +1,22 @@
 /* 鼠标锁定操作 */
+
+document.body.requestPointerLock = document.body.requestPointerLock ||
+	document.body.mozRequestPointerLock ||
+	document.body.webkitRequestPointerLock;
+
+document.exitPointerLock = document.exitPointerLock ||
+	document.mozExitPointerLock ||
+	document.webkitExitPointerLock;
+	
 const PointerLock = {
 	//请求指针锁定
 	lock(){
-		return (document.body.requestPointerLock ||
-			document.body.mozRequestPointerLock ||
-			document.body.webkitRequestPointerLock)();
+		return document.body.requestPointerLock();
 	},
 	
 	//解除鼠标锁定
 	unlock(){
-		return (document.exitPointerLock ||
-			document.mozExitPointerLock ||
-			document.webkitExitPointerLock)();
+		return document.exitPointerLock();
 	},
 	
 	//是否锁定

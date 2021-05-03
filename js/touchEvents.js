@@ -236,37 +236,10 @@ $("#game").on("touchstart", function (e){
 	touch_screen.y = touch_screen.y0 = y;
 	touch_screen.loop = setTimeout(()=>{ //长按1000ms（删除）
 		touch_screen.loop = null;
-		if ( Math.sqrt(
-				(touch_screen.x0 - touch_screen.x) **2+
-				(touch_screen.y0 - touch_screen.y) **2
-			) < 36
-		){ //误差36px
-			for (const obj of ray2D()){
-				if ( !(obj.object instanceof THREE.Mesh) ) continue; //非物体
-				
-				const thing = obj.object.userData.thingObject; //物体对象
-				
-				if ( thing &&
-					eval(thing.get("attr", "block", "onLeftMouseDown")) === false
-				) return; //处理事件
-				
-				if ( obj.object.position.distanceToSquared( deskgood.pos )
-					>= deskgood.handLength*deskgood.handLength
-				) return; //距离**2 >= 手长**2 单位:px=cm
-				
-				const free = !deskgood.hold[deskgood.choice]? deskgood.choice: deskgood.hold.indexOf(null);
-				if (free == -1){
-					console.warn("deskgood's hands is full!")
-					return print("拿不下方块", "两只手拿4m³方块已经够多了，反正我是拿不下了", 3);
-				}
-				
-				deskgood.hold.addOne(thing.clone(), free); //克隆一个放在手中
-				
-				deskgood.remove( thing ); //删除方块
-				
-				break;//跳出 寻找有效放置的 循环
-			}
-		}
+		if ( (touch_screen.x0 - touch_screen.x) **2+
+			(touch_screen.y0 - touch_screen.y) **2
+			< 36*36 //误差36px
+		) Events.startDig(); //开始挖掘
 	}, 1000);
 	
 	return false;
@@ -325,71 +298,10 @@ $("#game").on("touchend", function (e){
 	if (touch_screen.loop !== null){ //短按（放置）
 		clearTimeout(touch_screen.loop);
 		touch_screen.loop = null;
-		if ( Math.sqrt(
-			(touch_screen.x0 - touch_screen.x) **2+
-			(touch_screen.y0 - touch_screen.y) **2)
-			< 36
-		){ //误差36px
-			const hold = deskgood.hold[deskgood.choice];
-			if ( !(hold instanceof Block) &&
-				!(hold instanceof Entity) //非方块非实体（空气）
-			) return;
-			
-			for (const obj of ray2D()){
-				if ( !(obj.object instanceof THREE.Mesh) ) continue; //非物体
-				
-				const thing = obj.object.userData.thingObject, //物体对象
-					pos = obj.object.position.clone().divideScalar(100); //单位:m
-				
-				if ( thing &&
-					eval(thing.get("attr", "block", "onRightMouseDown")) === false
-				) return; //处理事件
-				
-				switch (obj.faceIndex){
-					case 0:
-					case 1:
-						pos.x++; //单位:m
-						break;
-					case 2:
-					case 3:
-						pos.x--;
-						break;
-					case 4:
-					case 5:
-						pos.y++;
-						break;
-					case 6:
-					case 7:
-						pos.y--;
-						break;
-					case 8:
-					case 9:
-						pos.z++;
-						break;
-					case 10:
-					case 11:
-						pos.z--;
-						break;
-					default:
-						throw ["faceIndex wrong:", obj.faceIndex];
-				}
-				
-				if ( pos.clone().multiplyScalar(100)
-						.distanceToSquared( deskgood.pos )
-					>= deskgood.handLength*deskgood.handLength
-				) return; //距离**2 >= 手长**2  单位:px=cm
-				
-				if ( pos.distanceToSquared( deskgood.pos.clone().divideScalar )
-					< 0.5*0.5 //距离**2 < 0.5**2 单位:m
-				)  return print("往头上放方块", "想窒息吗？还往头上放方块！"); //放到头上
-				
-				deskgood.place(deskgood.hold[deskgood.choice], pos); //放置方块 单位:m
-				
-				deskgood.hold.delete(deskgood.choice); //删除手里的方块
-				
-				break; //跳出 寻找有效放置的 循环
-			}
-		}
+		if ( (touch_screen.x0 - touch_screen.x) **2+
+			(touch_screen.y0 - touch_screen.y) **2
+			< 36*36 //误差36px
+		) Events.startPlace(); //开始放置
 	}
 	
 	touch_screen.x = touch_screen.y = touch_screen.x0 = touch_screen.y0 = null;
