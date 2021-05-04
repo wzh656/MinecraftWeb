@@ -148,6 +148,11 @@ class Block extends Thing{
 			if (opt.attr.block.transparent) this.attr.block.transparent = opt.attr.block.transparent; //透明方块（其他方块必须显示，自己不可隐藏）
 			if (opt.attr.block.through) this.attr.block.through = opt.attr.block.through; //允许穿过
 			
+			if (opt.attr.block.onStartDig) this.attr.block.onStartDig = opt.attr.block.onStartDig; //开始挖掘
+			if (opt.attr.block.onEndDig) this.attr.block.onEndDig = opt.attr.block.onEndDig; //结束挖掘
+			if (opt.attr.block.onStartPlace) this.attr.block.onStartPlace = opt.attr.block.onStartPlace; //开始放置
+			if (opt.attr.block.onEndPlace) this.attr.block.onEndPlace = opt.attr.block.onEndPlace; //结束放置
+			
 			if (opt.attr.block.onLeftMouseDown) this.attr.block.onLeftMouseDown = opt.attr.block.onLeftMouseDown; //鼠标左键按下
 			if (opt.attr.block.onLeftMouseUp) this.attr.block.onLeftMouseUp = opt.attr.block.onLeftMouseUp; //鼠标左键抬起
 			if (opt.attr.block.onRightMouseDown) this.attr.block.onRightMouseDown = opt.attr.block.onRightMouseDown; //鼠标右键按下

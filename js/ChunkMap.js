@@ -798,7 +798,7 @@ class ChunkMap{
 			sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime() )
 		);
 		console.log("weather:", sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime()/1000/60 ))
-		time.setInterval((speed)=>{
+		time.setInterval((now, speed)=>{
 			if (!speed) return;
 			if ( !this.chunks[x][z].weather ) return;
 			console.log("weather:", sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime()/1000/3600 ))

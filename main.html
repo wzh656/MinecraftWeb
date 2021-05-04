@@ -890,15 +890,15 @@ deskgood.moveTo(0,10000*100);</textarea>
 		</div>
 		
 		<!-- 1:遮罩 -->
-		<article id="pause" style="z-index: 1; display: none;">
-			<p>已暂停</p>
+		<article id="pause" style="z-index: 1;">
+			<h1>已暂停</h1>
 			<button class="success">继续游戏</button>
 			<button class="info">设置</button>
 		</article>
 		
 		<!-- 1:设置 -->
 		<article id="setting" style="z-index: 1; display: none;">
-			<p>设置</p>
+			<h1>设置</h1>
 			<div>
 				<fieldset name="debug">
 					<legend>
@@ -917,7 +917,7 @@ deskgood.moveTo(0,10000*100);</textarea>
 		
 		<!-- 3:进度条 -->
 		<article id="progress" style="z-index: 3;">
-			<header>贴图加载中……</header>
+			<h1>贴图加载中……</h1>
 			进度：<progress></progress>
 			<span>0</span>%<br/>
 			<b>生命诚可贵，生命只有一次，请珍爱生命</b>
@@ -932,7 +932,7 @@ deskgood.moveTo(0,10000*100);</textarea>
 		
 		<!-- 5:死亡通知书 -->
 		<article id="die" style="z-index: 5; display: none;">
-			<header>游戏结束！<p>GAME OVER</p></header>
+			<h1>游戏结束！<p>GAME OVER</p></h1>
 			角色deskgood死亡（正在播放：凉凉）<br/>
 			死因：<span class="resaon">未知</span><br/>
 			注：生命诚可贵，生命只有一次，请珍爱生命，deskgood无法重生，游戏即将关闭<br/>
@@ -942,7 +942,7 @@ deskgood.moveTo(0,10000*100);</textarea>
 		<!-- 6:message -->
 		
 		<!-- bgm -->
-		<audio id="bgm" perload loop style="display: none;" src="./music/1.m4a" ></audio>
+		<audio id="bgm" preload loop style="display: none;" src="./music/1.m4a" ></audio>
 		<!--<audio id="bgm" autoplay perload loop style="display: none;" src="https://vdse.bdstatic.com/876934f28995e8042230ec598237c67e.mp4?authorization=bce-auth-v1/fb297a5cc0fb434c971b8fa103e8dd7b/2017-05-11T09:02:31Z/-1//ab5b458a478fae53b754e194ab270b96f23aa23ba71c2e63b06fc06d0543040c"></audio>-->
 		
 		<!-- 7:不支持js -->
