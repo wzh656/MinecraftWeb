@@ -1,7 +1,6 @@
-var stop = true, //游戏状态
+let stop = true, //游戏状态
 	device = 0; //设备代码
-const time = new GameTime(localStorage.getItem("我的世界_time"), 1), //游戏时间
-	REQUIRE_PICTURE = ["./img/textures/textures.png"]; //需要加载的贴图
+const time = new GameTime(localStorage.getItem("我的世界_time"), 1); //游戏时间
 
 //状态设置
 function status(id, pointerLock){
