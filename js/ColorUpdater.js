@@ -17,6 +17,7 @@ class ColorUpdater{
 			));
 		}
 		//.console.log(+new Date(), colors)
+		console.log(h, time.getTime(), colors)
 		if (typeof this.setter == "function"){
 			this.setter(`rgb(${colors.R},${colors.G},${colors.B})`);
 		}else{
@@ -27,7 +28,7 @@ class ColorUpdater{
 		return this;
 	}
 	autoUpdate(step){
-		time.setInterval((speed)=>{
+		time.setInterval((now, speed)=>{
 			if(speed) this.update(); //时间流逝
 		}, step);
 		/*this.id = setInterval(()=>{this.update();}, step/gameTime.speed);

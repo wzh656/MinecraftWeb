@@ -45,8 +45,8 @@ Copyleft by wzh 2020~2021
 			.wf-active *{
 				font-family: zyyt, serif;
 			}
-			.wf-active h1,
-			.wf-active h1 *{
+			.wf-active article,
+			.wf-active article *{
 				font-family: kt, serif;
 			}
 			.wf-active header{
@@ -177,14 +177,15 @@ Copyleft by wzh 2020~2021
 				box-shadow: 0 0 0 0.6vmax rgba(217, 83, 79, .25);
 			}
 			
-			h1{
+			article{
 				position: absolute;
 				top: 0;
 				width: 100%;
 				height: 100%;
 				margin: 0;
-				text-align: center;
 				
+				text-align: center;
+				font-weight: bold;
 				color: #fff;
 				background-color: #fffae8;
 				background-image: radial-gradient(#c5effd, #e0edd3, #77b5fe);
@@ -202,7 +203,7 @@ Copyleft by wzh 2020~2021
 					0 0 20px rgba(0,0,255, .5),
 					0 0 30px rgba(255,255,0, .7);
 			}
-			h1::after{
+			article::after{
 				content: "Copyleft by wzh 2020~2021";
 				white-space: pre;
 				font-size: 0.2em;
@@ -279,19 +280,19 @@ Copyleft by wzh 2020~2021
 				display: block;
 			}
 			#topTools > li:nth-child(1){ /* 暂停按钮 */
-				padding: 0.6vmax;
+				padding: 0.26rem;
 				opacity: 0.6;
 				background-color: #83af9b;
 			}
 			#topTools > li:nth-child(1) > div{
-				width: 1.2vmax;
-				height: 1.2vmax;
+				width: 0.6rem;
+				height: 0.6rem;
 				padding: 0;
 				background-color: #83af9b;
 				box-sizing: border-box;
 				
 				border-style: double;
-				border-width: 0px 0px 0px 1.2vmax;
+				border-width: 0px 0px 0px 0.6rem;
 				border-color: #233067;
 			}
 			
@@ -334,8 +335,8 @@ Copyleft by wzh 2020~2021
 				left: 10vw;
 				background: #aaa;
 				opacity: 0.66;
-				width: 8vw;
-				height: 8vw;
+				width: 8vmax;
+				height: 8vmax;
 				border-radius: 50%;
 			}
 			#jump{
@@ -344,8 +345,8 @@ Copyleft by wzh 2020~2021
 				right: 10vw;
 				background: #aaa;
 				opacity: 0.66;
-				width: 6vw;
-				height: 6vw;
+				width: 6vmax;
+				height: 6vmax;
 				border-radius: 50%;
 			}
 			
@@ -365,20 +366,16 @@ Copyleft by wzh 2020~2021
 				display: none;
 				
 				background-color: #d3e0ed;
-				border: 0.5vmax #a3c0dc outset;
+				border: 0.2rem #a3c0dc outset;
 				padding: 1.6%;
 			}
-			/*#command{
-				width: 86.66%;
-				height: 86.66%;
-			}*/
 			#command > textarea{
 				width: 100%;
 				height: 66vh;
 				
 				color: black;
 				background-color: #d3e0ed;
-				border: 0.3vmax #a3c0dc inset;
+				border: 0.1rem #a3c0dc inset;
 				font-size: 1em;
 			}
 			#command > span{
@@ -403,7 +400,6 @@ Copyleft by wzh 2020~2021
 				width: 80vw;
 				padding: 0;
 				
-				display: none;
 				flex-direction: column;
 				/* overflow-y: auto; */
 				/* top: 45%; */
@@ -425,10 +421,9 @@ Copyleft by wzh 2020~2021
 				height: 6vh;
 				margin: 0 0.3vmax;
 				
-				/* 黑底白字白边框 */
 				color: #876;
 				background-color: #fffae8;
-				border: 0.5vmax outset #876;
+				border: 0.2rem outset #876;
 				border-top-left-radius: 3vmax;
 				border-top-right-radius: 3vmax;
 				
@@ -440,29 +435,28 @@ Copyleft by wzh 2020~2021
 				background-color: #ccd8c1;
 			}
 			#bag > nav > label.checked{ /* 被选中 */
-				/* 白底黑字黑边框 */
 				color: #876 !important;
 				background-color: #e0edd3 !important;
-				border: 0.5vmax outset #876 !important;
+				border: 0.2rem outset #876 !important;
 			}
 			
 			/* “关闭”按钮 */
 			#bag > nav > label[onclick]{
 				width: 6vh;
-				flex-grow: 0;
-				flex-shrink: 0;
+				flex: none;
 				
-				font-weight: 10000;
-				/* 黑底白字白边框 */
 				color: #876;
 				background-color: #fffae8;
-				border: 0.5vmax solid #876;
+				border: 0.2rem solid #876;
 				border-radius: 666px;
+				
+				font-size: 0.86em;
+				font-weight: 900;
 			}
 			#bag > nav > label[onclick]:hover{ /* 悬停白底黑字黑边框 */
 				color: #876;
 				background-color: #ccd8c1;
-				border: 0.5vmax solid #876;
+				border: 0.2rem solid #876;
 			}
 			
 			/* section */
@@ -828,8 +822,10 @@ Copyleft by wzh 2020~2021
 		</div>
 		
 		<!-- 0:摇杆操作 -->
-		<div id="control" style="display: none;"></div>
-		<div id="jump" style="display: none;"></div>
+		<div>
+			<div id="control" style="display: none;"></div>
+			<div id="jump" style="display: none;"></div>
+		</div>
 		
 		<!-- 1:命令方块 -->
 		<div id="command" style="z-index: 1;">
@@ -843,7 +839,7 @@ deskgood.moveTo(0,10000*100);</textarea>
 		</div>
 		
 		<!-- 1:背包 -->
-		<div id="bag" data-display="flex" style="z-index: 1;">
+		<div id="bag" data-display="flex" style="z-index: 1; display: none;">
 			<nav>
 				<label class="checked">物品</label>
 				<label>状态</label>
@@ -894,14 +890,14 @@ deskgood.moveTo(0,10000*100);</textarea>
 		</div>
 		
 		<!-- 1:遮罩 -->
-		<h1 id="pause" style="z-index: 1;">
+		<article id="pause" style="z-index: 1; display: none;">
 			<p>已暂停</p>
 			<button class="success">继续游戏</button>
 			<button class="info">设置</button>
-		</h1>
+		</article>
 		
 		<!-- 1:设置 -->
-		<h1 id="setting" style="z-index: 1; display: none;">
+		<article id="setting" style="z-index: 1; display: none;">
 			<p>设置</p>
 			<div>
 				<fieldset name="debug">
@@ -914,34 +910,34 @@ deskgood.moveTo(0,10000*100);</textarea>
 				</fieldset>
 			</div>
 			<button class="success">确定</button>
-		</h1>
+		</article>
 		
 		<!-- 2:print -->
 		<printgroup style="z-index: 2;"></printgroup>
 		
 		<!-- 3:进度条 -->
-		<h1 id="progress" style="z-index: 3;">
+		<article id="progress" style="z-index: 3;">
 			<header>贴图加载中……</header>
 			进度：<progress></progress>
 			<span>0</span>%<br/>
 			<b>生命诚可贵，生命只有一次，请珍爱生命</b>
-		</h1>
+		</article>
 		
 		<!-- 4:竖屏警告 -->
-		<h1 id="warning" style="z-index: 4;">
+		<article id="warning" style="z-index: 4;">
 			<span>推荐使用横屏运行（请启用浏览器横屏或）</span>
 			<button onclick="$(this).parent().remove();" class="success" >继续竖屏</button>
 			<button onclick="location.href='https://wzh656.github.io/Minecraft/';" class="info" >下载APK</button>
-		</h1>
+		</article>
 		
 		<!-- 5:死亡通知书 -->
-		<h1 id="die" style="z-index: 5; display: none;">
+		<article id="die" style="z-index: 5; display: none;">
 			<header>游戏结束！<p>GAME OVER</p></header>
 			角色deskgood死亡（正在播放：凉凉）<br/>
 			死因：<span class="resaon">未知</span><br/>
 			注：生命诚可贵，生命只有一次，请珍爱生命，deskgood无法重生，游戏即将关闭<br/>
 			<button onclick="exit();">结束<p>OVER</p></button>
-		</h1>
+		</article>
 		
 		<!-- 6:message -->
 		
@@ -950,7 +946,7 @@ deskgood.moveTo(0,10000*100);</textarea>
 		<!--<audio id="bgm" autoplay perload loop style="display: none;" src="https://vdse.bdstatic.com/876934f28995e8042230ec598237c67e.mp4?authorization=bce-auth-v1/fb297a5cc0fb434c971b8fa103e8dd7b/2017-05-11T09:02:31Z/-1//ab5b458a478fae53b754e194ab270b96f23aa23ba71c2e63b06fc06d0543040c"></audio>-->
 		
 		<!-- 7:不支持js -->
-		<noscript><h1 style="z-index: 7;">你的浏览器不支持JavaScript，无法运行！</h1></noscript>
+		<noscript><article style="z-index: 7;">你的浏览器不支持JavaScript，无法运行！</article></noscript>
 		
 		<!-- none:流量统计 -->
 		<div style="display: none;">

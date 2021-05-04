@@ -1,8 +1,12 @@
-// 加载贴图
+//需要加载的贴图
+const REQUIRE_PICTURE = ["./img/textures/textures.png"];
+
+//确保所有图片载入cache以便后文同步获取
 const task = Img.get(REQUIRE_PICTURE[0]);
 for (let i=1; i<REQUIRE_PICTURE.length; i++)
-	task.then( ()=>Img.get(REQUIRE_PICTURE[i]) ); //确保所有图片载入cache以便后文同步获取
+	task.then( ()=>Img.get(REQUIRE_PICTURE[i]) );
 
+// 加载贴图
 let TEXTURES;
 task.then(()=>{
 	const keys = Object.keys(Thing.prototype.TEMPLATES); //（有序）

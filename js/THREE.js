@@ -208,7 +208,7 @@ const backgroundColor = new ColorUpdater({
 		t: {s: ColorUpdater.dateToNumber(18), d: 0.5},
 		v: {s: 250, i: -230} //250->20
 	}]
-}, renderer.setClearColor).update().autoUpdate(20*1000); // 20s/time
+}, renderer.setClearColor).autoUpdate(20*1000); // 20s/time
 
 //ambientColor
 const ambientColor = new ColorUpdater({
@@ -238,12 +238,12 @@ const ambientColor = new ColorUpdater({
 	}]
 }, (v)=>{
 	ambient.color = new THREE.Color(v);
-}).update().autoUpdate(20*1000); // 20s/time
+}).autoUpdate(20*1000); // 20s/time
 
 //时间
 let daytime;
 const {latitude=40, longitude=116} = localStorage.getItem("我的世界_position") || {};
-time.setInterval(function(speed){
+time.setInterval(function(now, speed){
 	if (!speed) return;
 	const N = ~~(
 				( time.getTime() - new Date(time.getTime().getFullYear(), 0, 1) )
@@ -259,7 +259,7 @@ time.setInterval(function(speed){
 			Math.sin( THREE.Math.degToRad(latitude) ) * Math.sin(δ)
 		)), // 昼长/h
 		//15°=1h
-		time_difference = longitude/15+0.65, // 时差(修正)/h
+		time_difference = longitude/15+0.6, // 时差(修正)/h
 		// 120°E 日中：12:00
 		// 0° 日中：12:00-8:00=4:00
 		sunrise = 4 - daytime/2 + time_difference,
@@ -270,12 +270,17 @@ time.setInterval(function(speed){
 		ambientColor.config[i][0].t.s = sunrise;
 		ambientColor.config[i][1].t.s = sunset;
 	}
+	backgroundColor.update();
+	ambientColor.update();
 	console.log(`太阳直射点纬度:${THREE.Math.radToDeg(δ)}°，
 		昼长:${daytime}h，
 		时差:${time_difference}h，
 		日出:${sunrise}h，
-		日落:${sunset}h`, backgroundColor.config, ambientColor.config);
-}, 24*3600*1000).func(); // 24h/time
+		日落:${sunset}h`,
+		backgroundColor.config,
+		ambientColor.config
+	);
+}, 24*3600*1000).func(0, true); // 24h/time
 
 /*function dateToNumber(h=0, m=0, s=0){
 	return (s/60+m)/60+h;
