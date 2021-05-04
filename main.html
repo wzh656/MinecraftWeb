@@ -41,40 +41,16 @@ Copyleft by wzh 2020~2021
 		</script>
 		
 		<link href="./css/bootstrap.css" rel="stylesheet" type="text/css" />
-		<style>	
-			.wf-active *{
-				font-family: zyyt, serif;
-			}
-			.wf-active article,
-			.wf-active article *{
-				font-family: kt, serif;
-			}
-			.wf-active header{
-				font-family: st, serif;
-			}
-			.wf-active button{
-				font-family: xs, serif;
-				font-weight: bold;
-			}
-			
+		<style>
 			/* 字体缩放方案 */
 			@media screen and (max-width:320px){
-				body {font-size: 0.8rem;}
+				body {font-size: calc(0.03 * 320px + 3px);}
 			}
-			@media screen and (min-width: 321px) and (max-width:481px){
-				body {font-size: 1rem;}
-			}
-			@media screen and (min-width: 481px) and (max-width:640px){
-				body {font-size: 1.1rem;}
-			}
-			@media screen and (min-width: 641px) and (max-width:800px){
-				body {font-size: 1.2rem;}
-			}
-			@media screen and (min-width: 801px) and (max-width:960px){
-				body {font-size: 1.5rem;}
+			body{
+				font-size: calc(3vw + 3px);
 			}
 			@media screen and (min-width: 960px){
-				body {font-size: 2rem;}
+				body {font-size: calc(0.03 * 960px + 3px);}
 			}
 			
 			/* 选择 */
@@ -245,16 +221,16 @@ Copyleft by wzh 2020~2021
 				height: 6vw;*/
 			}
 			#tools > li{
-				width: 5vmax;
-				height: 5vmax;
+				width: 3rem;
+				height: 3rem;
 				display: inline-block;
 				/* margin: 0 -2px; */
 				margin: 0;
-				border: 0.5vmax groove #fffae8;
+				border: 0.3rem groove #fffae8;
 			}
 			#tools > li.checked{ /* 选中 */
-				border: 0.6vmax groove #dae6cd;
-				transform: translateY(-0.3vmax);
+				border: 0.4rem groove #dae6cd;
+				transform: translateY(-0.2rem);
 			}
 			#tools > li > img{
 				width: 100%;
@@ -355,27 +331,28 @@ Copyleft by wzh 2020~2021
 				1:命令方块
 			*/
 			#command{
-				width: 80vw;
-				/* height: 80vh; */
-				
 				position: absolute;
 				left: 50%;
 				top: 50%;
 				transform: translate(-50%, -50%);
 				
 				display: none;
+				width: 80vw;
+				/* height: 80vh; */
+				padding: 1.6vw;
 				
-				background-color: #d3e0ed;
-				border: 0.2rem #a3c0dc outset;
-				padding: 1.6%;
+				background-color: #fffae8;
+				box-shadow: 0 0 10px rgba(0, 0, 0, .4),
+							0 0 20px rgba(0, 0, 0, .4),
+							0 0 30px rgba(0, 0, 0, .4);
 			}
 			#command > textarea{
-				width: 100%;
+				width: calc(100% - 1.68vw);
 				height: 66vh;
 				
 				color: black;
-				background-color: #d3e0ed;
-				border: 0.1rem #a3c0dc inset;
+				background-color: #fffae8;
+				border: 0.2rem #876 solid;
 				font-size: 1em;
 			}
 			#command > span{
@@ -419,13 +396,13 @@ Copyleft by wzh 2020~2021
 			#bag > nav > label{
 				width: 33%;
 				height: 6vh;
-				margin: 0 0.3vmax;
+				margin: 0 0.3vw;
 				
 				color: #876;
 				background-color: #fffae8;
 				border: 0.2rem outset #876;
-				border-top-left-radius: 3vmax;
-				border-top-right-radius: 3vmax;
+				border-top-left-radius: 2.6vw;
+				border-top-right-radius: 2.6vw;
 				
 				text-align: center;
 				font-size: 1.2em;
@@ -453,7 +430,7 @@ Copyleft by wzh 2020~2021
 				font-size: 0.86em;
 				font-weight: 900;
 			}
-			#bag > nav > label[onclick]:hover{ /* 悬停白底黑字黑边框 */
+			#bag > nav > label[onclick]:hover{
 				color: #876;
 				background-color: #ccd8c1;
 				border: 0.2rem solid #876;
@@ -479,7 +456,7 @@ Copyleft by wzh 2020~2021
 			/* section1:背包 */
 			#bag > section:nth-of-type(1) > #bag_deskgood{ /* deskgood旋转动画 */
 				margin: 1vmax;
-				border: 0.5vmax inset #fffae8;
+				border: 0.36rem inset #fffae8;
 			}
 			#bag > section:nth-of-type(1) > ul{ /* 背包物品栏列表 */
 				display: inline-flex;
@@ -502,13 +479,13 @@ Copyleft by wzh 2020~2021
 				width: 6vmax;
 				height: 6vmax;
 				margin: 0;
-				border: 0.3vmax inset #a6917c; /* 未选中 */
+				border: 0.2rem inset #a6917c; /* 未选中 */
 			}
 			#bag > section:nth-of-type(1) > ul > li > ol > li:hover{ /* 悬停背景 */
 				background-color: #e0edd3;
 			}
 			#bag > section:nth-of-type(1) > ul > li > ol > li.checked{ /* 选中 */
-				border: 0.5vmax inset #876;
+				border: 0.3rem inset #876;
 			}
 			#bag > section:nth-of-type(1) > ul > li > ol > li > img{ /* 背包物品图片 */
 				width: 100%;
@@ -522,19 +499,20 @@ Copyleft by wzh 2020~2021
 			#pause{
 				display: flex;
 				flex-direction: column;
+				height: 94vh;
 				
 				opacity: 0.6;
 				padding-top: 6vh;
-				height: 94vh;
+				font-size: 1.2em;
 			}
 			#pause > p{
-				font-size: 1.4em;
+				font-size: 1.6em;
 				margin: 6vmax 0;
 			}
 			#pause > button{
 				width: 60vw;
 				height: 10vh;
-				font-size: 0.7em;
+				font-size: 0.8em;
 				margin: 3vmax auto;
 			}
 			/*
@@ -697,7 +675,7 @@ Copyleft by wzh 2020~2021
 				font-size: 0.36em;
 				margin: 0;
 			}
-			#die > header{
+			#die > h1{
 				font-size: 1.6em;
 			}
 			#die > button{

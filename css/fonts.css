@@ -57,7 +57,8 @@
 .wf-active h3 *,
 .wf-active h4 *,
 .wf-active h5 *,
-.wf-active h6 *{
+.wf-active h6 *,
+.wf-active header{
 	font-family: st, serif;
 }
 .wf-active label,
