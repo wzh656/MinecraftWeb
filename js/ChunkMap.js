@@ -282,7 +282,7 @@ class ChunkMap{
 						[size.z0/100, size.y0/100, size.z1/100, size.y1/100],
 						[size.x0/100, size.z0/100, size.x1/100, size.z1/100],
 						[size.x0/100, size.y0/100, size.x1/100, size.y1/100]
-					]/*,
+					]/* ,
 					uv = [
 						[	[ pos[0][0], pos[0][1] ],
 							[ pos[0][2], pos[0][1] ],
@@ -313,7 +313,7 @@ class ChunkMap{
 							[ pos[2][2], pos[2][1] ],
 							[ pos[2][2], pos[2][3] ],
 							[ pos[2][0], pos[2][3] ]	]
-					]*/;
+					] */;
 				/* for (const [i,face] of Object.entries(thing.get("entityBlock", "face")) ){
 					thing.setTexture(
 						new THREE.TextureLoader().load(
@@ -362,7 +362,7 @@ class ChunkMap{
 						uv[2][0], uv[2][1],
 						uv[2][2], uv[2][1]
 						
-						/*uv[0][3][0], uv[0][3][1],
+						/* uv[0][3][0], uv[0][3][1],
 						uv[0][2][0], uv[0][2][1],
 						uv[0][0][0], uv[0][0][1],
 						uv[0][1][0], uv[0][1][1],
@@ -390,7 +390,7 @@ class ChunkMap{
 						uv[5][3][0], uv[5][3][1],
 						uv[5][2][0], uv[5][2][1],
 						uv[5][0][0], uv[5][0][1],
-						uv[5][1][0], uv[5][1][1]*/
+						uv[5][1][0], uv[5][1][1] */
 					]), 2
 				));
 				/* thing.thing.geometry.faceVertexUvs[0][0] = [ uv[0][3], uv[0][0], uv[0][2] ];
@@ -657,7 +657,6 @@ class ChunkMap{
 		
 	}
 	
-	//更新方块大小
 	updateSize(thing){
 		const size = {
 			x0: thing.get("attr", "entityBlock", "size", "x0") || 0,
@@ -671,43 +670,53 @@ class ChunkMap{
 		size.y = size.y1 - size.y0,
 		size.z = size.z1 - size.z0; //长宽高
 		
-		const uv = [
+		const pos = {
+				x0: size.x0-50,
+				x1: size.x1-50,
+				y0: size.y0-50,
+				y1: size.y1-50,
+				z0: size.z0-50,
+				z1: size.z1-50
+			},
+			uv = [
 				[size.z0/100, size.y0/100, size.z1/100, size.y1/100],
 				[size.x0/100, size.z0/100, size.x1/100, size.z1/100],
 				[size.x0/100, size.y0/100, size.x1/100, size.y1/100]
-			]/*,
-			uv = [
-				[	[ pos[0][0], pos[0][1] ],
-					[ pos[0][2], pos[0][1] ],
-					[ pos[0][2], pos[0][3] ],
-					[ pos[0][0], pos[0][3] ]	],
-				
-				[	[ pos[0][0], pos[0][1] ],
-					[ pos[0][2], pos[0][1] ],
-					[ pos[0][2], pos[0][3] ],
-					[ pos[0][0], pos[0][3] ]	],
-				
-				[	[ pos[1][0], pos[1][1] ],
-					[ pos[1][2], pos[1][1] ],
-					[ pos[1][2], pos[1][3] ],
-					[ pos[1][0], pos[1][3] ]	],
-				
-				[	[ pos[1][0], pos[1][1] ],
-					[ pos[1][2], pos[1][1] ],
-					[ pos[1][2], pos[1][3] ],
-					[ pos[1][0], pos[1][3] ]	],
-				
-				[	[ pos[2][0], pos[2][1] ],
-					[ pos[2][2], pos[2][1] ],
-					[ pos[2][2], pos[2][3] ],
-					[ pos[2][0], pos[2][3] ]	],
-				
-				[	[ pos[2][0], pos[2][1] ],
-					[ pos[2][2], pos[2][1] ],
-					[ pos[2][2], pos[2][3] ],
-					[ pos[2][0], pos[2][3] ]	]
-			]*/;
+			];
 		
+		thing.block.geometry.setAttribute("position", new THREE.BufferAttribute(
+			new Float32Array([
+				pos.x1, pos.y1, pos.z1,
+				pos.x1, pos.y1, pos.z0,
+				pos.x1, pos.y0, pos.z1,
+				pos.x1, pos.y0, pos.z0,
+				
+				pos.x0, pos.y1, pos.z0,
+				pos.x0, pos.y1, pos.z1,
+				pos.x0, pos.y0, pos.z0,
+				pos.x0, pos.y0, pos.z1,
+				
+				pos.x0, pos.y1, pos.z0,
+				pos.x1, pos.y1, pos.z0,
+				pos.x0, pos.y1, pos.z1,
+				pos.x1, pos.y1, pos.z1,
+				
+				pos.x0, pos.y0, pos.z1,
+				pos.x1, pos.y0, pos.z1,
+				pos.x0, pos.y0, pos.z0,
+				pos.x1, pos.y0, pos.z0,
+				
+				pos.x0, pos.y1, pos.z1,
+				pos.x1, pos.y1, pos.z1,
+				pos.x0, pos.y0, pos.z1,
+				pos.x1, pos.y0, pos.z1,
+				
+				pos.x1, pos.y1, pos.z0,
+				pos.x0, pos.y1, pos.z0,
+				pos.x1, pos.y0, pos.z0,
+				pos.x0, pos.y0, pos.z0
+			]), 3
+		));
 		thing.block.geometry.setAttribute("uv", new THREE.BufferAttribute(
 			new Float32Array([
 				uv[0][0], uv[0][3],
@@ -739,44 +748,17 @@ class ChunkMap{
 				uv[2][2], uv[2][3],
 				uv[2][0], uv[2][1],
 				uv[2][2], uv[2][1]
-				/*uv[0][3][0], uv[0][3][1],
-				uv[0][2][0], uv[0][2][1],
-				uv[0][0][0], uv[0][0][1],
-				uv[0][1][0], uv[0][1][1],
-				
-				uv[1][3][0], uv[1][3][1],
-				uv[1][2][0], uv[1][2][1],
-				uv[1][0][0], uv[1][0][1],
-				uv[1][1][0], uv[1][1][1],
-				
-				uv[2][3][0], uv[2][3][1],
-				uv[2][2][0], uv[2][2][1],
-				uv[2][0][0], uv[2][0][1],
-				uv[2][1][0], uv[2][1][1],
-				
-				uv[3][3][0], uv[3][3][1],
-				uv[3][2][0], uv[3][2][1],
-				uv[3][0][0], uv[3][0][1],
-				uv[3][1][0], uv[3][1][1],
-				
-				uv[4][3][0], uv[4][3][1],
-				uv[4][2][0], uv[4][2][1],
-				uv[4][0][0], uv[4][0][1],
-				uv[4][1][0], uv[4][1][1],
-				
-				uv[5][3][0], uv[5][3][1],
-				uv[5][2][0], uv[5][2][1],
-				uv[5][0][0], uv[5][0][1],
-				uv[5][1][0], uv[5][1][1]*/
 			]), 2
 		));
 		
-		const {x, y, z} = thing.block.mesh.position.clone() .divideScalar(100).round();
-		thing.block.mesh.position.copy(new THREE.Vector3({
-			x: x + (size.x0 + size.x1)/2 /100 -0.5,
-			y: y + (size.y0 + size.y1)/2 /100 -0.5,
-			z: z + (size.z0 + size.z1)/2 /100 -0.5
-		}));
+		thing.block.mesh.position.copy( thing.block.mesh.position.clone()
+			.divideScalar(100).round().multiplyScalar(100)
+			.add(new THREE.Vector3(
+				(size.x0 + size.x1)/2 /100 -0.5,
+				(size.y0 + size.y1)/2 /100 -0.5,
+				(size.z0 + size.z1)/2 /100 -0.5
+			))
+		);
 	}
 	
 	//更新方块及周围
@@ -949,11 +931,11 @@ class ChunkMap{
 			],
 			sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime() )
 		);
-		console.log("weather:", sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime()/1000/60 ))
+		// console.log("weather:", sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime()/1000/60 ))
 		time.setInterval((now, speed)=>{
 			if (!speed) return;
 			if ( !this.chunks[x][z].weather ) return;
-			console.log("weather:", sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime()/1000/3600 ))
+			// console.log("weather:", sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime()/1000/3600 ))
 			this.chunks[x][z].weather.rain =
 				sNoise.weatherRain( this.seed.noise, this.seed.wR, x*this.size.x, z*this.size.z, time.getTime()/1000/3600 );
 		}, 60*1000); //60s更新一次

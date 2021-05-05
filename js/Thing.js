@@ -139,10 +139,14 @@ class Block extends Thing{
 			}
 			
 			if (opt.attr.block.hardness) this.attr.block.hardness = opt.attr.block.hardness; //硬度
-			if (opt.attr.block.PureExcavationTime){ //纯挖掘时间(cm³/s)
-				this.attr.block.PureExcavationTime = {};
-				for (const [name, value] of opt.attr.block.PureExcavationTime)
-					this.attr.block.PureExcavationTime[name] = +value;
+			if (opt.attr.block.digSpeed){ //挖掘速度(cm³/s)
+				if (typeof opt.attr.block.digSpeed == "number"){
+					this.attr.block.digSpeed = opt.attr.block.digSpeed;
+				}else{
+					this.attr.block.digSpeed = {};
+					for (const [name, value] of Object.entries(opt.attr.block.digSpeed))
+						this.attr.block.digSpeed[name] = +value;
+				}
 			}
 			
 			if (opt.attr.block.transparent) this.attr.block.transparent = opt.attr.block.transparent; //透明方块（其他方块必须显示，自己不可隐藏）

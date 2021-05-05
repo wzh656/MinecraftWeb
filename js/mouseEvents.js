@@ -162,7 +162,7 @@ document.addEventListener("mousedown", function (e){
 
 
 /* mouseup */
-document.addEventListener("mousedown", function (e){
+document.addEventListener("mouseup", function (e){
 	if (stop)
 		return;
 	
