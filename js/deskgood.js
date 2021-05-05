@@ -332,7 +332,7 @@ const deskgood = { //桌子好
 			} */
 		}else{
 			// throw "block";
-			print("区块未加载完成", "区块暂未加载完成，禁止进入<br/>（想加载快可以调节区块预加载范围，只要不卡死就行）", 1);
+			print("区块暂未加载完成，无法进入<br/>（想加载快可以调节区块预加载范围）", "区块未加载完成", 1);
 		}
 	},
 	// 前进
@@ -898,38 +898,14 @@ if (DEBUG){
 			deskgood_look_folder.add(deskgood, "VR").name("VR模式").onChange(v =>{ if (!v) deskgood.look.z=0; });
 		const deskgood_up_folder = deskgood_folder.addFolder("天旋地转（小心头晕）");
 			deskgood_up_folder.add(deskgood.up, "x", -1, 1, 0.01).onChange(function(){
-				print("头晕", "<font style='font-size: 16px;'>头晕别怪我</font>", 3);
-				/* plus.nativeUI.toast(
-					"<font size=\"16\">头晕别怪我</font>",
-					{
-						type: "richtext",
-						verticalAlign: "top",
-						richTextStyle: {align:"center"}
-					}
-				); }catch(err){} */
+				print("头晕别怪我", "头晕");
 			});
 			deskgood_up_folder.add(deskgood.up, "y", -1, 1, 0.01).onChange(function(){
-				print("头晕", "<font style='font-size: 16px;'>头晕别怪我</font>", 3);
-					/* plus.nativeUI.toast(
-						"<font size=\"16\">头晕别怪我</font>",
-						{
-							type: "richtext",
-							verticalAlign: "top",
-							richTextStyle: {align:"center"}
-						}
-					); }catch(err){} */
-				});
+				print("头晕别怪我", "头晕");
+			});
 			deskgood_up_folder.add(deskgood.up, "z", -1, 1, 0.01).onChange(function(){
-				print("头晕", "<font style='font-size: 16px;'>头晕别怪我</font>", 3);
-					/* plus.nativeUI.toast(
-						"<font size=\"16\">头晕别怪我</font>",
-						{
-							type: "richtext",
-							verticalAlign: "top",
-							richTextStyle: {align:"center"}
-						}
-					); }catch(err){} */
-				});
+				print("头晕别怪我", "头晕");
+			});
 		const deskgood_hold_folder = deskgood_folder.addFolder("工具栏(tools)");
 		deskgood_hold_folder.open();
 			deskgood_hold_folder.add(deskgood, "choice", 0, 3, 1).listen().name("选择工具").onChange(deskgood.hold.update);
@@ -955,20 +931,7 @@ setInterval(()=>{
 			deskgood.pos.z/100).get("attr", "block", "through")
 	){ //头被卡住
 		warn.push("头被卡住？");
-		print("窒息提示", "你的头竟然卡到方块里了，想窒息吗？看你怎么出来", 1, "#f68");
-		/* try{
-			plus.nativeUI.toast(
-				"<font size=\"16\">想窒息吗？还往头上放方块，看你怎么出来！</font>",
-				{
-					type:"richtext",
-					verticalAlign: "top",
-					richTextStyle:{align:"center"}
-				}
-			);
-		}catch(err){} */
-		/*setTimeout(function(){
-			try{ plus.nativeUI.closeToast(); }catch(err){}
-		},1);*/
+		print("你的头竟然卡到方块里了，想窒息吗？看你怎么出来", "窒息", 1, "#f00");
 	}
 	if (map.get(deskgood.pos.x/100,
 			deskgood.pos.y/100-1,

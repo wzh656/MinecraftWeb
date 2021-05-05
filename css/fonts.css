@@ -61,8 +61,8 @@
 .wf-active header{
 	font-family: st, serif;
 }
-.wf-active label,
-.wf-active label *{
+.wf-active label[for],
+.wf-active label[for] *{
 	font-family: kt, serif;
 }
 .wf-active button,

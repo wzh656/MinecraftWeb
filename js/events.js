@@ -23,7 +23,7 @@ const Events = {
 		const free = !deskgood.hold[deskgood.choice]? deskgood.choice: deskgood.hold.indexOf(null);
 		if (free == -1){
 			console.warn("deskgood's hands is full!")
-			return print("拿不下方块", "两只手拿4m³方块已经够多了，反正我是拿不下了", 3);
+			return print("两只手拿4m³方块已经够多了，反正我是拿不下了", "拿不下方块", 3, "rgba(255, 255, 0, .5)");
 		}
 		
 		deskgood.hold.addOne(thing.clone(), free); //克隆一个放在手中
@@ -106,13 +106,13 @@ const Events = {
 		if ( pos.distanceToSquared( deskgood.pos.clone() .divideScalar(100) )
 			< 0.5*0.5 && //距离**2 < 0.5**2 单位:m
 			hold.get("attr", "block", "through") !== true
-		)  return print("往头上放方块", "想窒息吗？还往头上放方块！"); //放到头上
+		)  return print("想窒息吗？还往头上放方块！", "往头上放方块", 3); //放到头上
 		
 		//是否在腿上 且 不可穿过
 		if ( pos.distanceToSquared( deskgood.pos.clone() .divideScalar(100).add(new THREE.Vector3(0,-1,0) ) )
 			< 0.5*0.5 && //距离**2 < 0.5**2 单位:m
 			hold.get("attr", "block", "through") !== true
-		)  return print("往腿上放方块", "想卡死吗？还往腿上放方块！"); //放到头上
+		)  return print("想卡死吗？还往腿上放方块！", "往腿上放方块"); //放到腿上
 		
 		deskgood.place(hold, pos); //放置方块 单位:m
 		

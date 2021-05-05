@@ -73,9 +73,9 @@ class GameTime{
 	}
 	//分配不重复的key
 	newChangeSpeedKey(){
-		let key = Math.random().toString(36).substr(2); //随机生成key
+		let key = String.random(); //随机生成key
 		while (this.onChangeSpeed[key])
-			key = Math.random().toString(36).substr(2);
+			key = String.random();
 		return key;
 	}
 	
