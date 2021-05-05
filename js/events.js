@@ -2,12 +2,14 @@ const Events = {
 	/**
 	* 通用操作
 	*/
+	digId: null,
 	/* 开始挖掘 */
 	startDig(){
 		const obj = ray2D().filter(obj => obj.object instanceof THREE.Mesh)[0]; //Mesh物体
 		if (!obj) return;
 		
-		const thing = obj.object.userData.thingObject; //物体对象
+		const thing = obj.object.userData.thingObject, //物体对象
+			hold = deskgood.hold[deskgood.choice]; //挖掘工具
 		
 		//处理事件
 		if ( thing &&
@@ -26,9 +28,22 @@ const Events = {
 			return print("拿不下方块", "两只手拿4m³方块已经够多了，反正我是拿不下了", 3);
 		}
 		
-		deskgood.hold.addOne(thing.clone(), free); //克隆一个放在手中
+		const digSpeed = thing.get("attr", "block", "digSpeed", hold? hold.name: "手"); //挖掘速度cm(cm³/s)
+		if (!digSpeed)
+			return print("无法挖掘", "当前工具无法挖掘该方块", 3, "#f00");
 		
-		deskgood.remove( thing ); //删除方块
+		console.log("startDig","digSpeed:", digSpeed, "cm³/s, ", 1000*1000/digSpeed, "s/cm")
+		
+		this.digId = time.setInterval(()=>{
+			if (thing.attr.entityBlock.size.y1 <= 0){
+				deskgood.hold.addOne(thing.clone(), free); //克隆一个放在手中
+				deskgood.remove( thing ); //删除方块
+				time.clearInterval(this.digId);
+			}
+			thing.attr.entityBlock.size.y1 -= 1;
+			console.log("Digging", thing.attr.entityBlock.size.y1)
+			map.updateSize(thing);
+		}, 1000*1000/digSpeed*1000); //挖1cm厚
 	},
 	
 	
@@ -43,6 +58,9 @@ const Events = {
 		if ( thing &&
 			eval(thing.get("attr", "block", "onEndDig")) === false
 		) return;
+		
+		time.clearInterval(this.digId);
+		console.log("endDig")
 	},
 	
 	
