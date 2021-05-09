@@ -99,8 +99,18 @@ Date.prototype.format = function(fmt){
 	return fmt;	 
 }
 
-function GetQueryString(name){
+//随机字符串
+String.random = function(len){
+	if (len === undefined)
+		return Math.random().toString(36).substr(2);
+	let str = "";
+	while (str.length < len)
+		str += Math.random().toString(36).substr(2);
+	return str.slice(0,len);
+}
+
+location.getQueryString = function(name){
 	var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
 	var r = window.location.search.substr(1).match(reg);
-	if(r!=null)return decodeURIComponent(r[2]); return null;
+	if(r!=null) return decodeURIComponent(r[2]); return null;
 }
