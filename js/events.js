@@ -32,18 +32,40 @@ const Events = {
 		if (!digSpeed)
 			return print("无法挖掘", "当前工具无法挖掘该方块", 3, "#f00");
 		
-		console.log("startDig","digSpeed:", digSpeed, "cm³/s, ", 1000*1000/digSpeed, "s/cm")
+		console.log("startDig","digSpeed:", digSpeed*time.getSpeed(), "cm³/s, ", 1000*1000/digSpeed/time.getSpeed(), "s/cm")
+		
+		let entityBlock;
+		switch (thing.type){
+			case "Block": //方块
+				entityBlock = new EntityBlock(thing);
+				const pos = thing.block.mesh.position.clone(); //单位: px=cm
+				map.delete(thing);
+				map.addID(entityBlock, pos.divideScalar(100)); //单位: m
+				break;
+			case "EntityBlock": //实体方块
+				entityBlock = thing;
+				break;
+			case "Entity": //实体
+				break;
+		}
+		
 		
 		this.digId = time.setInterval(()=>{
-			if (thing.attr.entityBlock.size.y1 <= 0){
-				deskgood.hold.addOne(thing.clone(), free); //克隆一个放在手中
-				deskgood.remove( thing ); //删除方块
+			if (entityBlock.attr.entityBlock.size.y1 <= 0){ //挖掘结束
+				deskgood.hold.addOne(entityBlock.clone(), free); //克隆一个放在手中
+				deskgood.remove( entityBlock ); //删除方块
 				time.clearInterval(this.digId);
 			}
-			thing.attr.entityBlock.size.y1 -= 1;
-			console.log("Digging", thing.attr.entityBlock.size.y1)
-			map.updateSize(thing);
-		}, 1000*1000/digSpeed*1000); //挖1cm厚
+			
+			entityBlock.attr.entityBlock.size.y1 -= 1;
+			console.log("Digging", entityBlock.attr.entityBlock.size.y1)
+			entityBlock.updateSize(); //更新大小
+			
+			const {x,y,z} = entityBlock.block.mesh.position.clone() .divideScalar(100).round(); //单位: m
+			map.updateRound(x, y, z, false); //更新周围方块
+		}, 1000*1000/digSpeed*1000).id; //挖1cm厚
+		
+		entityBlock.set("attr","entityBlock","size","y1", entityBlock.get("attr","entityBlock","size","y1") || 100, this.digId);
 	},
 	
 	

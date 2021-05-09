@@ -5,6 +5,7 @@ class GameTime{
 		this.speed = +speed;
 		this.stop = stop;
 		this.onChangeSpeed = {};
+		this.ids = {}; //setTimeout, setInterval
 	}
 	
 	//获取时间
@@ -79,52 +80,74 @@ class GameTime{
 		return key;
 	}
 	
+	//分配不重复的id及空间
+	newId(){
+		let id = String.random(); //随机生成id
+		while (this.ids[id])
+			id = String.random();
+		this.ids[id] = {};
+		return id;
+	}
+	
 	setTimeout(func, delay){
 		const endTime = +new Date()+delay/this.getSpeed(),
-			key = this.newChangeSpeedKey(), //随机生成key
-			id = setTimeout(()=>{
+			id = this.newId(), //随机生成id
+			space = this.ids[id];
+		
+		space.key = this.newChangeSpeedKey(); //随机生成key
+		if ( this.getSpeed() ) //非暂停
+			space.id = setTimeout(()=>{
 				func( this.getTime(), this.getSpeed() );
-				this.removeChangeSpeedListener(key); //删除监听	
+				this.clearTimeout(id); //清除自己
 			}, delay/this.getSpeed());
 		
-		this.addChangeSpeedListener(key, (speed)=>{ //添加监听
-			this.removeChangeSpeedListener(key); //删除监听
-			if (+new Date() < endTime){ //未达到目标时间
-				clearTimeout(id);
-				this.setTimeout(func, endTime-new Date()); //重新setTimeout
-			}
+		this.addChangeSpeedListener(space.key, (speed)=>{ //添加时间流速改变监听
+			this.clearTimeout(id); //清除自己
+			
+			if (+new Date() < endTime) //未达到目标时间
+				this.ids[id] = this.setTimeout(func, endTime-new Date()); //重新setTimeout
 		});
 		
-		return {key, id, func};
+		return {id, func};
 	}
-	clearTimeout({key, id}){
-		clearTimeout(id);
-		this.removeChangeSpeedListener(key); //删除监听
+	clearTimeout(id){
+		clearTimeout(this.ids[id].id);
+		this.removeChangeSpeedListener(this.ids[id].key); //删除监听
+		delete this.ids[id];
 		return this;
 	}
 	
 	setInterval(func, step){
 		const startTime = +new Date(),
 			startSpeed = this.getSpeed(),
-			key = this.newChangeSpeedKey(), //随机生成key
-			id = setInterval(
+			id = this.newId(), //随机生成id
+			space = this.ids[id];
+		
+		space.key = this.newChangeSpeedKey(); //随机生成key
+		if ( this.getSpeed() ) //非暂停
+			space.id = setInterval(
 				() => func( this.getTime(), this.getSpeed() ),
-				step/this.getSpeed()
+				step / this.getSpeed()
 			);
 		
-		this.addChangeSpeedListener(key, (speed)=>{ //添加监听
-			clearInterval(id);
-			this.setTimeout(
-				() => this.setInterval(func, step),
-				(new Date()-startTime)*startSpeed%step
-			)
+		this.addChangeSpeedListener(space.key, (speed)=>{ //添加时间流速改变监听
+			this.clearTimeout(id); //清除自己
+			
+			this.ids[id] = this.setTimeout(
+				() => {
+					this.clearTimeout(id); //清除自己
+					this.ids[id] = this.setInterval(func, step);
+				},
+				(new Date() - startTime) * startSpeed % step
+			);
 		});
 		
-		return {key, id, func};
+		return {id, func};
 	}
-	clearInterval({key, id}){
-		clearInterval(id);
-		this.removeChangeSpeedListener(key); //删除监听
+	clearInterval(id){
+		clearInterval(this.ids[id].id);
+		this.removeChangeSpeedListener(this.ids[id].key); //删除监听
+		delete this.ids[id];
 		return this;
 	}
 }

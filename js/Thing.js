@@ -331,6 +331,205 @@ class EntityBlock extends Block{
 			}
 		}
 	}
+	
+	updateSize(){
+		const size = {
+			x0: this.get("attr", "entityBlock", "size", "x0") || 0,
+			x1: this.get("attr", "entityBlock", "size", "x1") || 100,
+			y0: this.get("attr", "entityBlock", "size", "y0") || 0,
+			y1: this.get("attr", "entityBlock", "size", "y1") || 100,
+			z0: this.get("attr", "entityBlock", "size", "z0") || 0,
+			z1: this.get("attr", "entityBlock", "size", "z1") || 100
+		};
+		size.x = size.x1 - size.x0,
+		size.y = size.y1 - size.y0,
+		size.z = size.z1 - size.z0; //长宽高
+		
+		const pos = {
+				x0: size.x0-50,
+				x1: size.x1-50,
+				y0: size.y0-50,
+				y1: size.y1-50,
+				z0: size.z0-50,
+				z1: size.z1-50
+			},
+			uv = [
+				[size.z0/100, size.y0/100, size.z1/100, size.y1/100],
+				[size.x0/100, size.z0/100, size.x1/100, size.z1/100],
+				[size.x0/100, size.y0/100, size.x1/100, size.y1/100]
+			]/* ,
+			uv = [
+				[	[ pos[0][0], pos[0][1] ],
+					[ pos[0][2], pos[0][1] ],
+					[ pos[0][2], pos[0][3] ],
+					[ pos[0][0], pos[0][3] ]	],
+				
+				[	[ pos[0][0], pos[0][1] ],
+					[ pos[0][2], pos[0][1] ],
+					[ pos[0][2], pos[0][3] ],
+					[ pos[0][0], pos[0][3] ]	],
+				
+				[	[ pos[1][0], pos[1][1] ],
+					[ pos[1][2], pos[1][1] ],
+					[ pos[1][2], pos[1][3] ],
+					[ pos[1][0], pos[1][3] ]	],
+				
+				[	[ pos[1][0], pos[1][1] ],
+					[ pos[1][2], pos[1][1] ],
+					[ pos[1][2], pos[1][3] ],
+					[ pos[1][0], pos[1][3] ]	],
+				
+				[	[ pos[2][0], pos[2][1] ],
+					[ pos[2][2], pos[2][1] ],
+					[ pos[2][2], pos[2][3] ],
+					[ pos[2][0], pos[2][3] ]	],
+				
+				[	[ pos[2][0], pos[2][1] ],
+					[ pos[2][2], pos[2][1] ],
+					[ pos[2][2], pos[2][3] ],
+					[ pos[2][0], pos[2][3] ]	]
+			] */;
+		/* for (const [i,face] of Object.entries(this.get("entityBlock", "face")) ){
+			this.setTexture(
+				new THREE.TextureLoader().load(
+					Img.clip(
+						( face[2]? //自定义
+							Img.scale(
+								Img.clip( Img.get(face[2]), face[0]*16, face[1]*16, 16, 16 ),
+							64, 64)
+						:
+							TEXTURES[ face[0] ][ face[1] ] ),
+						uv[i][0], uv[i][1], uv[i][2]-uv[i][0], uv[i][3]-uv[i][1]
+					).toDataURL("image/png")
+				), i
+			);
+		} */
+		this.block.geometry.setAttribute("position", new THREE.BufferAttribute(
+			new Float32Array([
+				pos.x1, pos.y1, pos.z1,
+				pos.x1, pos.y1, pos.z0,
+				pos.x1, pos.y0, pos.z1,
+				pos.x1, pos.y0, pos.z0,
+				
+				pos.x0, pos.y1, pos.z0,
+				pos.x0, pos.y1, pos.z1,
+				pos.x0, pos.y0, pos.z0,
+				pos.x0, pos.y0, pos.z1,
+				
+				pos.x0, pos.y1, pos.z0,
+				pos.x1, pos.y1, pos.z0,
+				pos.x0, pos.y1, pos.z1,
+				pos.x1, pos.y1, pos.z1,
+				
+				pos.x0, pos.y0, pos.z1,
+				pos.x1, pos.y0, pos.z1,
+				pos.x0, pos.y0, pos.z0,
+				pos.x1, pos.y0, pos.z0,
+				
+				pos.x0, pos.y1, pos.z1,
+				pos.x1, pos.y1, pos.z1,
+				pos.x0, pos.y0, pos.z1,
+				pos.x1, pos.y0, pos.z1,
+				
+				pos.x1, pos.y1, pos.z0,
+				pos.x0, pos.y1, pos.z0,
+				pos.x1, pos.y0, pos.z0,
+				pos.x0, pos.y0, pos.z0
+			]), 3
+		));
+		this.block.geometry.setAttribute("uv", new THREE.BufferAttribute(
+			new Float32Array([
+				uv[0][0], uv[0][3],
+				uv[0][2], uv[0][3],
+				uv[0][0], uv[0][1],
+				uv[0][2], uv[0][1],
+				
+				uv[0][0], uv[0][3],
+				uv[0][2], uv[0][3],
+				uv[0][0], uv[0][1],
+				uv[0][2], uv[0][1],
+				
+				uv[1][0], uv[1][3],
+				uv[1][2], uv[1][3],
+				uv[1][0], uv[1][1],
+				uv[1][2], uv[1][1],
+				
+				uv[1][0], uv[1][3],
+				uv[1][2], uv[1][3],
+				uv[1][0], uv[1][1],
+				uv[1][2], uv[1][1],
+				
+				uv[2][0], uv[2][3],
+				uv[2][2], uv[2][3],
+				uv[2][0], uv[2][1],
+				uv[2][2], uv[2][1],
+				
+				uv[2][0], uv[2][3],
+				uv[2][2], uv[2][3],
+				uv[2][0], uv[2][1],
+				uv[2][2], uv[2][1]
+				
+				/* uv[0][3][0], uv[0][3][1],
+				uv[0][2][0], uv[0][2][1],
+				uv[0][0][0], uv[0][0][1],
+				uv[0][1][0], uv[0][1][1],
+				
+				uv[1][3][0], uv[1][3][1],
+				uv[1][2][0], uv[1][2][1],
+				uv[1][0][0], uv[1][0][1],
+				uv[1][1][0], uv[1][1][1],
+				
+				uv[2][3][0], uv[2][3][1],
+				uv[2][2][0], uv[2][2][1],
+				uv[2][0][0], uv[2][0][1],
+				uv[2][1][0], uv[2][1][1],
+				
+				uv[3][3][0], uv[3][3][1],
+				uv[3][2][0], uv[3][2][1],
+				uv[3][0][0], uv[3][0][1],
+				uv[3][1][0], uv[3][1][1],
+				
+				uv[4][3][0], uv[4][3][1],
+				uv[4][2][0], uv[4][2][1],
+				uv[4][0][0], uv[4][0][1],
+				uv[4][1][0], uv[4][1][1],
+				
+				uv[5][3][0], uv[5][3][1],
+				uv[5][2][0], uv[5][2][1],
+				uv[5][0][0], uv[5][0][1],
+				uv[5][1][0], uv[5][1][1] */
+			]), 2
+		));
+		/* this.this.geometry.faceVertexUvs[0][0] = [ uv[0][3], uv[0][0], uv[0][2] ];
+		this.this.geometry.faceVertexUvs[0][1] = [ uv[0][0], uv[0][1], uv[0][2] ];
+		
+		this.this.geometry.faceVertexUvs[0][2] = [ uv[1][3], uv[1][0], uv[1][2] ];
+		this.this.geometry.faceVertexUvs[0][3] = [ uv[1][0], uv[1][1], uv[1][2] ];
+		
+		this.this.geometry.faceVertexUvs[0][4] = [ uv[2][3], uv[2][0], uv[2][2] ];
+		this.this.geometry.faceVertexUvs[0][5] = [ uv[2][0], uv[2][1], uv[2][2] ];
+		
+		this.this.geometry.faceVertexUvs[0][6] = [ uv[3][3], uv[3][0], uv[3][2] ];
+		this.this.geometry.faceVertexUvs[0][7] = [ uv[3][0], uv[3][1], uv[3][2] ];
+		
+		this.this.geometry.faceVertexUvs[0][8] = [ uv[4][3], uv[4][0], uv[4][2] ];
+		this.this.geometry.faceVertexUvs[0][9] = [ uv[4][0], uv[4][1], uv[4][2] ];
+		
+		this.this.geometry.faceVertexUvs[0][10] = [ uv[5][3], uv[5][0], uv[5][2] ];
+		this.this.geometry.faceVertexUvs[0][11] = [ uv[5][0], uv[5][1], uv[5][2] ]; */
+		
+		if ( this.have("block", "mesh") )
+			this.block.mesh.position.copy( this.block.mesh.position.clone()
+				.divideScalar(100).round().multiplyScalar(100)
+				.add(new THREE.Vector3(
+					(size.x0 + size.x1)/2 /100 -0.5,
+					(size.y0 + size.y1)/2 /100 -0.5,
+					(size.z0 + size.z1)/2 /100 -0.5
+				))
+			);
+		
+		return this;
+	}
 }
 EntityBlock.prototype.type = "EntityBlock"; //名称
 
