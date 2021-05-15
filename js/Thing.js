@@ -86,6 +86,13 @@ class Thing{
 	clone(){
 		return new this.constructor(this);
 	}
+	cloneAttr(){ //只保留属性
+		return new this.constructor({
+			name: this.name,
+			view: this.view,
+			attr: this.attr
+		});
+	}
 }
 Thing.prototype.type = "Thing"; //名称
 Thing.prototype.TEMPLATES = []; //模板

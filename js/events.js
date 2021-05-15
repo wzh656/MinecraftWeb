@@ -28,6 +28,7 @@ const Events = {
 			return print("两只手拿4m³方块已经够多了，反正我是拿不下了", "拿不下方块", 3, "rgba(255, 255, 0, .5)");
 		}
 		
+		//挖掘速度
 		const digSpeed = thing.get("attr", "block", "digSpeed", hold? hold.name: "手"); //挖掘速度cm(cm³/s)
 		if (!digSpeed)
 			return print("无法挖掘", "当前工具无法挖掘该方块", 3, "#f00");
@@ -36,7 +37,7 @@ const Events = {
 		
 		let entityBlock;
 		switch (thing.type){
-			case "Block": //方块
+			case "Block": //方块 转化为实体方块
 				entityBlock = new EntityBlock(thing);
 				const pos = thing.block.mesh.position.clone(); //单位: px=cm
 				map.delete(thing);
@@ -49,23 +50,31 @@ const Events = {
 				break;
 		}
 		
-		
+		entityBlock.set("attr","entityBlock","size","y1", entityBlock.get("attr","entityBlock","size","y1")||100);
+		let put;
 		this.digId = time.setInterval(()=>{
 			if (entityBlock.attr.entityBlock.size.y1 <= 0){ //挖掘结束
-				deskgood.hold.addOne(entityBlock.clone(), free); //克隆一个放在手中
 				deskgood.remove( entityBlock ); //删除方块
 				time.clearInterval(this.digId);
 			}
 			
+			if (!put){
+				put = entityBlock.cloneAttr();
+				put.set("attr","entityBlock","size","y1", 0);
+				deskgood.hold.addOne(put, free); //克隆一个放在手中
+			}
+			
 			entityBlock.attr.entityBlock.size.y1 -= 1;
-			console.log("Digging", entityBlock.attr.entityBlock.size.y1)
+			put.attr.entityBlock.size.y1 += 1;
+			
+			console.log("Digging", entityBlock.attr.entityBlock.size.y1, put.attr.entityBlock.size.y1)
 			entityBlock.updateSize(); //更新大小
 			
 			const {x,y,z} = entityBlock.block.mesh.position.clone() .divideScalar(100).round(); //单位: m
 			map.updateRound(x, y, z, false); //更新周围方块
 		}, 1000*1000/digSpeed*1000).id; //挖1cm厚
 		
-		entityBlock.set("attr","entityBlock","size","y1", entityBlock.get("attr","entityBlock","size","y1") || 100, this.digId);
+		console.log(this.digId, time.ids[this.digId])
 	},
 	
 	

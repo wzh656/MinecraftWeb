@@ -10,7 +10,7 @@
 		<link href="./img/icon.png" rel="icon" type="image/x-icon"/>
 		
 		<!-- 异步fonts加载 -->
-		<script src="https://staticfile.qnssl.com/webfont/1.6.16/webfontloader.js"></script>
+		<script src="./js/modules/webfontloader.js"></script>
 		<script>
 		if (typeof require != "undefined"){ //electron
 			console.log("electron")
@@ -154,11 +154,7 @@
 		}
 		</style>
 		
-		<!-- layui -->
-		<!--<link rel="stylesheet" href="https://unpkg.com/layui@2.6.4/dist/css/layui.css">-->
-		<script src="https://unpkg.com/layui@2.6.4/dist/layui.js"></script>
-		
-		<script src="./js/modules/sha512.js"></script>
+		<!-- jquery -->
 		<script src="./js/modules/jquery.min.js"></script>
 		<script>
 		if (typeof require != "undefined") //electron
@@ -166,6 +162,11 @@
 		</script>
 		<script src="./js/modules/js_plus.js"></script>
 		
+		<!-- layui -->
+		<!--<link rel="stylesheet" href="https://unpkg.com/layui@2.6.4/dist/css/layui.css">-->
+		<script src="./js/modules/layui.js"></script>
+		
+		<!-- 调试工具 -->
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
 		<script>
@@ -176,6 +177,8 @@
 		}
 		</script>
 		
+		<script src="./js/modules/sha512.js"></script> <!-- sha加密 -->
+		<script src="./js/modules/js_plus.js"></script> <!-- js+ -->
 	</head>
 	<body>
 		<section id="view">

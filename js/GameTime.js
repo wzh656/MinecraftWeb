@@ -81,49 +81,61 @@ class GameTime{
 	}
 	
 	//分配不重复的id及空间
-	newId(){
-		let id = String.random(); //随机生成id
-		while (this.ids[id])
-			id = String.random();
-		this.ids[id] = {};
-		return id;
+	newSpace(id){
+		if (id){ //有id
+			if (this.ids[id]) //被占用
+				console.warn("GameTime.newSpace: ", id, "has already been used");
+		}else{ //生成id
+			id = String.random(); //随机生成id
+			while (this.ids[id])
+				id = String.random();
+		}
+		
+		this.ids[id] = {
+			id: null, //定时器id
+			key: this.newChangeSpeedKey() //监听key
+		};
+		return {
+			space: this.ids[id],
+			id,
+			key: this.ids[id].key
+		};
 	}
 	
-	setTimeout(func, delay){
+	setTimeout(func, delay, useId){
 		const endTime = +new Date()+delay/this.getSpeed(),
-			id = this.newId(), //随机生成id
-			space = this.ids[id];
+			{space, id} = this.newSpace(useId); //随机生成id及空间
 		
-		space.key = this.newChangeSpeedKey(); //随机生成key
 		if ( this.getSpeed() ) //非暂停
 			space.id = setTimeout(()=>{
-				func( this.getTime(), this.getSpeed() );
 				this.clearTimeout(id); //清除自己
-			}, delay/this.getSpeed());
+				func( this.getTime(), this.getSpeed() );
+			}, delay / this.getSpeed());
 		
 		this.addChangeSpeedListener(space.key, (speed)=>{ //添加时间流速改变监听
 			this.clearTimeout(id); //清除自己
 			
 			if (+new Date() < endTime) //未达到目标时间
-				this.ids[id] = this.setTimeout(func, endTime-new Date()); //重新setTimeout
+				this.setTimeout(func, endTime-new Date(), id); //重新setTimeout
 		});
 		
 		return {id, func};
 	}
 	clearTimeout(id){
+		if (!this.ids[id])
+			return console.warn("GameTime.clearTimeout: ", id, "has already been cleared")
+		
 		clearTimeout(this.ids[id].id);
 		this.removeChangeSpeedListener(this.ids[id].key); //删除监听
 		delete this.ids[id];
 		return this;
 	}
 	
-	setInterval(func, step){
+	setInterval(func, step, useId){
 		const startTime = +new Date(),
 			startSpeed = this.getSpeed(),
-			id = this.newId(), //随机生成id
-			space = this.ids[id];
+			{space, id} = this.newSpace(useId); //随机生成id及空间
 		
-		space.key = this.newChangeSpeedKey(); //随机生成key
 		if ( this.getSpeed() ) //非暂停
 			space.id = setInterval(
 				() => func( this.getTime(), this.getSpeed() ),
@@ -131,21 +143,22 @@ class GameTime{
 			);
 		
 		this.addChangeSpeedListener(space.key, (speed)=>{ //添加时间流速改变监听
-			this.clearTimeout(id); //清除自己
+			this.clearInterval(id); //清除自己
 			
-			this.ids[id] = this.setTimeout(
-				() => {
-					this.clearTimeout(id); //清除自己
-					this.ids[id] = this.setInterval(func, step);
-				},
-				(new Date() - startTime) * startSpeed % step
+			this.setTimeout(
+				() => this.setInterval(func, step, id), //无需清除自己（timeout一次性）
+				(new Date() - startTime) * startSpeed % step,
+				id
 			);
 		});
 		
 		return {id, func};
 	}
 	clearInterval(id){
-		clearInterval(this.ids[id].id);
+		if (!this.ids[id])
+			return console.warn("GameTime.clearInterval", id, "has already been cleared")
+		
+		clearInterval(this.ids[id].id); //取消计时器
 		this.removeChangeSpeedListener(this.ids[id].key); //删除监听
 		delete this.ids[id];
 		return this;

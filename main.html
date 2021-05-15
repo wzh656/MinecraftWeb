@@ -21,7 +21,7 @@ Copyleft by wzh 2020~2021
 		<link href="./img/icon.png" rel="icon" type="image/x-icon"/>
 		
 		<!-- 异步fonts加载 -->
-		<script src="https://staticfile.qnssl.com/webfont/1.6.16/webfontloader.js"></script>
+		<script src="./js/modules/webfontloader.js"></script>
 		<script>
 		if (typeof require != "undefined"){ //electron
 			console.log("electron")
@@ -751,6 +751,7 @@ Copyleft by wzh 2020~2021
 			}
 		</style>
 		
+		<!-- jquery -->
 		<script src="./js/modules/jquery.min.js"></script>
 		<script>
 		let ipcRenderer;
@@ -759,6 +760,12 @@ Copyleft by wzh 2020~2021
 			ipcRenderer = require('electron').ipcRenderer;
 		}
 		</script>
+		
+		<!-- layui -->
+		<!--<link rel="stylesheet" href="https://unpkg.com/layui@2.6.4/dist/css/layui.css">-->
+		<script src="./js/modules/layui.js"></script>
+		
+		<!-- 调试工具 -->
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
 		<script>
@@ -771,13 +778,15 @@ Copyleft by wzh 2020~2021
 			new VConsole();
 		}
 		</script>
-		<script src="./js/modules/three.min.js"></script>
+		
+		<script src="./js/modules/three.min.js"></script> <!-- three.js -->
 		<script src="./js/modules/OrbitControls.js"></script> <!-- bag deskgood 相机控制 -->
 		<script src="./js/modules/DeviceOrientationControls.js"></script> <!-- 陀螺仪相机控制 -->
 		<script src="./js/modules/simplex-noise.js"></script> <!-- 柏林噪声 -->
-		<script src="./js/modules/dat.gui.min.js"></script>
-		<script src="./js/modules/stats.min.js"></script>
-		<script src="./js/modules/js_plus.js"></script>
+		<script src="./js/modules/dat.gui.min.js"></script> <!-- dat.gui -->
+		<script src="./js/modules/stats.min.js"></script> <!-- stats.js -->
+		
+		<script src="./js/modules/js_plus.js"></script> <!-- js+ -->
 		
 	</head>
 	
