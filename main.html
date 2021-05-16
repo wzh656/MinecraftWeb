@@ -42,7 +42,7 @@ Copyleft by wzh 2020~2021
 		
 		<link href="./css/bootstrap.css" rel="stylesheet" type="text/css" />
 		<style>
-			/* 字体缩放方案 */
+			/* 字体缩放 */
 			@media screen and (max-width:320px){
 				body {font-size: calc(0.03 * 320px + 3px);}
 			}
@@ -78,13 +78,28 @@ Copyleft by wzh 2020~2021
 				z-index: 1 !important;
 			}
 			
+			/* 隐藏body窗口区域滚动条 */
 			body{
 				margin: 0;
 				overflow: hidden;
-				/* 隐藏body窗口区域滚动条 */
 			}
 			
+			/* 列表 */
+			ul, ol{
+				display: inline-block;
+				margin: 0;
+				padding: 0;
+				list-style-type: none;
+			}
+			ul > li, ol > li{
+				display: inline-block;
+			}
+			.dg ul, .dg ol,
+			.dg ul > li, .dg ol > li{
+				display: block;
+			}
 			
+			/* 按钮 */
 			button{
 				vertical-align: middle;
 				border: 0.2vmax solid #ced4da;
@@ -153,18 +168,20 @@ Copyleft by wzh 2020~2021
 				box-shadow: 0 0 0 0.6vmax rgba(217, 83, 79, .25);
 			}
 			
-			article{
+			/* 遮罩层 */
+			layer{
 				position: absolute;
+				left: 0;
 				top: 0;
 				width: 100%;
 				height: 100%;
 				margin: 0;
+				padding: 0;
 				
 				text-align: center;
 				font-weight: bold;
 				color: #fff;
 				background-color: #fffae8;
-				background-image: radial-gradient(#c5effd, #e0edd3, #77b5fe);
 				
 				text-shadow:
 					0 0 10px rgba(255,0,0, .4),
@@ -179,9 +196,9 @@ Copyleft by wzh 2020~2021
 					0 0 20px rgba(0,0,255, .5),
 					0 0 30px rgba(255,255,0, .7);
 			}
-			article::after{
+			layer::after{
 				content: "Copyleft by wzh 2020~2021";
-				white-space: pre;
+				/* white-space: pre; */
 				font-size: 0.2em;
 				
 				position: absolute;
@@ -189,10 +206,15 @@ Copyleft by wzh 2020~2021
 				left: 50%;
 				transform: translateX(-50%);
 				
-				text-shadow: 0.5px 0px 0px #aaa, /*右*/
-					-0.5px 0px 0px #ddd, /*左*/
-					0px 0.5px 0px #ddd, /*上*/
-					0px -0.5px 0px #aaa; /*下*/
+				text-shadow: 1px 0px 0px #666, /*右*/
+					-1px 0px 0px #aaa, /*左*/
+					0px 1px 0px #aaa, /*上*/
+					0px -1px 0px #666; /*下*/
+			}
+			
+			/* 多行文本框 */
+			textarea{
+				resize: none;
 			}
 			
 			/* canvas */
@@ -205,10 +227,14 @@ Copyleft by wzh 2020~2021
 				z-index: -1;
 			}
 			
+			
+			
 			/* ------------------I'm 分割线--------------- */
 			
-			/*
-				0:物品栏
+			
+			
+			/**
+			* 0:物品栏
 			*/
 			#tools{
 				position: absolute;
@@ -237,12 +263,9 @@ Copyleft by wzh 2020~2021
 				height: 100%;
 			}
 			
-			textarea{
-				resize: none;
-			}
 			
-			/*
-				0:顶部工具栏
+			/**
+			* 0:顶部工具栏
 			*/
 			#topTools{
 				position: absolute;
@@ -273,8 +296,8 @@ Copyleft by wzh 2020~2021
 			}
 			
 			
-			/*
-				0:十字准星
+			/**
+			* 0:十字准星
 			*/
 			#pointer{
 				position: absolute;
@@ -302,8 +325,8 @@ Copyleft by wzh 2020~2021
 			}
 			
 			
-			/*
-				0:摇杆操纵
+			/**
+			* 0:摇杆操纵
 			*/
 			#control{
 				position: absolute;
@@ -327,8 +350,8 @@ Copyleft by wzh 2020~2021
 			}
 			
 			
-			/*
-				1:命令方块
+			/**
+			* 1:命令方块
 			*/
 			#command{
 				position: absolute;
@@ -366,8 +389,8 @@ Copyleft by wzh 2020~2021
 			}
 			
 			
-			/*
-				1:背包
+			/**
+			* 1:背包
 			*/
 			#bag{
 				position: absolute;
@@ -382,7 +405,6 @@ Copyleft by wzh 2020~2021
 				/* top: 45%; */
 				
 			}
-			
 			
 			/* 导航栏 */
 			#bag > nav{
@@ -493,13 +515,14 @@ Copyleft by wzh 2020~2021
 			}
 			
 			
-			/*
-				1:遮罩
+			/**
+			* 1:暂停遮罩
 			*/
 			#pause{
 				display: flex;
 				flex-direction: column;
 				height: 94vh;
+				background-image: radial-gradient(#c5effd, #e0edd3, #77b5fe);
 				
 				opacity: 0.6;
 				padding-top: 6vh;
@@ -515,8 +538,10 @@ Copyleft by wzh 2020~2021
 				font-size: 0.8em;
 				margin: 3vmax auto;
 			}
-			/*
-				1:设置
+			
+			
+			/**
+			* 1:设置
 			*/
 			#setting{
 				background-color: #fffae8;
@@ -556,27 +581,28 @@ Copyleft by wzh 2020~2021
 			}
 			
 			
-			/*
-				2:打印信息
+			/**
+			* 2:打印信息
 			*/
-			printgroup{
+			#printOutput{
 				position: absolute;
 				top: 16vh;
 				left: 0;
-				max-width: 16vw;
-				max-height: 86vh;
+				max-width: 20vw;
+				max-width: calc(16vw + 36px);
+				max-height: 84vh;
 				font-size: 0.5em;
 				overflow-y: hidden;
 			}
-			printgroup > print{
+			#printOutput > li{
 				display: block;
 				background-color: white;
 				opacity: 0.5;
 			}
 			
 			
-			/*
-				3:进度条
+			/**
+			* 3:进度条
 			*/
 			#progress{
 				font-size: 1em;
@@ -632,8 +658,8 @@ Copyleft by wzh 2020~2021
 			}
 			
 			
-			/*
-				4:竖屏警告
+			/**
+			* 4:竖屏警告
 			*/
 			#warning{
 				background-image: none;
@@ -666,8 +692,8 @@ Copyleft by wzh 2020~2021
 			}
 			
 			
-			/*
-				5:死亡通知书
+			/**
+			* 5:死亡通知书
 			*/
 			#die{
 				background-image: none;
@@ -692,10 +718,10 @@ Copyleft by wzh 2020~2021
 			}*/
 			
 			
-			/*
-				6:message
+			/**
+			* 6:message
 			*/
-			@keyframes messageIn{
+			/* @keyframes messageIn{
 				from {
 					right: 0;
 					transform: translateX(100%);
@@ -748,7 +774,7 @@ Copyleft by wzh 2020~2021
 				opacity: 0;
 				
 				animation: 3s messageOut;
-			}
+			} */
 		</style>
 		
 		<!-- jquery -->
@@ -760,10 +786,6 @@ Copyleft by wzh 2020~2021
 			ipcRenderer = require('electron').ipcRenderer;
 		}
 		</script>
-		
-		<!-- layui -->
-		<!--<link rel="stylesheet" href="https://unpkg.com/layui@2.6.4/dist/css/layui.css">-->
-		<script src="./js/modules/layui.js"></script>
 		
 		<!-- 调试工具 -->
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
@@ -819,7 +841,7 @@ Copyleft by wzh 2020~2021
 		</div>
 		
 		<!-- 1:命令方块 -->
-		<div id="command" style="z-index: 1;">
+		<section id="command" style="z-index: 1;">
 			<textarea>
 print("hello,world!");
 print("hello,world!", "helloworld", 10, "#ff0");
@@ -829,10 +851,10 @@ status("command");</textarea>
 			<span>运行代码即表示同意《免责协议》：输入代码产生的一切后果由玩家自行承担</span><br/>
 			<button onclick="status('command');" class="warn">关闭</button>
 			<button onclick="run($('#command > textarea').val());" class="success">运行</button>
-		</div>
+		</section>
 		
 		<!-- 1:背包 -->
-		<div id="bag" data-display="flex" style="z-index: 1; display: none;">
+		<section id="bag" data-display="flex" style="z-index: 1; display: none;">
 			<nav>
 				<label class="checked">物品</label>
 				<label>状态</label>
@@ -880,18 +902,18 @@ status("command");</textarea>
 						$("#bag > section:eq("+i+")").addClass("checked").siblings().removeClass("checked");
 					};
 			</script>
-		</div>
+		</section>
 		
 		<!-- 1:遮罩 -->
-		<article id="pause" style="z-index: 1;">
+		<layer id="pause" style="z-index: 1;">
 			<h1>已暂停</h1>
 			<button class="next success">继续游戏</button>
 			<button class="reload info">重新加载</button>
 			<button class="set info">设置</button>
-		</article>
+		</layer>
 		
 		<!-- 1:设置 -->
-		<article id="setting" style="z-index: 1; display: none;">
+		<layer id="setting" style="z-index: 1; display: none;">
 			<h1>设置</h1>
 			<div>
 				<fieldset name="debug">
@@ -904,34 +926,34 @@ status("command");</textarea>
 				</fieldset>
 			</div>
 			<button class="back success">返回</button>
-		</article>
+		</layer>
 		
-		<!-- 2:print -->
-		<printgroup style="z-index: 2;"></printgroup>
+		<!-- 2:print output -->
+		<ol id="printOutput" style="z-index: 2;"></ol>
 		
 		<!-- 3:进度条 -->
-		<article id="progress" style="z-index: 3;">
+		<layer id="progress" style="z-index: 3;">
 			<h1>贴图加载中……</h1>
 			进度：<progress></progress>
 			<span>0</span>%<br/>
 			<b>生命诚可贵，生命只有一次，请珍爱生命</b>
-		</article>
+		</layer>
 		
 		<!-- 4:竖屏警告 -->
-		<article id="warning" style="z-index: 4;">
+		<layer id="warning" style="z-index: 4;">
 			<span>推荐使用横屏运行（请启用浏览器横屏或）</span>
 			<button onclick="$(this).parent().remove();" class="success" >继续竖屏</button>
 			<button onclick="location.href='https://wzh656.github.io/Minecraft/';" class="info" >下载APK</button>
-		</article>
+		</layer>
 		
 		<!-- 5:死亡通知书 -->
-		<article id="die" style="z-index: 5; display: none;">
+		<layer id="die" style="z-index: 5; display: none;">
 			<h1>游戏结束！<p>GAME OVER</p></h1>
 			角色deskgood死亡（正在播放：凉凉）<br/>
 			死因：<span class="resaon">未知</span><br/>
 			注：生命诚可贵，生命只有一次，请珍爱生命，deskgood无法重生，游戏即将关闭<br/>
 			<button onclick="exit();">结束<p>OVER</p></button>
-		</article>
+		</layer>
 		
 		<!-- 6:message -->
 		
@@ -940,7 +962,7 @@ status("command");</textarea>
 		<!--<audio id="bgm" autoplay perload loop style="display: none;" src="https://vdse.bdstatic.com/876934f28995e8042230ec598237c67e.mp4?authorization=bce-auth-v1/fb297a5cc0fb434c971b8fa103e8dd7b/2017-05-11T09:02:31Z/-1//ab5b458a478fae53b754e194ab270b96f23aa23ba71c2e63b06fc06d0543040c"></audio>-->
 		
 		<!-- 7:不支持js -->
-		<noscript><article style="z-index: 7;">你的浏览器不支持JavaScript，无法运行！</article></noscript>
+		<noscript><layer style="z-index: 7;">你的浏览器不支持JavaScript，无法运行！</layer></noscript>
 		
 		<!-- none:流量统计 -->
 		<div style="display: none;">
@@ -1039,45 +1061,21 @@ $("#setting > .back").click(function(){ //返回
 	document.body.requestPointerLock(); //请求成功后再继续游戏
 });
 
-function print(text, id=String.random(), time=3, color){
+function print(text, id=String.random(undefined, print.prototype.ids), time=3, color){
+	/* time 单位: s */
 	if (print.prototype.ids[id] == true) return; //已加载
 	print.prototype.ids[id] = true;
 	
-	const msg = $(`<print>${text}</print>`).css("backgroundColor", color);
-	$("printgroup").append( msg.fadeIn("slow") );
+	const msg = $(`<li>${text}</li>`).css("backgroundColor", color);
+	$("#printOutput").append( msg.fadeIn("slow") );
 	setTimeout(()=>{
 		msg.fadeOut("slow", msg.remove);
 		print.prototype.ids[id] = false;
 		
-		$("printgroup > print[style='display: none;']").remove(); //避免漏掉
+		$("#printOutput > li[style='display: none;']").remove(); //避免漏掉
 	}, time*1000);
 }
-print.prototype.ids = [];
-
-function message(id, text, time=5){
-	if (message.prototype.ids[id] == true) return; //已加载
-	message.prototype.ids[id] = true;
-	
-	const msg = $(`<message>${text}</message>`)
-		.attr("open", "true")
-		.click(()=>{
-			msg.removeAttr("open").attr("close");
-			message.prototype.ids[id] = false;
-			msg.hide("slow", ()=>{
-				msg.remove();
-				$("message:not(open).close").remove(); //避免漏掉
-			});
-		});
-	$( document.body ).append( msg );
-	setTimeout(()=>{
-		msg.removeAttr("open").attr("close");
-		message.prototype.ids[id] = false;
-		setTimeout(()=>msg.remove(), 3000);
-		
-		$("message:not(open).close").remove(); //避免漏掉
-	}, time*1000);
-}
-message.prototype.ids = [];
+print.prototype.ids = {};
 
 //屏蔽鼠标右键
 document.oncontextmenu = function(e){

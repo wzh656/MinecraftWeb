@@ -74,10 +74,7 @@ class GameTime{
 	}
 	//分配不重复的key
 	newChangeSpeedKey(){
-		let key = String.random(); //随机生成key
-		while (this.onChangeSpeed[key])
-			key = String.random();
-		return key;
+		return String.random(undefined, this.onChangeSpeed);
 	}
 	
 	//分配不重复的id及空间
@@ -86,9 +83,7 @@ class GameTime{
 			if (this.ids[id]) //被占用
 				console.warn("GameTime.newSpace: ", id, "has already been used");
 		}else{ //生成id
-			id = String.random(); //随机生成id
-			while (this.ids[id])
-				id = String.random();
+			id = String.random(undefined, this.ids); //随机生成id
 		}
 		
 		this.ids[id] = {

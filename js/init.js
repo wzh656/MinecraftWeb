@@ -1,6 +1,20 @@
 let stop = true, //游戏状态
 	device = 0; //设备代码
 const time = new GameTime(localStorage.getItem("我的世界_time"), 1); //游戏时间
+time.tmpSpeed = time.speed; //临时speed
+
+setInterval(()=>{
+	if (time.speed != time.tmpSpeed){ //改变
+		time.speed = time.tmpSpeed;
+		print("时间流逝改变："+Math.round(time.speed, 2)+"x");
+		console.log("time speed:",
+`${time.speed}s/s
+=${time.speed/60}min/s
+=${time.speed/3600}h/s
+=${time.speed/3600/24}day/s
+=${time.speed/3600/24/365.25}year/s`)
+	}
+}, 666);
 
 //状态设置
 function status(id, pointerLock){

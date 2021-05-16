@@ -100,13 +100,25 @@ Date.prototype.format = function(fmt){
 }
 
 //随机字符串
-String.random = function(len){
-	if (len === undefined)
-		return Math.random().toString(36).substr(2);
+String.random = function(len, obj=[]){
 	let str = "";
-	while (str.length < len)
-		str += Math.random().toString(36).substr(2);
-	return str.slice(0,len);
+	if ( !(obj instanceof Array) )
+		obj = Object.keys(obj)
+	
+	if (len === undefined){
+		while ( obj.some(v => v == str) ) //重复
+			str = Math.random().toString(36).substr(2);
+		return str;
+		
+	}else{
+		while ( obj.some(v => v == str)) { //重复
+			while (str.length < len)
+				str += Math.random().toString(36).substr(2);
+			str = str.slice(0, len)
+		}
+		return str
+	}
+	
 }
 
 location.getQueryString = function(name){
