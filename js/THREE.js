@@ -254,21 +254,25 @@ const ambientColor = new ColorUpdater({
 
 //时间
 let daytime;
-const {latitude=40, longitude=116} = localStorage.getItem("我的世界_position") || {};
+const {latitude=40, longitude=116} = JSON.parse(localStorage.getItem("我的世界_position") || "{}");
 time.setInterval(function(speed){
 	if (!speed) return;
 	const N = ~~(
 				( time.getTime() - new Date(time.getTime().getFullYear(), 0, 1) )
 				/1000/3600/24
-			), // 日数，自每年1月1日开始计算。
-		b = 2*Math.PI*(N-1)/365, //单位为弧度
+			), // 日数，自每年1月1日开始计算
+		b = 2*Math.PI*(N-1)/365, //单位: 弧度(rad)
 		δ = 0.006918
 			-0.399912 *Math.cos(b) + 0.070257 *Math.sin(b)
 			-0.006758 *Math.cos(2*b) + 0.000907 *Math.sin(2*b)
 			-0.002697 *Math.cos(3*b) + 0.00148 *Math.sin(3*b),
 			// 太阳直射点纬度/弧度(rad)
+		θ = THREE.Math.degToRad(latitude), //当前纬度 单位: 弧度(rad)
 		daytime = 24 - 2/15 *THREE.Math.radToDeg(Math.acos(
-			Math.sin( THREE.Math.degToRad(latitude) ) * Math.sin(δ)
+			Math.range(
+				Math.sin(θ) * Math.sin(δ) / Math.cos(θ) / Math.cos(δ),
+				-1, 1
+			)
 		)), // 昼长/h
 		//15°=1h
 		time_difference = longitude/15+0.65, // 时差(修正)/h

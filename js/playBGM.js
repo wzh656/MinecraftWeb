@@ -1,7 +1,7 @@
 function playBGM(){
 	const bgm = $("#bgm")[0];
 	if ( bgm.paused ){
-		if ( Math.random(1, 0, 0) ){
+		if ( Math.random(0, 1, 0) ){
 			bgm.volume = 1;
 			bgm.src = "./music/1.m4a";
 			bgm.play();
