@@ -302,8 +302,9 @@ class ChunkMap{
 					
 					scene.remove( thing.block.mesh );
 					thing.deleteMesh();
+					arr.splice(i, 1);
 					
-					delete arr[i];
+					return true; //找到
 				}) ) console.warn("can't find entity", thing, "in chunk", cX, cZ); //找不到
 				break;
 		}
@@ -323,6 +324,13 @@ class ChunkMap{
 		
 		if (thisBlock === null) return; //空气
 		
+		if (thisBlock === undefined){ //本方块 未加载
+			const cX = Math.round(x/map.size.x),
+				cZ = Math.round(z/map.size.z), //所属区块(Chunk)
+				edit = this.chunks[cX] && this.chunks[cX][cZ] && this.chunks[cX][cZ].edit;
+			thisBlock = new Block( this.perGet(x, y, z, edit||[]) ); //应该的方块
+		}
+		
 		const rule = [
 				/* x,y,z偏移量 正方向 反方向 其他方向 */
 				[1,0,0, "x0","x1", "y","z"],
@@ -332,20 +340,20 @@ class ChunkMap{
 				[0,0,1, "z0","z1", "x","y"],
 				[0,0,-1, "z1","z0", "x","y"]
 			],
-			direction = {x0:0, x1:100, y0:0, y1:100, z0:0, z1:100}, //所有方向 及默认值
+			normal = {x0:0, x1:100, y0:0, y1:100, z0:0, z1:100}, //所有方向 及默认值
 			visibleValue = [], //可见值
-			thisSize = thisBlock?
-				thisBlock.get("attr", "block", "size") || {}:
-				{}, //本方块大小
-			transparent = thisBlock? thisBlock.get("attr", "block", "transparent"): undefined; //透明方块（自己不可隐藏）
-		Object.map(direction, (v,i)=> thisSize[i] = thisSize[i]===undefined? v: thisSize[i]); //默认值
+			thisSize = thisBlock.get("attr", "block", "size") || {}, //本方块大小 （可能未加载）
+			thisTransparent = thisBlock.get("attr", "block", "transparent"); //透明方块（自己不可隐藏）
+		Object.map(normal, (v,i)=>
+			thisSize[i] = thisSize[i]===undefined? v: thisSize[i]
+		); //本方块大小 默认值
 		
 		let needLoad = false; //需要加载
-		if (transparent === true){ //整体不可隐藏
+		if (thisTransparent === true){ //整体不可隐藏
 			for (let i=0; i<6; i++)
 				visibleValue[i] = true;
 			needLoad = true;
-		}else{
+		}else{ //整体/部分不可隐藏
 			for (const [i, [dx,dy,dz, posDir,oppDir, othDir1, othDir2]] of Object.entries(rule)){ //遍历旁边的方块
 				const px=x+dx, py=y+dy, pz=z+dz; //旁边方块位置
 				let thatBlock = this.get(px, py, pz); //旁边方块
@@ -360,10 +368,10 @@ class ChunkMap{
 				const thatSize = thatBlock?
 					thatBlock.get("attr", "block", "size") || {}:
 					{}; //旁边方块大小
-				Object.map(direction, (v,i)=> thatSize[i] = thatSize[i]===undefined? v: thatSize[i]); //默认值
+				Object.map(normal, (v,i)=> thatSize[i] = thatSize[i]===undefined? v: thatSize[i]); //默认值
 				
-				if ( thisSize && thisSize[posDir] != direction[posDir] || //本方块 正方向变小
-					thatSize && thatSize[oppDir] != direction[oppDir] || //旁方块 反方向变小
+				if ( thisSize && thisSize[posDir] != normal[posDir] || //本方块 正方向变小
+					thatSize && thatSize[oppDir] != normal[oppDir] || //旁边方块 反方向变小
 					thisSize[othDir1+"0"] < thatSize[othDir1+"0"] ||
 					thisSize[othDir1+"1"] > thatSize[othDir1+"1"] ||
 					thisSize[othDir2+"0"] < thatSize[othDir2+"0"] ||

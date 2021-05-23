@@ -54,6 +54,7 @@ const Events = {
 		let take; //拿走的方块
 		this.digId = time.setInterval(()=>{
 			if (entityBlock.attr.entityBlock.size.y1 <= 0){ //挖掘结束
+				console.log("dig over")
 				time.clearInterval(this.digId);
 				return deskgood.remove( entityBlock ); //删除方块
 			}
@@ -90,8 +91,8 @@ const Events = {
 			eval(thing.get("attr", "block", "onEndDig")) === false
 		) return;
 		
-		time.clearInterval(this.digId);
 		console.log("endDig")
+		time.clearInterval(this.digId);
 	},
 	
 	

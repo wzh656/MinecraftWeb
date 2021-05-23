@@ -266,8 +266,8 @@ time.setInterval(function(time, speed){
 		time_difference = longitude/15+0.6, // 时差(修正)/h
 		// 120°E 日中：12:00
 		// 0° 日中：12:00-8:00=4:00
-		sunrise = 4 - daytime/2 + time_difference,
-		sunset = 4 + daytime/2 + time_difference;
+		sunrise = Math.modRange( 4 - daytime/2 + time_difference, 0, 24 ),
+		sunset = Math.modRange(4 + daytime/2 + time_difference, 0, 24);
 	for (const i of ["R", "G", "B"]){
 		backgroundColor.config[i][0].t.s = sunrise;
 		backgroundColor.config[i][1].t.s = sunset;
