@@ -8,18 +8,20 @@ function try_start_load(){
 				if (ipcRenderer)
 					ipcRenderer.send("progressUpdate", Math.min(value, 1));
 			},
-			finishCallback: ()=>{
-				$("#progress span").text("100");
-				$("#progress progress").val("1");
-				deskgood.update_round_blocks();
-				deskgood.update_round_blocks();
-				setTimeout(function(){
-					render(); //纹理贴图加载成功后，调用渲染函数执行渲染操作
-					$("#progress").remove();
-					if (ipcRenderer)
-						ipcRenderer.send("progressUpdate", -1); //关闭进度条
-				},0);
+			updateCallback: ()=>{
+				$("#progress h1").text("更新区块中……");
 			}
+		}).then(()=>{
+			$("#progress span").text("100");
+			$("#progress progress").val("1");
+			deskgood.update_round_blocks();
+			deskgood.update_round_blocks();
+			setTimeout(function(){
+				render(); //纹理贴图加载成功后，调用渲染函数执行渲染操作
+				$("#progress").remove();
+				if (ipcRenderer)
+					ipcRenderer.send("progressUpdate", -1); //关闭进度条
+			},0);
 		});
 	}
 };

@@ -141,7 +141,7 @@ class ChunkMap{
 	*/
 	
 	//获取方块（不可编辑）
-	get(x, y, z, entity=false, r=0.5){
+	get(x, y, z, entity=false, num=Infinity, r=0.5){
 		/* x,y,z,r 单位：m */
 		const rX=Math.round(x), rY=Math.round(y), rZ=Math.round(z); //规范化
 		
@@ -151,15 +151,18 @@ class ChunkMap{
 				cX = Math.round(x/this.size.x),
 				cZ = Math.round(z/this.size.z); //区块
 			if (block) result.push(block); //方块
-			if (this.chunks[cX] && this.chunks[cX][cZ])
-				for (const e of this.chunks[cX][cZ].entity){ // 实体/实体方块
-					const pos = e.type=="EntityBlock"? e.block.mesh.position: e.entity.mesh.position; //坐标
+			if (this.chunks[cX] && this.chunks[cX][cZ] && this.chunks[cX][cZ].entity)
+				for (let i=this.chunks[cX][cZ].entity.length-1; i>=0; i--){ // 实体/实体方块
+					const e = this.chunks[cX][cZ].entity[i],
+						pos = e.type=="EntityBlock"? e.block.mesh.position: e.entity.mesh.position; //坐标
 					/* pos 单位：px */
+					if (result.length >= num) break; //达到数量
 					if ( (pos.x/100 - x) **2+
 						(pos.y/100 - y) **2+
 						(pos.z/100 - z) **2 <= r*r
 					) result.push(e); //在半径范围内
 				}
+			if (num === true) return result[0];
 			return result;
 		}else{
 			return this.map[rX] && this.map[rX][rY] && this.map[rX][rY][rZ];
@@ -315,114 +318,130 @@ class ChunkMap{
 	/*
 	* 更新操作(update)
 	*/
-	
+	//获取真正的方块及属性
+	getReal(x, y, z){
+		let block = this.get(x,y,z, true, true),
+			loaded = true; //是否预加载
+		if (block === undefined){ //未加载
+			const cX = Math.round(x/this.size.x),
+				cZ = Math.round(z/this.size.z), //所属区块(Chunk)
+				edit = this.chunks[cX] && this.chunks[cX][cZ] && this.chunks[cX][cZ].edit;
+			block = new Block( this.perGet(x, y, z, edit||[]) ); //应该的方块
+			loaded = false;
+		}
+		return {
+			block,
+			loaded,
+			attr:{
+				size: Object.or( //取默认值
+					block.get("attr", "block", "size"),
+					{x0:0, x1:100, y0:0, y1:100, z0:0, z1:100}
+				),
+				transparent: block.get("attr", "block", "transparent"),
+			}
+		}
+	}
 	//更新方块
 	update(x, y, z){
 		x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 		/* 单位: m */
-		let thisBlock = this.get(x,y,z);
+		let {
+			block: thisBlock,
+			loaded,
+			attr: {
+				size: thisSize,
+				transparent: thisTransparent
+			}
+		} = this.getReal(x, y, z);
 		
-		if (thisBlock === null) return; //空气
-		
-		if (thisBlock === undefined){ //本方块 未加载
-			const cX = Math.round(x/map.size.x),
-				cZ = Math.round(z/map.size.z), //所属区块(Chunk)
-				edit = this.chunks[cX] && this.chunks[cX][cZ] && this.chunks[cX][cZ].edit;
-			thisBlock = new Block( this.perGet(x, y, z, edit||[]) ); //应该的方块
-		}
+		if (thisBlock.block === null) return; //空气
 		
 		const rule = [
 				/* x,y,z偏移量 正方向 反方向 其他方向 */
-				[1,0,0, "x0","x1", "y","z"],
-				[-1,0,0, "x1","x0", "y","z"],
-				[0,1,0, "y0","y1", "x","z"],
-				[0,-1,0, "y1","y0", "x","z"],
-				[0,0,1, "z0","z1", "x","y"],
-				[0,0,-1, "z1","z0", "x","y"]
+				[1,0,0, "x1",100, "x0",0, "y","z"],
+				[-1,0,0, "x0",0, "x1",100, "y","z"],
+				[0,1,0, "y1",100, "y0",0, "x","z"],
+				[0,-1,0, "y0",0, "y1",100, "x","z"],
+				[0,0,1, "z1",100, "z0",0, "x","y"],
+				[0,0,-1, "z0",0, "z1",100, "x","y"]
 			],
-			normal = {x0:0, x1:100, y0:0, y1:100, z0:0, z1:100}, //所有方向 及默认值
-			visibleValue = [], //可见值
-			thisSize = thisBlock.get("attr", "block", "size") || {}, //本方块大小 （可能未加载）
-			thisTransparent = thisBlock.get("attr", "block", "transparent"); //透明方块（自己不可隐藏）
-		Object.map(normal, (v,i)=>
-			thisSize[i] = thisSize[i]===undefined? v: thisSize[i]
-		); //本方块大小 默认值
+			thisVisible = []; //本方块 可见值
 		
-		let needLoad = false; //需要加载
-		if (thisTransparent === true){ //整体不可隐藏
+		let needLoad = false; //是否需要加载
+		if (thisBlock.attr.transparent === true){ //整体不可隐藏
 			for (let i=0; i<6; i++)
-				visibleValue[i] = true;
-			needLoad = true;
-		}else{ //整体/部分不可隐藏
-			for (const [i, [dx,dy,dz, posDir,oppDir, othDir1, othDir2]] of Object.entries(rule)){ //遍历旁边的方块
+				thisVisible[i] = true; //全部显示
+			needLoad = true; //需要加载
+		}else{ //整体/部分可隐藏
+			if (typeof thisBlock.attr.transparent == "object") //部分不可隐藏
+				for (const [i,v] of Object.entries(thisBlock.attr.transparent))
+					if (v){
+						thisVisible[i] = true;
+						needLoad = true;
+					}
+			
+			for (const [i, [dx,dy,dz, posDir,norPos, oppDir,norOpp, othDir1, othDir2]] of Object.entries(rule)){ //遍历旁边的方块
+				if (thisVisible[i]) continue; //不可隐藏
+				
 				const px=x+dx, py=y+dy, pz=z+dz; //旁边方块位置
-				let thatBlock = this.get(px, py, pz); //旁边方块
-				
-				if (thatBlock === undefined){ //未加载
-					const cX = Math.round(px/map.size.x),
-						cZ = Math.round(pz/map.size.z), //所属区块
-						edit = this.chunks[cX] && this.chunks[cX][cZ] && this.chunks[cX][cZ].edit;
-					thatBlock = new Block( this.perGet(px, py, pz, edit||[]) ); //应该的方块
+				if ( py < map.size[0].y ){ //位于最底层 不显示
+					thisVisible.push(false);
+					continue;
 				}
+				const {
+					block: thatBlock,
+					attr: {
+						size: thatSize,
+						transparent: thatTransparent
+					}
+				} = this.getReal(px, py, pz); //旁边方块
 				
-				const thatSize = thatBlock?
-					thatBlock.get("attr", "block", "size") || {}:
-					{}; //旁边方块大小
-				Object.map(normal, (v,i)=> thatSize[i] = thatSize[i]===undefined? v: thatSize[i]); //默认值
-				
-				if ( thisSize && thisSize[posDir] != normal[posDir] || //本方块 正方向变小
-					thatSize && thatSize[oppDir] != normal[oppDir] || //旁边方块 反方向变小
+				if ( !(thatBlock && thatBlock.name!="空气") ){ //无方块 显示
+					needLoad = true;
+					thisVisible.push(true);
+				}else if ( thisSize[posDir] != norPos || //本方块 正方向变小
+					thatSize[oppDir] != norOpp || //旁边方块 反方向变小
 					thisSize[othDir1+"0"] < thatSize[othDir1+"0"] ||
 					thisSize[othDir1+"1"] > thatSize[othDir1+"1"] ||
 					thisSize[othDir2+"0"] < thatSize[othDir2+"0"] ||
 					thisSize[othDir2+"1"] > thatSize[othDir2+"1"] //超出旁边方块
 				){ // 显示
 					needLoad = true;
-					visibleValue.push(true);
-				}else if ( py < map.size[0].y ){ //位于最底层 不显示
-					visibleValue.push(false);
-				}else if ( !(thatBlock && thatBlock.name!="空气") ){ //无方块 显示
-					needLoad = true;
-					visibleValue.push(true);
+					thisVisible.push(true);
 				}else if ( thatBlock.get("attr", "block", "transparent") !== undefined ){ //有属性
 					const visible = thatBlock.get("attr", "block", "transparent"); //透明 则可见
 					needLoad = needLoad || visible;
-					visibleValue.push( visible ); //方块透明 显示
+					thisVisible.push( visible ); //方块透明 显示
 				}else{ //继承模板
 					const visible = Block.prototype.TEMPLATES[ thatBlock.name ].attr.block.transparent;
 					needLoad = needLoad || visible;
-					visibleValue.push( visible ); //方块透明 显示
+					thisVisible.push( visible ); //方块透明 显示
 				}
 			}
 		}
 		
-		if (thisBlock === undefined){ //未加载
-			const cX = Math.round(x/map.size.x),
-				cZ = Math.round(z/map.size.z), //所属区块(Chunk)
-				edit = this.chunks[cX] && this.chunks[cX][cZ] && this.chunks[cX][cZ].edit,
-				get = new Block( this.perGet(x, y, z, edit||[]) ); //应该的方块
-			
-			if ( needLoad && this.getInitedChunks().some(v => v[0]==cX && v[1]==cZ) ){ //不可隐藏（有面true） 且 在加载区块内
-				this.addID(new Block({
-					name: get.name,
-					attr: get.attr
-				}), {x,y,z});
-				thisBlock = this.get(x,y,z); //加载后的this方块
+		
+		if (!loaded){ //未加载
+			const cX = Math.round(x/this.size.x),
+				cZ = Math.round(z/this.size.z);
+			if ( needLoad && this.getInitedChunks().some(v => v[0]==cX && v[1]==cZ) ){ //不可隐藏 且 在加载区块内
+				this.addID(thisBlock, {x,y,z});
+				thisBlock = this.get(x, y, z, true, true); //加载后的this方块
+				loaded = true;
 			}
-			if ( !thisBlock ) //undefined（无需加载） 或 null（加载为空气）
-				return;
+			if ( !loaded || !thisBlock ) return; //无需加载 或 null（加载为空气）
 		}
 		
 		const material = thisBlock.block.material;
-		for (let i=0, len=material.length; i<len; i++)
-			material[i].visible = visibleValue[i];
+		for (let i=material.length-1; i>=0; i--)
+			material[i].visible = thisVisible[i];
 		
-		if (thisBlock.block.added == true && visibleValue.every(value => !value)){ //已加入 and 可隐藏（每面都false）
+		if (thisBlock.block.added == true && !needLoad){ //已加入 且 可隐藏
 			scene.remove( thisBlock.block.mesh );
 			thisBlock.block.added = false;
 			// console.log("隐藏", this.map[x][y][z])
 		}
-		if (thisBlock.block.added == false && visibleValue.some(value => value)){ //未加入 and 不可隐藏（有面true）
+		if (thisBlock.block.added == false && needLoad){ //未加入 且 不可隐藏
 			scene.add( thisBlock.block.mesh );
 			thisBlock.block.added = true;
 			// console.log("显示", this.map[x][y][z])
@@ -434,7 +453,7 @@ class ChunkMap{
 				edit = this.chunks[cX] && this.chunks[cX][cZ] && this.chunks[cX][cZ].edit,
 				get = new Block( this.perGet(x, y, z, edit||[]) ),
 				noTransparent = get.id && get.get("attr", "block", "noTransparent");
-			visibleValue = [
+			thisVisible = [
 				!( this.get(x+1, y, z) && !this.get(x+1, y, z).get("attr", "block", "transparent")) || noTransparent,
 				!( this.get(x-1, y, z) && !this.get(x-1, y, z).get("attr", "block", "transparent")) || noTransparent,
 				!( this.get(x, y+1, z) && !this.get(x, y+1, z).get("attr", "block", "transparent")) || noTransparent,
@@ -444,7 +463,7 @@ class ChunkMap{
 				// 没有方块 或 有方块非透明 则显示  或  自身透明 也显示
 			];
 			
-			if (visibleValue.some(v => v) && this.getInitedChunks().some(v => v[0]==cX && v[1]==cZ)){ //不可隐藏（有面true） 且 在加载区块内
+			if (thisVisible.some(v => v) && this.getInitedChunks().some(v => v[0]==cX && v[1]==cZ)){ //不可隐藏（有面true） 且 在加载区块内
 				this.addID(new Block({
 					name: get.name,
 					attr: get.attr
@@ -455,7 +474,7 @@ class ChunkMap{
 				return;
 		}else{ //已加载
 			const noTransparent =  thisBlock.get("attr", "block", "noTransparent");
-			visibleValue = [
+			thisVisible = [
 				!( this.get(x+1, y, z) && !this.get(x+1, y, z).get("attr", "block", "transparent")) || noTransparent,
 				!( this.get(x-1, y, z) && !this.get(x-1, y, z).get("attr", "block", "transparent")) || noTransparent,
 				!( this.get(x, y+1, z) && !this.get(x, y+1, z).get("attr", "block", "transparent")) || noTransparent,
@@ -468,7 +487,7 @@ class ChunkMap{
 		
 		/*if (thisBlock === undefined){ //未加载
 			let [cX, cZ] = [x/map.size.x, z/map.size.z].map(Math.round); //所属区块(Chunk)
-			if (visibleValue.some(v => v) && this.getInitedChunks().some(v => v[0]==cX && v[1]==cZ)){ //不可隐藏（有面true） and 在加载区块内
+			if (thisVisible.some(v => v) && this.getInitedChunks().some(v => v[0]==cX && v[1]==cZ)){ //不可隐藏（有面true） and 在加载区块内
 				let edit = this.edit[cX] && this.edit[cX][cZ];
 				let get = this.perGet(x, y, z, edit||[]);
 				this.addID(new Block({
@@ -484,7 +503,7 @@ class ChunkMap{
 		
 		
 		/* try{
-			if (thisBlock === undefined && visibleValue.some(value => value)){ //未加载 且 不可隐藏（有面true）
+			if (thisBlock === undefined && thisVisible.some(value => value)){ //未加载 且 不可隐藏（有面true）
 				let edit = this.edit[Math.round(x/map.size.x)] && this.edit[Math.round(x/map.size.x)][Math.round(z/map.size.z)];
 				let get = this.perGet(x, y, z, edit||[]);
 				this.addID(new Block({
@@ -499,14 +518,14 @@ class ChunkMap{
 			console.log(this.get(x,y,z), thisBlock)
 			let material = thisBlock.block.material;
 			for (let i in material)
-				material[i].visible = visibleValue[i];
+				material[i].visible = thisVisible[i];
 			
-			if (thisBlock.block.added == true && visibleValue.every(value => !value)){ //已加入 且 可隐藏（每面都false）
+			if (thisBlock.block.added == true && thisVisible.every(value => !value)){ //已加入 且 可隐藏（每面都false）
 				scene.remove(thisBlock.block.mesh);
 				thisBlock.block.added = false;
 				// console.log("隐藏", this.map[x][y][z])
 			}
-			if (thisBlock.block.added == false && visibleValue.some(value => value)){ //未加入 且 不可隐藏（有面true）
+			if (thisBlock.block.added == false && thisVisible.some(value => value)){ //未加入 且 不可隐藏（有面true）
 				scene.add(thisBlock.block.mesh);
 				thisBlockblock.added = true;
 				// console.log("显示", this.map[x][y][z])
@@ -612,49 +631,52 @@ class ChunkMap{
 	}
 	//更新区块内所有方块（生成器异步）
 	updateChunkGenerator(x, z, opt={}){
-		let {
-			finishCallback,
-			progressCallback,
-			breakTime=66, // 最大执行时间/ms
-			mostSpeed=2 // 最大速度/次
-		} = opt;
-		
-		x = Math.round(x), z = Math.round(z); //规范化
-		const ox = x*this.size.x,
-			oz = z*this.size.z; //区块中心坐标
-		
-		if ( !this.getLoadedChunks().some(v => v[0]==x && v[1]==z) ) //未加载完毕
-			return console.warn("updateChunkGenerator", x, z, "haven't load");
-		
-		const gen = function* (_this){
-			for (let i=_this.size[0].x; i<=_this.size[1].x; i++){
-				for (let j=_this.size[0].z; j<=_this.size[1].z; j++){
-					for (let k=_this.size[0].y; k<=_this.size[1].y; k++)
-						_this.update(ox+i, k, oz+j);
-					yield; //判断超时k
+		return new Promise((resolve, reject)=>{
+			let {
+				// finishCallback,
+				progressCallback,
+				breakTime=66, // 最大执行时间/ms
+				mostSpeed=2 // 最大速度/次
+			} = opt;
+			
+			x = Math.round(x), z = Math.round(z); //规范化
+			const ox = x*this.size.x,
+				oz = z*this.size.z; //区块中心坐标
+			
+			if ( !this.getLoadedChunks().some(v => v[0]==x && v[1]==z) ) //未加载完毕
+				return console.warn("updateChunkGenerator", x, z, "haven't load");
+			
+			const gen = function* (_this){
+				for (let i=_this.size[0].x; i<=_this.size[1].x; i++){
+					for (let j=_this.size[0].z; j<=_this.size[1].z; j++){
+						for (let k=_this.size[0].y; k<=_this.size[1].y; k++)
+							_this.update(ox+i, k, oz+j);
+						yield; //判断超时k
+					}
+					if (progressCallback)
+						progressCallback( (i-_this.size[0].x) / (_this.size[1].x-_this.size[0].x) );
+					yield true; //判断超数
 				}
-				if (progressCallback)
-					progressCallback( (i-_this.size[0].x) / (_this.size[1].x-_this.size[0].x) );
-				yield true; //判断超数
 			}
-		}
-		
-		const gener = gen( this ),
-			id = setInterval(function work(){
-				let res = {},
-					t0 = +new Date(),
-					num = 0;
-				while ( !res.done ){
-					res = gener.next();
-					if (new Date()-t0 >= breakTime) //超时
-						return;
-					if (res.value == true && ++num >= mostSpeed) //超数
-						return;
-				}
-				if (finishCallback) finishCallback(); //更新完毕
-				clearInterval(id); //运行结束
-			}, 0);
-		return id;
+			
+			const gener = gen( this ),
+				id = setInterval(function work(){
+					let res = {},
+						t0 = +new Date(),
+						num = 0;
+					while ( !res.done ){
+						res = gener.next();
+						if (new Date()-t0 >= breakTime) //超时
+							return;
+						if (res.value == true && ++num >= mostSpeed) //超数
+							return;
+					}
+					// if (finishCallback) finishCallback(); //更新完毕
+					clearInterval(id); //运行结束
+					resolve();
+				}, 0);
+			// return id;
+		});
 	}
 	
 	
@@ -1814,117 +1836,120 @@ class ChunkMap{
 	}
 	//加载区块（生成器异步）
 	loadChunkGenerator(x, z, opt={}){
-		let {
-			finishCallback,
-			progressCallback,
-			breakTime=66, // 最大执行时间/ms
-			mostSpeed=2, // 最大速度/次
-			dir="" //方向
-		} = opt;
-		
-		x=Math.round(x), z=Math.round(z); //规范化
-		const ox = x*this.size.x,
-			oz = z*this.size.z; //区块中心坐标
-		
-		// console.log("loadChunkGenerator", [x, z], this.getInitedChunks())
-		if ( this.getInitedChunks().some(v => v[0]==x && v[1]==z) ) //已初始化
-			return console.warn("loadChunkGenerator", x, z, "already inited");
-		
-		const gen = function* (columns, _this){
-			switch ( dir.substr(0,2) ){
-				case "x-":
-					for (let i=_this.size[1].x; i>=_this.size[0].x; i--){
+		return new Promise((resolve, reject)=>{
+			let {
+				// finishCallback,
+				progressCallback,
+				breakTime=66, // 最大执行时间/ms
+				mostSpeed=2, // 最大速度/次
+				dir="" //方向
+			} = opt;
+			
+			x=Math.round(x), z=Math.round(z); //规范化
+			const ox = x*this.size.x,
+				oz = z*this.size.z; //区块中心坐标
+			
+			// console.log("loadChunkGenerator", [x, z], this.getInitedChunks())
+			if ( this.getInitedChunks().some(v => v[0]==x && v[1]==z) ) //已初始化
+				return console.warn("loadChunkGenerator", x, z, "already inited");
+			
+			const gen = function* (columns, _this){
+				switch ( dir.substr(0,2) ){
+					case "x-":
+						for (let i=_this.size[1].x; i>=_this.size[0].x; i--){
+							for (let j=_this.size[0].z; j<=_this.size[1].z; j++){
+								_this.loadColumn(ox+i, oz+j, columns);
+								yield; //判断超时
+							}
+							// console.log("load", x, z, i)
+							if (progressCallback)
+								progressCallback( (i-_this.size[1].x)/(_this.size[0].x-_this.size[1].x) );
+							yield true; //判断超数
+						}
+						
+						_this.finishLoadChunk(x, z); //区块加载完毕
+						break;
+					
+					case "z+":
 						for (let j=_this.size[0].z; j<=_this.size[1].z; j++){
-							_this.loadColumn(ox+i, oz+j, columns);
-							yield; //判断超时
+							for (let i=_this.size[0].x; i<=_this.size[1].x; i++){
+								_this.loadColumn(ox+i, oz+j, columns);
+								yield; //判断超时
+							}
+							// console.log("load", x, z, j)
+							if (progressCallback)
+								progressCallback( (j-_this.size[0].z)/(_this.size[0].z-_this.size[1].z) );
+							yield true; //判断超数
 						}
-						// console.log("load", x, z, i)
-						if (progressCallback)
-							progressCallback( (i-_this.size[1].x)/(_this.size[0].x-_this.size[1].x) );
-						yield true; //判断超数
-					}
+						
+						_this.finishLoadChunk(x, z); //区块加载完毕
+						break;
 					
-					_this.finishLoadChunk(x, z); //区块加载完毕
-					break;
-				
-				case "z+":
-					for (let j=_this.size[0].z; j<=_this.size[1].z; j++){
+					case "z-":
+						for (let j=_this.size[1].z; j>=_this.size[0].z; j--){
+							for (let i=_this.size[0].x; i<=_this.size[1].x; i++){
+								_this.loadColumn(ox+i, oz+j, columns);
+								yield; //判断超时
+							}
+							// console.log("load", x, z, j)
+							if (progressCallback)
+								progressCallback( (j-_this.size[1].dz)/(_this.size[0].z-_this.size[1].z) );
+							yield true; //判断超数
+						}
+						
+						_this.finishLoadChunk(x, z); //区块加载完毕
+						break;
+					
+					default:
 						for (let i=_this.size[0].x; i<=_this.size[1].x; i++){
-							_this.loadColumn(ox+i, oz+j, columns);
-							yield; //判断超时
+							for (let j=_this.size[0].z; j<=_this.size[1].z; j++){
+								_this.loadColumn(ox+i, oz+j, columns);
+								yield; //判断超时
+							}
+							// console.log("load", x, z, i)
+							if (progressCallback)
+								progressCallback( (i-_this.size[0].x)/(_this.size[1].x-_this.size[0].x) );
+							yield true; //判断超数
 						}
-						// console.log("load", x, z, j)
-						if (progressCallback)
-							progressCallback( (j-_this.size[0].z)/(_this.size[0].z-_this.size[1].z) );
-						yield true; //判断超数
-					}
-					
-					_this.finishLoadChunk(x, z); //区块加载完毕
-					break;
-				
-				case "z-":
-					for (let j=_this.size[1].z; j>=_this.size[0].z; j--){
-						for (let i=_this.size[0].x; i<=_this.size[1].x; i++){
-							_this.loadColumn(ox+i, oz+j, columns);
-							yield; //判断超时
-						}
-						// console.log("load", x, z, j)
-						if (progressCallback)
-							progressCallback( (j-_this.size[1].dz)/(_this.size[0].z-_this.size[1].z) );
-						yield true; //判断超数
-					}
-					
-					_this.finishLoadChunk(x, z); //区块加载完毕
-					break;
-				
-				default:
-					for (let i=_this.size[0].x; i<=_this.size[1].x; i++){
-						for (let j=_this.size[0].z; j<=_this.size[1].z; j++){
-							_this.loadColumn(ox+i, oz+j, columns);
-							yield; //判断超时
-						}
-						// console.log("load", x, z, i)
-						if (progressCallback)
-							progressCallback( (i-_this.size[0].x)/(_this.size[1].x-_this.size[0].x) );
-						yield true; //判断超数
-					}
-					
-					_this.finishLoadChunk(x, z); //区块加载完毕
-					break;
+						
+						_this.finishLoadChunk(x, z); //区块加载完毕
+						break;
+				}
 			}
-		}
-		
-		const edit = [];
-		db.readStep(TABLE.WORLD, {
-			index: "type",
-			range: ["only", 0],
-			stepCallback: (res)=>{
-				if (
-					res.x >= ox+this.size[0].x && res.x <= ox+this.size[1].x &&
-					res.z >= oz+this.size[0].z && res.z <= oz+this.size[1].z
-				) edit.push(res);
-			},
-			successCallback: ()=>{
-				console.log("edit(DB):", x, z, edit);
-				this.startLoadChunk(x, z, edit); //开始加载区块
-				
-				const gener = gen( this.perGetChunk(x, z, edit), this ),
-					id = setInterval(function work(){
-						let res = {},
-							t0 = +new Date(),
-							num = 0;
-						while ( !res.done ){
-							res = gener.next();
-							if (new Date()-t0 >= breakTime) //超时
-								return;
-							if (res.value == true && ++num >= mostSpeed) //超数
-								return;
-						}
-						if (finishCallback) finishCallback(); //加载完毕
-						clearInterval(id); //运行结束
-					}, 0);
-				return id;
-			},
+			
+			const edit = [];
+			db.readStep(TABLE.WORLD, {
+				index: "type",
+				range: ["only", 0],
+				stepCallback: (res)=>{
+					if (
+						res.x >= ox+this.size[0].x && res.x <= ox+this.size[1].x &&
+						res.z >= oz+this.size[0].z && res.z <= oz+this.size[1].z
+					) edit.push(res);
+				},
+				successCallback: ()=>{
+					console.log("edit(DB):", x, z, edit);
+					this.startLoadChunk(x, z, edit); //开始加载区块
+					
+					const gener = gen( this.perGetChunk(x, z, edit), this ),
+						id = setInterval(function work(){
+							let res = {},
+								t0 = +new Date(),
+								num = 0;
+							while ( !res.done ){
+								res = gener.next();
+								if (new Date()-t0 >= breakTime) //超时
+									return;
+								if (res.value == true && ++num >= mostSpeed) //超数
+									return;
+							}
+							// if (finishCallback) finishCallback(); //加载完毕
+							clearInterval(id); //运行结束
+							resolve(); //加载完毕
+						}, 0);
+					return id;
+				},
+			});
 		});
 	}
 	
@@ -2083,64 +2108,67 @@ class ChunkMap{
 	}
 	//卸载区块（生成器异步）
 	unloadChunkGenerator(x, z, opt={}){
-		let {
-			finishCallback,
-			progressCallback,
-			breakTime=66, // 最大执行时间/ms
-			mostSpeed=2 // 最大次数/次
-		} = opt;
-		
-		x = Math.round(x), z = Math.round(z); //规范化
-		const ox = x*this.size.x,
-			oz = z*this.size.z; //区块中心坐标
-		
-		// console.log("unloadChunkGenerator", [x, z], this.getLoadedChunks())
-		if ( !this.getLoadedChunks().some(v => v[0]==x && v[1]==z) ) //已卸载
-			return console.warn("unloadChunkGenerator", x, z, "already unload");;
-		
-		this.startUnloadChunk(x, z); //开始卸载区块
-		
-		const gen = function* (_this){
-			for (let i=_this.size[0].x; i<=_this.size[1].x; i++){
-				for (let j=_this.size[0].y; j<=_this.size[1].y; j++){
-					for (let k=_this.size[0].z; k<=_this.size[1].z; k++){
-						
-						const block = _this.get(ox+i, j, oz+k);
-						if ( block ){ //非空气 & 非未加载
-							block.block.mesh.material.forEach(v => v.dispose())
-							block.block.mesh.geometry.dispose(); //清除内存
-							scene.remove( block.block.mesh );
-							delete _this.map[ox+i][j][oz+k];
+		return new Promise((resolve, reject)=>{
+			let {
+				// finishCallback,
+				progressCallback,
+				breakTime=66, // 最大执行时间/ms
+				mostSpeed=2 // 最大次数/次
+			} = opt;
+			
+			x = Math.round(x), z = Math.round(z); //规范化
+			const ox = x*this.size.x,
+				oz = z*this.size.z; //区块中心坐标
+			
+			// console.log("unloadChunkGenerator", [x, z], this.getLoadedChunks())
+			if ( !this.getLoadedChunks().some(v => v[0]==x && v[1]==z) ) //已卸载
+				return console.warn("unloadChunkGenerator", x, z, "already unload");;
+			
+			this.startUnloadChunk(x, z); //开始卸载区块
+			
+			const gen = function* (_this){
+				for (let i=_this.size[0].x; i<=_this.size[1].x; i++){
+					for (let j=_this.size[0].y; j<=_this.size[1].y; j++){
+						for (let k=_this.size[0].z; k<=_this.size[1].z; k++){
+							
+							const block = _this.get(ox+i, j, oz+k);
+							if ( block ){ //非空气 & 非未加载
+								block.block.mesh.material.forEach(v => v.dispose())
+								block.block.mesh.geometry.dispose(); //清除内存
+								scene.remove( block.block.mesh );
+								delete _this.map[ox+i][j][oz+k];
+							}
+							yield; //判断超时
+							
 						}
-						yield; //判断超时
-						
 					}
+					// console.log("unload", x, z, i)
+					if (progressCallback)
+						progressCallback( (i-_this.size[0].x)/(_this.size[1].x-_this.size[0].x) )
+					yield true; //判断超数
 				}
-				// console.log("unload", x, z, i)
-				if (progressCallback)
-					progressCallback( (i-_this.size[0].x)/(_this.size[1].x-_this.size[0].x) )
-				yield true; //判断超数
+				
+				_this.finishUnloadChunk(x, z); //完成卸载区块
 			}
 			
-			_this.finishUnloadChunk(x, z); //完成卸载区块
-		}
-		
-		const gener = gen( this ),
-			id = setInterval(function work(){
-				let res = {},
-					t0 = +new Date(),
-					num = 0;
-				while ( !res.done ){
-					res = gener.next();
-					if (new Date()-t0 >= breakTime) //超时
-						return;
-					if (res.value == true && ++num >= mostSpeed) //超数
-						return;
-				}
-				if (finishCallback) finishCallback(); //卸载完毕
-				clearInterval(id); //运行结束
-			}, 0);
-		return id;
+			const gener = gen( this ),
+				id = setInterval(function work(){
+					let res = {},
+						t0 = +new Date(),
+						num = 0;
+					while ( !res.done ){
+						res = gener.next();
+						if (new Date()-t0 >= breakTime) //超时
+							return;
+						if (res.value == true && ++num >= mostSpeed) //超数
+							return;
+					}
+					// if (finishCallback) finishCallback(); //卸载完毕
+					clearInterval(id); //运行结束
+					resolve(); //卸载完毕
+				}, 0);
+			// return id;
+		});
 	}
 	
 	//预加载区块
@@ -2148,6 +2176,7 @@ class ChunkMap{
 		let {
 			length=map.perloadLength, //加载范围（视野）
 			progressCallback,
+			updateCallback,
 			finishCallback
 		} = opt;
 		const chunks = [];
@@ -2205,9 +2234,9 @@ class ChunkMap{
 		
 		for (const i in chunks){
 			const [cX, cZ] = chunks[i];
-			if (this.getInitedChunks().every(function(value, index, arr){
+			if ( this.getInitedChunks().every(function(value, index, arr){
 				return value[0] != cX || value[1] != cZ;
-			})){ //每个都不一样（不存在 & 不在加载中）
+			}) ){ //每个都不一样（不存在 & 不在加载中）
 				// this.initChunk(cX, cZ);
 				loading++;
 				
@@ -2219,18 +2248,18 @@ class ChunkMap{
 						loading -= 1/(map.size.x);
 						if (progressCallback)
 							progressCallback((total-loading) / total); //反馈进度
-					},
-					finishCallback: ()=>{
-						//更新区块
-						this.updateChunkGenerator(cX, cZ, {
-							breakTime: 16
-						});
-						
-						if (loading < 1e-6 && finishCallback){ //完成所有
-							finishCallback();
-						}else if (progressCallback){
-							progressCallback((total-loading) / total); //反馈进度
-						}
+					}
+				}).then(()=>{ //更新区块
+					if (updateCallback)
+						updateCallback();
+					return this.updateChunkGenerator(cX, cZ, {
+						breakTime: 36
+					});
+				}).then(()=>{
+					if (loading < 1e-6 && finishCallback){ //完成所有
+						finishCallback();
+					}else if (progressCallback){
+						progressCallback((total-loading) / total); //反馈进度
 					}
 				});
 			}

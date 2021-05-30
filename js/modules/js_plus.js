@@ -120,6 +120,20 @@
 		return true;
 	};
 	
+	//对每个项目进行与and(&&)操作
+	Object.and = function(obj1={}, obj2={}, index=obj2){
+		for (const [i,v] of Object.entries(index))
+			obj1[i] = obj1[i] && obj2[i];
+		return obj1;
+	}
+	
+	//对每个项目进行或or(||)操作
+	Object.or = function(obj1={}, obj2={}, index=obj2){
+		for (const [i,v] of Object.entries(index))
+			obj1[i] = obj1[i] || obj2[i];
+		return obj1;
+	}
+	
 	
 	/* Array */
 	// Array.range 生成范围数组[start, end)
