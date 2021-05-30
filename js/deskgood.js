@@ -3,7 +3,7 @@
 */
 const delay_id = {
 	update_block: null,
-	perloadChunk: null
+	preloadChunk: null
 }, body_blocks = [];
 const deskgood = { //桌子好
 	v: new THREE.Vector3(),
@@ -314,11 +314,11 @@ const deskgood = { //桌子好
 				deskgood.pos.y = y,
 				deskgood.pos.z = z;
 				
-				//perloadChunk
-				if (changed_x_z && !delay_id.perloadChunk)
-					delay_id.perloadChunk =  setTimeout(()=>{
-						map.perloadChunk();
-						delay_id.perloadChunk = null;
+				//preloadChunk
+				if (changed_x_z && !delay_id.preloadChunk)
+					delay_id.preloadChunk =  setTimeout(()=>{
+						map.preloadChunk();
+						delay_id.preloadChunk = null;
 					}, 100);
 				//更新周围方块
 				if (changed && !delay_id.update_block)
@@ -854,11 +854,11 @@ if (DEBUG){
 				cX = Math.round(deskgood.pos.x/100/map.size.x),
 				cZ = Math.round(deskgood.pos.z/100/map.size.z);
 				map.updateChunkGenerator(cX, cZ, {
-					breakTime: 16
+					breakTime: 6
 				});
 			}
 		}, "f").name("更新区块(update)");
-		scene_chunk_folder.add(map, "perloadChunk").name("更新加载区块(perloadChunk)")
+		scene_chunk_folder.add(map, "preloadChunk").name("更新加载区块(preloadChunk)")
 	const scene_chunk_weather_folder = gui.__folders["场景(scene)"].__folders["区块(chunk)"].__folders["天气"];
 		scene_chunk_weather_folder.add({
 			get r(){
