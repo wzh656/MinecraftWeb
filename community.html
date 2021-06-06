@@ -10,7 +10,7 @@
 		<link href="./img/icon.png" rel="icon" type="image/x-icon"/>
 		
 		<!-- 异步fonts加载 -->
-		<script src="https://staticfile.qnssl.com/webfont/1.6.16/webfontloader.js"></script>
+		<script src="./js/modules/webfontloader.js"></script>
 		<script>
 		if (typeof require != "undefined"){ //electron
 			console.log("electron")
@@ -280,7 +280,7 @@
 		}
 		#chat > form > button{
 			flex: none;
-			width: 3.6rem;
+			/* width: calc(3vw + 40px); */
 			
 			border: 1px solid #6af;
 			font-size: 1em;
@@ -303,19 +303,18 @@
 		}
 		</style>
 		
-		<!-- layui -->
-		<!--<link rel="stylesheet" href="https://unpkg.com/layui@2.6.4/dist/css/layui.css">-->
-		<script src="https://unpkg.com/layui@2.6.4/dist/layui.js"></script>
-		
-		<script src="./js/modules/sha512.js"></script>
-		<script src="https://cdn.bootcdn.net/ajax/libs/marked/2.0.1/marked.min.js"></script>
+		<!-- jquery -->
 		<script src="./js/modules/jquery.min.js"></script>
 		<script>
 		if (typeof require != "undefined") //electron
 			window.$ = window.jQuery = require("./js/modules/jquery.min.js");
 		</script>
-		<script src="./js/modules/js+.js"></script>
 		
+		<!-- layui -->
+		<!--<link rel="stylesheet" href="https://unpkg.com/layui@2.6.4/dist/css/layui.css">-->
+		<script src="./js/modules/layui.js"></script>
+		
+		<!-- 调试工具 -->
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
 		<script>
@@ -325,6 +324,12 @@
 			new VConsole();
 		}
 		</script>
+		
+		<script src="./js/modules/sha512.js"></script> <!-- sha加密 -->
+		<script src="./js/modules/marked.min.js"></script> <!-- markdown -->
+		
+		<script src="./js/modules/js_plus.js"></script> <!-- js+ -->
+		<script src="./js/modules/count.js"></script> <!-- 流量统计 -->
 		
 	</head>
 	<body>
@@ -355,11 +360,6 @@
 		
 		<!-- 1:不支持js -->
 		<noscript  style="z-index: 1;"><h1>你的浏览器不支持JavaScript，无法运行！</h1></noscript>
-		
-		<!-- none:流量统计 -->
-		<div style="display: none;">
-			<script language="javascript" src="http://count24.51yes.com/click.aspx?id=248466766&logo=12" charset="gb2312"></script>
-		</div>
 		
 <script>
 if (window.innerWidth > window.innerHeight)

@@ -21,7 +21,7 @@ Copyleft by wzh 2020~2021
 		<link href="./img/icon.png" rel="icon" type="image/x-icon"/>
 		
 		<!-- 异步fonts加载 -->
-		<script src="https://staticfile.qnssl.com/webfont/1.6.16/webfontloader.js"></script>
+		<script src="./js/modules/webfontloader.js"></script>
 		<script>
 		if (typeof require != "undefined"){ //electron
 			console.log("electron")
@@ -43,27 +43,6 @@ Copyleft by wzh 2020~2021
 		
 		<link href="./css/bootstrap.css" rel="stylesheet" type="text/css" />
 		<style>
-		/* 字体加载完成 */
-		.wf-active *{
-			font-family: zyyt, serif;
-			outline: none;
-		}
-		.wf-active h1,
-		.wf-active h2,
-		.wf-active h3,
-		.wf-active h4{
-			font-family: st, serif;
-		}
-		.wf-active p,
-		.wf-active label{
-			font-family: kt, serif;
-		}
-		.wf-active button{
-			font-family: xs, serif;
-			font-weight: bold;
-		}
-		
-		
 		/* 字体缩放方案 */
 		@media screen and (max-width:320px){
 			body {font-size: calc(0.018 * 320px + 6px);}
@@ -308,17 +287,18 @@ Copyleft by wzh 2020~2021
 		}
 		</style>
 		
-		<!-- layui -->
-		<!--<link rel="stylesheet" href="https://unpkg.com/layui@2.6.4/dist/css/layui.css">-->
-		<script src="https://unpkg.com/layui@2.6.4/dist/layui.js"></script>
-		
+		<!-- jquery -->
 		<script src="./js/modules/jquery.min.js"></script>
 		<script>
 		if (typeof require != "undefined") //electron
 			window.$ = window.jQuery = require("./js/modules/jquery.min.js");
 		</script>
-		<script src="./js/modules/js+.js"></script>
 		
+		<!-- layui -->
+		<!--<link rel="stylesheet" href="https://unpkg.com/layui@2.6.4/dist/css/layui.css">-->
+		<script src="./js/modules/layui.js"></script>
+		
+		<!-- 调试工具 -->
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
 		<script>
@@ -345,6 +325,9 @@ Copyleft by wzh 2020~2021
 		};
 		</script>
 		<script src="https://sidecar.gitter.im/dist/sidecar.v1.js" async defer></script>
+		
+		<script src="./js/modules/js_plus.js"></script> <!-- js+ -->
+		<script src="./js/modules/count.js"></script> <!-- 流量统计 -->
 	</head>
 	<body>
 		<!-- 初始页 -->
@@ -489,9 +472,6 @@ Copyleft by wzh 2020~2021
 			</div>
 			<hr/>
 			<center><button class="warn back">返回<small>Back</small></button></center>
-			<footer style="display: none;"><center>
-				<script language="javascript" src="http://count24.51yes.com/click.aspx?id=248466766&logo=1" charset="gb2312"></script>
-			</center></footer>
 		</section>
 		
 		<!-- 1:不支持js -->
@@ -653,14 +633,6 @@ function open(url="main.html"){
 	return false;
 }
 
-//已有存档
-if (localStorage.getItem("我的世界_seed") !== null){
-	$("#new_world")[0].innerHTML = "开始游戏<small>START PLAYING</small>"
-	$("#new_world")[0].onclick = ()=>open();
-}else{ //无存档
-	// getGeolocationPosition();
-}
-
 
 
 //新的世界
@@ -794,10 +766,18 @@ $("#community").click(function(){
 
 
 
+//已有存档
+if (localStorage.getItem("我的世界_seed") !== null){
+	$("#new_world")[0].innerHTML = "开始游戏<small>PLAY</small>"
+	$("#new_world")[0].onclick = ()=>open();
+}else{ //无存档
+	// getGeolocationPosition();
+}
+
+
 //生成世界
 $(".new_world > button:eq(1)").click(function(){
-	const
-		time = +inputValueToDate( $(".more > .time-position > input[name='time']").val() )
+	const time = +inputValueToDate( $(".more > .time-position > input[name='time']").val() )
 		position = {
 			latitude: +$(".more > .time-position > input[name='latitude']").val(),
 			longitude: +$(".more > .time-position > input[name='longitude']").val()

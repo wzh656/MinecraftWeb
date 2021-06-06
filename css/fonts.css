@@ -1,4 +1,4 @@
-/* 字体 */
+﻿/* 字体 */
 @font-face{
 	font-family: kt; /*楷体*/
 	src:url("../fonts/kt.ttf");
@@ -9,7 +9,7 @@
 }
 @font-face{
 	font-family: xs; /*QQ*/
-	src:url("../fonts/qq2.ttf");
+	src:url("../fonts/qq1.ttf");
 }
 @font-face{
 	font-family: zyyt; /*资源圆体*/
