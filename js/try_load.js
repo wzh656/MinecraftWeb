@@ -1,7 +1,8 @@
 function try_start_load(){
 	console.log("load_condition", try_start_load.prototype.condition+1)
 	if (++try_start_load.prototype.condition == 2){
-		map.perloadChunk({
+		$("#progress h1").text("区块加载中……");
+		map.preloadChunk({
 			progressCallback: (value)=>{
 				$("#progress span").text( Math.round(value*100, 2).padding(2, 2) );
 				$("#progress progress").val( value );
