@@ -160,7 +160,8 @@
 		if (typeof require != "undefined") //electron
 			window.$ = window.jQuery = require("./js/modules/jquery.min.js");
 		</script>
-		<script src="./js/modules/js_plus.js"></script>
+		<script src="./js/modules/js_plus.js"></script> <!-- js+ -->
+		<script src="./js/modules/count.js"></script> <!-- 流量统计 -->
 		
 		<!-- layui -->
 		<!--<link rel="stylesheet" href="https://unpkg.com/layui@2.6.4/dist/css/layui.css">-->
@@ -203,11 +204,6 @@
 		
 		<!-- 1:不支持js -->
 		<noscript  style="z-index: 1;"><h1>你的浏览器不支持JavaScript，无法运行！</h1></noscript>
-		
-		<!-- none:流量统计 -->
-		<div style="display: none;">
-			<script language="javascript" src="http://count24.51yes.com/click.aspx?id=248466766&logo=12" charset="gb2312"></script>
-		</div>
 		
 <script>
 if (window.innerWidth > window.innerHeight)
