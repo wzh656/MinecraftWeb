@@ -2,14 +2,14 @@
 	const name = "我的世界-wzh";
 	function request(method, data){
 		return new Promise((resolve, reject)=>{
-			console.log(method, data)
+			//console.log(method, data)
 			$.ajax({
 				url: "https://wzh.glitch.me/count/" + method,
 				data,
 				type: "GET",
 				dataType: "jsonp",
 				success: (response, status, xhr)=>{
-					console.log("count/"+method, data, response)
+					//console.log("count/"+method, data, response)
 					resolve(response);
 				},
 				error: (response, status, xhr)=>{
