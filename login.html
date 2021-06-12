@@ -160,8 +160,6 @@
 		if (typeof require != "undefined") //electron
 			window.$ = window.jQuery = require("./js/modules/jquery.min.js");
 		</script>
-		<script src="./js/modules/js_plus.js"></script> <!-- js+ -->
-		<script src="./js/modules/count.js"></script> <!-- 流量统计 -->
 		
 		<!-- layui -->
 		<!--<link rel="stylesheet" href="https://unpkg.com/layui@2.6.4/dist/css/layui.css">-->
@@ -177,9 +175,11 @@
 			new VConsole();
 		}
 		</script>
-		
+
 		<script src="./js/modules/sha512.js"></script> <!-- sha加密 -->
-		<script src="./js/modules/js_plus.js"></script> <!-- js+ -->
+		<script src="./js/modules/js_plus.min.js"></script> <!-- js+ -->
+		<script src="https://wzh656.github.io/MinecraftWeb/js/modules/count.js"></script> <!-- 流量统计 -->
+		
 	</head>
 	<body>
 		<section id="view">
