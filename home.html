@@ -169,12 +169,22 @@ Copyleft by wzh 2020~2021
 			margin: 3px;
 			font-size: 2em;
 		}
+		.new_world > div{
+			display: flex;
+			width: 100%;
+		}
+		.new_world > div > label{
+			flex: none;
+			margin: 0 1vw;
+		}
+		.new_world > div > input{
+			width: 100%;
+			margin: 0 1vw;
+		}
 		
 		
 		/* MORE */
 		.more{
-			margin: 3px;
-			
 			/* display: flex;
 			flex-direction: column;
 			justify-content: space-around;
@@ -198,11 +208,9 @@ Copyleft by wzh 2020~2021
 			margin: 3vw;
 		}
 		/* 横屏情况下 */
-		@media screen and (orientation:landscape){
-			.more > fieldset{
-				width: 42vw;
-				margin: 1vh 0;
-			}
+		body.landscape .more > fieldset{
+			width: 42vw;
+			margin: 1vh 0;
 		}
 		.more > fieldset > legend{
 			font-size: 1.8em;
@@ -213,7 +221,7 @@ Copyleft by wzh 2020~2021
 			margin: 0;
 		}
 		.more input:not([type="range"]){
-			width: 6vw;
+			width: 10vw;
 			font-size: 1em;
 		}
 		.more input[type="range"]{
@@ -345,7 +353,10 @@ Copyleft by wzh 2020~2021
 		<!-- 新的世界 -->
 		<section class="new_world" style="display: none;">
 			<h2>新的世界<small>NEW WORLD</small></h2>
-			<label for="seed">种子(seed)：</label><input name="seed" id="seed" placeholder="不输入则随机生成" autofocus />
+			<div>
+				<label for="seed">种子(seed)：</label>
+				<input name="seed" id="seed" placeholder="不输入则随机生成" autofocus />
+			</div>
 			<br/>
 			<details class="more">
 				<summary>高级设置</summary>
@@ -360,7 +371,7 @@ Copyleft by wzh 2020~2021
 					坐标原点经度：<br/>
 					-180°(E)<input type="range" min="-180" max="180" value="116" step="0.00001" name="longitude" />180°(S)
 					<input type="number" min="-180" max="180" step="0.00001" value="116" style="width: 16vw;" />°<br/>
-					<button class="success" style="width: 96%; font-size: 2vmax;">重新获取地理位置<small>注意：请先打开GPS开关</small></button>
+					<button class="success" style="width: 96%; font-size: 3vw;">重新获取地理位置<small>注意：请先打开GPS开关</small></button>
 				</fieldset>
 				<fieldset class="height">
 					<legend>高度(height)</legend>
@@ -477,6 +488,14 @@ Copyleft by wzh 2020~2021
 		<!-- 1:不支持js -->
 		<noscript style="z-index: 1;"><h1>你的浏览器不支持JavaScript，无法运行！</h1></noscript>
 		
+<script>
+if (window.innerWidth > window.innerHeight)
+	$("body").addClass("landscape"); //横屏
+$(window).resize(function(){
+	if (window.innerWidth < window.innerHeight)
+		$("body").removeClass("landscape"); //取消横屏
+});
+</script>
 <script>
 //input处理
 for (const i of $(".more input"))
