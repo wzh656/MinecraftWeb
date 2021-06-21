@@ -78,69 +78,8 @@
 			height: 100%;
 			background-color: #aaa;
 		}*/
-		textarea{
+		textarea{ /*禁止调整大小*/
 			resize: none;
-		}
-		
-		
-		/* button */
-		#exit, #newSection{
-			transition: background-color 0.3s;
-		}
-		
-		#exit{
-			float: right;
-			margin-right: 1rem;
-			font-size: 1.1em;
-			padding: 1vw;
-			
-			color: #ff1e9f;
-			background-color: #fff;
-			border: 1px solid #ff1e9f;
-		}
-		#exit:hover{
-			background-color: #eee;
-		}
-		
-		#newSection{
-			float: right;
-			margin-right: 1rem;
-			font-size: 1.1em;
-			padding: 1vw;
-			
-			color: #1e9fff;
-			background-color: #fff;
-			border: 1px solid #1e9fff;
-		}
-		#newSection:hover{
-			background-color: #eee;
-		}
-		
-		
-		/* list */
-		#sectionsList{
-			margin: 0;
-			padding: 0;
-		}
-		#sectionsList > li{
-			display: block;
-			margin: 1rem;
-			padding: 0.6rem;
-			
-			background-color: #cef;
-			border: 1px solid #6af;
-			border-radius: 6px;
-			transition: background-color 0.5s, border-color 0.5s;
-		}
-		#sectionsList > li:hover{
-			background-color: #cfe;
-			border: 1px solid #6fa;
-		}
-		#sectionsList > li:active{
-			background-color: #bed;
-		}
-		#sectionsList > li > span, #sections > li > time{
-			display: block;
 		}
 		
 		
@@ -329,37 +268,27 @@
 		<script src="./js/modules/marked.min.js"></script> <!-- markdown -->
 		
 		<script src="./js/modules/js_plus.min.js"></script> <!-- js+ -->
-		<script src="https://wzh656.github.io/MinecraftWeb/js/modules/count.js"></script> <!-- 流量统计 -->
+		<script src="https://wzh656.github.io/MinecraftWeb/js/modules/count.js"></script> <!-- 流量统计
 		
 	</head>
 	<body>
-		<!-- 列表界面 -->
-		<section id="list">
-			<h1>社区<small>COMMUNITY</small></h1>
-			<button id="exit">退出登录</button>
-			<button id="newSection" style="display: none;">新建板块</button><br/><br/>
-			<ul id="sectionsList">
-				<span>加载中……</span>
-			</ul>
-		</section>
-		
 		<!-- 聊天界面 -->
-		<section id="chat" style="display: none;">
+		<section id="chat">
 			<header>
-				<span class="back">〈返回</span>
-				<h2></h2>
+				<span class="exit">〈退出</span>
+				<h2>我的世界讨论区</h2>
 			</header>
 			<ul id="messagesList">
 				<span>获取中……</span>
 			</ul>
-			<form style="display: none;">
+			<form>
 				<textarea id="message" placeholder="shift+Enter发送（支持markdown/html格式）" contenteditable></textarea>
 				<button type="button" id="send">发送</button>
 			</form>
 		</section>
 		
 		<!-- 1:不支持js -->
-		<noscript  style="z-index: 1;"><h1>你的浏览器不支持JavaScript，无法运行！</h1></noscript>
+		<noscript style="z-index: 1;"><h1>你的浏览器不支持JavaScript，无法运行！</h1></noscript>
 		
 <script>
 if (window.innerWidth > window.innerHeight)
@@ -371,21 +300,40 @@ $(window).resize(function(){
 </script>
 
 <script>
-//请求服务器
-function request(method, path="", value=""){
+//发送消息
+function send(name, msg, attr={}){
 	return new Promise((resolve, reject)=>{
-		console.log(method, path, value)
+		console.log("send", name, msg, attr)
 		$.ajax({
-			url: "https://wzh.glitch.me/data/" + method,
-			data: {path, value},
+			url: "https://wzh.glitch.me/chatroom/MinecraftCommunity/send",
+			data: {name, msg, attr},
 			type: "GET",
 			dataType: "jsonp",
 			success: (response, status, xhr)=>{
-				console.log({method, path, value}, response)
+				console.log("send", {name, msg, attr}, response)
 				resolve(response);
 			},
 			error: (response, status, xhr)=>{
-				alert(`请求错误！\nstatus: ${status}\nresponse: ${response}`);
+				alert(`发送请求错误！\nstatus: ${status}\nresponse: ${response}`);
+				reject(response, status, xhr);
+			}
+		});
+	});
+}
+function get(date){
+	return new Promise((resolve, reject)=>{
+		console.log("send", date)
+		$.ajax({
+			url: "https://wzh.glitch.me/chatroom/MinecraftCommunity/get",
+			data: {date},
+			type: "GET",
+			dataType: "jsonp",
+			success: (response, status, xhr)=>{
+				console.log("send", {date}, response)
+				resolve(response);
+			},
+			error: (response, status, xhr)=>{
+				alert(`发送请求错误！\nstatus: ${status}\nresponse: ${response}`);
 				reject(response, status, xhr);
 			}
 		});
@@ -394,171 +342,42 @@ function request(method, path="", value=""){
 
 
 
-const ROOT = "/MinecraftCommunity/",
-	USERS = ROOT + "users/",
-	CHAT = ROOT + "chat/",
-	INITFILE = "/info.ini",
-	sections = {}; //板块
+let name = localStorage.getItem("MinecraftCommunity_name");
+while (!name){
+	name = prompt("请输入你的昵称");
+	localStorage.setItem("MinecraftCommunity_name", name);
+}
 
-let user, //用户名
-	sectionName, //板块名
-	updater; //板块聊天记录更新
 
-async function main(){
-	const waitLayerId = layer.load(0);
-	let res;
-	
-	
-	//初始化获取用户信息
-	res = await request("makeDir", USERS);
-	if (res !== true){
-		console.error("makeDir", USERS, res);
-		return alert("操作错误！\nmethod: makeDir\nresult:"+JSON.stringify(res));
-	}
-	
-	res = await request("makeDir", CHAT);
-	if (res !== true){
-		console.error("makeDir", CHAT, res);
-		return alert("操作错误！\nmethod: makeDir\nresult:"+JSON.stringify(res));
-	}
-	
-	
-	//登录判断
-	if (localStorage.getItem("MinecraftCommunity-tourist") == "true"){ //游客模式
-		user = false;
-	
-	}else if (localStorage.getItem("MinecraftCommunity-name") && localStorage.getItem("MinecraftCommunity-password")){
-		const name = localStorage.getItem("MinecraftCommunity-name"),
-			password = localStorage.getItem("MinecraftCommunity-password");
-		
-		if (await request("exists", USERS+name) == true){ //用户存在
-			res = await request("readFile", USERS+name);
-			const lines = res.split("\n");
-			if (lines[1] == hex_sha512(password)){ //密码正确
-				user = {
-					name,
-					regTime: new Date(+lines[0]),
-					password: lines[1],
-					info: JSON.parse(lines[2] || "{}")
-				};
-				$("#newSection").show(); //允许创建板块
-				$("#chat > form").show(); //允许发送消息
-			}else{
-				layer.alert("登录错误！", {icon:2, closeBtn:0}, function(){
-					location.href = "login.html";
-				});
-			}
-		}else{
-			layer.alert("登录错误！", {icon:2, closeBtn:0}, function(){
-				location.href = "login.html";
-			});
-		}
-	
-	}else{
-		layer.alert("请先登录！", {icon:5, closeBtn:0}, function(){
-			location.href = "login.html";
-		});
-	}
-	
-	
-	//社区列表
-	res = await request("readDir", CHAT);
-	$("#sectionsList").empty();
-	for (const name of res){
-		const lines = (await request("readFile", CHAT+name+INITFILE)).split("\n");
-		sections[name] = {
-			creator: lines[0],
-			createTime: new Date(+lines[1]),
-			info: JSON.parse(lines[2] || "{}")
-		};
-		$("#sectionsList").append(
+
+get(new Date().format("yyyy-MM-dd")).then(res => {
+	for (const {time, name, msg, attr} of res)
+		$("messagesList").append(
 			$("<li></li>")
-			.append(
-				$("<h3></h3>").html(name)
-			)
-			.append(
-				$("<span></span>").html( "创建者："+sections[name].creator )
-			)
-			.append(
-				$("<time></time>").html( "创建时间："+sections[name].createTime.format("MM月dd日") )
-			)
-			.click(() => {sectionName=name; openSection();})
+				.data("time", +data.time)
+				.addClass(data.name==user.name? "right": "left")
+				.append(
+					$("<time></time>").html( data.time.format("yyyy/MM/dd hh:mm:ss") )
+				)
+				.append( //main
+					$("<div></div>")
+					.append( //icon
+						$("<span></span>").html( data.name.substr(0,1) )
+							.addClass( data.name=="wzh"? "v": ""  )
+					)
+					.append( //name, message
+						$("<div></div>")
+						.append( //name
+							$("<span></span>").html( data.name )
+						)
+						.append( //message
+							$("<article>"+data.message+"</article>")
+						)
+					)
+				)
 		);
-	}
-	
-	
-	layer.close(waitLayerId);
-}
-main();
+});
 
-
-function exit(){
-	layer.load(1);
-	localStorage.removeItem("MinecraftCommunity-name");
-	localStorage.removeItem("MinecraftCommunity-password");
-	localStorage.removeItem("MinecraftCommunity-tourist");
-	location.href = "./login.html";
-}
-
-// 新建板块
-function newSection(){
-	if (!user) return layer.msg("请先登录", {icon: 5});
-	
-	layer.prompt({title: "请输入名称"}, async function(name, index){
-		layer.close(index);
-		
-		let res;
-		
-		res = await request("makeDir", CHAT+name);
-		if (res !== true){
-			console.error("makeDir", CHAT+name, res);
-			return alert("操作错误！\nmethod: makeDir\nresult:"+JSON.stringify(res));
-		}
-		
-		res = await request("writeFile", CHAT+name+INITFILE,
-			user.name+"\n"+
-			+new Date()+"\n"+
-			"{}"
-		);
-		if (res !== true){
-			console.error("makeDir", CHAT+name+INITFILE, res);
-			return alert("操作错误！\nmethod: makeDir\nresult:"+JSON.stringify(res));
-		}
-		
-		layer.msg("创建成功！", {icon: 1});
-		location.reload();
-	});
-}
-
-
-// 打开板块
-async function openSection(){
-	$("#chat > header > h2").html(sectionName);
-	$("#chat").slideDown("slow");
-	$("#list").slideUp("slow");
-	
-	$("#messagesList").empty()
-		.append( $("<span>加载中……</span>") )
-	
-	let res;
-	res = await request("readDir", CHAT+sectionName);
-	const dates = res.filter(v => v.slice(-4)==".dat").sort().reverse().map(v => v.slice(0,-4));
-	console.log("dates", dates)
-	
-	$("#messagesList").empty();
-	for (const date of dates)
-		update(date);
-	
-	updater = setInterval(update, 10*1000); //10s
-}
-
-
-// 关闭板块
-function closeSection(){
-	clearTimeout(updater);
-	$("#chat").slideUp("slow");
-	$("#list").slideDown("slow");
-}
 
 
 // 发送消息
@@ -597,79 +416,9 @@ async function sendMessage(){
 }
 
 
-// 更新聊天消息
-async function update(date=new Date().format("yyyy-MM-dd")){
-	const file = CHAT+sectionName+"/"+date+".dat";
-	
-	if (await request("exists", file) !== true) return; //无聊天记录
-	
-	const res = await request("readFile", file),
-		lines = res.split("\n");
-	
-	for (const e of $("#messagesList > li")){ //移除当天消息
-		const child = $(e);
-		if (new Date(+child.data("time")).format("yyyy-MM-dd") == date)
-			child.remove();
-	}
-	
-	let last=null, lastDis=Infinity;
-	for (const e of $("#messagesList > li")){ //寻找前一条消息
-		const time = +$(e).data("time"),
-			dis = new Date(date)-time;
-		if (dis < lastDis && dis > 0){
-			last = $(e);
-			lastDis = dis;
-		}
-	}
-	
-	for (let i=lines.length-4; i>=0; i-=4){
-		const data = {
-			time: new Date(+lines[i]),
-			name: lines[+i+1],
-			message: lines[+i+2],
-			info: JSON.parse(lines[+i+3] || "{}")
-		};
-		console.log(date, i, data)
-		
-		const e = $("<li></li>")
-			.data("time", +data.time)
-			.addClass(data.name==user.name? "right": "left")
-			.append(
-				$("<time></time>").html( data.time.format("yyyy/MM/dd hh:mm:ss") )
-			)
-			.append( //main
-				$("<div></div>")
-				.append( //icon
-					$("<span></span>").html( data.name.substr(0,1) )
-						.addClass( data.name=="wzh"? "v": ""  )
-				)
-				.append( //name, message
-					$("<div></div>")
-					.append( //name
-						$("<span></span>").html( data.name )
-					)
-					.append( //message
-						$("<article>"+data.message+"</article>")
-					)
-				)
-			);
-		if ( last ){
-			last.after(e);
-		}else{
-			$("#messagesList").prepend(e);
-		}
-		
-	}
-}
 
-
-
-//退出登录
-$("#exit").click(exit);
 //新建板块
-$("#newSection").click(newSection);
-//返回
-$("#chat .back").click(closeSection);
+$("#exit").click(()=>history.back());
 //发送消息
 $("#send").click(sendMessage);
 $("#message").keydown(function(e){
