@@ -5,7 +5,7 @@ async function loadTextures(){
 	TEXTURES = Img.grid(await Img.get("./img/textures/textures.png"), 16, 16);
 	for (const i of keys.slice(1)){ //除去空气
 		const block = TEMPLATES[i];
-		for (const j in block.block.face){
+		for (let j=0; j<block.block.face.length; j++){
 			const face = block.block.face[j];
 			block.setTexture(
 				new THREE.TextureLoader().load(

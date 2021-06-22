@@ -2120,7 +2120,7 @@ class ChunkMap{
 			return console.warn("chunk_perload chunks:", chunks);
 		}
 		
-		for (const i in chunks){
+		for (let i=chunks.length-1; i>=0; i--){
 			const [cX, cZ] = chunks[i];
 			if (this.getInitedChunks().every(function(value, index, arr){
 				return value[0] != cX || value[1] != cZ;

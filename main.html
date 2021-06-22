@@ -721,7 +721,7 @@ Copyleft by wzh 2020~2021
 			/**
 			* 6:message
 			*/
-			/* @keyframes messageIn{
+			@keyframes messageIn{
 				from {
 					right: 0;
 					transform: translateX(100%);
@@ -774,7 +774,7 @@ Copyleft by wzh 2020~2021
 				opacity: 0;
 				
 				animation: 3s messageOut;
-			} */
+			}
 		</style>
 		
 		<!-- jquery -->
@@ -972,67 +972,155 @@ if (!DEBUG){
 }
 </script>
 <script src="./js/GameTime.js"></script> <!-- 游戏时间 -->
-<script src="./js/PointerLock.js"></script>
-<script src="./js/init.js"></script>
 <script>
+//退出
+function exit(){
+	if (typeof require != "undefined"){ //electron
+		window.close();
+	}
+
+	window.open("home.html", "_self").close(); //website
+
+	try{ //html5+
+		plus.runtime.quit();
+	}catch(e){}
+}
+//运行命令方块
+function run(code){
+	try{
+		eval(code);
+	}catch(err){
+		console.error("【命令】\n代码运行出错，错误信息（自行翻译）：\n"+err);
+		alert("代码运行出错，错误信息（自行翻译,可在VConsole查看）：\n"+err);
+		/* $.get("http://fanyi.youdao.com/translate",{
+			doctype: "json",
+			type: "auto",
+			i: err
+		},function(data, state, xhr){
+			console.log(data);
+			try{
+				if (state == "success" & !!data.translateResult[0][0].tgt){
+					console.error("【命令方块】\n代码运行出错，错误信息：\n"+err+"\n译文（有道翻译提供）："+data.translateResult[0][0].tgt);
+					alert("代码运行出错，错误信息（可在VConsole查看）：\n"+err+"\n译文（有道翻译提供）："+data.translateResult[0][0].tgt);
+				}else{
+					console.error("【命令方块】\n代码运行出错，错误信息（自行翻译）：\n"+err);
+					alert("代码运行出错，错误信息（自行翻译,可在VConsole查看）：\n"+err);
+				}
+			}catch(e){
+				console.error("【命令方块】\n代码运行出错，错误信息（自行翻译）：\n"+err);
+				alert("代码运行出错，错误信息（自行翻译,可在VConsole查看）：\n"+err);
+			}
+		}); */
+	}
+}
+
+var stop = true,
+	device = 0, //设备代码
+	perload_condition = 0,
+	time = new GameTime(localStorage.getItem("我的世界_time"), 1);
+
+// 判断手机电脑
+if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(
+		navigator.userAgent.toLowerCase()
+	)
+){ //手机(-)
+	if ( navigator.userAgent.toLowerCase().indexOf("html5plus") != -1 ){ //html5+
+		device = -2;
+	}else{ //浏览器
+		device = -1;
+	}
+}else{ //电脑(+)
+	if (typeof require != "undefined"){ //electron
+		device = +2;
+	}else{ //浏览器
+		device = +1;
+	}
+}
+console.log("device:", device)
+
 if (device < 0){ //手机
 	$("#control, #jump").css("display", "block"); //显示摇杆
 	
-	//默认不暂停
 	$("#pause").css("display", "none");
 	stop = false;
-	time.setStop(stop);
-	
+	if (time.stop) //已暂停
+		time.stopTime(); //继续
 	//继续游戏
-	$("#pause > .next").click(function(){
-		$("#pause").css("display", "none"); //默认开始游戏 无需鼠标锁定
+	$("#pause > button:eq(0)").click(function (){
+		$("#pause").css("display", "none");
 		stop = false;
-		time.setStop(stop);
+		if (time.stop) //已暂停
+			time.stopTime(); //继续
 		playBGM();
 	});
 }else{ //电脑
 	$("#pointer").css("display", "block"); //显示指针
 	
+	//请求指针锁定
+	document.body.requestPointerLock =
+		document.body.requestPointerLock ||
+		document.body.mozRequestPointerLock ||
+		document.body.webkitRequestPointerLock;
+	//解除鼠标锁定
+	document.exitPointerLock =
+		document.exitPointerLock ||
+		document.mozExitPointerLock ||
+		document.webkitExitPointerLock;
+	
 	//继续游戏
-	$("#pause > .next").click(function(){
-		PointerLock.lock(); //请求成功后再继续游戏
+	$("#pause > button:eq(0)").click(function (){
+		document.body.requestPointerLock(); //请求成功后再继续游戏
 		playBGM();
 	});
 	
 	//输入锁定改变事件
-	PointerLock.onChange(function(){
+	const pointerLockChangeEvent = function(){
 		if (typeof stop == "string")
 			return;
 		
-		if ( PointerLock.isLocked() ){ //已锁定 继续
+		if ( document.pointerLockElement === document.body ||
+			document.mozPointerLockElement === document.body ||
+			document.webkitPointerLockElement === document.body
+		){ //已锁定 继续
 			console.log("pointerLock yes");
 			stop = false;
-			time.setStop(stop);
+			if (time.stop) //已暂停
+				time.stopTime(); //继续
 			$("#pause").css("display", "none");
 		}else{ //未锁定 暂停
 			console.log("pointerLock no");
 			stop = true;
-			time.setStop(stop);
+			if (!time.stop) //未暂停
+				time.stopTime(); //暂停
 			$("#pause").css("display", "inline-block");
 			DB.save();
 		}
-	});
+	};
 	
 	//输入锁定改变错误
-	PointerLock.onError(function(){
+	const pointerLockErrorEvent = function(){
 		console.error("鼠标锁定错误");
 		// alert("鼠标锁定错误\n请重试 或 关闭重新打开 或 切换/升级浏览器");
-		print("鼠标锁定错误\n请重试 或 关闭重新打开 或 切换/升级浏览器", "鼠标锁定", 3, "#f00");
-		PointerLock.lock();
-	});
+		print("鼠标锁定", "鼠标锁定错误\n请重试 或 关闭重新打开 或 切换/升级浏览器", 3, "#f68");
+		document.body.requestPointerLock();
+	};
+	
+	//添加锁定改变事件
+	document.addEventListener("pointerlockchange", pointerLockChangeEvent, false);
+	document.addEventListener("mozpointerlockchange", pointerLockChangeEvent, false);
+	document.addEventListener("webkitpointerlockchange", pointerLockChangeEvent, false);
+	
+	//添加锁定错误事件
+	document.addEventListener("pointerlockerror", pointerLockErrorEvent, false);
+	document.addEventListener("mozpointerlockerror", pointerLockErrorEvent, false);
+	document.addEventListener("webkitpointerlockerror", pointerLockErrorEvent, false);
 }
 
-/* 顶部工具栏 */
 //暂停按钮
-$("#topTools > .pause").click(function(){
+$("#topTools > li:eq(0)").click(function(){
 	if (typeof stop == "string"){ //打开窗口
 		const stop0 = stop;
-		status(stop);
+		state(stop);
 		console.log("StopButton", stop0, "changeTo", stop);
 	}else{ //普通暂停
 		const stop0 = stop;
@@ -1044,49 +1132,127 @@ $("#topTools > .pause").click(function(){
 	}
 });
 
-/* 暂停界面 */
-$("#pause > .set").click(function(){ //设置
+$("#pause > button:eq(1)").click(function(){ //设置
 	$("#pause").fadeOut("slow");
 	$("#setting").show("slow");
 });
-$("#pause > .reload").click(function(){ //重新加载
-	location.reload();
-});
-$("#setting > .back").click(function(){ //返回
+$("#setting > button").click(function(){ //确定
 	$("#setting").hide("slow");
 	$("#pause").fadeIn("slow");
 	document.body.requestPointerLock(); //请求成功后再继续游戏
-});
+})
 
-function print(text, id=String.random(undefined, print.prototype.ids), time=3, color){
-	/* time 单位: s */
+//2维度射线检测
+function ray2D(crosshair, x, y){
+	const raycaster = new THREE.Raycaster(), //光线投射，用于确定鼠标点击位置
+		mouse = new THREE.Vector2(); //创建二维平面
+	mouse.x = crosshair? 2*(x/WIDTH)-1: 0;
+	mouse.y = crosshair? -2*(y/HEIGHT)+1: 0;
+	//console.log("get:", x, y, mouse.x, mouse.y);
+	//以camera为z坐标，确定所点击物体的3D空间位置
+	raycaster.setFromCamera(mouse, camera);
+	//确定所点击位置上的物体数量
+	const objs = raycaster.intersectObjects(scene.children);
+	//选中后进行的操作
+	return objs.filter(obj => obj.faceIndex !== null); //过滤
+}
+//3维度射线检测
+function ray3D(start, end, near, far){
+	if (start.x === undefined) start.x = deskgood.pos.x;
+	if (start.y === undefined) start.y = deskgood.pos.y;
+	if (start.z === undefined) start.z = deskgood.pos.z;
+	if (end.x === undefined) end.x = 0;
+	if (end.y === undefined) end.y = 0;
+	if (end.z === undefined) end.z = 0;
+	
+	const ray = new THREE.Raycaster(
+		new THREE.Vector3(start.x, start.y, start.z),
+		new THREE.Vector3(end.x, end.y, end.z),
+		near,
+		far
+	);
+	ray.camera = camera;
+	const objs = ray.intersectObjects(scene.children);
+	return objs.filter(obj => obj.faceIndex !== null); //过滤
+}
+//屏蔽鼠标右键
+document.oncontextmenu = function (e){
+	var e = e || window.event;
+	e.returnValue = false;
+	return false;
+};
+
+function print(id, text, time=3, color){
 	if (print.prototype.ids[id] == true) return; //已加载
 	print.prototype.ids[id] = true;
 	
-	const msg = $(`<li>${text}</li>`).css("backgroundColor", color);
-	$("#printOutput").append( msg.fadeIn("slow") );
+	const msg = $(`<print>${text}</print>`).css("backgroundColor", color);
+	$("printgroup").append( msg.fadeIn("slow") );
 	setTimeout(()=>{
 		msg.fadeOut("slow", msg.remove);
 		print.prototype.ids[id] = false;
 		
-		$("#printOutput > li[style='display: none;']").remove(); //避免漏掉
+		$("printgroup > print[style='display: none;']").remove(); //避免漏掉
 	}, time*1000);
 }
-print.prototype.ids = {};
+print.prototype.ids = [];
 
-//屏蔽鼠标右键
-document.oncontextmenu = function(e){
-	var e = e || window.event;
-	e.returnValue = false;
+function message(id, text, time=5){
+	if (message.prototype.ids[id] == true) return; //已加载
+	message.prototype.ids[id] = true;
 	
-	e.stopPropagation();
-	e.cancelBubble = true;
+	const msg = $(`<message>${text}</message>`)
+		.attr("open", "true")
+		.click(()=>{
+			msg.removeAttr("open").attr("close");
+			message.prototype.ids[id] = false;
+			msg.hide("slow", ()=>{
+				msg.remove();
+				$("message:not(open).close").remove(); //避免漏掉
+			});
+		});
+	$( document.body ).append( msg );
+	setTimeout(()=>{
+		msg.removeAttr("open").attr("close");
+		message.prototype.ids[id] = false;
+		setTimeout(()=>msg.remove(), 3000);
+		
+		$("message:not(open).close").remove(); //避免漏掉
+	}, time*1000);
+}
+message.prototype.ids = [];
+
+function rnd_error(){
+	return Math.random()*0.2+0.9;
+}
+
+
+//录屏
+function record(canvas, time, opt={}){
+	const {fps=30, audioBitsPerSecond=128000, videoBitsPerSecond=8500000} = opt,
+		
+		chunks = new Set(),
+		mediaStream = canvas.captureStream(fps), // 设置帧频率(FPS)
+		mediaRecord = new MediaRecorder(mediaStream, {
+			audioBitsPerSecond,
+			videoBitsPerSecond
+		});
 	
-	return false;
-};
+	mediaRecord.ondataavailable = (e)=>{ // 接收数据
+		chunks.add(e.data);
+		
+		console.log(e.data);
+		const videoBlob = new Blob(chunks, {type: "video/mp4"}),
+			videoUrl = window.URL.createObjectURL(videoBlob);
+		Img.download(videoUrl, "录屏.mp4");
+	};
+	
+	mediaRecord.start(); //开始录屏
+	return ()=>mediaRecord.stop();
+}
 </script>
 		<!-- <script src="./js/sendMessage.js"></script> -->
-		<script src="./js/bgm.js"></script> <!-- 播放BGM -->
+		<script src="./js/playBGM.js"></script> <!-- 播放BGM -->
 		
 		<script src="./js/try_load.js"></script> <!-- textures贴图、indexDB存档加载完毕后调用加载区块 -->
 		
@@ -1099,7 +1265,7 @@ document.oncontextmenu = function(e){
 		<script src="./js/dat.gui.js"></script> <!-- dat.gui控制模块 -->
 		
 		<script src="./js/Thing.js"></script> <!-- Thing,Block,EntityBlock,Entity,Tool物品类 -->
-		<script src="./js/templates.js"></script> <!-- Thing模板；需置于Thing后 -->
+		<script src="./js/template.js"></script> <!-- Thing模板；需置于Thing后 -->
 			
 		<script src="./js/simplexNoise.js"></script> <!-- 初始化柏林噪声simplexNoise函数 -->
 		<script src="./js/Weather.js"></script> <!-- Weather天气类 -->
@@ -1112,11 +1278,9 @@ document.oncontextmenu = function(e){
 		<script src="./js/ColorUpdater.js"></script> <!-- ColorUpdater自动更新颜色类 -->
 		<script src="./js/THREE.js"></script> <!-- 初始化Three.js模块；需置于ColorUpdate,stats后 -->
 		
-		<script src="./js/ThingGroup.js"></script> <!-- ThingGroup物品栏类 -->
 		<script src="./js/deskgood.js"></script> <!-- 初始化角色deskgood；需置于ThingGroup后 -->
 		<script src="./js/bagView.js"></script> <!-- 角色deskgood背包旋转视图 -->
 		
-		<script src="./js/events.js"></script> <!-- 键盘key事件 -->
 		<script src="./js/keyEvents.js"></script> <!-- 键盘key事件 -->
 		<script src="./js/mouseEvents.js"></script> <!-- 鼠标mouse事件 -->
 		<script src="./js/touchEvents.js"></script> <!-- 触摸touch事件 -->

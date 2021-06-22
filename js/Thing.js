@@ -214,7 +214,7 @@ class Block extends Thing{
 		if (!this.have("block", "material")){
 			const template = this.get("block", "material");
 			this.block.material = [];
-			for (const i in template)
+			for (let i=template.length-1; i>=0; i--)
 				this.block.material[i] = template[i].clone();
 		}
 		if (geometry){
