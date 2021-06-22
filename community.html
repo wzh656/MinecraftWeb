@@ -72,10 +72,6 @@
 			margin: 0;
 			background-color: #fffae8;
 		}
-		/* 横屏 */
-		body.landscape{
-			margin: 0 20vw;
-		}
 		
 		
 		/* header */
@@ -85,7 +81,7 @@
 			padding: 0.6rem;
 			background-color: #cef;
 		}
-		body > header > .exit{ /* 退出 */
+		body > header > span{ /* 退出 */
 			position: absolute;
 			display: inline-block;
 			left: 0.1rem;
@@ -95,7 +91,7 @@
 			font-size: 1.2em;
 			line-height: 2rem;
 		}
-		body > header > .exit:active{
+		body > header > span:active{
 			background-color: #bde;
 		}
 		body > header > h2{
@@ -253,7 +249,8 @@
 		
 		<!-- layui -->
 		<!--<link rel="stylesheet" href="https://unpkg.com/layui@2.6.4/dist/css/layui.css">-->
-		<script src="./js/modules/layui.js"></script>
+		<script src="https://unpkg.com/layui@2.6.8/dist/layui.js"></script>
+		<!--<script src="./js/modules/layui.js"></script>-->
 		
 		<!-- 调试工具 -->
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
@@ -270,12 +267,12 @@
 		<script src="./js/modules/marked.min.js"></script> <!-- markdown -->
 		
 		<script src="./js/modules/js_plus.min.js"></script> <!-- js+ -->
-		<script src="https://wzh656.github.io/MinecraftWeb/js/modules/count.js"></script> <!-- 流量统计 -->
+		<script src="https://wzh656.github.io/MinecraftWeb/js/modules/count.js" async></script>
 		
 	</head>
 	<body>
 		<header>
-			<span class="exit">〈退出</span>
+			<span id="exit">〈退出</span>
 			<h2>我的世界讨论区</h2>
 		</header>
 		<ul id="list"></ul>
@@ -287,15 +284,6 @@
 		<!-- 1:不支持js -->
 		<noscript style="z-index: 1;"><h1>你的浏览器不支持JavaScript，无法运行！</h1></noscript>
 		
-<script>
-if (window.innerWidth > window.innerHeight)
-	$("body").addClass("landscape"); //横屏
-$(window).resize(function(){
-	if (window.innerWidth < window.innerHeight)
-		$("body").removeClass("landscape"); //取消横屏
-});
-</script>
-
 <script>
 //发送消息
 function send(name, msg, attr={}){
@@ -343,80 +331,95 @@ function get(date){
 let NAME = localStorage.getItem("MinecraftCommunity_name"),
 	DATE = +new Date();
 while (!NAME){
-	NAME = prompt("请输入你的昵称");
-	if (NAME == "wzh") continue;
+	do{
+		NAME = prompt("请输入你的昵称");
+	}while (NAME == "wzh");
 	localStorage.setItem("MinecraftCommunity_name", NAME);
 }
 
+if (!localStorage.getItem("MinecraftCommunity_help")){
+	layer.alert("操作提示：下拉（或鼠标滚动）聊天列表可加载上一天聊天记录");
+	localStorage.setItem("MinecraftCommunity_help", 1);
+}
 
 
-function update(date=new Date().format("yyyy-MM-dd")){
+
+async function update(loadLayer=false, date=new Date().format("yyyy-MM-dd")){
 	console.log("update", date)
-	return get(date).then(res => {
-		const list = $("#list > li");
-		let elem = $("#list > li.d"+date);
-		console.log(list)
-		if (elem.length == 0){
-			for (let i=-1; i<list.length; i++){
-				const before = $(list[i]).data("date") || -Infinity,
-					after = $(list[+i+1]).data("date") || Infinity,
-					now = +new Date(date);
-				console.log(i, before, after, now)
-				if ( +before < now && now < +after){
-					console.log("ok");
-					elem = $("<li><ul></ul></li>").addClass("d"+date)
-						.data("date", +new Date(date));
-					console.log("add", elem)
-					if (list[i]){
-						list[i].after(elem);
-					}else{
-						$("#list").prepend(elem);
-					}
-					break;
+	let waitLayerId;
+	if (loadLayer)
+		waitLayerId = layer.load(1);
+	
+	const res = await get(date);
+	
+	const list = $("#list > li");
+	let elem = $("#list > li.d"+date);
+	console.log(list)
+	if (elem.length == 0){
+		for (let i=-1; i<list.length; i++){
+			const before = $(list[i]).data("date") || -Infinity,
+				after = $(list[+i+1]).data("date") || Infinity,
+				now = +new Date(date);
+			console.log(i, before, after, now)
+			if ( +before < now && now < +after){
+				console.log("ok");
+				elem = $("<li><ul></ul></li>").addClass("d"+date)
+					.data("date", +new Date(date));
+				console.log("add", elem)
+				if (list[i]){
+					list[i].after(elem);
+				}else{
+					$("#list").prepend(elem);
 				}
+				break;
 			}
 		}
-		elem.children("ul").empty();
-		for (const {time, name, msg, attr} of res)
-			elem.children("ul").append(
-				$("<li></li>")
-					.addClass(name==NAME? "right": "left")
-					.append(
-						$("<time></time>").html( date+" "+time )
+	}
+	
+	elem.children("ul").empty();
+	for (const {time, name, msg, attr} of res)
+		elem.children("ul").append(
+			$("<li></li>")
+				.addClass(name==NAME? "right": "left")
+				.append(
+					$("<time></time>").html( date+" "+time )
+				)
+				.append( //main
+					$("<div></div>")
+					.append( //icon
+						$("<span></span>").html( name.substr(0,1) )
+							.addClass( name=="wzh"? "v": ""  )
 					)
-					.append( //main
+					.append( //name, msg
 						$("<div></div>")
-						.append( //icon
-							$("<span></span>").html( name.substr(0,1) )
-								.addClass( name=="wzh"? "v": ""  )
+						.append( //name
+							$("<span></span>").html( name )
 						)
-						.append( //name, msg
-							$("<div></div>")
-							.append( //name
-								$("<span></span>").html( name )
-							)
-							.append( //msg
-								$("<article>"+msg+"</article>")
-							)
+						.append( //msg
+							$("<article>"+msg+"</article>")
 						)
 					)
-			);
-	});
+				)
+		);
+	
+	if (loadLayer)
+		layer.close(waitLayerId);
 }
-update();
+update(true);
 setInterval(update, 6*1000); //6s/次
 
 // 发送消息
 async function sendmsg(){
-	if (!$("#msg").val()) return update(); //无输入 刷新
+	if (!$("#msg").val()) return update(true); //无输入 刷新
 	
-	const waitLayerId = layer.load(2);
+	const waitLayerId = layer.load(1);
 	
 	const msg = marked( $("#msg").val() ).replace(/\n+/g, "").replace(/<script[\s\S]+<\/script>/g, "");
-	await send(NAME, $("#msg").val(), {});
+	await send(NAME, msg, {});
 	
 	$("#msg").val(""); //清除发送框内容
-	update();
+	
+	await update();
 	
 	layer.close(waitLayerId);
 }
@@ -439,12 +442,17 @@ $("#list").on("touchend", function(e){
 	
 	if (Math.abs(dx) < 60 && dy > 100){
 		DATE -= 24*3600*1000;
-		update(new Date(DATE).format("yyyy-MM-dd"));
+		update(true, new Date(DATE).format("yyyy-MM-dd"));
 		layer.msg(new Date(DATE).format("yyyy-MM-dd"));
 	}
 });
-//新建板块
-$("#exit").click(() => location.href="./home.html");
+
+//退出
+$("#exit").click(() => {
+	layer.load(0);
+	location.href = "./home.html";
+});
+
 //发送消息
 $("#send").click(sendmsg);
 $("#msg").keydown(function(e){
