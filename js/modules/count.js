@@ -13,7 +13,7 @@
 					resolve(response);
 				},
 				error: (response, status, xhr)=>{
-					// alert(`请求错误！\nstatus: ${status}\nresponse: ${response}`);
+					console.error("请求错误", {method, data}, status, response);
 					reject(response, status, xhr);
 				}
 			});
@@ -45,6 +45,6 @@
 				platform,
 				language
 			});
-		}, 1000);
+		}, 2000); // 2s/s
 	});
 })();
