@@ -40,32 +40,12 @@
 		@media screen and (min-width: 960px){
 			body {font-size: calc(0.016 * 960px + 9px);}
 		}
-		/* 横屏 */
-		body.landscape{
-			margin: 0 20vw;
-		}
 		
 		/* element */
 		html{
 			-moz-user-select: none;
 			-khtml-user-select: none;
 			user-select: none;
-		}
-		body{
-			background-color: #f6f6f6;
-			text-align: center;
-		}
-		small{
-			display: block;
-			margin: 0;
-			font-size: 0.36em;
-		}
-		section > h1{
-			margin: 2rem;
-			font-size: 3em;
-		}
-		button{
-			border-radius: 6px;
 		}
 		code{
 			background-color: rgba(236, 236, 236, 0.8);
@@ -78,13 +58,10 @@
 			height: 100%;
 			background-color: #aaa;
 		}*/
-		textarea{ /*禁止调整大小*/
-			resize: none;
-		}
 		
 		
-		/* chat */
-		#chat{
+		/* body */
+		body{
 			position: absolute;
 			left: 0;
 			top: 0;
@@ -92,16 +69,19 @@
 			flex-direction: column;
 			width: 100%;
 			height: 100%;
+			margin: 0;
 			background-color: #fffae8;
 		}
 		
-		#chat > header{
+		
+		/* header */
+		body > header{
 			flex: none;
 			height: 2rem;
 			padding: 0.6rem;
 			background-color: #cef;
 		}
-		#chat > header > span{ /* 返回 */
+		body > header > span{ /* 退出 */
 			position: absolute;
 			display: inline-block;
 			left: 0.1rem;
@@ -111,16 +91,19 @@
 			font-size: 1.2em;
 			line-height: 2rem;
 		}
-		#chat > header > span:active{
+		body > header > span:active{
 			background-color: #bde;
 		}
-		#chat > header > h2{
+		body > header > h2{
 			margin: 0;
+			text-align: center;
 			font-size: 1.6em;
 			line-height: 2rem;
 		}
 		
-		#messagesList{
+		
+		/* list */
+		#list{
 			width: 100%;
 			height: 100%;
 			overflow-y: auto;
@@ -128,13 +111,24 @@
 			padding: 0;
 			border-radius: 6px;
 		}
-		#messagesList > li{
+		
+		#list > li{
+			display: block;
+			margin: 0;
+			padding: 0;
+		}
+		#list > li > ul{
+			margin: 0;
+			padding: 0;
+		}
+		
+		#list > li > ul > li{
 			display: flex;
 			flex-direction: column;
 			margin: 0.6rem;
 			padding: 0;
 		}
-		#messagesList > li > time{ /* time */
+		#list > li > ul > li > time{ /* time */
 			display: inline-block;
 			margin: 0 auto;
 			padding: 0.1rem 0.2rem;
@@ -143,14 +137,14 @@
 			border-radius: 10px;
 			font-size: 0.8em;
 		}
-		#messagesList > li > div{ /* main */
+		#list > li > ul > li > div{ /* main */
 			display: flex;
 			text-align: left;
 		}
-		#messagesList > li.right > div{
+		#list > li > ul > li.right > div{
 			flex-direction: row-reverse;
 		}
-		#messagesList > li > div > span{ /* icon */
+		#list > li > ul > li > div > span{ /* icon */
 			display: inline-block;
 			width: 2rem;
 			height: 2rem;
@@ -163,7 +157,7 @@
 			text-align: center;
 			line-height: 2rem;
 		}
-		#messagesList > li > div > span.v:after{
+		#list > li > ul > li > div > span.v:after{
 			content: "V";
 			position: relative;
 			top: -2rem;
@@ -179,19 +173,19 @@
 			text-align: center;
 			line-height: 0.6rem;
 		}
-		#messagesList > li > div > div{ /* name,message */
+		#list > li > ul > li > div > div{ /* name,msg */
 			display: inline-flex;
 			flex-direction: column;
 		}
-		#messagesList > li > div > div > span{ /* name */
+		#list > li > ul > li > div > div > span{ /* name */
 			margin: 0.1rem;
 			color: grey;
 			font-size: 0.8em;
 		}
-		#messagesList > li.right > div > div > span{
+		#list > li > ul > li.right > div > div > span{
 			text-align: right;
 		}
-		#messagesList > li > div > div > article{ /* message */
+		#list > li > ul > li > div > div > article{ /* msg */
 			margin: 0.1rem;
 			padding: 0.2rem;
 			background-color: #e0edd3;
@@ -199,33 +193,37 @@
 			user-select: text; /* 可复制 */
 			word-break: break-all; /* 自动换行 */
 		}
-		#messagesList > li > div > div > article > *{
+		#list > li > ul > li > div > div > article > *{
 			font-family: zyyt; /* 字体修正 */
 		}
 		
-		#chat > form{
+		
+		/* form */
+		body > form{
 			display: flex;
 			flex: none;
 			height: 3rem;
 			margin: 1px;
 		}
-		#chat > form > textarea{
+		body > form > textarea{
 			width: 100%;
 			height: 2.6rem;
 			background-color: white;
 			border: 1px solid #6af;
 			border-radius: 3px;
 			text-align: left;
+			resize: none; /* 禁止调整大小 */
 		}
-		#chat > form > button{
+		body > form > button{
 			flex: none;
 			/* width: calc(3vw + 40px); */
 			
 			border: 1px solid #6af;
+			border-radius: 6px;
 			font-size: 1em;
 			background-color: #cef;
 		}
-		#chat > form > button:active{
+		body > form > button:active{
 			background-color: #bde;
 		}
 		
@@ -251,7 +249,8 @@
 		
 		<!-- layui -->
 		<!--<link rel="stylesheet" href="https://unpkg.com/layui@2.6.4/dist/css/layui.css">-->
-		<script src="./js/modules/layui.js"></script>
+		<script src="https://unpkg.com/layui@2.6.8/dist/layui.js"></script>
+		<!--<script src="./js/modules/layui.js"></script>-->
 		
 		<!-- 调试工具 -->
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
@@ -268,37 +267,23 @@
 		<script src="./js/modules/marked.min.js"></script> <!-- markdown -->
 		
 		<script src="./js/modules/js_plus.min.js"></script> <!-- js+ -->
-		<script src="https://wzh656.github.io/MinecraftWeb/js/modules/count.js"></script> <!-- 流量统计
+		<script src="https://wzh656.github.io/MinecraftWeb/js/modules/count.js" async></script>
 		
 	</head>
 	<body>
-		<!-- 聊天界面 -->
-		<section id="chat">
-			<header>
-				<span class="exit">〈退出</span>
-				<h2>我的世界讨论区</h2>
-			</header>
-			<ul id="messagesList">
-				<span>获取中……</span>
-			</ul>
-			<form>
-				<textarea id="message" placeholder="shift+Enter发送（支持markdown/html格式）" contenteditable></textarea>
-				<button type="button" id="send">发送</button>
-			</form>
-		</section>
+		<header>
+			<span id="exit">〈退出</span>
+			<h2>我的世界讨论区</h2>
+		</header>
+		<ul id="list"></ul>
+		<form>
+			<textarea id="msg" placeholder="shift+Enter发送（支持markdown/html格式）" contenteditable></textarea>
+			<button type="button" id="send">发送</button>
+		</form>
 		
 		<!-- 1:不支持js -->
 		<noscript style="z-index: 1;"><h1>你的浏览器不支持JavaScript，无法运行！</h1></noscript>
 		
-<script>
-if (window.innerWidth > window.innerHeight)
-	$("body").addClass("landscape"); //横屏
-$(window).resize(function(){
-	if (window.innerWidth < window.innerHeight)
-		$("body").removeClass("landscape"); //取消横屏
-});
-</script>
-
 <script>
 //发送消息
 function send(name, msg, attr={}){
@@ -320,16 +305,17 @@ function send(name, msg, attr={}){
 		});
 	});
 }
+//获取消息
 function get(date){
 	return new Promise((resolve, reject)=>{
-		console.log("send", date)
+		console.log("get", date)
 		$.ajax({
 			url: "https://wzh.glitch.me/chatroom/MinecraftCommunity/get",
 			data: {date},
 			type: "GET",
 			dataType: "jsonp",
 			success: (response, status, xhr)=>{
-				console.log("send", {date}, response)
+				console.log("get", {date}, response)
 				resolve(response);
 			},
 			error: (response, status, xhr)=>{
@@ -342,88 +328,136 @@ function get(date){
 
 
 
-let name = localStorage.getItem("MinecraftCommunity_name");
-while (!name){
-	name = prompt("请输入你的昵称");
-	localStorage.setItem("MinecraftCommunity_name", name);
+let NAME = localStorage.getItem("MinecraftCommunity_name"),
+	DATE = +new Date();
+while (!NAME){
+	do{
+		NAME = prompt("请输入你的昵称");
+	}while (NAME == "wzh");
+	localStorage.setItem("MinecraftCommunity_name", NAME);
+}
+
+if (!localStorage.getItem("MinecraftCommunity_help")){
+	layer.alert("操作提示：下拉（或鼠标滚动）聊天列表可加载上一天聊天记录");
+	localStorage.setItem("MinecraftCommunity_help", 1);
 }
 
 
 
-get(new Date().format("yyyy-MM-dd")).then(res => {
+async function update(loadLayer=false, date=new Date().format("yyyy-MM-dd")){
+	console.log("update", date)
+	let waitLayerId;
+	if (loadLayer)
+		waitLayerId = layer.load(1);
+	
+	const res = await get(date);
+	
+	const list = $("#list > li");
+	let elem = $("#list > li.d"+date);
+	console.log(list)
+	if (elem.length == 0){
+		for (let i=-1; i<list.length; i++){
+			const before = $(list[i]).data("date") || -Infinity,
+				after = $(list[+i+1]).data("date") || Infinity,
+				now = +new Date(date);
+			console.log(i, before, after, now)
+			if ( +before < now && now < +after){
+				console.log("ok");
+				elem = $("<li><ul></ul></li>").addClass("d"+date)
+					.data("date", +new Date(date));
+				console.log("add", elem)
+				if (list[i]){
+					list[i].after(elem);
+				}else{
+					$("#list").prepend(elem);
+				}
+				break;
+			}
+		}
+	}
+	
+	elem.children("ul").empty();
 	for (const {time, name, msg, attr} of res)
-		$("messagesList").append(
+		elem.children("ul").append(
 			$("<li></li>")
-				.data("time", +data.time)
-				.addClass(data.name==user.name? "right": "left")
+				.addClass(name==NAME? "right": "left")
 				.append(
-					$("<time></time>").html( data.time.format("yyyy/MM/dd hh:mm:ss") )
+					$("<time></time>").html( date+" "+time )
 				)
 				.append( //main
 					$("<div></div>")
 					.append( //icon
-						$("<span></span>").html( data.name.substr(0,1) )
-							.addClass( data.name=="wzh"? "v": ""  )
+						$("<span></span>").html( name.substr(0,1) )
+							.addClass( name=="wzh"? "v": ""  )
 					)
-					.append( //name, message
+					.append( //name, msg
 						$("<div></div>")
 						.append( //name
-							$("<span></span>").html( data.name )
+							$("<span></span>").html( name )
 						)
-						.append( //message
-							$("<article>"+data.message+"</article>")
+						.append( //msg
+							$("<article>"+msg+"</article>")
 						)
 					)
 				)
 		);
-});
-
-
+	
+	if (loadLayer)
+		layer.close(waitLayerId);
+}
+update(true);
+setInterval(update, 6*1000); //6s/次
 
 // 发送消息
-async function sendMessage(){
-	if (!user) return layer.msg("请先登录", {icon: 5});
-	if (!$("#message").val()) return update(); //无输入 刷新
+async function sendmsg(){
+	if (!$("#msg").val()) return update(true); //无输入 刷新
 	
-	const waitLayerId = layer.load(2);
+	const waitLayerId = layer.load(1);
 	
-	const message = marked( $("#message").val() ).replace(/\n+/g, "").replace(/<script[\s\S]+<\/script>/g, ""),
-		file = CHAT+sectionName+"/"+new Date().format("yyyy-MM-dd")+".dat",
-		value = +new Date()+"\n"+
-			user.name+"\n"+
-			message+"\n"+
-			"{}";
+	const msg = marked( $("#msg").val() ).replace(/\n+/g, "").replace(/<script[\s\S]+<\/script>/g, "");
+	await send(NAME, msg, {});
 	
-	let res;
-	res = await request("exists", file);
-	if (res === true){ //已存在，追加文件
-		res = await request("appendFile", file, "\n"+value);
-		if (res !== true){
-			console.error("appendFile", file, res);
-			return alert("操作错误！\nmethod: appendFile\nresult:"+JSON.stringify(res));
-		}
-	}else if (res === false){ //不存在，写入文件
-		res = await request("writeFile", file, value);
-		if (res !== true){
-			console.error("writeFile", file, res);
-			return alert("操作错误！\nmethod: writeFile\nresult:"+JSON.stringify(res));
-		}
-	}
-	$("#message").val(""); //清除发送框内容
-	update();
+	$("#msg").val(""); //清除发送框内容
+	
+	await update();
 	
 	layer.close(waitLayerId);
 }
 
 
+//刷新
+const touch = {x: null, y: null};
+$("#list").on("touchstart", function(e){
+	if ($("#list")[0].scrollTop != 0) return; //未到顶
+	
+	const t = e.originalEvent.targetTouches[0];
+	[touch.x, touch.y] = [t.screenX, t.screenY];
+});
+$("#list").on("touchend", function(e){
+	if ($("#list")[0].scrollTop != 0) return; //未到顶
+	
+	const t = e.originalEvent.changedTouches[0],
+		[dx, dy] = [t.screenX-touch.x, t.screenY-touch.y];
+	touch.x = touch.y = null;
+	
+	if (Math.abs(dx) < 60 && dy > 100){
+		DATE -= 24*3600*1000;
+		update(true, new Date(DATE).format("yyyy-MM-dd"));
+		layer.msg(new Date(DATE).format("yyyy-MM-dd"));
+	}
+});
 
-//新建板块
-$("#exit").click(()=>history.back());
+//退出
+$("#exit").click(() => {
+	layer.load(0);
+	location.href = "./home.html";
+});
+
 //发送消息
-$("#send").click(sendMessage);
-$("#message").keydown(function(e){
-	if (e.keyCode == 13 && e.shiftKey){
-		sendMessage(); //shift+回车
+$("#send").click(sendmsg);
+$("#msg").keydown(function(e){
+	if (e.keyCode == 13 && e.shiftKey){ //shift+回车
+		sendmsg();
 		e.stopPropagation();
 		e.cancelBubble = true;
 		return false;
