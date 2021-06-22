@@ -325,11 +325,32 @@ function get(date){
 		});
 	});
 }
+//获取所有日期
+function dates(){
+	return new Promise((resolve, reject)=>{
+		console.log("dates")
+		$.ajax({
+			url: "https://wzh.glitch.me/chatroom/MinecraftCommunity/dates",
+			data: {},
+			type: "GET",
+			dataType: "jsonp",
+			success: (response, status, xhr)=>{
+				console.log("dates", response)
+				resolve(response);
+			},
+			error: (response, status, xhr)=>{
+				alert(`发送请求错误！\nstatus: ${status}\nresponse: ${response}`);
+				reject(response, status, xhr);
+			}
+		});
+	});
+}
 
 
 
 let NAME = localStorage.getItem("MinecraftCommunity_name"),
-	DATE = +new Date();
+	DATES, //所有聊天记录
+	DATE;
 while (!NAME){
 	do{
 		NAME = prompt("请输入你的昵称");
@@ -337,14 +358,17 @@ while (!NAME){
 	localStorage.setItem("MinecraftCommunity_name", NAME);
 }
 
+
+
+//新手提示
 if (!localStorage.getItem("MinecraftCommunity_help")){
-	layer.alert("操作提示：下拉（或鼠标滚动）聊天列表可加载上一天聊天记录");
+	layer.alert("操作提示：下拉（或鼠标滚动）消息列表可加载上一天消息记录");
 	localStorage.setItem("MinecraftCommunity_help", 1);
 }
 
 
-
-async function update(loadLayer=false, date=new Date().format("yyyy-MM-dd")){
+//刷新消息
+async function update(loadLayer=false, date=DATES[DATES.length-1] || new Date().format("yyyy-MM-dd")){
 	console.log("update", date)
 	let waitLayerId;
 	if (loadLayer)
@@ -405,21 +429,25 @@ async function update(loadLayer=false, date=new Date().format("yyyy-MM-dd")){
 	if (loadLayer)
 		layer.close(waitLayerId);
 }
-update(true);
-setInterval(update, 6*1000); //6s/次
 
-// 发送消息
+dates().then((res) => {
+	DATES = res;
+	DATE = DATES.length-1;
+	update(true);
+	setInterval(update, 6666); //6s/次
+});
+
+
+//发送消息
 async function sendmsg(){
 	if (!$("#msg").val()) return update(true); //无输入 刷新
 	
 	const waitLayerId = layer.load(1);
 	
-	const msg = marked( $("#msg").val() ).replace(/\n+/g, "").replace(/<script[\s\S]+<\/script>/g, "");
-	await send(NAME, msg, {});
-	
+	const msg = marked( $("#msg").val() ).replace(/\n+/g, "").replace(/<script[\s\S]+<\/script>/g, ""); //处理
+	await send(NAME, msg, {}); //发送
 	$("#msg").val(""); //清除发送框内容
-	
-	await update();
+	await update(); //刷新
 	
 	layer.close(waitLayerId);
 }
@@ -440,10 +468,32 @@ $("#list").on("touchend", function(e){
 		[dx, dy] = [t.screenX-touch.x, t.screenY-touch.y];
 	touch.x = touch.y = null;
 	
-	if (Math.abs(dx) < 60 && dy > 100){
-		DATE -= 24*3600*1000;
-		update(true, new Date(DATE).format("yyyy-MM-dd"));
-		layer.msg(new Date(DATE).format("yyyy-MM-dd"));
+	if (Math.abs(dx) < 60 && dy > 100){ //偏移较小 下拉
+		if (!DATES[--DATE])
+			return layer.msg("没有更早的记录了");
+		
+		update(true, DATES[DATE]);
+		layer.msg(DATES[DATE], {time: 1000});
+	}
+});
+
+let scroll_limit = false; //限制刷新过快
+$(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind监听
+	const wheel = event.originalEvent.wheelDelta || event.originalEvent.detail; //判断浏览器IE,谷歌滚轮事件 Firefox滚轮事件
+	if (wheel > 0){ //上滚轮
+		console.log("mouseWheelScroll Up", scroll_limit)
+		if (!scroll_limit && $("#list")[0].scrollTop == 0){ //未限制 且 到顶
+			if (!DATES[--DATE])
+				return layer.msg("没有更早的记录了");
+			
+			update(true, DATES[DATE]);
+			layer.msg(DATES[DATE], {time: 1000});
+			scroll_limit = true;
+			
+			setTimeout(function(){
+				scroll_limit = false;
+			}, 1000);
+		}
 	}
 });
 
