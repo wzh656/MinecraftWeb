@@ -42,15 +42,15 @@ Copyleft by wzh 2020~2021
 		
 		<link href="./css/bootstrap.css" rel="stylesheet" type="text/css" />
 		<style>
-			/* 字体缩放 */
+			/* 字体缩放方案 */
 			@media screen and (max-width:320px){
-				body {font-size: calc(0.03 * 320px + 3px);}
+				body {font-size: calc(0.018 * 320px + 6px);}
 			}
 			body{
-				font-size: calc(3vw + 3px);
+				font-size: calc(1.8vw + 6px);
 			}
 			@media screen and (min-width: 960px){
-				body {font-size: calc(0.03 * 960px + 3px);}
+				body {font-size: calc(0.018 * 960px + 6px);}
 			}
 			
 			/* 选择 */
@@ -521,6 +521,7 @@ Copyleft by wzh 2020~2021
 			#pause{
 				display: flex;
 				flex-direction: column;
+				justify-content: space-around;
 				height: 94vh;
 				background-image: radial-gradient(#c5effd, #e0edd3, #77b5fe);
 				
@@ -528,15 +529,22 @@ Copyleft by wzh 2020~2021
 				padding-top: 6vh;
 				font-size: 1.2em;
 			}
+			#pause > h1{
+				margin: 0;
+			}
 			#pause > p{
 				font-size: 1.6em;
 				margin: 6vmax 0;
 			}
 			#pause > button{
 				width: 60vw;
-				height: 10vh;
-				font-size: 0.8em;
+				/* height: 10vh; */
+				padding: 1.6vw;
+				font-size: 0.9em;
 				margin: 3vmax auto;
+			}
+			#pause > button:last-of-type{
+				margin-bottom: 10vw;
 			}
 			
 			
@@ -548,11 +556,13 @@ Copyleft by wzh 2020~2021
 				background-image: none; /* 清除渐变颜色 */
 				padding-top: 6vh;
 				height: 94vh;
+				overflow: auto;
 			}
 			#setting > button{
 				width: 60vw;
-				height: 10vh;
-				font-size: 0.7em;
+				/* height: 10vh; */
+				padding: 1vw;
+				font-size: 1em;
 				margin: 3vmax auto;
 			}
 			#setting > div{
@@ -561,7 +571,9 @@ Copyleft by wzh 2020~2021
 			}
 			#setting > div > button{
 				width: 100%;
-				height: 6vh;
+				/* height: 6vh; */
+				margin: 0.6vw;
+				padding: 0.6vw;
 			}
 			#setting > div > fieldset{
 				display: inline-block;
@@ -569,7 +581,9 @@ Copyleft by wzh 2020~2021
 			}
 			#setting > div > fieldset button{
 				width: 100%;
-				height: 6vh;
+				/* height: 6vh; */
+				margin: 0.6vw;
+				padding: 0.6vw;
 			}
 			/* 横屏情况下 */
 			@media screen and (orientation:landscape){
@@ -591,7 +605,7 @@ Copyleft by wzh 2020~2021
 				max-width: 20vw;
 				max-width: calc(16vw + 36px);
 				max-height: 84vh;
-				font-size: 0.5em;
+				font-size: 0.8em;
 				overflow-y: hidden;
 			}
 			#printOutput > li{
@@ -605,7 +619,7 @@ Copyleft by wzh 2020~2021
 			* 3:进度条
 			*/
 			#progress{
-				font-size: 1em;
+				font-size: 1.2em;
 				padding-top: 12.6vh;
 				height: 87.4vh;
 				
@@ -696,22 +710,39 @@ Copyleft by wzh 2020~2021
 			* 5:死亡通知书
 			*/
 			#die{
-				background-image: none;
-				background-color: rgba(254, 67, 101, .392157);
-				font-size: 1.6em;
+				display: flex;
+				flex-direction: column;
+				justify-content: space-around;
+				
+				height: 94vh;
 				padding-top: 6vh;
+				
+				background-image: none;
+				background-color: rgba(254, 67, 101, .36);
+				font-size: 1.2em;
 			}
-			#die p{
+			#die small{
+				display: block;
 				font-size: 0.36em;
 				margin: 0;
 			}
 			#die > h1{
 				font-size: 1.6em;
+				flex-grow: 0;
+			}
+			#die > p{
+				margin: 0;
+				flex-grow: 0;
 			}
 			#die > button{
 				width: 66vw;
 				font-size: 1.2em;
+				margin: 1vw auto;
+				flex-grow: 0;
 				/*font-family: hwxk, serif;*/
+			}
+			.#die > div{
+				flex-grow: 16;
 			}
 			/*#die > .resaon{
 				font-family: zyyt, serif;
@@ -937,23 +968,24 @@ status("command");</textarea>
 			<h1>贴图加载中……</h1>
 			进度：<progress></progress>
 			<span>0</span>%<br/>
-			<b>生命诚可贵，生命只有一次，请珍爱生命</b>
+			<b>若初次加载失败，请刷新重试</b>
 		</layer>
 		
 		<!-- 4:竖屏警告 -->
 		<layer id="warning" style="z-index: 4;">
 			<span>推荐使用横屏运行（请启用浏览器横屏或）</span>
 			<button onclick="$(this).parent().remove();" class="success" >继续竖屏</button>
-			<button onclick="location.href='https://wzh656.github.io/Minecraft/';" class="info" >下载APK</button>
+			<button onclick="location.href='https://wzh656.github.io/MinecraftWeb/';" class="info" >下载APK</button>
 		</layer>
 		
 		<!-- 5:死亡通知书 -->
 		<layer id="die" style="z-index: 5; display: none;">
-			<h1>游戏结束！<p>GAME OVER</p></h1>
-			角色deskgood死亡（正在播放：凉凉）<br/>
-			死因：<span class="resaon">未知</span><br/>
-			注：生命诚可贵，生命只有一次，请珍爱生命，deskgood无法重生，游戏即将关闭<br/>
-			<button onclick="exit();">结束<p>OVER</p></button>
+			<h1>游戏结束！<small>GAME OVER</small></h1>
+			<p>角色deskgood死亡（正在播放：凉凉）</p>
+			<p>死因：<span class="resaon">未知</span></p>
+			<p>注：生命诚可贵，生命只有一次，请珍爱生命，deskgood无法重生，游戏即将关闭</p>
+			<button onclick="exit();">结束<small>OVER</small></button>
+			<div></div>
 		</layer>
 		
 		<!-- 6:message -->
@@ -968,7 +1000,7 @@ status("command");</textarea>
 		
 <script>
 if (!DEBUG){
-	console.log = console.info = console.warn = console.error = new Function();
+	console.log = console.info = console.warn = console.error = function(){};
 }
 </script>
 <script src="./js/GameTime.js"></script> <!-- 游戏时间 -->
@@ -978,9 +1010,9 @@ function exit(){
 	if (typeof require != "undefined"){ //electron
 		window.close();
 	}
-
+	
 	window.open("home.html", "_self").close(); //website
-
+	
 	try{ //html5+
 		plus.runtime.quit();
 	}catch(e){}
@@ -1092,7 +1124,7 @@ if (device < 0){ //手机
 			stop = true;
 			if (!time.stop) //未暂停
 				time.stopTime(); //暂停
-			$("#pause").css("display", "inline-block");
+			$("#pause").css("display", "flex");
 			DB.save();
 		}
 	};
@@ -1132,7 +1164,7 @@ $("#topTools > li:eq(0)").click(function(){
 	}
 });
 
-$("#pause > button:eq(1)").click(function(){ //设置
+$("#pause > button:eq(2)").click(function(){ //设置
 	$("#pause").fadeOut("slow");
 	$("#setting").show("slow");
 });
@@ -1186,13 +1218,13 @@ function print(id, text, time=3, color){
 	if (print.prototype.ids[id] == true) return; //已加载
 	print.prototype.ids[id] = true;
 	
-	const msg = $(`<print>${text}</print>`).css("backgroundColor", color);
-	$("printgroup").append( msg.fadeIn("slow") );
+	const msg = $(`<li>${text}</li>`).css("backgroundColor", color);
+	$("#printOutput").append( msg.fadeIn("slow") );
 	setTimeout(()=>{
 		msg.fadeOut("slow", msg.remove);
 		print.prototype.ids[id] = false;
 		
-		$("printgroup > print[style='display: none;']").remove(); //避免漏掉
+		$("#printOutput > li[style='display: none;']").remove(); //避免漏掉
 	}, time*1000);
 }
 print.prototype.ids = [];
@@ -1280,6 +1312,7 @@ function record(canvas, time, opt={}){
 		
 		<script src="./js/deskgood.js"></script> <!-- 初始化角色deskgood；需置于ThingGroup后 -->
 		<script src="./js/bagView.js"></script> <!-- 角色deskgood背包旋转视图 -->
+		<script src="./js/changeState.js"></script> <!-- 改变状态 -->
 		
 		<script src="./js/keyEvents.js"></script> <!-- 键盘key事件 -->
 		<script src="./js/mouseEvents.js"></script> <!-- 鼠标mouse事件 -->
