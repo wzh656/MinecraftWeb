@@ -20,7 +20,7 @@ task.then(()=>{
 		const block = Thing.prototype.TEMPLATES[i];
 		if (!(block instanceof Block)) continue; //不属于方块类
 		
-		for (const j in block.block.face){
+		for (let j=0; j<block.block.face.length; j++){
 			const face = block.block.face[j];
 			block.setTexture(
 				new THREE.TextureLoader().load(

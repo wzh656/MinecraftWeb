@@ -1,7 +1,7 @@
 let stop = true, //游戏状态
 	device = 0; //设备代码
 const time = new GameTime(localStorage.getItem("我的世界_time"), 1); //游戏时间
-time.tmpSpeed = time.speed; //临时speed
+time.tmpSpeed = time.speed; //临时speed 防止调整过快
 
 setInterval(()=>{
 	if (time.speed != time.tmpSpeed){ //改变
@@ -56,9 +56,9 @@ function exit(){
 	if (typeof require != "undefined"){ //electron
 		window.close();
 	}
-
+	
 	window.open("home.html", "_self").close(); //website
-
+	
 	try{ //html5+
 		plus.runtime.quit();
 	}catch(e){}
@@ -97,17 +97,17 @@ function run(code){
 
 //2维射线检测
 function ray2D(x, y){
-	if (x===undefined) x = WIDTH/2;
-	if (y===undefined) y = HEIGHT/2;
-	const raycaster = new THREE.Raycaster(), //光线投射，用于确定鼠标点击位置
-		mouse = new THREE.Vector2(); //创建二维平面
+	if (x === undefined) x = WIDTH/2;
+	if (y === undefined) y = HEIGHT/2; //默认中心
+	const ray = new THREE.Raycaster(), //光线投射，用于确定鼠标点击位置
+		mouse = new THREE.Vector2(); //创建二维坐标
 	mouse.x = 2*(x/WIDTH)-1;
 	mouse.y = -2*(y/HEIGHT)+1;
 	//console.log("get:", x, y, mouse.x, mouse.y);
 	//以camera为z坐标，确定所点击物体的3D空间位置
-	raycaster.setFromCamera(mouse, camera);
+	ray.setFromCamera(mouse, camera);
 	//确定所点击位置上的物体数量
-	const objs = raycaster.intersectObjects(scene.children);
+	const objs = ray.intersectObjects(scene.children);
 	//选中后进行的操作
 	return objs.filter(obj => obj.faceIndex !== null); //过滤
 }
@@ -140,25 +140,40 @@ function rnd_error(){
 
 
 //录屏
-function record(canvas, time, opt={}){
-	const {fps=30, audioBitsPerSecond=128000, videoBitsPerSecond=8500000} = opt,
+class RecordCanvas{
+	constructor(canvas){
+		this.canvas = canvas;
+		this.status = false;
+	}
+	
+	start(opt={}){
+		const {fps=30, audioBitsPerSecond=128000, videoBitsPerSecond=8500000} = opt;
 		
-		chunks = new Set(),
-		mediaStream = canvas.captureStream(fps), // 设置帧频率(FPS)
-		mediaRecord = new MediaRecorder(mediaStream, {
+		this.chunks = new Set();
+		const mediaStream = this.canvas.captureStream(fps); // 设置帧频率(FPS)
+		this.mediaRecord = new MediaRecorder(mediaStream, {
 			audioBitsPerSecond,
 			videoBitsPerSecond
 		});
-	
-	mediaRecord.ondataavailable = (e)=>{ // 接收数据
-		chunks.add(e.data);
 		
-		console.log(e.data);
-		const videoBlob = new Blob(chunks, {type: "video/mp4"}),
-			videoUrl = window.URL.createObjectURL(videoBlob);
-		Img.download(videoUrl, "录屏.mp4");
-	};
+		this.mediaRecord.start(); //开始录屏
+		this.status = true;
+		
+		return this;
+	}
 	
-	mediaRecord.start(); //开始录屏
-	return ()=>mediaRecord.stop();
+	stop(type="video/mp4"){
+		return new Promise((resolve, reject)=>{
+			this.mediaRecord.ondataavailable = (e)=>{ // 接收数据
+				this.chunks.add(e.data);
+				
+				console.log(e.data);
+				const videoBlob = new Blob(this.chunks, {type}); //blob
+				
+				resolve( URL.createObjectURL(videoBlob) ); //url
+			};
+			this.mediaRecord.stop(); //结束录屏
+			this.status = false;
+		});
+	}
 }

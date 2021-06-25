@@ -142,13 +142,17 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setSize(WIDTH, HEIGHT);//设置渲染区域尺寸
 renderer.setClearColor("#eef", 1); //设置背景颜色
+renderer.shadowMapEnabled = true; //阴影
+
+//执行渲染操作   指定场景、相机作为参数
+renderer.render(scene, camera);
+
 renderer.domElement.style.margin = "0";
 document.body.appendChild(renderer.domElement); //body元素中插入canvas对象
 // renderer.domElement.style.cursor = "none";
 renderer.domElement.id = "game";
-renderer.shadowMapEnabled = true; //阴影
-//执行渲染操作   指定场景、相机作为参数
-renderer.render(scene, camera);
+renderer.domElement.record = new RecordCanvas(renderer.domElement); //录屏
+
 
 renderer.color = {
 	get clearColor(){
@@ -257,7 +261,7 @@ time.setInterval(function(time, speed){
 			// 太阳直射点纬度/弧度(rad)
 		θ = THREE.Math.degToRad(latitude), //当前纬度 单位: 弧度(rad)
 		daytime = 24 - 2/15 *THREE.Math.radToDeg(Math.acos(
-			Math.range(
+			Math.limitRange(
 				Math.sin(θ) * Math.sin(δ) / Math.cos(θ) / Math.cos(δ),
 				-1, 1
 			)

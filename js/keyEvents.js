@@ -136,11 +136,13 @@ document.addEventListener("keyup", function (e){
 	}
 	
 	if (e.keyCode == 115){ //F4 录屏
-		if (keydown.record_stop){
-			keydown.record_stop(); //停止录屏
-			keydown.record_stop = null;
-		}else if ( confirm("是否开始录屏？\n再次按F4结束录屏") ){
-			keydown.record_stop = record( $("#game")[0] );
+		if ( $("#game")[0].record.status ){ //正在录屏
+			$("#game")[0].record.stop().then((url)=>{
+				Img.download(url, "录屏.mp4");
+			});
+		}else{ //未录屏
+			const fps = +prompt("请输入录屏帧率(fps)：", 30);
+			if (fps) $("#game")[0].record.start({fps});
 		}
 	}
 	

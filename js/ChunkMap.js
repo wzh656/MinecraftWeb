@@ -319,7 +319,7 @@ class ChunkMap{
 	* 更新操作(update)
 	*/
 	//获取真正的方块及属性
-	getReal(x, y, z){
+	getShould(x, y, z){
 		let block = this.get(x,y,z, true, true),
 			loaded = true; //是否预加载
 		if (block === undefined){ //未加载
@@ -352,7 +352,7 @@ class ChunkMap{
 				size: thisSize,
 				transparent: thisTransparent
 			}
-		} = this.getReal(x, y, z);
+		} = this.getShould(x, y, z);
 		
 		if (thisBlock.block === null) return; //空气
 		
@@ -394,7 +394,7 @@ class ChunkMap{
 						size: thatSize,
 						transparent: thatTransparent
 					}
-				} = this.getReal(px, py, pz); //旁边方块
+				} = this.getShould(px, py, pz); //旁边方块
 				
 				if ( !(thatBlock && thatBlock.name!="空气") ){ //无方块 显示
 					needLoad = true;
