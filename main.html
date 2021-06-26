@@ -551,35 +551,29 @@ Copyleft by wzh 2020~2021
 			/**
 			* 1:设置
 			*/
-			#setting{
+			#settings{
 				background-color: #fffae8;
 				background-image: none; /* 清除渐变颜色 */
 				padding-top: 6vh;
 				height: 94vh;
 				overflow: auto;
 			}
-			#setting > button{
+			#settings > button{
 				width: 60vw;
 				/* height: 10vh; */
 				padding: 1vw;
 				font-size: 1em;
 				margin: 3vmax auto;
 			}
-			#setting > div{
+			#settings > div{
 				/* width: 100%; */
 				padding: 3vw;
 			}
-			#setting > div > button{
-				width: 100%;
-				/* height: 6vh; */
-				margin: 0.6vw;
-				padding: 0.6vw;
-			}
-			#setting > div > fieldset{
+			#settings > div > fieldset{
 				display: inline-block;
 				/* width: 100%; */
 			}
-			#setting > div > fieldset button{
+			#settings > div > fieldset button{
 				width: 100%;
 				/* height: 6vh; */
 				margin: 0.6vw;
@@ -587,7 +581,7 @@ Copyleft by wzh 2020~2021
 			}
 			/* 横屏情况下 */
 			@media screen and (orientation:landscape){
-				#setting > div{
+				#settings > div{
 					display: grid; /* 网格布局 */
 					grid-template-columns: 50% 50%;
 					grid-gap: 1vw 1vw; /* 行列间距 */
@@ -822,7 +816,7 @@ Copyleft by wzh 2020~2021
 		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
 		<script>
-		const DEBUG = localStorage.getItem("debug")=="false"? false: true;
+		const DEBUG = localStorage.getItem("我的世界_debug")=="0"? false: true;
 		//const DEBUG = false;
 		if (DEBUG &&
 			/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test( navigator.userAgent.toLowerCase() )
@@ -945,16 +939,16 @@ status("command");</textarea>
 		</layer>
 		
 		<!-- 1:设置 -->
-		<layer id="setting" style="z-index: 1; display: none;">
+		<layer id="settings" style="z-index: 1; display: none;">
 			<h1>设置</h1>
 			<div>
-				<fieldset name="debug">
-					<legend>
-						<button class="info">调试模式：<span>开</span></button>
-					</legend>
-					<button name="stats" class="info">stats：<span>开</span></button>
-					<button name="dat-gui" class="info">dat.gui：<span>开</span></button>
-					<button name="console" class="info">console：<span>开</span></button>
+				<fieldset class="operation">
+					<legend>操作</legend>
+					<p><label>灵敏度：</label><input type="range" class="sensitivity" /></p>
+				</fieldset>
+				<fieldset class="debug">
+					<legend>调试模式</legend>
+					<p><button class="total">调试模式：开</button></p>
 				</fieldset>
 			</div>
 			<button class="back success">返回</button>
@@ -1100,7 +1094,7 @@ if (device < 0){ //手机
 		document.webkitExitPointerLock;
 	
 	//继续游戏
-	$("#pause > button:eq(0)").click(function (){
+	$("#pause > button.next").click(function (){
 		document.body.requestPointerLock(); //请求成功后再继续游戏
 		playBGM();
 	});
@@ -1164,15 +1158,36 @@ $("#topTools > li:eq(0)").click(function(){
 	}
 });
 
-$("#pause > button:eq(2)").click(function(){ //设置
+//刷新
+$("#pause > button.reload").click( ()=>location.reload() );
+//设置
+$("#pause > button.set").click(function(){
 	$("#pause").fadeOut("slow");
-	$("#setting").show("slow");
+	$("#settings").show("slow");
 });
-$("#setting > button").click(function(){ //确定
-	$("#setting").hide("slow");
+
+/* 设置 */
+//灵敏度
+$("#settings > div > fieldset.operation input.sensitivity")
+.val( +localStorage.getItem("我的世界_operation_sensitivity") || (device<0? 2.6: 1) )
+.change(function(){
+	deskgood.sensitivity = +this.value;
+	localStorage.setItem("我的世界_operation_sensitivity", this.value);
+});
+//调试模式
+$("#settings > div > fieldset.debug button.total")
+.html(DEBUG? "调试模式：开": "调试模式：关")
+.click(function(){
+	localStorage.setItem("我的世界_debug", "0");
+	location.reload();
+});
+//返回
+$("#settings > button.back").click(function(){
+	$("#settings").hide("slow");
 	$("#pause").fadeIn("slow");
 	document.body.requestPointerLock(); //请求成功后再继续游戏
-})
+});
+
 
 //2维度射线检测
 function ray2D(crosshair, x, y){

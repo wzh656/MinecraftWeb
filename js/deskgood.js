@@ -34,7 +34,7 @@ const deskgood = { //桌子好
 		set z(v){ camera.rotation.z = THREE.Math.degToRad(v); }
 	},
 	VR: false,
-	sensitivity: device? 2.6: 1, //灵敏度：手机2，电脑1
+	sensitivity: +localStorage.getItem("我的世界_operation_sensitivity") || (device<0? 2.6: 1), //灵敏度：手机2.6，电脑1
 	handLength: 360, //手长（谐音360°全方位手残）
 	choice: 0,
 	hold: new ThingGroup($("#tools")[0], {
@@ -203,7 +203,9 @@ const deskgood = { //桌子好
 		localStorage.removeItem("我的世界_treeHeight");
 		localStorage.removeItem("我的世界_leavesScale");
 		localStorage.removeItem("我的世界_openStone");
-		localStorage.removeItem("我的世界_weatherRain"); //删存储
+		localStorage.removeItem("我的世界_weatherRain");
+		localStorage.removeItem("我的世界_operation_sensitivity");
+		localStorage.removeItem("我的世界_debug"); //删存储
 		
 		document.exitPointerLock(); //取消鼠标锁定
 		gui.close(); //隐藏gui
