@@ -16,7 +16,11 @@ const deskgood = { //桌子好
 		"z+": 50,
 		"z-": 50
 	},*/
-	jump_v: 5,
+	ideal_v: { //理想速度
+		walk: 1, //行走：1m/s
+		sprint: 3, //疾跑：3m/s
+		jump: 5, //跳跃：5m/s
+	},
 	up: camera.up,
 	look: {
 		get x(){ return THREE.Math.radToDeg(camera.rotation.x); },
@@ -902,7 +906,10 @@ if (DEBUG){
 		deskgood_folder.add(window, "stop").listen();
 		deskgood_folder.add(deskgood, "die").name("Game Over(自杀)");
 		deskgood_folder.add(deskgood, "sensitivity", 0.1, 10).name("灵敏度");
-		deskgood_folder.add(deskgood, "jump_v", 1, 36).name("跳跃速度");
+		const deskgood_idealV_folder = deskgood_folder.addFolder("理想速度(ideal_v/(m/s))");
+			deskgood_idealV_folder.add(deskgood.ideal_v, "walk", 0, 10, 0.1).name("行走(walk)");
+			deskgood_idealV_folder.add(deskgood.ideal_v, "sprint", 0, 10, 0.1).name("疾跑(sprint)");
+			deskgood_idealV_folder.add(deskgood.ideal_v, "jump", 0, 36, 1).name("跳跃(jump)");
 		const deskgood_position_folder = deskgood_folder.addFolder("位置/px");
 		deskgood_position_folder.open();
 			deskgood_position_folder.add(deskgood.pos, "x", map.size[0].x*100, map.size[1].x*100, 0.01).listen();

@@ -165,7 +165,7 @@ setInterval(function(){
 		return;
 	}
 	
-	let x = y = z = 0; //单位：m/s
+	let x = y = z = 0; //速度（单位：m/s）
 	
 	/* if (keydown.key.size)
 		console.log("keydown:", keydown.key); */
@@ -175,30 +175,34 @@ setInterval(function(){
 		console.log("run");
 	}
 	
+	const v = keydown.double_run==true?
+		deskgood.ideal_v.sprint: //疾跑速度
+		deskgood.ideal_v.walk; //行走速度
+	
 	if (keydown.key.has(87) || keydown.key.has(38)){ //前(x+)
 		// console.log("front:", keydown.key);
-		const vec = new THREE.Vector2((keydown.double_run==true?3:1), 0)
+		const vec = new THREE.Vector2(v, 0)
 			.rotateAround( new THREE.Vector2(0,0), THREE.Math.degToRad(deskgood.look.y) );
 		x += vec.x*rnd_error(),
 		z += vec.y*rnd_error();
 	}
 	if (keydown.key.has(83) || keydown.key.has(40)){ //后(x-)
 		// console.log("behind:", keydown.key);
-		const vec = new THREE.Vector2(-(keydown.double_run==true?3:1), 0)
+		const vec = new THREE.Vector2(-v, 0)
 			.rotateAround( new THREE.Vector2(0,0), THREE.Math.degToRad(deskgood.look.y) );
 		x += vec.x*rnd_error(),
 		z += vec.y*rnd_error();
 	}
 	if (keydown.key.has(65) || keydown.key.has(37)){ //左(z-)
 		// console.log("left:", keydown.key);
-		const vec = new THREE.Vector2(0, -(keydown.double_run==true?3:1))
+		const vec = new THREE.Vector2(0, -v)
 			.rotateAround( new THREE.Vector2(0,0), THREE.Math.degToRad(deskgood.look.y) );
 		x += vec.x*rnd_error(),
 		z += vec.y*rnd_error();
 	}
 	if (keydown.key.has(68) || keydown.key.has(39)){ //右(z+)
 		// console.log("right:", keydown.key);
-		const vec = new THREE.Vector2(0, (keydown.double_run==true?3:1))
+		const vec = new THREE.Vector2(0, v)
 			.rotateAround( new THREE.Vector2(0,0), THREE.Math.degToRad(deskgood.look.y) );
 		x += vec.x*rnd_error(),
 		z += vec.y*rnd_error();
@@ -212,64 +216,9 @@ setInterval(function(){
 		y += -1*rnd_error();
 	} */
 	
-	/* x = x*10 + (x>0? 10: x<0? -10: 0);
-	z = z*10 + (z>0? 10: z<0? -10: 0);
-	
-	try{
-		if (
-			map.get((deskgood.pos.x+x)/100,
-				deskgood.pos.y/100,
-				deskgood.pos.z/100)
-			!=
-				null
-		){ //无法向X移动
-			x = 0;
-		}
-	}catch(err){}
-	try{
-		if (map.get((deskgood.pos.x+x)/100,
-				deskgood.pos.y/100-1,
-				deskgood.pos.z/100)
-			!=
-				null
-		){ //无法向X移动
-			x = 0;
-		}
-	}catch(err){}
-	
-	try{
-		if (map.get(deskgood.pos.x/100,
-				deskgood.pos.y/100,
-				(deskgood.pos.z+z)/100)
-			!=
-				null
-		){ //无法向Z移动
-			z = 0;
-		}
-	}catch(err){}
-	try{
-		if (map.get(
-				deskgood.pos.x/100,
-				deskgood.pos.y/100-1,
-				(deskgood.pos.z+z)/100)
-			!=
-				null
-		){ //无法向Z移动
-			z = 0;
-		}
-	}catch(err){}
-	
-	x -= (x>0? 10: x<0? -10: 0);
-	z -= (z>0? 10: z<0? -10: 0);
-	
-	deskgood.pos.x += x*rnd_error();
-	deskgood.pos.z += z*rnd_error(); */
-	
-	/*if (x && z)
-		console.log("go",x,z)*/
 	
 	if (x || z)
-		deskgood.go(x*t*0.1, 0, z*t*0.1); // 1m/s = 100px/s = 0.1px/ms
+		deskgood.go(x*t*0.1, 0, z*t*0.1); // 1m/s = 100cm/s = 0.1cm/ms
 	
 	if (y &&
 		map.get(deskgood.pos.x/100,
@@ -278,7 +227,7 @@ setInterval(function(){
 	){ //脚下有方块
 		if (time.getTime()-last_jump >= 1000*rnd_error()){
 			console.log("jump");
-			deskgood.v.y += y * deskgood.jump_v*rnd_error();
+			deskgood.v.y += y * deskgood.ideal_v.jump *rnd_error();
 			last_jump = +time.getTime();
 		}
 	}
