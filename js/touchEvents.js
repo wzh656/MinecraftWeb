@@ -19,41 +19,44 @@ $("#control").on("touchstart", function(e){
 	if (stop)
 		return;
 	
-	const {clientX: x, clientY: y} = e.originalEvent.targetTouches[0];
+	const {pageX: x, pageY: y} = e.originalEvent.targetTouches[0];
 	//console.log("touchstart(control):", x, y);
 	
 	touch.control.x0 = x,
 	touch.control.y0 = y,
 	touch.control.t0 = +time.getTime();
 	
+	$("#place").show()
+		.css("left", x+"px")
+		.css("top", y+"px");
+	
 	//循环
 	touch.control.id = setInterval(function(){
-		if ( touch.control.x0 !== null &&
-			touch.control.y0 !== null &&
-			touch.control.x !== null &&
-			touch.control.y !== null
-		){
-			const t = time.getTime() - touch.control.t0; //时间间隔（游戏时间） 单位: ms
-			touch.control.t0 = +time.getTime();
-			
-			const d = new THREE.Vector2(touch.control.x - touch.control.x0,
-					touch.control.y - touch.control.y0), //与开始时的变化量
-				len = d.length(); //长度
-			
-			if (len > 100){ //>100px 疾跑
-				d.setLength(deskgood.ideal_v.sprint * t * 0.1); // 1m/s = 100cm/s = 0.1cm/ms
-			}else{
-				d.setLength(len/100*deskgood.ideal_v.walk * t * 0.1);
-			}
-			
-			d.rotateAround(
-				new THREE.Vector2(0, 0),
-				Math.rad(deskgood.look.y + 90)
-			);
-			
-			deskgood.go(d.x*rnd_error(), 0, d.y*rnd_error());
-			
+		if ( touch.control.x0 === null ||
+			touch.control.y0 === null ||
+			touch.control.x === null ||
+			touch.control.y === null
+		) return console.warn(touch);
+		
+		const t = time.getTime() - touch.control.t0; //时间间隔（游戏时间） 单位: ms
+		touch.control.t0 = +time.getTime();
+		
+		const d = new THREE.Vector2(touch.control.x - touch.control.x0,
+				touch.control.y - touch.control.y0), //与开始时的变化量
+			len = d.length(); //长度
+		
+		if (len > 100){ //>100px 疾跑
+			d.setLength(deskgood.ideal_v.sprint * t * 0.1); // 1m/s = 100cm/s = 0.1cm/ms
+		}else{
+			d.setLength(len/100*deskgood.ideal_v.walk * t * 0.1);
 		}
+		
+		d.rotateAround(
+			new THREE.Vector2(0, 0),
+			Math.rad(deskgood.look.y + 90)
+		);
+		
+		deskgood.go(d.x*rnd_error(), 0, d.y*rnd_error());
 	}, 16);
 	
 	return false;
@@ -64,33 +67,41 @@ $("#control").on("touchmove", function(e){
 	if (stop)
 		return;
 	
-	const {clientX: x, clientY: y} = e.originalEvent.targetTouches[0];
+	const {pageX: x, pageY: y} = e.originalEvent.targetTouches[0];
 	//console.log("touchmove(control):", x, y);
 	
 	touch.control.x = x,
 	touch.control.y = y;
+	
+	$("#place").show()
+		.css("left", x+"px")
+		.css("top", y+"px");
 	
 	return false;
 });
 
 //end
 $("#control").on("touchend", function(e){
-	const {clientX: x, clientY: y} = e.originalEvent.changedTouches[0];
+	const {pageX: x, pageY: y} = e.originalEvent.changedTouches[0];
 	//console.log("touchend(control):", x, y);
 	
 	clearInterval(touch.control.id);
 	touch.control.x0 = touch.control.y0 = touch.control.x = touch.control.y = touch.control.t0 = touch.control.id = null;
+	
+	$("#place").hide();
 	
 	return false;
 });
 
 //cancel
 $("#control").on("touchcancel", function(e){
-	const {clientX: x, clientY: y} = e.originalEvent.changedTouches[0];
+	const {pageX: x, pageY: y} = e.originalEvent.changedTouches[0];
 	//console.log("touchcancel(control):", x, y);
 	
 	clearInterval(touch.control.id);
 	touch.control.x0 = touch.control.y0 = touch.control.x = touch.control.y = touch.control.t0 = touch.control.id = null;
+	
+	$("#place").hide();
 	
 	return false;
 });

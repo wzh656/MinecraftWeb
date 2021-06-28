@@ -331,24 +331,27 @@ Copyleft by wzh 2020~2021
 			/**
 			* 0:摇杆操纵
 			*/
+
 			#control{
 				position: absolute;
 				bottom: 16vh;
 				left: 10vw;
-				background: #aaa;
-				opacity: 0.66;
 				width: 8vmax;
 				height: 8vmax;
+				
+				background-color: rgba(255, 255, 255, 0.36);
+				border: 2px solid rgba(0, 0, 0, 0.36);
 				border-radius: 50%;
 			}
 			#jump{
 				position: absolute;
 				bottom: 16vh;
 				right: 10vw;
-				background: #aaa;
-				opacity: 0.66;
 				width: 6vmax;
 				height: 6vmax;
+				
+				background-color: rgba(255, 255, 255, 0.36);
+				border: 2px solid rgba(0, 0, 0, 0.36);
 				border-radius: 50%;
 			}
 			
@@ -839,9 +842,10 @@ Copyleft by wzh 2020~2021
 		</div>
 		
 		<!-- 0:摇杆操作 -->
-		<div>
-			<div id="control" style="display: none;"></div>
-			<div id="jump" style="display: none;"></div>
+		<div id="control">
+			<div class="move" style="display: none;"></div>
+			<div class="place" style="display: none;"></div>
+			<div class="jump" style="display: none;"></div>
 		</div>
 		
 		<!-- 1:命令方块 -->
