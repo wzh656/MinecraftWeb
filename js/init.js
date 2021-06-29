@@ -138,6 +138,17 @@ function rnd_error(){
 	return Math.random()*0.2+0.9;
 }
 
+let VW = innerWidth / 100,
+	VH = innerHeight / 100,
+	VMAX = Math.max(innerWidth, innerHeight) / 100,
+	VMIN = Math.min(innerWidth, innerHeight) / 100;
+$(window).resize(function(){
+	VW = innerWidth / 100,
+	VH = innerHeight / 100,
+	VMAX = Math.max(innerWidth, innerHeight) / 100,
+	VMIN = Math.min(innerWidth, innerHeight) / 100;
+});
+
 
 //录屏
 class RecordCanvas{

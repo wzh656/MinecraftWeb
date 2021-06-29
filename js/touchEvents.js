@@ -1,7 +1,5 @@
 const touch = {};
 
-
-
 /**
 * Touch Control
 */
@@ -15,18 +13,22 @@ touch.control = {
 };
 
 //start
-$("#control").on("touchstart", function(e){
+$("#control > .move").on("touchstart", function(e){
 	if (stop)
-		return;
+		return false;
 	
 	const {pageX: x, pageY: y} = e.originalEvent.targetTouches[0];
-	//console.log("touchstart(control):", x, y);
+	console.log("touchstart(control):", x, y);
 	
 	touch.control.x0 = x,
 	touch.control.y0 = y,
 	touch.control.t0 = +time.getTime();
 	
-	$("#place").show()
+	$("#control > .move")
+		.css("left", x+"px")
+		.css("top", y+"px")
+		.css("transform", "translate(-50%, -50%)");
+	$("#control > .position").show()
 		.css("left", x+"px")
 		.css("top", y+"px");
 	
@@ -63,9 +65,9 @@ $("#control").on("touchstart", function(e){
 });
 
 //move
-$("#control").on("touchmove", function(e){
+$("#control > .move").on("touchmove", function(e){
 	if (stop)
-		return;
+		return false;
 	
 	const {pageX: x, pageY: y} = e.originalEvent.targetTouches[0];
 	//console.log("touchmove(control):", x, y);
@@ -73,35 +75,45 @@ $("#control").on("touchmove", function(e){
 	touch.control.x = x,
 	touch.control.y = y;
 	
-	$("#place").show()
-		.css("left", x+"px")
-		.css("top", y+"px");
-	
+	const d = new THREE.Vector2(x - touch.control.x0, y - touch.control.y0),
+		rotation = Math.atan(d.y / d.x);
+	if (d.length() > 8/2*VMAX)
+		d.setLength(8/2*VMAX);
+	$("#control > .mvoe > .direction").show()
+		.css("transform", "rotate("+rotation+"rad)");
+	$("#control > .position").show()
+		.css("left", touch.control.x0 + d.x + "px")
+		.css("top", touch.control.y0 + d.y + "px");
 	return false;
 });
 
 //end
-$("#control").on("touchend", function(e){
+$("#control > .move").on("touchend", function(e){
 	const {pageX: x, pageY: y} = e.originalEvent.changedTouches[0];
 	//console.log("touchend(control):", x, y);
 	
 	clearInterval(touch.control.id);
 	touch.control.x0 = touch.control.y0 = touch.control.x = touch.control.y = touch.control.t0 = touch.control.id = null;
 	
-	$("#place").hide();
+	$("#control > .move")
+		.css("left", "")
+		.css("top", "")
+		.css("transform", "");
+	$("#control > .position").hide();
 	
 	return false;
 });
 
 //cancel
-$("#control").on("touchcancel", function(e){
+$("#control > .move").on("touchcancel", function(e){
 	const {pageX: x, pageY: y} = e.originalEvent.changedTouches[0];
 	//console.log("touchcancel(control):", x, y);
 	
 	clearInterval(touch.control.id);
 	touch.control.x0 = touch.control.y0 = touch.control.x = touch.control.y = touch.control.t0 = touch.control.id = null;
 	
-	$("#place").hide();
+	$("#control > .mvoe > .direction").hide();
+	$("#control > .position").hide();
 	
 	return false;
 });
@@ -111,11 +123,14 @@ $("#control").on("touchcancel", function(e){
 /**
 * Touch Jump
 */
-$("#jump").on("touchstart", function(){
+//start
+$("#control > .jump").on("touchstart", function(){
 	if (stop)
-		return;
+		return false;
 	
 	console.log("try jump");
+	
+	$("#control > .jump").addClass("active");
 	
 	if ( map.get(deskgood.pos.x/100,
 			deskgood.pos.y/100-2,
@@ -126,6 +141,15 @@ $("#jump").on("touchstart", function(){
 			last_jump = +time.getTime();
 		}
 	}
+	
+	return false;
+});
+//end
+$("#control > .jump").on("touchend", function(){
+	if (stop)
+		return false;
+	
+	$("#control > .jump").removeClass("active");
 	
 	return false;
 });
@@ -147,7 +171,7 @@ touch.screen = {
 //start
 $("#game").on("touchstart", function (e){
 	if (stop)
-		return;
+		return false;
 	
 	const {pageX: x, pageY: y} = e.originalEvent.targetTouches[0];
 	
@@ -214,16 +238,20 @@ $("#game").on("touchend", function (e){
 	}
 	
 	touch.screen.x = touch.screen.y = touch.screen.x0 = touch.screen.y0 = touch.screen.operation = null;
+	
+	return false;
 });
 
 //cancel
 $("#game").on("touchcancel", function (e){
 	if (stop)
-		return;
+		return false;
 	
 	const {pageX: x, pageY: y} = e.originalEvent.changedTouches[0];
 	//console.log("touchcancel(screen):", {x, y}, touch.screen);
 	
 	clearTimeout(touch.screen.id);
 	touch.screen.x = touch.screen.y = touch.screen.x0 = touch.screen.y0 = touch.screen.operation = touch.screen.id = null;
+	
+	return false;
 });
