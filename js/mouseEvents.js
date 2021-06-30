@@ -144,6 +144,8 @@ document.addEventListener("mousedown", function (e){
 	
 	if (e.button == 0){ //左键（挖掘）
 		Events.startDig(); //开始挖掘
+	}else if (e.button == 1){ //中键（重置时间）
+		Events.mouseWheelDown(); //中键按下
 	}else if (e.button == 2){ //右键（放置）
 		Events.startPlace(); //开始放置
 	}

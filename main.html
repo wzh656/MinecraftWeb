@@ -237,6 +237,38 @@ Copyleft by wzh 2020~2021
 			
 			
 			/**
+			* 0:顶部工具栏
+			*/
+			#topTools{
+				position: absolute;
+				top: 0;
+				left: 50%;
+				transform: translateX(-50%);
+				margin: 0;
+				padding: 0;
+			}
+			#topTools > li{
+				display: block;
+			}
+			#topTools > li:nth-child(1){ /* 暂停按钮 */
+				padding: 0.36rem;
+				opacity: 0.6;
+				background-color: #83af9b;
+			}
+			#topTools > li:nth-child(1) > div{
+				width: 0.8rem;
+				height: 0.8rem;
+				padding: 0;
+				background-color: #83af9b;
+				box-sizing: border-box;
+				
+				border-style: double;
+				border-width: 0px 0px 0px 0.8rem;
+				border-color: #233067;
+			}
+			
+			
+			/**
 			* 0:物品栏
 			*/
 			#tools{
@@ -264,38 +296,6 @@ Copyleft by wzh 2020~2021
 			#tools > li > img{
 				width: 100%;
 				height: 100%;
-			}
-			
-			
-			/**
-			* 0:顶部工具栏
-			*/
-			#topTools{
-				position: absolute;
-				top: 0;
-				left: 50%;
-				transform: translateX(-50%);
-				margin: 0;
-				padding: 0;
-			}
-			#topTools > li{
-				display: block;
-			}
-			#topTools > li:nth-child(1){ /* 暂停按钮 */
-				padding: 0.26rem;
-				opacity: 0.6;
-				background-color: #83af9b;
-			}
-			#topTools > li:nth-child(1) > div{
-				width: 0.6rem;
-				height: 0.6rem;
-				padding: 0;
-				background-color: #83af9b;
-				box-sizing: border-box;
-				
-				border-style: double;
-				border-width: 0px 0px 0px 0.6rem;
-				border-color: #233067;
 			}
 			
 			
@@ -339,15 +339,15 @@ Copyleft by wzh 2020~2021
 				width: 8vmax;
 				height: 8vmax;
 				
-				background-color: rgba(255, 255, 255, 0.36);
-				border: 2px solid rgba(0, 0, 0, 0.36);
+				background-color: rgba(255, 255, 255, .36);
+				border: 2px solid rgba(0, 0, 0, .36);
 				border-radius: 50%;
 			}
 			#control > .move > .direction{
 				display: block;
 				width: 8vmax;
 				height: 8vmax;
-				border-right: 0.3rem solid #ddd;
+				border-right: 0.3rem solid rgba(255, 255, 255, .6);
 				border-radius: 50%;
 			}
 			#control > .position{
@@ -356,8 +356,8 @@ Copyleft by wzh 2020~2021
 				height: 3.6vmax;
 				transform: translate(-50%, -50%);
 				
-				background-color: rgba(255, 255, 255, 0.36);
-				border: 2px solid rgba(0, 0, 0, 0.36);
+				background-color: rgba(255, 255, 255, .36);
+				border: 2px solid rgba(0, 0, 0, .36);
 				border-radius: 50%;
 			}
 			#control > .jump{
@@ -367,12 +367,12 @@ Copyleft by wzh 2020~2021
 				width: 6vmax;
 				height: 6vmax;
 				
-				background-color: rgba(255, 255, 255, 0.36);
-				border: 2px solid rgba(0, 0, 0, 0.36);
+				background-color: rgba(255, 255, 255, .36);
+				border: 2px solid rgba(0, 0, 0, .36);
 				border-radius: 50%;
 			}
 			#control > .jump.active{
-				background-color: rgba(200, 200, 200, 0.36);
+				background-color: rgba(200, 200, 200, .36);
 			}
 			
 			
@@ -841,6 +841,11 @@ Copyleft by wzh 2020~2021
 	
 	<body bgcolor="black">
 		
+		<!-- 0:顶部工具栏 -->
+		<ul id="topTools">
+			<li class="pause"><div></div></li> <!-- 暂停 -->
+		</ul>
+		
 		<!-- 0:工具栏 -->
 		<ul id="tools">
 			<li><img/></li>
@@ -848,11 +853,6 @@ Copyleft by wzh 2020~2021
 			<li><img/></li>
 			<li><img/></li>
 			<li><img src="./img/more.png" onclick="status('bag');" /></li>
-		</ul>
-		
-		<!-- 0:顶部工具栏 -->
-		<ul id="topTools">
-			<li class="pause"><div></div></li> <!-- 暂停 -->
 		</ul>
 		
 		<!-- 0:十字准星 -->
@@ -864,9 +864,9 @@ Copyleft by wzh 2020~2021
 		<!-- 0:摇杆操作 -->
 		<div id="control" style="display: none;">
 			<div class="move">
-				<div class="direction"></div>
+				<div class="direction" style="display: none;"></div>
 			</div>
-			<div class="position"></div>
+			<div class="position" style="display: none;"></div>
 			<div class="jump"></div>
 		</div>
 		

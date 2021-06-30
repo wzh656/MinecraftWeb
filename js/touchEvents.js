@@ -24,21 +24,13 @@ $("#control > .move").on("touchstart", function(e){
 	touch.control.y0 = y,
 	touch.control.t0 = +time.getTime();
 	
-	$("#control > .move")
-		.css("left", x+"px")
-		.css("top", y+"px")
-		.css("transform", "translate(-50%, -50%)");
-	$("#control > .position").show()
-		.css("left", x+"px")
-		.css("top", y+"px");
-	
 	//循环
 	touch.control.id = setInterval(function(){
 		if ( touch.control.x0 === null ||
 			touch.control.y0 === null ||
 			touch.control.x === null ||
 			touch.control.y === null
-		) return console.warn(touch);
+		) return false;
 		
 		const t = time.getTime() - touch.control.t0; //时间间隔（游戏时间） 单位: ms
 		touch.control.t0 = +time.getTime();
@@ -61,6 +53,15 @@ $("#control > .move").on("touchstart", function(e){
 		deskgood.go(d.x*rnd_error(), 0, d.y*rnd_error());
 	}, 16);
 	
+	$("#control > .move")
+		.css("left", x+"px")
+		.css("top", y+"px")
+		.css("transform", "translate(-50%, -50%)");
+	$("#control > .move > .direction").hide();
+	$("#control > .position").show()
+		.css("left", x+"px")
+		.css("top", y+"px");
+	
 	return false;
 });
 
@@ -76,14 +77,15 @@ $("#control > .move").on("touchmove", function(e){
 	touch.control.y = y;
 	
 	const d = new THREE.Vector2(x - touch.control.x0, y - touch.control.y0),
-		rotation = Math.atan(d.y / d.x);
+		rotation = Math.atan(d.y / d.x) + (d.x<0? Math.PI: 0);
 	if (d.length() > 8/2*VMAX)
 		d.setLength(8/2*VMAX);
-	$("#control > .mvoe > .direction").show()
+	$("#control > .move > .direction").show()
 		.css("transform", "rotate("+rotation+"rad)");
 	$("#control > .position").show()
 		.css("left", touch.control.x0 + d.x + "px")
 		.css("top", touch.control.y0 + d.y + "px");
+	
 	return false;
 });
 
@@ -99,6 +101,7 @@ $("#control > .move").on("touchend", function(e){
 		.css("left", "")
 		.css("top", "")
 		.css("transform", "");
+	$("#control > .move > .direction").hide();
 	$("#control > .position").hide();
 	
 	return false;
@@ -112,7 +115,7 @@ $("#control > .move").on("touchcancel", function(e){
 	clearInterval(touch.control.id);
 	touch.control.x0 = touch.control.y0 = touch.control.x = touch.control.y = touch.control.t0 = touch.control.id = null;
 	
-	$("#control > .mvoe > .direction").hide();
+	$("#control > .move > .direction").hide();
 	$("#control > .position").hide();
 	
 	return false;
@@ -134,12 +137,11 @@ $("#control > .jump").on("touchstart", function(){
 	
 	if ( map.get(deskgood.pos.x/100,
 			deskgood.pos.y/100-2,
-			deskgood.pos.z/100)
-	){ //脚下有方块
-		if (time.getTime()-last_jump >= 1000*rnd_error()){
-			deskgood.v.y += deskgood.ideal_v.jump * rnd_error();
-			last_jump = +time.getTime();
-		}
+			deskgood.pos.z/100) && //脚下有方块
+		time.getTime()-last_jump >= 1000*rnd_error() //达到休息时间
+	){
+		deskgood.v.y += deskgood.ideal_v.jump * rnd_error();
+		last_jump = +time.getTime();
 	}
 	
 	return false;
@@ -160,12 +162,12 @@ $("#control > .jump").on("touchend", function(){
 * Touch Screen
 */
 touch.screen = {
-	operation: false, //是否操作（挖掘/放置）
 	x0: null,
 	y0: null, //开始位置
 	x: null,
 	y: null, //当前位置
-	id: null
+	id: null,
+	valid: null //操作是否有效（挖掘/放置）
 };
 
 //start
@@ -179,10 +181,10 @@ $("#game").on("touchstart", function (e){
 	
 	touch.screen.x = touch.screen.x0 = x,
 	touch.screen.y = touch.screen.y0 = y;
-	touch.screen.operation = true;
+	touch.screen.valid = true;
 	touch.screen.id = setTimeout(()=>{ //长按1000ms（挖掘）
-		touch.screen.id = null; //非短按
-		if (touch.screen.operation)
+		touch.screen.id = null;
+		if (touch.screen.valid)
 			Events.startDig(); //开始挖掘
 	}, 1000);
 	
@@ -198,7 +200,7 @@ $("#game").on("touchmove", function (e){
 	//console.log("touchmove(start):", {x, y}, touch.screen);
 	
 	const dx = x - touch.screen.x,
-		dy = y - touch.screen.y;
+		dy = y - touch.screen.y; //与上次变化量
 	
 	touch.screen.x = x, touch.screen.y = y;
 	
@@ -213,7 +215,7 @@ $("#game").on("touchmove", function (e){
 	if ( (touch.screen.x0 - x) **2+
 		(touch.screen.y0 - y) **2
 		>= 36*36 //误差36px
-	) touch.screen.operation = false; //停止操作
+	) touch.screen.valid = false; //无效操作 仅滑动屏幕
 	
 	return false;
 });
@@ -226,18 +228,21 @@ $("#game").on("touchend", function (e){
 	const {pageX: x, pageY: y} = e.originalEvent.changedTouches[0];
 	//console.log("touchend(screen):", {x, y}, touch.screen);
 	
-	if (touch.screen.id !== null){ //短按（放置）
-		clearTimeout(touch.screen.id); //防止长按
-		touch.screen.id = null;
-		
-		if (touch.screen.operation)
-			Events.startPlace(); //开始放置
-		
-	}else{ //长按抬起
+	if (touch.screen.id === null){ //长按抬起
 		Events.endDig();
+		
+	}else{ //短按抬起（放置）
+		clearTimeout(touch.screen.id); //防止长按
+		
+		if (touch.screen.valid)
+			if (Events.placing){ //正在放置
+				Events.endPlace(); //结束放置
+			}else{ //不在放置
+				Events.startPlace(); //开始放置
+			}
 	}
 	
-	touch.screen.x = touch.screen.y = touch.screen.x0 = touch.screen.y0 = touch.screen.operation = null;
+	touch.screen.x = touch.screen.y = touch.screen.x0 = touch.screen.y0 = touch.screen.id = touch.screen.valid = null;
 	
 	return false;
 });
@@ -251,7 +256,7 @@ $("#game").on("touchcancel", function (e){
 	//console.log("touchcancel(screen):", {x, y}, touch.screen);
 	
 	clearTimeout(touch.screen.id);
-	touch.screen.x = touch.screen.y = touch.screen.x0 = touch.screen.y0 = touch.screen.operation = touch.screen.id = null;
+	touch.screen.x = touch.screen.y = touch.screen.x0 = touch.screen.y0 = touch.screen.id = touch.screen.valid =null;
 	
 	return false;
 });

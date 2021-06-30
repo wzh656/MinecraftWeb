@@ -334,7 +334,7 @@ class ChunkMap{
 			loaded,
 			attr:{
 				size: Object.or( //取默认值
-					block.get("attr", "block", "size"),
+					block.get("attr", "entityBlock", "size"),
 					{x0:0, x1:100, y0:0, y1:100, z0:0, z1:100}
 				),
 				transparent: block.get("attr", "block", "transparent"),
@@ -354,7 +354,7 @@ class ChunkMap{
 			}
 		} = this.getShould(x, y, z);
 		
-		if (thisBlock.block === null) return; //空气
+		if (thisBlock.name == "空气") return; //空气
 		
 		const rule = [
 				/* x,y,z偏移量 正方向 反方向 其他方向 */

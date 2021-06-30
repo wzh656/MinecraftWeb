@@ -2,9 +2,13 @@ const Events = {
 	/**
 	* 通用操作
 	*/
+	digging: false, //正在挖掘
 	digId: null,
 	/* 开始挖掘 */
 	startDig(){
+		console.log("startDig")
+		
+		//获取物体和方块
 		const obj = ray2D().filter(obj => obj.object instanceof THREE.Mesh)[0]; //Mesh物体
 		if (!obj) return;
 		
@@ -35,6 +39,9 @@ const Events = {
 		
 		console.log("startDig","digSpeed:", digSpeed*time.getSpeed(), "cm³/s, ", 1e6/digSpeed/time.getSpeed(), "s/cm")
 		
+		this.digging = true; //正在挖掘
+		
+		//转化为实体方块
 		let entityBlock;
 		switch (thing.type){
 			case "Block": //方块 转化为实体方块
@@ -50,12 +57,14 @@ const Events = {
 				break;
 		}
 		
+		//挖掘
 		entityBlock.set("attr","entityBlock","size","y1", entityBlock.get("attr","entityBlock","size","y1")||100);
 		let take; //拿走的方块
 		this.digId = time.setInterval(()=>{
 			if (entityBlock.attr.entityBlock.size.y1 <= 0){ //挖掘结束
 				console.log("dig over")
 				time.clearInterval(this.digId);
+				this.digging = false; //挖掘结束
 				return deskgood.remove( entityBlock ); //删除方块
 			}
 			
@@ -81,6 +90,9 @@ const Events = {
 	
 	/* 结束挖掘 */
 	endDig(){
+		console.log("endDig")
+		
+		//获取物体和方块
 		const obj = ray2D().filter(obj => obj.object instanceof THREE.Mesh)[0]; //Mesh物体
 		if (!obj) return;
 		
@@ -92,19 +104,24 @@ const Events = {
 		) return;
 		
 		console.log("endDig")
+		this.digging = false; //挖掘结束
 		time.clearInterval(this.digId);
 	},
 	
 	
 	
+	placing: false, //正在放置
 	/* 开始放置 */
 	startPlace(){
+		console.log("startPlace")
+		
 		//手上是否有效方块
 		const hold = deskgood.hold[deskgood.choice];
 		if ( !(hold instanceof Block) &&
 			!(hold instanceof Entity) //非方块非实体（空气）
 		) return;
 		
+		//获取物体和方块
 		const obj = ray2D().filter(obj => obj.object instanceof THREE.Mesh)[0]; //Mesh物体
 		if (!obj) return;
 		
@@ -164,14 +181,20 @@ const Events = {
 			hold.get("attr", "block", "through") !== true
 		)  return print("想卡死吗？还往腿上放方块！", "往腿上放方块"); //放到腿上
 		
-		deskgood.place(hold, pos); //放置方块 单位:m
+		this.placing = true; //正在放置
 		
+		deskgood.place(hold, pos); //放置方块 单位:m
 		deskgood.hold.delete(deskgood.choice); //删除手里的方块
+		
+		this.placing = false; //结束放置
 	},
 	
 	
 	/* 结束放置 */
 	endPlace(){
+		console.log("endPlace")
+		
+		//获取物体和方块
 		const obj = ray2D().filter(obj => obj.object instanceof THREE.Mesh)[0]; //Mesh物体
 		if (!obj) return;
 		
@@ -212,6 +235,8 @@ const Events = {
 			default:
 				throw ["faceIndex wrong:", obj.faceIndex];
 		}
+		
+		this.placing = false; //结束放置
 	},
 	
 	
@@ -224,11 +249,11 @@ const Events = {
 	mouseWheelScrollUp(){
 		if ( keydown.key.has(16) ){ //shift
 			console.log("shift+上滚轮");
-			time.tmpSpeed = time.tmpSpeed*1.5; //时间流逝加速
+			time.tmpSpeed *= 1.5; //时间流逝加速
 			
 		}else{
 			console.log("上滚轮");
-			let before = deskgood.choice; //之前的选择
+			const before = deskgood.choice; //之前的选择
 			if ( deskgood.hold[before] && //切换前事件
 				eval(deskgood.hold[before].get("attr", "onChangeLeave")) === false //取消事件
 			) return;
@@ -250,7 +275,7 @@ const Events = {
 	mouseWheelScrollDown(){
 		if ( keydown.key.has(16) ){ //shift
 			console.log("shift+下滚轮");
-			time.tmpSpeed = time.tmpSpeed/1.5; //时间流逝减慢
+			time.tmpSpeed /= 1.5; //时间流逝减慢
 			
 		}else{
 			console.log("下滚轮");
@@ -269,5 +294,12 @@ const Events = {
 			
 			deskgood.hold.update(); //更新选择
 		}
+	},
+	
+	
+	/* 鼠标中键按下 */
+	mouseWheelDown(){
+		console.log("鼠标中键按下");
+		time.tmpSpeed = 1;
 	}
 };
