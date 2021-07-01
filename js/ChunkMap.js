@@ -773,8 +773,8 @@ class ChunkMap{
 		x=Math.round(x), z=Math.round(z); //规范化
 		
 		const arr = [];
-		for (const i in this.chunks)			
-			for (const j in this.chunks[i])
+		for (const i of Object.keys(this.chunks))
+			for (const j of Object.keys(this.chunks[i]))
 				if ( this.chunks[i][j].status !== undefined ) // true或false
 					arr.push([i, j])
 		
@@ -785,8 +785,8 @@ class ChunkMap{
 		x=Math.round(x), z=Math.round(z); //规范化
 		
 		const arr = [];
-		for (const i in this.chunks)			
-			for (const j in this.chunks[i])
+		for (const i of Object.keys(this.chunks))
+			for (const j of Object.keys(this.chunks[i]))
 				if ( this.chunks[i][j].status === true )
 					arr.push([i, j])
 		
@@ -2281,7 +2281,7 @@ class ChunkMap{
 					loading++;
 					const [cX, cZ] = i;
 					//卸载区块
-					this.unloadChunkAsync(cX, cZ, {
+					this.unloadChunkGenerator(cX, cZ, {
 						breakTime: 16,
 						progressCallback: (v)=>{
 							loading -= 1/(this.size.x);

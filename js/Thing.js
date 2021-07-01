@@ -646,3 +646,4 @@ class Tool extends Thing{
 		}
 	}
 }
+Tool.prototype.type = "Tool"; //名称

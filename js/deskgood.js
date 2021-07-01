@@ -712,15 +712,12 @@ const deskgood = { //桌子好
 		const attr = JSON.stringify(thing.attr).slice(1,-1),
 			cX = Math.round(x/map.size.x),
 			cZ = Math.round(z/map.size.z);
-		map.chunks[cX][cZ].edit = map.chunks[cX][cZ].edit.filter(v =>
-			v.x != x && v.y != y && v.z != z
-		); //删除重复
-		/*for (const [i, item] of Object.entries(map.chunks[cX][cZ].edit) )
-			if (
-				item.x == x &&
-				item.y == y &&
-				item.z == z
-			) map.chunks[cX][cX].edit.splice(i,1); //删除重复*/
+		for (let i=map.chunks[cX][cZ].edit.length-1; i>=0; i--){ //删除数组元素需倒序
+			v = map.chunks[cX][cZ].edit[i];
+			if (v.x == x && v.y == y && v.z == z)
+				map.chunks[cX][cZ].edit.splice(i, 1); //删除重复
+		}
+		
 		map.chunks[cX][cZ].edit.push({
 			type: 0,
 			x,
@@ -777,9 +774,8 @@ const deskgood = { //桌子好
 			thing.entity.mesh.position.clone().divideScalar(100).round()
 			: thing.block.mesh.position.clone().divideScalar(100).round(); //规范化 单位:m
 		
-		if ( thing &&
-			eval(thing.get("attr", "block", "onRemove")) === false //移除事件
-		) return;
+		//移除事件
+		if ( eval(thing.get("attr", "block", "onRemove")) === false ) return;
 		
 		console.log("deskgood.remove", {x,y,z}, thing)
 		
@@ -787,15 +783,12 @@ const deskgood = { //桌子好
 		
 		const cX = Math.round(x/map.size.x),
 			cZ = Math.round(z/map.size.z);
-		map.chunks[cX][cZ].edit = map.chunks[cX][cZ].edit.filter(v =>
-			v.x != x && v.y != y && v.z != z
-		); //删除重复
-		/*for (const [i, item] of Object.entries(map.chunks[cX][cZ].edit) )
-			if (
-				item.x == x &&
-				item.y == y &&
-				item.z == z
-			) map.chunks[cX][cZ].edit.splice(i,1); //删除重复*/
+		for (let i=map.chunks[cX][cZ].edit.length-1; i>=0; i--){ //删除数组元素需倒序
+			v = map.chunks[cX][cZ].edit[i];
+			if (v.x == x && v.y == y && v.z == z)
+				map.chunks[cX][cZ].edit.splice(i, 1); //删除重复
+		}
+		
 		map.chunks[cX][cZ].edit.push({
 			type: 0,
 			x,

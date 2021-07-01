@@ -6,7 +6,7 @@ const Events = {
 	digId: null,
 	/* 开始挖掘 */
 	startDig(){
-		console.log("startDig")
+		console.log("try startDig")
 		
 		//获取物体和方块
 		const obj = ray2D().filter(obj => obj.object instanceof THREE.Mesh)[0]; //Mesh物体
@@ -16,9 +16,7 @@ const Events = {
 			hold = deskgood.hold[deskgood.choice]; //挖掘工具
 		
 		//处理事件
-		if ( thing &&
-			eval(thing.get("attr", "block", "onStartDig")) === false
-		) return;
+		if ( eval(thing.get("attr", "block", "onStartDig")) === false ) return;
 		
 		//是否超出手长
 		if ( obj.object.position .distanceToSquared( deskgood.pos )
@@ -26,20 +24,36 @@ const Events = {
 		) return; //距离**2 >= 手长**2 单位:px=cm
 		
 		//手上空闲
-		const free = !deskgood.hold[deskgood.choice]? deskgood.choice: deskgood.hold.indexOf(null);
-		if (free == -1){
+		let free = deskgood.hold.indexOf(null); //否则 寻找空闲
+		if (hold == null || //空闲
+			(hold.name == thing.name && //同种方块/实体方块可叠加
+			hold.type != "Entity") //但实体不能叠加
+		) free = deskgood.choice;
+		if (free == -1){ //未找到
 			console.warn("deskgood's hands is full!")
-			return print("两只手拿4m³方块已经够多了，反正我是拿不下了", "拿不下方块", 3, "#ff0");
+			return print("东西太多，我拿不下了", "拿不下方块", 3, "#f00");
 		}
 		
 		//挖掘速度
-		const digSpeed = thing.get("attr", "block", "digSpeed", hold? hold.name: "手"); //挖掘速度cm(cm³/s)
+		let digSpeed; //挖掘速度cm(cm³/s)
+		if (hold && hold.type == "Tool"){ //工具挖掘
+			digSpeed = thing.get("attr", "block", "digSpeed", hold.name);
+		}else if (deskgood.hold.indexOf(null) != -1){ //有手空出来挖掘
+			digSpeed = thing.get("attr", "block", "digSpeed", "手");
+		}else{
+			return print("东西太多，我没手挖了", "没手挖方块", 3, "#f00");
+		}
 		if (!digSpeed)
-			return print("当前工具无法挖掘该方块", "无法挖掘", 3, "#ff0");
-		
-		console.log("startDig","digSpeed:", digSpeed*time.getSpeed(), "cm³/s, ", 1e6/digSpeed/time.getSpeed(), "s/cm")
+			return print("当前工具无法挖掘该方块", "无法挖掘", 3, "#f00");
 		
 		this.digging = true; //正在挖掘
+		
+		console.log("startDig", thing, hold, "digSpeed:", digSpeed*time.getSpeed(), "cm³/s, ", 1e6/digSpeed/time.getSpeed(), "s/cm")
+		
+		//手里方块 转化为 实体方块
+		if (hold != null)
+			if (hold.type == "Block") //方块 转化为实体方块
+				hold = deskgood.hold[deskgood.choice] = new EntityBlock(hold);
 		
 		//转化为实体方块
 		let entityBlock;
@@ -59,14 +73,8 @@ const Events = {
 		
 		//挖掘
 		entityBlock.set("attr","entityBlock","size","y1", entityBlock.get("attr","entityBlock","size","y1")||100);
-		let take; //拿走的方块
+		let take = hold; //拿走的方块
 		this.digId = time.setInterval(()=>{
-			if (entityBlock.attr.entityBlock.size.y1 <= 0){ //挖掘结束
-				console.log("dig over")
-				time.clearInterval(this.digId);
-				this.digging = false; //挖掘结束
-				return deskgood.remove( entityBlock ); //删除方块
-			}
 			
 			if (!take){
 				take = entityBlock.cloneAttr();
@@ -80,8 +88,16 @@ const Events = {
 			console.log("Digging", entityBlock.attr.entityBlock.size.y1, take.attr.entityBlock.size.y1)
 			entityBlock.updateSize(); //更新大小
 			
+			if (entityBlock.attr.entityBlock.size.y1 <= 0){ //挖掘结束
+				console.log("endDig")
+				time.clearInterval(this.digId);
+				this.digging = false; //挖掘结束
+				return deskgood.remove( entityBlock ); //删除方块
+			}
+			
 			const {x,y,z} = entityBlock.block.mesh.position.clone() .divideScalar(100).round(); //单位: m
-			map.updateRound(x, y, z, false); //更新周围方块
+			map.updateRound(x, y, z); //更新周围方块
+			
 		}, 1000*1000/digSpeed*1000).id; //挖1cm厚
 		
 		console.log(this.digId, time.ids[this.digId])
@@ -90,7 +106,7 @@ const Events = {
 	
 	/* 结束挖掘 */
 	endDig(){
-		console.log("endDig")
+		console.log("try endDig")
 		
 		//获取物体和方块
 		const obj = ray2D().filter(obj => obj.object instanceof THREE.Mesh)[0]; //Mesh物体
@@ -113,7 +129,7 @@ const Events = {
 	placing: false, //正在放置
 	/* 开始放置 */
 	startPlace(){
-		console.log("startPlace")
+		console.log("try startPlace")
 		
 		//手上是否有效方块
 		const hold = deskgood.hold[deskgood.choice];
@@ -192,7 +208,7 @@ const Events = {
 	
 	/* 结束放置 */
 	endPlace(){
-		console.log("endPlace")
+		console.log("try endPlace")
 		
 		//获取物体和方块
 		const obj = ray2D().filter(obj => obj.object instanceof THREE.Mesh)[0]; //Mesh物体
@@ -237,6 +253,8 @@ const Events = {
 		}
 		
 		this.placing = false; //结束放置
+		
+		console.log("endPlace")
 	},
 	
 	

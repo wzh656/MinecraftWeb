@@ -78,7 +78,8 @@ document.addEventListener("mousemove", function (e){
 	mouse.choice.name = map.get(
 		get.object.position.x/100,
 		get.object.position.y/100,
-		get.object.position.z/100
+		get.object.position.z/100,
+		true, true
 	).name;
 	
 	if (mouse.choice.view){

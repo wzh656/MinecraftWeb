@@ -1044,6 +1044,10 @@ if (device < 0){ //手机
 			time.setStop(stop);
 			$("#pause").css("display", "inline-block");
 			DB.save();
+			if (Events.digging)
+				Events.endDig(); //停止挖掘
+			if (Events.placing)
+				Events.endPlace(); //停止放置
 		}
 	});
 	
