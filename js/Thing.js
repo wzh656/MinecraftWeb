@@ -24,6 +24,8 @@ class Thing{
 		//属性
 		this.attr = {};
 		if (opt.attr){
+			if (opt.attr.stackable) this.attr.stackable = opt.attr.stackable; //可叠加
+			
 			if (opt.attr.onChangeTo) this.attr.onChangeTo = opt.attr.onChangeTo; //choice切换到
 			if (opt.attr.onChangeLeave) this.attr.onChangeLeave = opt.attr.onChangeLeave; //choice切换离开
 			if (opt.attr.onPutToHead) this.attr.onPutToHead = opt.attr.onPutToHead; //放到头上
@@ -41,10 +43,11 @@ class Thing{
 		}
 	}
 	
+	
 	//获取属性
 	get(...attr){
 		let this_part = this,
-			template_part = this.constructor.prototype.TEMPLATES[ this.name ];
+			template_part = this.constructor.TEMPLATES[ this.name ];
 		//let type = !!this.template;
 		for (const i of attr){
 			if (this_part && this_part[i]){ //this_part不为undefined 且 可获取下一个属性
@@ -61,6 +64,7 @@ class Thing{
 		}
 		return this_part===undefined? template_part: this_part;
 	}
+	
 	//设置属性
 	set(...attr){
 		let this_part = this,
@@ -73,6 +77,7 @@ class Thing{
 		this_part[attr.pop()] = value;
 		return this;
 	}
+	
 	//判断是否拥有属性
 	have(...attr){
 		let part = this;
@@ -82,11 +87,14 @@ class Thing{
 		}
 		return true;
 	}
+	
 	//克隆
 	clone(){
 		return new this.constructor(this);
 	}
-	cloneAttr(){ //只保留属性
+	
+	//只保留属性克隆
+	cloneAttr(){
 		return new this.constructor({
 			name: this.name,
 			view: this.view,
@@ -95,7 +103,7 @@ class Thing{
 	}
 }
 Thing.prototype.type = "Thing"; //名称
-Thing.prototype.TEMPLATES = []; //模板
+Thing.TEMPLATES = []; //模板
 
 
 /*
@@ -167,6 +175,7 @@ class Block extends Thing{
 			
 			if (opt.attr.block.transparent) this.attr.block.transparent = opt.attr.block.transparent; //透明方块（其他方块必须显示，自己不可隐藏）
 			if (opt.attr.block.through) this.attr.block.through = opt.attr.block.through; //允许穿过
+			if (opt.attr.block.digGet) this.attr.block.digGet = opt.attr.block.digGet; //挖掘获得
 			
 			if (opt.attr.block.onStartDig) this.attr.block.onStartDig = opt.attr.block.onStartDig; //开始挖掘
 			if (opt.attr.block.onEndDig) this.attr.block.onEndDig = opt.attr.block.onEndDig; //结束挖掘
@@ -322,6 +331,11 @@ class Block extends Thing{
 		this.set("block", "mesh", null); //半保留
 		return this;
 	}
+	
+	//转换为实体方块
+	toEntityBlock(){
+		return new EntityBlock(this);
+	}
 }
 Block.prototype.type = "Block"; //名称
 Block.prototype.normalGeometry = new THREE.BoxBufferGeometry(100, 100, 100); //通用几何体
@@ -348,6 +362,7 @@ class EntityBlock extends Block{
 		}
 	}
 	
+	//更新实体方块大小
 	updateSize(){
 		const size = {
 			x0: this.get("attr", "entityBlock", "size", "x0") || 0,

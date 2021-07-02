@@ -413,7 +413,7 @@ class ChunkMap{
 					needLoad = needLoad || visible;
 					thisVisible.push( visible ); //方块透明 显示
 				}else{ //继承模板
-					const visible = Block.prototype.TEMPLATES[ thatBlock.name ].attr.block.transparent;
+					const visible = Block.TEMPLATES[ thatBlock.name ].attr.block.transparent;
 					needLoad = needLoad || visible;
 					thisVisible.push( visible ); //方块透明 显示
 				}
@@ -1238,7 +1238,7 @@ class ChunkMap{
 					thisSize = block.attr && block.attr.block && block.attr.block.size || {}, //本方块大小
 					thisTransparent = (block.attr && block.attr.block && block.attr.block.transparent!==undefined)? //有属性
 						block.attr.block.transparent:
-						Block.prototype.TEMPLATES[ block.name ].attr.block.noTransparent; //是否可以隐藏
+						Block.TEMPLATES[ block.name ].attr.block.noTransparent; //是否可以隐藏
 				Object.map(direction, (v,i)=> thisSize[i] = thisSize[i]===undefined? v: thisSize[i]); //默认值
 				
 				let needLoad = false;
@@ -1282,7 +1282,7 @@ class ChunkMap{
 							needLoad = needLoad || visible;
 							visibleValue.push( visible ); //方块透明 显示
 						}else{ //继承模板
-							const visible = Block.prototype.TEMPLATES[ columns[px][pz][py].name ].attr.block.transparent;
+							const visible = Block.TEMPLATES[ columns[px][pz][py].name ].attr.block.transparent;
 							needLoad = needLoad || visible;
 							visibleValue.push( visible ); //方块透明 显示
 						}
@@ -1308,12 +1308,12 @@ class ChunkMap{
 					// x,z,y
 					/*const noTransparent =  thisBlock.get("attr", "block", "noTransparent"),
 						visibleValue = [
-							!( columns[dx+1] && columns[dx+1][y] && columns[dx+1][y][dz] && columns[dx+1][y][dz].id && !((columns[dx+1][y][dz].attr&&columns[dx+1][y][dz].attr.block.transparent)||Block.prototype.TEMPLATES[columns[dx+1][y][dz].id].attr.block.transparent)) || noTransparent,
-							!( columns[dx-1] && columns[dx-1][y] && columns[dx-1][y][dz] && columns[dx-1][y][dz].id && !((columns[dx-1][y][dz].attr&&columns[dx-1][y][dz].attr.block.transparent)||Block.prototype.TEMPLATES[columns[dx-1][y][dz].id].attr.block.transparent)) || noTransparent,
-							!( columns[dx] && columns[dx][y+1] && columns[dx][y+1][dz] && columns[dx][y+1][dz].id && !((columns[dx][y+1][dz].attr&&columns[dx][y+1][dz].attr.block.transparent)||Block.prototype.TEMPLATES[columns[dx][y+1][dz].id].attr.block.transparent)) || noTransparent,
-							!( columns[dx] && columns[dx][y-1] &&  columns[dx][y-1][dz] && columns[dx][y-1][dz].id && !((columns[dx][y-1][dz].attr&&columns[dx][y-1][dz].attr.block.transparent)||Block.prototype.TEMPLATES[columns[dx][y-1][dz].id].attr.block.transparent)) || noTransparent,
-							!( columns[dx] && columns[dx][y] && columns[dx][y][dz+1] && columns[dx][y][dz+1].id && !((columns[dx][y][dz+1].attr&&columns[dx][y][dz+1].attr.block.transparent)||Block.prototype.TEMPLATES[columns[dx][y][dz+1].id].attr.block.transparent)) || noTransparent,
-							!( columns[dx] && columns[dx][y] && columns[dx][y][dz-1] && columns[dx][y][dz-1].id && !((columns[dx][y][dz-1].attr&&columns[dx][y][dz-1].attr.block.transparent)||Block.prototype.TEMPLATES[columns[dx][y][dz-1].id].attr.block.transparent)) || noTransparent
+							!( columns[dx+1] && columns[dx+1][y] && columns[dx+1][y][dz] && columns[dx+1][y][dz].id && !((columns[dx+1][y][dz].attr&&columns[dx+1][y][dz].attr.block.transparent)||Block.TEMPLATES[columns[dx+1][y][dz].id].attr.block.transparent)) || noTransparent,
+							!( columns[dx-1] && columns[dx-1][y] && columns[dx-1][y][dz] && columns[dx-1][y][dz].id && !((columns[dx-1][y][dz].attr&&columns[dx-1][y][dz].attr.block.transparent)||Block.TEMPLATES[columns[dx-1][y][dz].id].attr.block.transparent)) || noTransparent,
+							!( columns[dx] && columns[dx][y+1] && columns[dx][y+1][dz] && columns[dx][y+1][dz].id && !((columns[dx][y+1][dz].attr&&columns[dx][y+1][dz].attr.block.transparent)||Block.TEMPLATES[columns[dx][y+1][dz].id].attr.block.transparent)) || noTransparent,
+							!( columns[dx] && columns[dx][y-1] &&  columns[dx][y-1][dz] && columns[dx][y-1][dz].id && !((columns[dx][y-1][dz].attr&&columns[dx][y-1][dz].attr.block.transparent)||Block.TEMPLATES[columns[dx][y-1][dz].id].attr.block.transparent)) || noTransparent,
+							!( columns[dx] && columns[dx][y] && columns[dx][y][dz+1] && columns[dx][y][dz+1].id && !((columns[dx][y][dz+1].attr&&columns[dx][y][dz+1].attr.block.transparent)||Block.TEMPLATES[columns[dx][y][dz+1].id].attr.block.transparent)) || noTransparent,
+							!( columns[dx] && columns[dx][y] && columns[dx][y][dz-1] && columns[dx][y][dz-1].id && !((columns[dx][y][dz-1].attr&&columns[dx][y][dz-1].attr.block.transparent)||Block.TEMPLATES[columns[dx][y][dz-1].id].attr.block.transparent)) || noTransparent
 							// 没有方块 或 有方块非透明 则显示  或  自身透明 也显示
 						],*/
 					

@@ -15,45 +15,43 @@ const Events = {
 		const thing = obj.object.userData.thingObject, //物体对象
 			hold = deskgood.hold[deskgood.choice]; //挖掘工具
 		
-		//处理事件
-		if ( eval(thing.get("attr", "block", "onStartDig")) === false ) return;
-		
 		//是否超出手长
 		if ( obj.object.position .distanceToSquared( deskgood.pos )
 			>= deskgood.handLength * deskgood.handLength
 		) return; //距离**2 >= 手长**2 单位:px=cm
 		
-		//手上空闲
-		let free = deskgood.hold.indexOf(null); //否则 寻找空闲
-		if (hold == null || //空闲
-			(hold.name == thing.name && //同种方块/实体方块可叠加
-			hold.type != "Entity") //但实体不能叠加
-		) free = deskgood.choice;
-		if (free == -1){ //未找到
-			console.warn("deskgood's hands is full!")
-			return print("东西太多，我拿不下了", "拿不下方块", 3, "#f00");
+		let free, //手上空闲位置
+			digSpeed; //挖掘速度 单位: cm³/s
+		if (hold == null){
+			free = deskgood.choice;
+			digSpeed = thing.get("attr", "block", "digSpeed", "手");
+			
+		}else if (hold.type == "Entity"){ //实体无法用于挖掘
+			return print("当前工具无法挖掘该方块", "无法挖掘", 3, "#f00");
+			
+		}else if (hold.type == "Tool"){ //工具挖掘
+			free = deskgood.hold.indexOf(null);
+			if (free == -1)
+				return print("东西太多，我拿不下了", "拿不下方块", 3, "#f00");
+			digSpeed = thing.get("attr", "block", "digSpeed", hold.name);
+			
+		}else{ //方块或实体方块
+			if (hold.name != thing.name || hold.get("attr", "stackable") != true) //非同种物体 或 不可叠加
+				return print("当前工具无法挖掘该方块", "无法挖掘", 3, "#f00");
+			if (deskgood.hold.indexOf(null) == -1) //空出手来挖
+				return print("东西太多，我没手挖了", "没手挖方块", 3, "#f00");
+			free = deskgood.choice; //挖到叠加
+			digSpeed = thing.get("attr", "block", "digSpeed", "手"); //用手挖掘
+			if (hold.type == "Block") //方块 变为 实体方块
+				hold = deskgood.hold[deskgood.choice] = hold.toEntityBlock();
 		}
 		
-		//挖掘速度
-		let digSpeed; //挖掘速度cm(cm³/s)
-		if (hold && hold.type == "Tool"){ //工具挖掘
-			digSpeed = thing.get("attr", "block", "digSpeed", hold.name);
-		}else if (deskgood.hold.indexOf(null) != -1){ //有手空出来挖掘
-			digSpeed = thing.get("attr", "block", "digSpeed", "手");
-		}else{
-			return print("东西太多，我没手挖了", "没手挖方块", 3, "#f00");
-		}
 		if (!digSpeed)
 			return print("当前工具无法挖掘该方块", "无法挖掘", 3, "#f00");
 		
 		this.digging = true; //正在挖掘
 		
 		console.log("startDig", thing, hold, "digSpeed:", digSpeed*time.getSpeed(), "cm³/s, ", 1e6/digSpeed/time.getSpeed(), "s/cm")
-		
-		//手里方块 转化为 实体方块
-		if (hold != null)
-			if (hold.type == "Block") //方块 转化为实体方块
-				hold = deskgood.hold[deskgood.choice] = new EntityBlock(hold);
 		
 		//转化为实体方块
 		let entityBlock;
@@ -70,6 +68,9 @@ const Events = {
 			case "Entity": //实体
 				break;
 		}
+		
+		//处理事件
+		if ( eval(thing.get("attr", "block", "onStartDig")) === false ) return;
 		
 		//挖掘
 		entityBlock.set("attr","entityBlock","size","y1", entityBlock.get("attr","entityBlock","size","y1")||100);

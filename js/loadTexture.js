@@ -9,7 +9,7 @@ for (let i=1; i<REQUIRE_PICTURE.length; i++)
 // 加载贴图
 let TEXTURES;
 task.then(()=>{
-	const keys = Object.keys(Thing.prototype.TEMPLATES); //（有序）
+	const keys = Object.keys(Thing.TEMPLATES); //（有序）
 	TEXTURES = Img.grid( Img.get("./img/textures/textures.png"), 16, 16 );
 	
 	for (let x=0, len=TEXTURES.length; x<len; x++)
@@ -17,7 +17,7 @@ task.then(()=>{
 			TEXTURES[x][y] = Img.scale(TEXTURES[x][y], 64, 64);
 	
 	for (const i of keys.slice(1)){ //除去空气
-		const block = Thing.prototype.TEMPLATES[i];
+		const block = Thing.TEMPLATES[i];
 		if (!(block instanceof Block)) continue; //不属于方块类
 		
 		for (let j=0; j<block.block.face.length; j++){
