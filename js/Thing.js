@@ -36,7 +36,7 @@ class Thing{
 			
 			/*if (opt.attr.hardness) this.attr.hardness = opt.attr.hardness; //硬度
 			if (opt.attr.durability) this.attr.durability = opt.attr.durability; //耐久
-			if (opt.attr.digSpeed) this.attr.digSpeed = opt.attr.digSpeed; //挖掘速度 m³/s
+			if (opt.attr.idealDigSpeed) this.attr.idealDigSpeed = opt.attr.idealDigSpeed; //理想挖掘速度 m³/s
 			if (opt.attr.durabilityLoss) this.attr.durabilityLoss = opt.attr.durabilityLoss; //耐久损耗 /m³
 			if (opt.attr.hungerLoss) this.attr.hungerLoss = opt.attr.hungerLoss; //饥饿损耗 /m³
 			if (opt.attr.lifeLoss) this.attr.lifeLoss = opt.attr.lifeLoss; //生命损耗 /m³*/
@@ -93,12 +93,12 @@ class Thing{
 		return new this.constructor(this);
 	}
 	
-	//只保留属性克隆
-	cloneAttr(){
+	//只保留属性 或 重设属性 克隆
+	cloneAttr(attr){
 		return new this.constructor({
 			name: this.name,
 			view: this.view,
-			attr: this.attr
+			attr: attr || this.attr
 		});
 	}
 }
@@ -143,24 +143,15 @@ class Block extends Thing{
 		//属性
 		this.attr.block = {};
 		if (opt.attr && opt.attr.block){
-			if (opt.attr.block.size){ //大小
-				this.attr.block.size = {};
-				if (opt.attr.block.size.x0) this.attr.block.size.x0 = opt.attr.block.size.x0;
-				if (opt.attr.block.size.x1) this.attr.block.size.x1 = opt.attr.block.size.x1;
-				if (opt.attr.block.size.y0) this.attr.block.size.y0 = opt.attr.block.size.y0;
-				if (opt.attr.block.size.y1) this.attr.block.size.y1 = opt.attr.block.size.y1;
-				if (opt.attr.block.size.z0) this.attr.block.size.z0 = opt.attr.block.size.z0;
-				if (opt.attr.block.size.z1) this.attr.block.size.z1 = opt.attr.block.size.z1;
-			}
 			
 			if (opt.attr.block.hardness) this.attr.block.hardness = opt.attr.block.hardness; //硬度
-			if (opt.attr.block.digSpeed){ //挖掘速度(cm³/s)
-				if (typeof opt.attr.block.digSpeed == "number"){
-					this.attr.block.digSpeed = opt.attr.block.digSpeed;
+			if (opt.attr.block.idealDigSpeed){ //理想挖掘速度(cm³/s)
+				if (typeof opt.attr.block.idealDigSpeed == "number"){
+					this.attr.block.idealDigSpeed = opt.attr.block.idealDigSpeed;
 				}else{
-					this.attr.block.digSpeed = {};
-					for (const [name, value] of Object.entries(opt.attr.block.digSpeed))
-						this.attr.block.digSpeed[name] = +value;
+					this.attr.block.idealDigSpeed = {};
+					for (const [name, value] of Object.entries(opt.attr.block.idealDigSpeed))
+						this.attr.block.idealDigSpeed[name] = +value;
 				}
 			}
 			if (opt.attr.block.placeSpeed){ //放置速度(cm³/s)

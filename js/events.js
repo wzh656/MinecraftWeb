@@ -16,27 +16,27 @@ const Events = {
 		switch (obj.faceIndex){
 			case 0:
 			case 1:
-				direction = "x+";
+				direction = "x1";
 				break;
 			case 2:
 			case 3:
-				direction = "x-";
+				direction = "x0";
 				break;
 			case 4:
 			case 5:
-				direction = "y+";
+				direction = "y1";
 				break;
 			case 6:
 			case 7:
-				direction = "y-";
+				direction = "y0";
 				break;
 			case 8:
 			case 9:
-				direction = "z+";
+				direction = "z1";
 				break;
 			case 10:
 			case 11:
-				direction = "z-";
+				direction = "z0";
 				break;
 		}
 		
@@ -49,18 +49,19 @@ const Events = {
 		) return; //距离**2 >= 手长**2 单位:px=cm
 		
 		let free, //手上空闲位置
-			digSpeed, //挖掘速度 单位: cm³/s
+			idealDigSpeed, //理想挖掘速度 单位: cm³/s
 			take; //拿走的方块
 		//判断hold类型
+			//用手挖掘
 		if (hold == null){
 			free = deskgood.choice;
-			digSpeed = thing.get("attr", "block", "digSpeed", "手");
+			idealDigSpeed = thing.get("attr", "block", "idealDigSpeed", "手");
 			
-		//实体无法用于挖掘
+			//实体无法用于挖掘
 		}else if (hold.type == "Entity"){
 			return print("当前工具无法挖掘该方块", "无法挖掘", 3, "#f00");
 			
-		//用工具挖掘
+			//用工具挖掘
 		}else if (hold.type == "Tool"){
 			const left = deskgood.hold[deskgood.choice-1];
 			if (left &&
@@ -74,9 +75,9 @@ const Events = {
 				if (free == -1)
 					return print("东西太多，我拿不下了", "拿不下方块", 3, "#f00");
 			}
-			digSpeed = thing.get("attr", "block", "digSpeed", hold.name);
+			idealDigSpeed = thing.get("attr", "block", "idealDigSpeed", hold.name);
 			
-		//方块或实体方块
+			//方块或实体方块
 		}else{
 			if (hold.name != thing.name || hold.get("attr", "stackable") != true) //非同种物体 或 不可叠加
 				return print("当前工具无法挖掘该方块", "无法挖掘", 3, "#f00");
@@ -85,12 +86,12 @@ const Events = {
 				return print("东西太多，我没办法空出手来挖了", "没手挖方块", 3, "#f00");
 			
 			free = deskgood.choice; //挖到叠加
-			digSpeed = thing.get("attr", "block", "digSpeed", "手"); //用手挖掘
+			idealDigSpeed = thing.get("attr", "block", "idealDigSpeed", "手"); //用手挖掘
 			take = hold;
 			if (hold.type == "Block") //要叠加的方块 转化为 实体方块
 				hold = deskgood.hold[deskgood.choice] = hold.toEntityBlock();
 		}
-		if (!digSpeed)
+		if (!idealDigSpeed)
 			return print("当前工具无法挖掘该方块", "无法挖掘", 3, "#f00");
 		
 		//挖掘的物体 转化为 实体方块
@@ -105,27 +106,55 @@ const Events = {
 			case "EntityBlock": //实体方块
 				entityBlock = thing;
 				break;
-			case "Entity": //实体
+			case "Entity": //实体 无法挖掘 用事件特殊处理
 				break;
 		}
-		entityBlock.set("attr","entityBlock","size","y1", entityBlock.get("attr","entityBlock","size","y1")||100);
+		entityBlock.set("attr","entityBlock","size",direction,
+			entityBlock.get("attr","entityBlock","size",direction) || 100
+		); //保证有值
+		
+		let S; //面积
+		switch (direction[0]){
+			case "x": //y*z
+				S = (entityBlock.get("attr","entityBlock","size","y1") || 100 -
+						entityBlock.get("attr","entityBlock","size","y0") || 0) *
+					(entityBlock.get("attr","entityBlock","size","z1") || 100 -
+						entityBlock.get("attr","entityBlock","size","z0") || 0);
+				break;
+			case "y": //x*z
+				S = (entityBlock.get("attr","entityBlock","size","x1") || 100 -
+						entityBlock.get("attr","entityBlock","size","x0") || 0) *
+					(entityBlock.get("attr","entityBlock","size","z1") || 100 -
+						entityBlock.get("attr","entityBlock","size","z0") || 0);
+				break;
+			case "z": //x*y
+				S = (entityBlock.get("attr","entityBlock","size","x1") || 100 -
+						entityBlock.get("attr","entityBlock","size","x0") || 0) *
+					(entityBlock.get("attr","entityBlock","size","y1") || 100 -
+						entityBlock.get("attr","entityBlock","size","y0") || 0);
+				break;
+		}
 		
 		this.digging = true; //正在挖掘
-		console.log("startDig", thing, hold, "digSpeed:", digSpeed*time.getSpeed(), "cm³/s, ", 1e6/digSpeed/time.getSpeed(), "s/cm")
+		console.log("startDig", {thing, hold, direction},
+			"idealDigSpeed:", idealDigSpeed*time.getSpeed(), "cm³/s, ", S/idealDigSpeed/time.getSpeed(), "s/cm") //现实时间
 		
 		//处理事件
 		if ( eval(thing.get("attr", "block", "onStartDig")) === false ) return;
 		
 		//挖掘
-		let take;
-		this.digId = time.setInterval(()=>{
+		const func = ()=>{
 			
 			if (!take){
 				const digGet = entityBlock.get("attr", "block", "digGet");
 				if (digGet){
 					take = new EntityBlock({
-						name: entityBlock.get("attr", "block", "digGet"), //挖掘获得
-						attr: entityBlock.get("attr")
+						name: entityBlock.get("attr", "block", "digGet"), //挖掘获得 （仅name）
+						attr: {
+							entityBlock: {
+								size: entityBlock.get("attr", "entityBlock", "size")
+							}
+						}
 					});
 				}else{
 					take = entityBlock.cloneAttr();
@@ -134,25 +163,43 @@ const Events = {
 				deskgood.hold.addOne(take, free); //克隆一个放在手中
 			}
 			
-			entityBlock.attr.entityBlock.size["direction"]--;
-			take.attr.entityBlock.size["direction"]++;
+			entityBlock.attr.entityBlock.size[direction] -= direction[1]*2-1; //0 -> -1, 1 -> 1
+			take.attr.entityBlock.size[direction] += direction[1]*2-1;
 			
-			console.log("Digging", entityBlock.attr.entityBlock.size["direction"], take.attr.entityBlock.size["direction"])
+			console.log("Digging", entityBlock.attr.entityBlock.size[direction], take.attr.entityBlock.size[direction])
 			entityBlock.updateSize(); //更新大小
 			
-			if (entityBlock.attr.entityBlock.size["direction"] <= 0){ //挖掘结束
-				console.log("endDig")
-				time.clearInterval(this.digId);
-				this.digging = false; //挖掘结束
-				return deskgood.remove( entityBlock ); //删除方块
+			if (direction[1] == "0"){ //0: ++
+				if (entityBlock.attr.entityBlock.size[direction]
+					>=
+					entityBlock.attr.entityBlock.size[direction[0] + "1"]
+				){ //挖掘结束
+					console.log("endDig")
+					time.clearInterval(this.digId);
+					this.digging = false; //挖掘结束
+					return deskgood.remove( entityBlock ); //删除方块
+				}
+				
+			}else{ //1: --
+				if (entityBlock.attr.entityBlock.size[direction]
+					<=
+					entityBlock.attr.entityBlock.size[direction[0] + "0"]
+				){ //挖掘结束
+					console.log("endDig")
+					time.clearInterval(this.digId);
+					this.digging = false; //挖掘结束
+					return deskgood.remove( entityBlock ); //删除方块
+				}
 			}
 			
 			const {x,y,z} = entityBlock.block.mesh.position.clone() .divideScalar(100).round(); //单位: m
 			map.updateRound(x, y, z); //更新周围方块
 			
-		}, 1000*1000/digSpeed*1000).id; //挖1cm厚
+			this.digId = time.setTimeout(func, S/idealDigSpeed*rnd_error()).id; // 下一cm
+			
+		};
+		this.digId = time.setTimeout(func, S/idealDigSpeed*rnd_error()).id; // s/cm 游戏时间
 		
-		console.log(this.digId, time.ids[this.digId])
 	},
 	
 	

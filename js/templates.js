@@ -45,7 +45,7 @@ Thing.TEMPLATES["草方块"] = new Block({
 	},
 	attr: {
 		block: {
-			digSpeed: {
+			idealDigSpeed: {
 				"手": 400,
 				
 				"木镐": 200,
@@ -81,7 +81,7 @@ Thing.TEMPLATES["泥土"] = new Block({
 	},
 	attr: {
 		block: {
-			digSpeed: {
+			idealDigSpeed: {
 				"手": 400,
 				
 				"木镐": 200,
@@ -117,7 +117,7 @@ Thing.TEMPLATES["松泥土"] = new Block({
 	},
 	attr: {
 		block: {
-			digSpeed: {
+			idealDigSpeed: {
 				"手": 1000,
 				
 				"木镐": 400,
@@ -153,7 +153,7 @@ Thing.TEMPLATES["石头"] = new Block({
 	},
 	attr: {
 		block: {
-			digSpeed: {
+			idealDigSpeed: {
 				"石镐": 2,
 				"石斧": 2,
 				"石铲": 2,
@@ -181,7 +181,7 @@ Thing.TEMPLATES["碎石"] = new Block({
 	},
 	attr: {
 		block: {
-			digSpeed: {
+			idealDigSpeed: {
 				"手": 800,
 				
 				"木镐": 200,
@@ -215,7 +215,7 @@ Thing.TEMPLATES["沙子"] = new Block({
 	},
 	attr: {
 		block: {
-			digSpeed: {
+			idealDigSpeed: {
 				"手": 1000,
 				
 				"木镐": 400,
@@ -240,7 +240,7 @@ Thing.TEMPLATES["沙子"] = new Block({
 		onPutToFoot: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100-1, z:deskgood.pos.z/100});deskgood.hold.delete(deskgood.choice);false;"
 	}
 });
-Thing.TEMPLATES["细橡木"] = new Block({
+Thing.TEMPLATES["细橡木"] = new EntityBlock({
 	// id: 6.0,
 	name: "细橡木",
 	view: [2,1],
@@ -251,12 +251,14 @@ Thing.TEMPLATES["细橡木"] = new Block({
 	},
 	attr: {
 		block: {
+			idealDigSpeed: {}
+		},
+		entityBlock: {
 			size: {
 				x0: 30, x1: 70,
 				y0: 0, y1: 100,
 				z0: 30, z1: 70
-			},
-			digSpeed: {}
+			}
 		},
 		stackable: false,
 		onPutToHead: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});deskgood.hold.delete(deskgood.choice);message('放到头上', '你自己要把方块放头上的，别怪我');false;",
@@ -278,7 +280,7 @@ Thing.TEMPLATES["疏树叶"] = new Block({
 		block: {
 			transparent: true, //透明方块
 			through: true, //可穿过
-			digSpeed: 10000000
+			idealDigSpeed: 10000000
 		},
 		stackable: false,
 		onPutToHead: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});deskgood.hold.delete(deskgood.choice);message('放到头上', '你自己要把方块放头上的，别怪我');false;",
@@ -300,7 +302,7 @@ Thing.TEMPLATES["密树叶"] = new Block({
 		block: {
 			transparent: true, //透明方块
 			through: true, //可穿过
-			digSpeed: 5000000
+			idealDigSpeed: 5000000
 		},
 		stackable: false,
 		onPutToHead: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});deskgood.hold.delete(deskgood.choice);message('放到头上', '你自己要把方块放头上的，别怪我');false;",
@@ -320,7 +322,7 @@ Thing.TEMPLATES["木板"] = new Block({
 	},
 	attr: {
 		block: {
-			digSpeed: {}
+			idealDigSpeed: {}
 		},
 		stackable: false,
 		onPutToHead: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});deskgood.hold.delete(deskgood.choice);message('放到头上', '你自己要把方块放头上的，别怪我');false;",
@@ -340,7 +342,7 @@ Thing.TEMPLATES["砖"] = new Block({
 	},
 	attr: {
 		block: {
-			digSpeed: {}
+			idealDigSpeed: {}
 		},
 		stackable: false,
 		onPutToHead: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});deskgood.hold.delete(deskgood.choice);deskgood.hold.delete(deskgood.choice);message('放到头上', '你自己要把方块放头上的，别怪我');false;",
@@ -360,7 +362,7 @@ Thing.TEMPLATES["仙人掌"] = new Block({
 	},
 	attr: {
 		block: {
-			digSpeed: {}
+			idealDigSpeed: {}
 		},
 		stackable: false,
 		onPutToHead: "deskgood.place(choice, {x:deskgood.pos.x/100, y:deskgood.pos.y/100, z:deskgood.pos.z/100});deskgood.hold.delete(deskgood.choice);deskgood.hold.delete(deskgood.choice);message('放到头上', '你自己要把方块放头上的，别怪我');false;",

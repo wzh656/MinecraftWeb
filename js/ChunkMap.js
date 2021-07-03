@@ -247,12 +247,10 @@ class ChunkMap{
 		// if (!attr.block) attr.block = {};
 		if (thing.name == "空气"){ //添加空气
 			x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
-			if ( this.get(x, y, z) ){ //有方块（强制移除）
-				for (const i of this.get(x,y,z).block.mesh.material)
-					i.dispose();
-				this.get(x,y,z).block.mesh.geometry.dispose(); //清除内存
-				scene.remove(this.get(x,y,z).block.mesh);
-			}
+			const block = this.get(x, y, z);
+			if ( block ) //有方块（强制移除）
+				this.remove( block );
+			
 			// this.map[x][y][z] = null; //空气
 			this.set(x, y, z, null);
 			/* if (this.map[x][y].every(v => !v))
@@ -287,13 +285,13 @@ class ChunkMap{
 		switch (thing.type){
 			case "Block": //方块
 				scene.remove( thing.block.mesh );
-				thing.deleteMesh();
+				thing.deleteMaterial().deleteGeometry().deleteMesh();
 				
 				delete this.map[x][y][z];
-				if (this.map[x][y].every(v => !v))
+				/* if (this.map[x][y].every(v => !v))
 					delete this.map[x][y];
 				if (this.map[x].every(v => !v))
-					delete this.map[x];
+					delete this.map[x]; */
 				
 				break;
 			case "EntityBlock": //实体方块
@@ -592,7 +590,9 @@ class ChunkMap{
 			return console.warn("updateChunkAsync", x, z, "haven't load");
 		
 		let t0 = new Date(),
-			num = 0;
+			num = 0,
+			stop = [false],
+			stopFunc = () => stop[0] = true;
 		
 		for (let i=dx; i<=this.size[1].x; i++){
 			for (let j=dz; j<=this.size[1].z; j++){
@@ -600,8 +600,9 @@ class ChunkMap{
 				for (let dy=this.size[0].y; dy<=this.size[1].y; dy++)
 					this.update(ox+i, dy, oz+j);
 				
-				if (new Date()-t0 > breakTime) //超时
-					return setTimeout(()=>{
+				if (new Date()-t0 > breakTime){ //超时
+					if (stop[0]) return; //停止
+					setTimeout(()=>{
 						this.updateChunkAsync(x, z, {
 							finishCallback,
 							progressCallback,
@@ -609,6 +610,8 @@ class ChunkMap{
 							breakPoint: {dx:i, dz:j+1}
 						});
 					},0);
+					return stopFunc;
+				}
 				
 			}
 			dz = this.size[0].z;
@@ -616,8 +619,9 @@ class ChunkMap{
 			if (progressCallback)
 				progressCallback( (i-this.size[0].x) / (this.size[1].x-this.size[0].x) );
 			
-			if (++num >= mostSpeed) //超数
-				return setTimeout(()=>{
+			if (++num >= mostSpeed){ //超数
+				if (stop[0]) return; //停止
+				setTimeout(()=>{
 					this.updateChunkAsync(x, z, {
 						finishCallback,
 						progressCallback,
@@ -625,6 +629,8 @@ class ChunkMap{
 						breakPoint: {dx:i+1}
 					});
 				},0);
+				return stopFunc;
+			}
 		}
 		
 		if (finishCallback) finishCallback();
@@ -1292,13 +1298,11 @@ class ChunkMap{
 				if ( needLoad ){ //有面需显示
 					// if (y == 0) console.log(visibleValue)
 					
-					this.addID(new Block({
-						name: block.name,
-						attr: block.attr
-					}), {x,y,z})
+					const thisBlock = Thing.TEMPLATES[block.name].cloneAttr(block.attr || {});
 					
-					const thisBlock = this.get(x, y, z),
-						material = thisBlock.block.material;
+					this.addID(thisBlock, {x,y,z});
+					
+					const material = thisBlock.block.material;
 					
 					if ( !thisBlock.get("attr", "block", "noTransparent") ) //允许透明
 						for (let i=material.length-1; i>=0; i--)
@@ -1965,17 +1969,18 @@ class ChunkMap{
 		
 		this.startUnloadChunk(x, z); //开始卸载区块
 		
+		//删除方块
 		for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
 			for (let dy=this.size[0].y; dy<=this.size[1].y; dy++)
-				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
-					if ( this.get(ox+dx, dy, oz+dz) ){
-						console.log("delete")
-						for (let i of this.map[ox+dx][dy][oz+dz].block.mesh.material)
-							i.dispose();
-						this.map[ox+dx][dy][oz+dz].block.mesh.geometry.dispose(); //清除内存
-						scene.remove(this.map[ox+dx][dy][oz+dz].block.mesh);
-						delete this.map[ox+dx][dy][oz+dz];
-					}
+				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
+					const block = this.get(ox+dx, dy, oz+dz);
+					if ( block ) this.delete(block);
+				}
+		//删除实体
+		for (const e of this.chunks[x][z].entity){
+			scene.remove(e.block.mesh);
+			e.deleteMaterial().deleteGeometry().deleteMesh();
+		}
 		
 		this.finishUnloadChunk(x, z); //完成卸载区块
 	}
@@ -2006,17 +2011,13 @@ class ChunkMap{
 		
 		let t0 = +new Date(),
 			num = 0;
+		//删除方块
 		for (let i=dx; i<=this.size[1].x; i++){
 			for (let j=dy; j<=this.size[1].y; j++){
 				for (let k=dz; k<=this.size[1].z; k++){
 					
 					const block = this.get(ox+i, j, oz+k);
-					if ( block ){ //非空气 & 非未加载
-						block.block.mesh.material.forEach(v => v.dispose())
-						block.block.mesh.geometry.dispose(); //清除内存
-						scene.remove( block.block.mesh );
-						delete this.map[ox+i][j][oz+k];
-					}
+					if ( block ) this.delete(block);
 					
 					if (new Date()-t0 > breakTime) //超时
 						return setTimeout(()=>
@@ -2046,6 +2047,11 @@ class ChunkMap{
 						breakPoint: {dx:i+1}
 					})
 				,0);
+		}
+		//删除实体
+		for (const e of this.chunks[x][z].entity){
+			scene.remove(e.block.mesh);
+			e.deleteMaterial().deleteGeometry().deleteMesh();
 		}
 		
 		this.finishUnloadChunk(x, z); //完成卸载区块
@@ -2128,17 +2134,13 @@ class ChunkMap{
 			this.startUnloadChunk(x, z); //开始卸载区块
 			
 			const gen = function* (_this){
+				//删除方块
 				for (let i=_this.size[0].x; i<=_this.size[1].x; i++){
 					for (let j=_this.size[0].y; j<=_this.size[1].y; j++){
 						for (let k=_this.size[0].z; k<=_this.size[1].z; k++){
 							
 							const block = _this.get(ox+i, j, oz+k);
-							if ( block ){ //非空气 & 非未加载
-								block.block.mesh.material.forEach(v => v.dispose())
-								block.block.mesh.geometry.dispose(); //清除内存
-								scene.remove( block.block.mesh );
-								delete _this.map[ox+i][j][oz+k];
-							}
+							if ( block ) _this.delete(block);
 							yield; //判断超时
 							
 						}
@@ -2148,6 +2150,12 @@ class ChunkMap{
 						progressCallback( (i-_this.size[0].x)/(_this.size[1].x-_this.size[0].x) )
 					yield true; //判断超数
 				}
+				//删除实体
+				for (const e of _this.chunks[x][z].entity){
+					scene.remove(e.block.mesh);
+					e.deleteMaterial().deleteGeometry().deleteMesh();
+				}
+				
 				
 				_this.finishUnloadChunk(x, z); //完成卸载区块
 			}
