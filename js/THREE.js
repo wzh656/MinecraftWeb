@@ -14,7 +14,7 @@ if (DEBUG){
 			scene_fog_folder.add(scene.fog, "near", 0.001, 10);
 			scene_fog_folder.addColor(scene.fog, "color").listen();
 		const scene_chunk_folder = scene_folder.addFolder("区块(chunk)");
-			scene_chunk_folder.add(map, "perloadLength", 100, 10000, 100).name("预加载范围/px");
+			scene_chunk_folder.add(map, "preloadLength", 100, 10000, 100).name("预加载范围/px");
 			const scene_chunk_weather_folder = scene_chunk_folder.addFolder("天气");
 }
 

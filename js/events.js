@@ -12,31 +12,38 @@ const Events = {
 		const obj = ray2D().filter(obj => obj.object instanceof THREE.Mesh)[0]; //Mesh物体
 		if (!obj) return;
 		
-		let direction; //挖掘方向
+		let direction, //挖掘方向
+			side; //旁边方向
 		switch (obj.faceIndex){
 			case 0:
 			case 1:
 				direction = "x1";
+				side = ["y", "z"];
 				break;
 			case 2:
 			case 3:
 				direction = "x0";
+				side = ["y", "z"];
 				break;
 			case 4:
 			case 5:
 				direction = "y1";
+				side = ["x", "z"];
 				break;
 			case 6:
 			case 7:
 				direction = "y0";
+				side = ["x", "z"];
 				break;
 			case 8:
 			case 9:
 				direction = "z1";
+				side = ["x", "y"];
 				break;
 			case 10:
 			case 11:
 				direction = "z0";
+				side = ["x", "y"];
 				break;
 		}
 		
@@ -79,8 +86,31 @@ const Events = {
 			
 			//方块或实体方块
 		}else{
-			if (hold.name != thing.name || hold.get("attr", "stackable") != true) //非同种物体 或 不可叠加
-				return print("当前工具无法挖掘该方块", "无法挖掘", 3, "#f00");
+			if (hold.name != (thing.get("attr", "block", "digGet") || thing.name) || //非同种物体
+				hold.get("attr", "stackable") != true //不可叠加
+			) return print("当前方块无法叠加", "无法挖掘", 3, "#f00");
+			
+			switch (direction[0]){
+				case "x": //y*z
+					S = ((entityBlock.get("attr","entityBlock","size","y1") || 100) -
+							(entityBlock.get("attr","entityBlock","size","y0") || 0)) *
+						((entityBlock.get("attr","entityBlock","size","z1") || 100) -
+							(entityBlock.get("attr","entityBlock","size","z0") || 0));
+					break;
+				case "y": //x*z
+					S = ((entityBlock.get("attr","entityBlock","size","x1") || 100) -
+							(entityBlock.get("attr","entityBlock","size","x0") || 0)) *
+						((entityBlock.get("attr","entityBlock","size","z1") || 100) -
+							(entityBlock.get("attr","entityBlock","size","z0") || 0));
+					break;
+				case "z": //x*y
+					S = ((entityBlock.get("attr","entityBlock","size","x1") || 100) -
+							(entityBlock.get("attr","entityBlock","size","x0") || 0)) *
+						((entityBlock.get("attr","entityBlock","size","y1") || 100) -
+							(entityBlock.get("attr","entityBlock","size","y0") || 0));
+					break;
+			}
+			if (hold.get("attr", "entityBlock", "x0"))
 			
 			if (deskgood.hold.indexOf(null) == -1) //空出手来挖
 				return print("东西太多，我没办法空出手来挖了", "没手挖方块", 3, "#f00");
@@ -97,8 +127,8 @@ const Events = {
 		//挖掘的物体 转化为 实体方块
 		let entityBlock;
 		switch (thing.type){
-			case "Block": //方块 转化为实体方块
-				entityBlock = new EntityBlock(thing);
+			case "Block": //方块 转化为 实体方块
+				entityBlock = thing.toEntityBlock();
 				const pos = thing.block.mesh.position.clone(); //单位: px=cm
 				map.delete(thing);
 				map.addID(entityBlock, pos.divideScalar(100)); //单位: m
@@ -110,30 +140,13 @@ const Events = {
 				break;
 		}
 		entityBlock.set("attr","entityBlock","size",direction,
-			entityBlock.get("attr","entityBlock","size",direction) || 100
+			entityBlock.get("attr","entityBlock","size",direction) || 100*direction[1] //x0: 0, x1: 100
 		); //保证有值
 		
-		let S; //面积
-		switch (direction[0]){
-			case "x": //y*z
-				S = (entityBlock.get("attr","entityBlock","size","y1") || 100 -
-						entityBlock.get("attr","entityBlock","size","y0") || 0) *
-					(entityBlock.get("attr","entityBlock","size","z1") || 100 -
-						entityBlock.get("attr","entityBlock","size","z0") || 0);
-				break;
-			case "y": //x*z
-				S = (entityBlock.get("attr","entityBlock","size","x1") || 100 -
-						entityBlock.get("attr","entityBlock","size","x0") || 0) *
-					(entityBlock.get("attr","entityBlock","size","z1") || 100 -
-						entityBlock.get("attr","entityBlock","size","z0") || 0);
-				break;
-			case "z": //x*y
-				S = (entityBlock.get("attr","entityBlock","size","x1") || 100 -
-						entityBlock.get("attr","entityBlock","size","x0") || 0) *
-					(entityBlock.get("attr","entityBlock","size","y1") || 100 -
-						entityBlock.get("attr","entityBlock","size","y0") || 0);
-				break;
-		}
+		const S = ((entityBlock.get("attr","entityBlock","size", side[0]+"1") || 100) -
+				(entityBlock.get("attr","entityBlock","size", side[0]+"0") || 0)) *
+			((entityBlock.get("attr","entityBlock","size", side[1]+"1") || 100) -
+				(entityBlock.get("attr","entityBlock","size", side[1]+"0") || 0)); //面积
 		
 		this.digging = true; //正在挖掘
 		console.log("startDig", {thing, hold, direction},
@@ -159,17 +172,17 @@ const Events = {
 				}else{
 					take = entityBlock.cloneAttr();
 				}
-				take.set("attr","entityBlock","size", direction, 0);
+				take.set("attr","entityBlock","size", direction[0]+"1", 0); //x0,x1 -> x1
 				deskgood.hold.addOne(take, free); //克隆一个放在手中
 			}
 			
-			entityBlock.attr.entityBlock.size[direction] -= direction[1]*2-1; //0 -> -1, 1 -> 1
-			take.attr.entityBlock.size[direction] += direction[1]*2-1;
+			entityBlock.attr.entityBlock.size[direction] += 1-direction[1]*2; //x0 -> 1, x1 -> -1
+			take.attr.entityBlock.size[direction[0] + "1"]++; //x1: 0 ~> 100
 			
 			console.log("Digging", entityBlock.attr.entityBlock.size[direction], take.attr.entityBlock.size[direction])
 			entityBlock.updateSize(); //更新大小
 			
-			if (direction[1] == "0"){ //0: ++
+			if (direction[1] == "0"){ //x0: ++
 				if (entityBlock.attr.entityBlock.size[direction]
 					>=
 					entityBlock.attr.entityBlock.size[direction[0] + "1"]
@@ -180,7 +193,7 @@ const Events = {
 					return deskgood.remove( entityBlock ); //删除方块
 				}
 				
-			}else{ //1: --
+			}else{ //x1: --
 				if (entityBlock.attr.entityBlock.size[direction]
 					<=
 					entityBlock.attr.entityBlock.size[direction[0] + "0"]
@@ -195,10 +208,10 @@ const Events = {
 			const {x,y,z} = entityBlock.block.mesh.position.clone() .divideScalar(100).round(); //单位: m
 			map.updateRound(x, y, z); //更新周围方块
 			
-			this.digId = time.setTimeout(func, S/idealDigSpeed*rnd_error()).id; // 下一cm
+			this.digId = time.setTimeout(func, S/idealDigSpeed*rnd_error()*1000).id; // 下一cm
 			
 		};
-		this.digId = time.setTimeout(func, S/idealDigSpeed*rnd_error()).id; // s/cm 游戏时间
+		this.digId = time.setTimeout(func, S/idealDigSpeed*rnd_error()*1000).id; // s/cm 游戏时间 单位: ms
 		
 	},
 	

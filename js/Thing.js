@@ -24,7 +24,7 @@ class Thing{
 		//属性
 		this.attr = {};
 		if (opt.attr){
-			if (opt.attr.stackable) this.attr.stackable = opt.attr.stackable; //可叠加
+			if (opt.attr.stackable) this.attr.stackable = opt.attr.stackable; //可叠加（布尔/数量）
 			
 			if (opt.attr.onChangeTo) this.attr.onChangeTo = opt.attr.onChangeTo; //choice切换到
 			if (opt.attr.onChangeLeave) this.attr.onChangeLeave = opt.attr.onChangeLeave; //choice切换离开
