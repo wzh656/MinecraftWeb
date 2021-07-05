@@ -96,9 +96,7 @@ function run(code){
 
 
 //2维射线检测
-function ray2D(x, y){
-	if (x === undefined) x = WIDTH/2;
-	if (y === undefined) y = HEIGHT/2; //默认中心
+function ray2D(x=WIDTH/2, y=HEIGHT/2){
 	const ray = new THREE.Raycaster(), //光线投射，用于确定鼠标点击位置
 		mouse = new THREE.Vector2(); //创建二维坐标
 	mouse.x = 2*(x/WIDTH)-1;
@@ -138,6 +136,7 @@ function rnd_error(){
 	return Math.random()*0.2+0.9;
 }
 
+//视口大小
 let VW = innerWidth / 100,
 	VH = innerHeight / 100,
 	VMAX = Math.max(innerWidth, innerHeight) / 100,
@@ -148,6 +147,31 @@ $(window).resize(function(){
 	VMAX = Math.max(innerWidth, innerHeight) / 100,
 	VMIN = Math.min(innerWidth, innerHeight) / 100;
 });
+
+Function.prototype.compress = function(){
+	let str = this+"";
+	str = str.trim() //去除首尾空白
+		.replace(/^function.*?\(.*?\)\{/g, "") //去除开头
+		.replace(/\}$/g, "") //去除结尾
+		.trim() //去除首尾空白
+		.replace(/;$/g, "") //去除末尾分号
+		.replace(/;\}/g, "}") //无需分号
+		.replace(/\s+/g, " ") //去除重复空白
+		.replace(/\s*,\s*/g, ",") //无需空白
+		.replace(/\s*:\s*/g, ":") //无需空白
+		.replace(/\s*;\s*/g, ";") //无需空白
+		.replace(/\(\s+/g, "(") //无需空白
+		.replace(/\s+\)/g, ")") //无需空白
+		.replace(/\[\s+/g, "[") //无需空白
+		.replace(/\s+\]/g, "]") //无需空白
+		.replace(/\{\s+/g, "{") //无需空白
+		.replace(/\s+\}/g, "}") //无需空白
+		.replace(/\s*\+\s*/g, "+") //无需空白
+		.replace(/\s*\-\s*/g, "-") //无需空白
+		.replace(/\s*\*\s*/g, "*") //无需空白
+		.replace(/\s*\/\s*/g, "/") //无需空白
+	return str;
+};
 
 
 //录屏

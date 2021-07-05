@@ -175,15 +175,20 @@ class Block extends Thing{
 			
 			if (opt.attr.block.onLeftMouseDown) this.attr.block.onLeftMouseDown = opt.attr.block.onLeftMouseDown; //鼠标左键按下
 			if (opt.attr.block.onLeftMouseUp) this.attr.block.onLeftMouseUp = opt.attr.block.onLeftMouseUp; //鼠标左键抬起
+			if (opt.attr.block.onMiddleMouseDown) this.attr.block.onMiddleMouseDown = opt.attr.block.onMiddleMouseDown; //鼠标中键按下
+			if (opt.attr.block.onMiddleMouseUp) this.attr.block.onMiddleMouseUp = opt.attr.block.onMiddleMouseUp; //鼠标中键抬起
 			if (opt.attr.block.onRightMouseDown) this.attr.block.onRightMouseDown = opt.attr.block.onRightMouseDown; //鼠标右键按下
 			if (opt.attr.block.onRightMouseUp) this.attr.block.onRightMouseUp = opt.attr.block.onRightMouseUp; //鼠标右键抬起
 			
+			if (opt.attr.block.onMouseWheelScrollUp) this.attr.block.onMouseWheelScrollUp = opt.attr.block.onMouseWheelScrollUp; //鼠标滚轮往上
+			if (opt.attr.block.onMouseWheelScrollDown) this.attr.block.onMouseWheelScrollDown = opt.attr.block.onMouseWheelScrollDown; //鼠标滚轮往下
+			
 			if (opt.attr.block.onShortTouch) this.attr.block.onShortTouch = opt.attr.block.onShortTouch; //短按
 			if (opt.attr.block.onLongTouch) this.attr.block.onLongTouch = opt.attr.block.onLongTouch; //长按
-			if (opt.attr.block.onTouchStart) this.attr.block.onTouchStart = opt.attr.block.onTouchStart;
-			if (opt.attr.block.onTouchMove) this.attr.block.onTouchMove = opt.attr.block.onTouchMove;
-			if (opt.attr.block.onTouchEnd) this.attr.block.onTouchEnd = opt.attr.block.onTouchEnd;
-			if (opt.attr.block.onTouchCancal) this.attr.block.onTouchCancal = opt.attr.block.onTouchCancal;
+			if (opt.attr.block.onTouchStart) this.attr.block.onTouchStart = opt.attr.block.onTouchStart; //触摸开始
+			if (opt.attr.block.onTouchMove) this.attr.block.onTouchMove = opt.attr.block.onTouchMove; //触摸移动
+			if (opt.attr.block.onTouchEnd) this.attr.block.onTouchEnd = opt.attr.block.onTouchEnd; //触摸结束
+			if (opt.attr.block.onTouchCancal) this.attr.block.onTouchCancal = opt.attr.block.onTouchCancal; //触摸取消
 			
 			if (opt.attr.block.onPlace) this.attr.block.onPlace = opt.attr.block.onPlace; //被放置
 			if (opt.attr.block.onRemove) this.attr.block.onRemove = opt.attr.block.onRemove; //被删除

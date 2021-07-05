@@ -125,11 +125,33 @@ $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind�
 		return;
 	
 	const wheel = event.originalEvent.wheelDelta || event.originalEvent.detail; //判断浏览器IE,谷歌滚轮事件 Firefox滚轮事件
+	
+	const obj = ray2D().filter(obj => obj.object instanceof THREE.Mesh)[0], //Mesh物体
+		thing = obj && obj.object.userData.thingObject;
+	
 	if (wheel){
 		if (wheel > 0){
-			Events.mouseWheelScrollUp(); //上滚轮
+			
+			//处理事件
+			if (Events.onMouseWheelScrollUp && Events.onMouseWheelScrollUp() === false)
+				return;
+			if (thing &&
+				eval(thing.get("attr", "block", "onMouseWheelScrollUp")) === false
+			) return;
+			//上一个
+			Events.choicePrev();
+			
 		}else if (wheel < 0){
-			Events.mouseWheelScrollDown(); //下滚轮
+			
+			//处理事件
+			if (Events.onMouseWheelScrollDown && Events.onMouseWheelScrollDown() === false)
+				return;
+			if (thing &&
+				eval(thing.get("attr", "block", "onMouseWheelScrollDown")) === false
+			) return;
+			//下一个
+			Events.choiceNext();
+			
 		}  
 	}  
 });
@@ -143,12 +165,42 @@ document.addEventListener("mousedown", function (e){
 	if (e.path[0] !== document.body)
 		return;
 	
+	const obj = ray2D().filter(obj => obj.object instanceof THREE.Mesh)[0], //Mesh物体
+		thing = obj && obj.object.userData.thingObject;
+	
 	if (e.button == 0){ //左键（挖掘）
-		Events.startDig(); //开始挖掘
+		
+		//处理事件
+		if (Events.onLeftMouseDown && Events.onLeftMouseDown() === false)
+			return;
+		if (thing &&
+			eval(thing.get("attr", "block", "onLeftMouseDown")) === false
+		) return;
+		//开始挖掘
+		Events.startDig();
+		
 	}else if (e.button == 1){ //中键（重置时间）
-		Events.mouseWheelDown(); //中键按下
+		
+		//处理事件
+		if (Events.onMiddleMouseDown && Events.onMiddleMouseDown() === false)
+			return;
+		if (thing &&
+			eval(thing.get("attr", "block", "onMiddleMouseDown")) === false
+		) return;
+		//重置时间
+		Events.resetTime();
+		
 	}else if (e.button == 2){ //右键（放置）
-		Events.startPlace(); //开始放置
+		
+		//处理事件
+		if (Events.onRightMouseDown && Events.onRightMouseDown() === false)
+			return;
+		if (thing &&
+			eval(thing.get("attr", "block", "onRightMouseDown")) === false
+		) return;
+		//开始放置
+		Events.startPlace();
+		
 	}
 	return false;
 });
@@ -162,10 +214,40 @@ document.addEventListener("mouseup", function (e){
 	if (e.path[0] !== document.body)
 		return;
 	
+	const obj = ray2D().filter(obj => obj.object instanceof THREE.Mesh)[0], //Mesh物体
+		thing = obj && obj.object.userData.thingObject;
+	
 	if (e.button == 0){ //左键（挖掘）
-		Events.endDig(); //结束挖掘
+		
+		//处理事件
+		if (Events.onLeftMouseUp && Events.onLeftMouseUp() === false)
+			return;
+		if (thing &&
+			eval(thing.get("attr", "block", "onLeftMouseUp")) === false
+		) return;
+		//结束挖掘
+		Events.endDig();
+		
+	}else if (e.button == 1){ //中键
+		
+		//处理事件
+		if (Events.onMiddleMouseUp && Events.onMiddleMouseUp() === false)
+			return;
+		if (thing &&
+			eval(thing.get("attr", "block", "onMiddleMouseUp")) === false
+		) return;
+		
 	}else if (e.button == 2){ //右键（放置）
-		Events.endPlace(); //结束挖掘
+		
+		//处理事件
+		if (Events.onRightMouseUp && Events.onRightMouseUp() === false)
+			return;
+		if (thing &&
+			eval(thing.get("attr", "block", "onRightMouseUp")) === false
+		) return;
+		//结束挖掘
+		Events.endPlace();
+		
 	}
 	return false;
 });

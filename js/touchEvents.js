@@ -179,13 +179,22 @@ $("#game").on("touchstart", function (e){
 	
 	//console.log("touchstart(screen):", {x, y}, touch.screen);
 	
+	//处理事件
+	const obj = ray2D(x, y).filter(obj => obj.object instanceof THREE.Mesh)[0], //Mesh物体
+		thing = obj && obj.object.userData.thingObject;
+	if (Events.onTouchStart && Events.onTouchStart() === false)
+		return;
+	if (thing &&
+		eval(thing.get("attr", "block", "onTouchStart")) === false
+	) return;
+	
 	touch.screen.x = touch.screen.x0 = x,
 	touch.screen.y = touch.screen.y0 = y;
 	touch.screen.valid = true;
 	touch.screen.id = setTimeout(()=>{ //长按1000ms（挖掘）
 		touch.screen.id = null;
 		if (touch.screen.valid)
-			Events.startDig(); //开始挖掘
+			Events.startDig(x ,y); //开始挖掘
 	}, 1000);
 	
 	return false;
@@ -201,6 +210,15 @@ $("#game").on("touchmove", function (e){
 	
 	const dx = x - touch.screen.x,
 		dy = y - touch.screen.y; //与上次变化量
+	
+	//处理事件
+	const obj = ray2D().filter(obj => obj.object instanceof THREE.Mesh)[0], //Mesh物体
+		thing = obj && obj.object.userData.thingObject;
+	if (Events.onTouchMove && Events.onTouchMove() === false)
+		return;
+	if (thing &&
+		eval(thing.get("attr", "block", "onTouchMove")) === false
+	) return;
 	
 	touch.screen.x = x, touch.screen.y = y;
 	
@@ -228,6 +246,15 @@ $("#game").on("touchend", function (e){
 	const {pageX: x, pageY: y} = e.originalEvent.changedTouches[0];
 	//console.log("touchend(screen):", {x, y}, touch.screen);
 	
+	//处理事件
+	const obj = ray2D().filter(obj => obj.object instanceof THREE.Mesh)[0], //Mesh物体
+		thing = obj && obj.object.userData.thingObject;
+	if (Events.onTouchEnd && Events.onTouchEnd() === false)
+		return;
+	if (thing &&
+		eval(thing.get("attr", "block", "onTouchEnd")) === false
+	) return;
+	
 	if (touch.screen.id === null){ //长按抬起
 		Events.endDig();
 		
@@ -254,6 +281,15 @@ $("#game").on("touchcancel", function (e){
 	
 	const {pageX: x, pageY: y} = e.originalEvent.changedTouches[0];
 	//console.log("touchcancel(screen):", {x, y}, touch.screen);
+	
+	//处理事件
+	const obj = ray2D().filter(obj => obj.object instanceof THREE.Mesh)[0], //Mesh物体
+		thing = obj && obj.object.userData.thingObject;
+	if (Events.onTouchCancel && Events.onTouchCancel() === false)
+		return;
+	if (thing &&
+		eval(thing.get("attr", "block", "onTouchCancel")) === false
+	) return;
 	
 	clearTimeout(touch.screen.id);
 	touch.screen.x = touch.screen.y = touch.screen.x0 = touch.screen.y0 = touch.screen.id = touch.screen.valid =null;
