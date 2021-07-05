@@ -73,12 +73,38 @@ const Img = {
 		return canvas2;
 	},
 	download(url, name){
-		let a = $("<a></a>")
-			.attr("href", url)
-			.attr("download", name)
-			.css("display", "none");
-		$("body").append(a);
-		a[0].click();
-		a.remove();
+		if (device == -2){ //html5+
+			const download = function(){
+				var bitmap = new plus.nativeObj.Bitmap("download");
+				bitmap.loadBase64Data(url,function(){
+					bitmap.save( "_downloads/"+name,
+						{quality: 100},
+						function(i){
+							bitmap.clear();
+							print("图片保存成功");
+						},
+						function(e){
+							console.log("保存图片失败", e);
+						}
+					);
+				},function(e){
+					console.error("加载图片失败", e);
+				});
+			};
+			if (typeof plus != "undefined"){
+				download();
+			}else{
+				document.addEventListener("plusready", download, false);
+			}
+			
+		}else{ //原生下载
+			const a = $("<a></a>")
+				.attr("href", url)
+				.attr("download", name)
+				.css("display", "none");
+			$("body").append(a);
+			a[0].click();
+			a.remove();
+		}
 	}
 };

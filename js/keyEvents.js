@@ -64,12 +64,7 @@ document.addEventListener("keydown", function (e){
 	}
 	if (e.keyCode == 113){ //F2 截图
 		console.log("F2:", keydown.key);
-		var oA = document.createElement("a");
-		oA.download = "截图";
-		oA.href = $("#game")[0].toDataURL();
-		document.body.appendChild(oA);
-		oA.click();
-		oA.remove(); // 下载之后把创建的元素删除
+		Img.download( $("#game")[0].toDataURL(), `截图${new Date().format("yyyyMMdd_hhmmssS")}.png` );
 	}
 	if (e.keyCode == 114){ //F3
 		if (e.shiftKey){ //shift+F3 切换调试

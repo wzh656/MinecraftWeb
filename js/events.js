@@ -155,6 +155,12 @@ const Events = {
 		//处理事件
 		if ( eval(thing.get("attr", "block", "onStartDig")) === false ) return;
 		
+		if (typeof plus != "undefined"){
+			plus.device.vibrate(20); //挖掘振动
+		}else if ("vibrate" in navigator){
+			navigator.vibrate(20);
+		}
+		
 		//挖掘
 		const func = ()=>{
 			
