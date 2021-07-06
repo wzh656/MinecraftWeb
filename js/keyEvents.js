@@ -15,7 +15,7 @@ document.addEventListener("keydown", function (e){
 			return false;
 		}
 	}
-	if (e.keyCode == 27 && typeof stop == "string"){ //ESC 退出界面
+	if (e.keyCode == 27 && typeof stop == "string"){ //ESC 关闭界面
 		console.log("ESC", stop, ":", keydown.key);
 		
 		//手动切换退出
