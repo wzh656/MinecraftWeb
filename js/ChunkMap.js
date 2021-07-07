@@ -338,10 +338,10 @@ class ChunkMap{
 			loaded,
 			attr:{
 				size: Object.or( //取默认值
-					block.get("attr", "entityBlock", "size"),
+					block.get("attr", "size"),
 					{x0:0, x1:100, y0:0, y1:100, z0:0, z1:100}
 				),
-				transparent: block.get("attr", "block", "transparent"),
+				transparent: block.get("attr", "transparent"),
 			}
 		}
 	}
@@ -361,38 +361,29 @@ class ChunkMap{
 		
 		if (thisBlock.name == "空气") return; //空气
 		
-		const rule = [
-				/* x,y,z偏移量 正方向 反方向 其他方向 */
-				[1,0,0, "x1",100, "x0",0, "y","z"],
-				[-1,0,0, "x0",0, "x1",100, "y","z"],
-				[0,1,0, "y1",100, "y0",0, "x","z"],
-				[0,-1,0, "y0",0, "y1",100, "x","z"],
-				[0,0,1, "z1",100, "z0",0, "x","y"],
-				[0,0,-1, "z0",0, "z1",100, "x","y"]
-			],
-			thisVisible = []; //本方块 可见值
+		const thisVisible = []; //本方块 可见值
 		
 		let needLoad = false; //是否需要加载
 		if (thisBlock.attr.transparent === true){ //整体不可隐藏
 			for (let i=0; i<6; i++)
 				thisVisible[i] = true; //全部显示
 			needLoad = true; //需要加载
+			
 		}else{ //整体/部分可隐藏
 			if (typeof thisBlock.attr.transparent == "object") //部分不可隐藏
 				for (const [i,v] of Object.entries(thisBlock.attr.transparent))
-					if (v){
-						thisVisible[i] = true;
-						needLoad = true;
-					}
+					if (v)
+						needLoad = thisVisible[i] = true;
 			
-			for (const [i, [dx,dy,dz, posDir,norPos, oppDir,norOpp, othDir1, othDir2]] of Object.entries(rule)){ //遍历旁边的方块
+			for (const [i, [dx,dy,dz, posDir,norPos, oppDir,norOpp, othDir1, othDir2]] of Object.entries(ChunkMap.updateRule)){ //遍历旁边的方块
 				if (thisVisible[i]) continue; //不可隐藏
 				
 				const px=x+dx, py=y+dy, pz=z+dz; //旁边方块位置
 				if ( py < this.size[0].y ){ //位于最底层 不显示
-					thisVisible.push(false);
+					thisVisible[i] = false;
 					continue;
 				}
+				
 				const {
 					block: thatBlock,
 					attr: {
@@ -401,9 +392,8 @@ class ChunkMap{
 					}
 				} = this.getShould(px, py, pz); //旁边方块
 				
-				if ( !(thatBlock && thatBlock.name!="空气") ){ //无方块 显示
-					needLoad = true;
-					thisVisible.push(true);
+				if ( !thatBlock || thatBlock.name == "空气" ){ //无方块 显示
+					needLoad = thisVisible[i] = true;
 				}else if ( thisSize[posDir] != norPos || //本方块 正方向变小
 					thatSize[oppDir] != norOpp || //旁边方块 反方向变小
 					thisSize[othDir1+"0"] < thatSize[othDir1+"0"] ||
@@ -411,16 +401,10 @@ class ChunkMap{
 					thisSize[othDir2+"0"] < thatSize[othDir2+"0"] ||
 					thisSize[othDir2+"1"] > thatSize[othDir2+"1"] //超出旁边方块
 				){ // 显示
-					needLoad = true;
-					thisVisible.push(true);
-				}else if ( thatBlock.get("attr", "block", "transparent") !== undefined ){ //有属性
-					const visible = thatBlock.get("attr", "block", "transparent"); //透明 则可见
-					needLoad = needLoad || visible;
-					thisVisible.push( visible ); //方块透明 显示
-				}else{ //继承模板
-					const visible = Block.TEMPLATES[ thatBlock.name ].attr.block.transparent;
-					needLoad = needLoad || visible;
-					thisVisible.push( visible ); //方块透明 显示
+					needLoad = thisVisible[i] = true;
+				}else{
+					needLoad = needLoad || thatTransparent;
+					thisVisible[i] = thatTransparent; //方块透明 显示
 				}
 			}
 		}
@@ -457,14 +441,14 @@ class ChunkMap{
 				cZ = Math.round(z/this.size.z), //所属区块(Chunk)
 				edit = this.chunks[cX] && this.chunks[cX][cZ] && this.chunks[cX][cZ].edit,
 				get = new Block( this.preGet(x, y, z, edit||[]) ),
-				noTransparent = get.id && get.get("attr", "block", "noTransparent");
+				noTransparent = get.id && get.get("attr", "noTransparent");
 			thisVisible = [
-				!( this.get(x+1, y, z) && !this.get(x+1, y, z).get("attr", "block", "transparent")) || noTransparent,
-				!( this.get(x-1, y, z) && !this.get(x-1, y, z).get("attr", "block", "transparent")) || noTransparent,
-				!( this.get(x, y+1, z) && !this.get(x, y+1, z).get("attr", "block", "transparent")) || noTransparent,
-				!( this.get(x, y-1, z) && !this.get(x, y-1, z).get("attr", "block", "transparent")) || noTransparent,
-				!( this.get(x, y, z+1) && !this.get(x, y, z+1).get("attr", "block", "transparent")) || noTransparent,
-				!( this.get(x, y, z-1) && !this.get(x, y, z-1).get("attr", "block", "transparent")) || noTransparent
+				!( this.get(x+1, y, z) && !this.get(x+1, y, z).get("attr", "transparent")) || noTransparent,
+				!( this.get(x-1, y, z) && !this.get(x-1, y, z).get("attr", "transparent")) || noTransparent,
+				!( this.get(x, y+1, z) && !this.get(x, y+1, z).get("attr", "transparent")) || noTransparent,
+				!( this.get(x, y-1, z) && !this.get(x, y-1, z).get("attr", "transparent")) || noTransparent,
+				!( this.get(x, y, z+1) && !this.get(x, y, z+1).get("attr", "transparent")) || noTransparent,
+				!( this.get(x, y, z-1) && !this.get(x, y, z-1).get("attr", "transparent")) || noTransparent
 				// 没有方块 或 有方块非透明 则显示  或  自身透明 也显示
 			];
 			
@@ -478,14 +462,14 @@ class ChunkMap{
 			if (!thisBlock) //undefined（无需加载） 或 null（加载为空气）
 				return;
 		}else{ //已加载
-			const noTransparent =  thisBlock.get("attr", "block", "noTransparent");
+			const noTransparent =  thisBlock.get("attr", "noTransparent");
 			thisVisible = [
-				!( this.get(x+1, y, z) && !this.get(x+1, y, z).get("attr", "block", "transparent")) || noTransparent,
-				!( this.get(x-1, y, z) && !this.get(x-1, y, z).get("attr", "block", "transparent")) || noTransparent,
-				!( this.get(x, y+1, z) && !this.get(x, y+1, z).get("attr", "block", "transparent")) || noTransparent,
-				!( this.get(x, y-1, z) && !this.get(x, y-1, z).get("attr", "block", "transparent")) || noTransparent,
-				!( this.get(x, y, z+1) && !this.get(x, y, z+1).get("attr", "block", "transparent")) || noTransparent,
-				!( this.get(x, y, z-1) && !this.get(x, y, z-1).get("attr", "block", "transparent")) || noTransparent
+				!( this.get(x+1, y, z) && !this.get(x+1, y, z).get("attr", "transparent")) || noTransparent,
+				!( this.get(x-1, y, z) && !this.get(x-1, y, z).get("attr", "transparent")) || noTransparent,
+				!( this.get(x, y+1, z) && !this.get(x, y+1, z).get("attr", "transparent")) || noTransparent,
+				!( this.get(x, y-1, z) && !this.get(x, y-1, z).get("attr", "transparent")) || noTransparent,
+				!( this.get(x, y, z+1) && !this.get(x, y, z+1).get("attr", "transparent")) || noTransparent,
+				!( this.get(x, y, z-1) && !this.get(x, y, z-1).get("attr", "transparent")) || noTransparent
 				// 没有方块 或 有方块非透明 则显示  或  自身透明 也显示
 			];
 		} */
@@ -1234,21 +1218,109 @@ class ChunkMap{
 			dx = x-ox,
 			dz = z-oz,
 			rule = [
-				/* x,y,z偏移量 正方向 反方向 其他方向 */
-				[1,0,0, "x0","x1", "y","z"],
-				[-1,0,0, "x1","x0", "y","z"],
-				[0,1,0, "y0","y1", "x","z"],
-				[0,-1,0, "y1","y0", "x","z"],
-				[0,0,1, "z0","z1", "x","y"],
-				[0,0,-1, "z1","z0", "x","y"]
-			],
-			direction = {x0:0, x1:100, y0:0, y1:100, z0:0, z1:100}; //所有方向 及默认值
+				"x0",
+				"x1",
+				"y0",
+				"y1",
+				"z0",
+				"z1"
+			];
 		
 		for (let y=this.size[0].y; y<=this.size[1].y; y++){
-			const block = columns[dx][dz][y];
-			if (block.name != "空气"){ //有方块
+			
+			
+			//本方块
+			const thisBlock = columns[dx][dz][y],
+				thisName = thisBlock.name;
+			if (thisName == "空气"){ //空气不加载
+				this.addID(/* new Block({
+					name: "空气"
+				}) */{
+					name: "空气"
+				}, {x,y,z});
+				continue;
+			}
+			
+			const normal = {x0:0, x1:100, y0:0, y1:100, z0:0, z1:100}, //默认值
+				thisSize = Object.or( //取默认值
+					(thisBlock.attr && thisBlock.attr.size) ||
+						(Thing.TEMPLATES[thisName].attr.size) || {},
+					normal
+				),
+				thisTransparent = (thisBlock.attr && thisBlock.attr.transparent) ||
+					(Thing.TEMPLATES[thisName].attr.transparent);
+			
+			
+			const thisVisible = []; //本方块 可见值
+			let needLoad = false; //是否需要加载
+			if (thisTransparent === true){ //整体不可隐藏
+				for (let i=0; i<6; i++)
+					thisVisible[i] = true; //全部显示
+				needLoad = true; //需要加载
 				
-				const visibleValue = [],
+			}else{ //整体/部分可隐藏
+				if (typeof thisTransparent == "object") //部分不可隐藏
+					for (const [i,v] of Object.entries(thisTransparent))
+						if (v)
+							needLoad = thisVisible[i] = true;
+				
+				for (const [i, direction] of Object.entries(rule)){ //遍历旁边的方块
+				// for (const [i, [dx,dy,dz, posDir,norPos, oppDir,norOpp, othDir1, othDir2]] of Object.entries(ChunkMap.updateRule)){ //遍历旁边的方块
+					if (thisVisible[i]) continue; //不可隐藏
+					
+					let px=dx, py=y, pz=dz, //旁边方块位置
+						side; //其他方向
+					switch (direction[0]){
+						case "x":
+							px += direction[1]*2 - 1;
+							side = ["y", "z"];
+							break;
+						case "y":
+							py += direction[1]*2 - 1;
+							side = ["x", "z"];
+							break;
+						case "z":
+							pz += direction[1]*2 - 1;
+							side = ["x", "y"];
+							break;
+					}
+					
+					if ( py < this.size[0].y ){ //位于最底层 不显示
+						thisVisible[i] = false;
+						continue;
+					}
+					
+					//盘边方块
+					const thatBlock = columns[px] && columns[px][pz] && columns[px][pz][py];
+					if ( !thatBlock || thatBlock.name == "空气" ){ //无方块 显示
+						needLoad = thisVisible[i] = true;
+						continue;
+					}
+					const thatName = thatBlock.name,
+						thatSize = Object.or(
+							(thatBlock.attr && thatBlock.attr.size) ||
+								(Thing.TEMPLATES[thatName].attr.size) || {},
+							normal
+						);
+					
+					if ( thatSize[direction] != i%2 * 100 || //本方块 正方向变小  正方向 奇(1):0 偶(0):100
+						thatSize[direction[0] + (1-direction[1])] != 100 - i%2 * 100 || //旁边方块 反方向变小  反方向 奇(1):100 偶(0):0
+						thisSize[side[0]+"0"] < thatSize[side[0]+"0"] ||
+						thisSize[side[0]+"1"] > thatSize[side[0]+"1"] ||
+						thisSize[side[1]+"0"] < thatSize[side[1]+"0"] ||
+						thisSize[side[1]+"1"] > thatSize[side[1]+"1"] //超出旁边方块
+					){ //显示
+						needLoad = thisVisible[i] = true;
+					}else{ //看透明属性
+						const visible = (thatBlock.attr && thatBlock.attr.transparent) ||
+							(Thing.TEMPLATES[thatName].attr.transparent); //继承属性
+						needLoad = needLoad || visible;
+						thisVisible[i] = visible; //方块透明 显示
+					}
+				}
+			}
+			
+			/* const thisVisible = [],
 					thisSize = block.attr && block.attr.block && block.attr.block.size || {}, //本方块大小
 					thisTransparent = (block.attr && block.attr.block && block.attr.block.transparent!==undefined)? //有属性
 						block.attr.block.transparent:
@@ -1258,7 +1330,7 @@ class ChunkMap{
 				let needLoad = false;
 				if (thisTransparent === true){ //整体不可隐藏
 					for (let i=0; i<6; i++)
-						visibleValue[i] = true;
+						thisVisible[i] = true;
 					needLoad = true;
 				}else{
 					for (const [i, [ddx,ddy,ddz, posDir,oppDir, othDir1, othDir2]] of Object.entries(rule)){
@@ -1279,62 +1351,56 @@ class ChunkMap{
 							thisSize[othDir2+"1"] > thatSize[othDir2+"1"] //超出旁边方块
 						) ){ // 显示
 							needLoad = true;
-							visibleValue.push(true);
+							thisVisible.push(true);
 						}else if ( py < this.size[0].y ){ //位于最底层 则不显示
-							visibleValue.push(false);
+							thisVisible.push(false);
 						}/* else if (
 							px < this.size[0].x || px > this.size[1].x ||
 							py < this.size[0].y || py > this.size[1].y ||
 							pz < this.size[0].z || pz > this.size[1].z
 						){ //位于边缘 则不显示
-							visibleValue.push(false);
-						} */else if ( !thatBlock || thatBlock.name=="空气" ){ //无方块 显示
+							thisVisible.push(false);
+						} *//*else if ( !thatBlock || thatBlock.name=="空气" ){ //无方块 显示
 							needLoad = true;
-							visibleValue.push(true);
+							thisVisible.push(true);
 						}else if ( thatBlock.attr && thatBlock.attr.block ){ //有属性
 							const visible = thatBlock.attr.block.transparent;
 							needLoad = needLoad || visible;
-							visibleValue.push( visible ); //方块透明 显示
+							thisVisible.push( visible ); //方块透明 显示
 						}else{ //继承模板
 							const visible = Block.TEMPLATES[ columns[px][pz][py].name ].attr.block.transparent;
 							needLoad = needLoad || visible;
-							visibleValue.push( visible ); //方块透明 显示
+							thisVisible.push( visible ); //方块透明 显示
 						}
 					}
-				}
+				} */
 				
-				if ( needLoad ){ //有面需显示
-					// if (y == 0) console.log(visibleValue)
-					
-					const thisBlock = Thing.TEMPLATES[block.name].cloneAttr(block.attr || {});
-					
-					this.addID(thisBlock, {x,y,z});
-					
-					const material = thisBlock.block.material;
-					
-					if ( !thisBlock.get("attr", "block", "noTransparent") ) //允许透明
-						for (let i=material.length-1; i>=0; i--)
-							material[i].visible = visibleValue[i];
-					
-					
-					// x,z,y
-					/*const noTransparent =  thisBlock.get("attr", "block", "noTransparent"),
-						visibleValue = [
-							!( columns[dx+1] && columns[dx+1][y] && columns[dx+1][y][dz] && columns[dx+1][y][dz].id && !((columns[dx+1][y][dz].attr&&columns[dx+1][y][dz].attr.block.transparent)||Block.TEMPLATES[columns[dx+1][y][dz].id].attr.block.transparent)) || noTransparent,
-							!( columns[dx-1] && columns[dx-1][y] && columns[dx-1][y][dz] && columns[dx-1][y][dz].id && !((columns[dx-1][y][dz].attr&&columns[dx-1][y][dz].attr.block.transparent)||Block.TEMPLATES[columns[dx-1][y][dz].id].attr.block.transparent)) || noTransparent,
-							!( columns[dx] && columns[dx][y+1] && columns[dx][y+1][dz] && columns[dx][y+1][dz].id && !((columns[dx][y+1][dz].attr&&columns[dx][y+1][dz].attr.block.transparent)||Block.TEMPLATES[columns[dx][y+1][dz].id].attr.block.transparent)) || noTransparent,
-							!( columns[dx] && columns[dx][y-1] &&  columns[dx][y-1][dz] && columns[dx][y-1][dz].id && !((columns[dx][y-1][dz].attr&&columns[dx][y-1][dz].attr.block.transparent)||Block.TEMPLATES[columns[dx][y-1][dz].id].attr.block.transparent)) || noTransparent,
-							!( columns[dx] && columns[dx][y] && columns[dx][y][dz+1] && columns[dx][y][dz+1].id && !((columns[dx][y][dz+1].attr&&columns[dx][y][dz+1].attr.block.transparent)||Block.TEMPLATES[columns[dx][y][dz+1].id].attr.block.transparent)) || noTransparent,
-							!( columns[dx] && columns[dx][y] && columns[dx][y][dz-1] && columns[dx][y][dz-1].id && !((columns[dx][y][dz-1].attr&&columns[dx][y][dz-1].attr.block.transparent)||Block.TEMPLATES[columns[dx][y][dz-1].id].attr.block.transparent)) || noTransparent
-							// 没有方块 或 有方块非透明 则显示  或  自身透明 也显示
-						],*/
-					
-				}
+			if ( needLoad ){ //有面需显示
+				// if (y == 0) console.log(thisVisible)
 				
-			}else{ //空气
-				this.addID(new Block({
-					name: "空气"
-				}), {x,y,z});
+				const block = Thing.TEMPLATES[thisName].cloneAttr(thisBlock.attr || {});
+				
+				this.addID(block, {x,y,z});
+				
+				const material = block.block.material;
+				
+				if ( !block.get("attr", "noTransparent") ) //允许透明
+					for (let i=material.length-1; i>=0; i--)
+						material[i].visible = thisVisible[i];
+				
+				
+				// x,z,y
+				/*const noTransparent =  block.get("attr", "noTransparent"),
+					thisVisible = [
+						!( columns[dx+1] && columns[dx+1][y] && columns[dx+1][y][dz] && columns[dx+1][y][dz].id && !((columns[dx+1][y][dz].attr&&columns[dx+1][y][dz].attr.block.transparent)||Block.TEMPLATES[columns[dx+1][y][dz].id].attr.block.transparent)) || noTransparent,
+						!( columns[dx-1] && columns[dx-1][y] && columns[dx-1][y][dz] && columns[dx-1][y][dz].id && !((columns[dx-1][y][dz].attr&&columns[dx-1][y][dz].attr.block.transparent)||Block.TEMPLATES[columns[dx-1][y][dz].id].attr.block.transparent)) || noTransparent,
+						!( columns[dx] && columns[dx][y+1] && columns[dx][y+1][dz] && columns[dx][y+1][dz].id && !((columns[dx][y+1][dz].attr&&columns[dx][y+1][dz].attr.block.transparent)||Block.TEMPLATES[columns[dx][y+1][dz].id].attr.block.transparent)) || noTransparent,
+						!( columns[dx] && columns[dx][y-1] &&  columns[dx][y-1][dz] && columns[dx][y-1][dz].id && !((columns[dx][y-1][dz].attr&&columns[dx][y-1][dz].attr.block.transparent)||Block.TEMPLATES[columns[dx][y-1][dz].id].attr.block.transparent)) || noTransparent,
+						!( columns[dx] && columns[dx][y] && columns[dx][y][dz+1] && columns[dx][y][dz+1].id && !((columns[dx][y][dz+1].attr&&columns[dx][y][dz+1].attr.block.transparent)||Block.TEMPLATES[columns[dx][y][dz+1].id].attr.block.transparent)) || noTransparent,
+						!( columns[dx] && columns[dx][y] && columns[dx][y][dz-1] && columns[dx][y][dz-1].id && !((columns[dx][y][dz-1].attr&&columns[dx][y][dz-1].attr.block.transparent)||Block.TEMPLATES[columns[dx][y][dz-1].id].attr.block.transparent)) || noTransparent
+						// 没有方块 或 有方块非透明 则显示  或  自身透明 也显示
+					],*/
+				
 			}
 		}
 	}
@@ -2318,3 +2384,14 @@ class ChunkMap{
 	}
 	
 }
+
+ChunkMap.updateRule = [
+	/* x,y,z偏移量 正方向 反方向 其他方向 */
+	[1,0,0, "x1",100, "x0",0, "y","z"],
+	[-1,0,0, "x0",0, "x1",100, "y","z"],
+	[0,1,0, "y1",100, "y0",0, "x","z"],
+	[0,-1,0, "y0",0, "y1",100, "x","z"],
+	[0,0,1, "z1",100, "z0",0, "x","y"],
+	[0,0,-1, "z0",0, "z1",100, "x","y"]
+];
+

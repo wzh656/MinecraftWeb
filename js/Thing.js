@@ -141,57 +141,56 @@ class Block extends Thing{
 		}
 		
 		//属性
-		this.attr.block = {};
-		if (opt.attr && opt.attr.block){
+		if (opt.attr){
 			
-			if (opt.attr.block.hardness) this.attr.block.hardness = opt.attr.block.hardness; //硬度
-			if (opt.attr.block.idealDigSpeed){ //理想挖掘速度(cm³/s)
-				if (typeof opt.attr.block.idealDigSpeed == "number"){
-					this.attr.block.idealDigSpeed = opt.attr.block.idealDigSpeed;
+			if (opt.attr.hardness) this.attr.hardness = opt.attr.hardness; //硬度
+			if (opt.attr.idealDigSpeed){ //理想挖掘速度(cm³/s)
+				if (typeof opt.attr.idealDigSpeed == "number"){
+					this.attr.idealDigSpeed = opt.attr.idealDigSpeed;
 				}else{
-					this.attr.block.idealDigSpeed = {};
-					for (const [name, value] of Object.entries(opt.attr.block.idealDigSpeed))
-						this.attr.block.idealDigSpeed[name] = +value;
+					this.attr.idealDigSpeed = {};
+					for (const [name, value] of Object.entries(opt.attr.idealDigSpeed))
+						this.attr.idealDigSpeed[name] = +value;
 				}
 			}
-			if (opt.attr.block.placeSpeed){ //放置速度(cm³/s)
-				if (typeof opt.attr.block.placeSpeed == "number"){
-					this.attr.block.placeSpeed = opt.attr.block.placeSpeed;
+			if (opt.attr.placeSpeed){ //放置速度(cm³/s)
+				if (typeof opt.attr.placeSpeed == "number"){
+					this.attr.placeSpeed = opt.attr.placeSpeed;
 				}else{
-					this.attr.block.placeSpeed = {};
-					for (const [name, value] of Object.entries(opt.attr.block.placeSpeed))
-						this.attr.block.placeSpeed[name] = +value;
+					this.attr.placeSpeed = {};
+					for (const [name, value] of Object.entries(opt.attr.placeSpeed))
+						this.attr.placeSpeed[name] = +value;
 				}
 			}
 			
-			if (opt.attr.block.transparent) this.attr.block.transparent = opt.attr.block.transparent; //透明方块（其他方块必须显示，自己不可隐藏）
-			if (opt.attr.block.through) this.attr.block.through = opt.attr.block.through; //允许穿过
-			if (opt.attr.block.digGet) this.attr.block.digGet = opt.attr.block.digGet; //挖掘获得
+			if (opt.attr.transparent) this.attr.transparent = opt.attr.transparent; //透明方块（其他方块必须显示，自己不可隐藏）
+			if (opt.attr.through) this.attr.through = opt.attr.through; //允许穿过
+			if (opt.attr.digGet) this.attr.digGet = opt.attr.digGet; //挖掘获得
 			
-			if (opt.attr.block.onStartDig) this.attr.block.onStartDig = opt.attr.block.onStartDig; //开始挖掘
-			if (opt.attr.block.onEndDig) this.attr.block.onEndDig = opt.attr.block.onEndDig; //结束挖掘
-			if (opt.attr.block.onStartPlace) this.attr.block.onStartPlace = opt.attr.block.onStartPlace; //开始放置
-			if (opt.attr.block.onEndPlace) this.attr.block.onEndPlace = opt.attr.block.onEndPlace; //结束放置
+			if (opt.attr.onStartDig) this.attr.onStartDig = opt.attr.onStartDig; //开始挖掘
+			if (opt.attr.onEndDig) this.attr.onEndDig = opt.attr.onEndDig; //结束挖掘
+			if (opt.attr.onStartPlace) this.attr.onStartPlace = opt.attr.onStartPlace; //开始放置
+			if (opt.attr.onEndPlace) this.attr.onEndPlace = opt.attr.onEndPlace; //结束放置
 			
-			if (opt.attr.block.onLeftMouseDown) this.attr.block.onLeftMouseDown = opt.attr.block.onLeftMouseDown; //鼠标左键按下
-			if (opt.attr.block.onLeftMouseUp) this.attr.block.onLeftMouseUp = opt.attr.block.onLeftMouseUp; //鼠标左键抬起
-			if (opt.attr.block.onMiddleMouseDown) this.attr.block.onMiddleMouseDown = opt.attr.block.onMiddleMouseDown; //鼠标中键按下
-			if (opt.attr.block.onMiddleMouseUp) this.attr.block.onMiddleMouseUp = opt.attr.block.onMiddleMouseUp; //鼠标中键抬起
-			if (opt.attr.block.onRightMouseDown) this.attr.block.onRightMouseDown = opt.attr.block.onRightMouseDown; //鼠标右键按下
-			if (opt.attr.block.onRightMouseUp) this.attr.block.onRightMouseUp = opt.attr.block.onRightMouseUp; //鼠标右键抬起
+			if (opt.attr.onPlace) this.attr.onPlace = opt.attr.onPlace; //被放置
+			if (opt.attr.onRemove) this.attr.onRemove = opt.attr.onRemove; //被删除
 			
-			if (opt.attr.block.onMouseWheelScrollUp) this.attr.block.onMouseWheelScrollUp = opt.attr.block.onMouseWheelScrollUp; //鼠标滚轮往上
-			if (opt.attr.block.onMouseWheelScrollDown) this.attr.block.onMouseWheelScrollDown = opt.attr.block.onMouseWheelScrollDown; //鼠标滚轮往下
+			if (opt.attr.onLeftMouseDown) this.attr.onLeftMouseDown = opt.attr.onLeftMouseDown; //鼠标左键按下
+			if (opt.attr.onLeftMouseUp) this.attr.onLeftMouseUp = opt.attr.onLeftMouseUp; //鼠标左键抬起
+			if (opt.attr.onMiddleMouseDown) this.attr.onMiddleMouseDown = opt.attr.onMiddleMouseDown; //鼠标中键按下
+			if (opt.attr.onMiddleMouseUp) this.attr.onMiddleMouseUp = opt.attr.onMiddleMouseUp; //鼠标中键抬起
+			if (opt.attr.onRightMouseDown) this.attr.onRightMouseDown = opt.attr.onRightMouseDown; //鼠标右键按下
+			if (opt.attr.onRightMouseUp) this.attr.onRightMouseUp = opt.attr.onRightMouseUp; //鼠标右键抬起
 			
-			if (opt.attr.block.onShortTouch) this.attr.block.onShortTouch = opt.attr.block.onShortTouch; //短按
-			if (opt.attr.block.onLongTouch) this.attr.block.onLongTouch = opt.attr.block.onLongTouch; //长按
-			if (opt.attr.block.onTouchStart) this.attr.block.onTouchStart = opt.attr.block.onTouchStart; //触摸开始
-			if (opt.attr.block.onTouchMove) this.attr.block.onTouchMove = opt.attr.block.onTouchMove; //触摸移动
-			if (opt.attr.block.onTouchEnd) this.attr.block.onTouchEnd = opt.attr.block.onTouchEnd; //触摸结束
-			if (opt.attr.block.onTouchCancal) this.attr.block.onTouchCancal = opt.attr.block.onTouchCancal; //触摸取消
+			if (opt.attr.onMouseWheelScrollUp) this.attr.onMouseWheelScrollUp = opt.attr.onMouseWheelScrollUp; //鼠标滚轮往上
+			if (opt.attr.onMouseWheelScrollDown) this.attr.onMouseWheelScrollDown = opt.attr.onMouseWheelScrollDown; //鼠标滚轮往下
 			
-			if (opt.attr.block.onPlace) this.attr.block.onPlace = opt.attr.block.onPlace; //被放置
-			if (opt.attr.block.onRemove) this.attr.block.onRemove = opt.attr.block.onRemove; //被删除
+			if (opt.attr.onShortTouch) this.attr.onShortTouch = opt.attr.onShortTouch; //短按
+			if (opt.attr.onLongTouch) this.attr.onLongTouch = opt.attr.onLongTouch; //长按
+			if (opt.attr.onTouchStart) this.attr.onTouchStart = opt.attr.onTouchStart; //触摸开始
+			if (opt.attr.onTouchMove) this.attr.onTouchMove = opt.attr.onTouchMove; //触摸移动
+			if (opt.attr.onTouchEnd) this.attr.onTouchEnd = opt.attr.onTouchEnd; //触摸结束
+			if (opt.attr.onTouchCancal) this.attr.onTouchCancal = opt.attr.onTouchCancal; //触摸取消
 		}
 	}
 	
@@ -254,7 +253,7 @@ class Block extends Thing{
 		/* if (material)
 			return this.set("block", "material", material.map( v => v.clone() )); */
 		
-		const transparent = this.get("attr", "block", "transparent") || false;
+		const transparent = this.get("attr", "transparent") || false;
 		this.set("block", "material", [
 			new THREE.MeshLambertMaterial({ map:textures[0], transparent }),
 			new THREE.MeshLambertMaterial({ map:textures[1], transparent }),
@@ -344,16 +343,15 @@ class EntityBlock extends Block{
 	constructor(opt){
 		super(opt);
 		
-		this.attr.entityBlock = {};
-		if (opt.attr && opt.attr.entityBlock){
-			if (opt.attr.entityBlock.size){ //挖掘大小程度
-				this.attr.entityBlock.size = {};
-				if (opt.attr.entityBlock.size.x0) this.attr.entityBlock.size.x0 = opt.attr.entityBlock.size.x0;
-				if (opt.attr.entityBlock.size.x1) this.attr.entityBlock.size.x1 = opt.attr.entityBlock.size.x1;
-				if (opt.attr.entityBlock.size.y0) this.attr.entityBlock.size.y0 = opt.attr.entityBlock.size.y0;
-				if (opt.attr.entityBlock.size.y1) this.attr.entityBlock.size.y1 = opt.attr.entityBlock.size.y1;
-				if (opt.attr.entityBlock.size.z0) this.attr.entityBlock.size.z0 = opt.attr.entityBlock.size.z0;
-				if (opt.attr.entityBlock.size.z1) this.attr.entityBlock.size.z1 = opt.attr.entityBlock.size.z1;
+		if (opt.attr){
+			if (opt.attr.size){ //挖掘大小程度
+				this.attr.size = {};
+				if (opt.attr.size.x0) this.attr.size.x0 = opt.attr.size.x0;
+				if (opt.attr.size.x1) this.attr.size.x1 = opt.attr.size.x1;
+				if (opt.attr.size.y0) this.attr.size.y0 = opt.attr.size.y0;
+				if (opt.attr.size.y1) this.attr.size.y1 = opt.attr.size.y1;
+				if (opt.attr.size.z0) this.attr.size.z0 = opt.attr.size.z0;
+				if (opt.attr.size.z1) this.attr.size.z1 = opt.attr.size.z1;
 			}
 		}
 	}
@@ -361,12 +359,12 @@ class EntityBlock extends Block{
 	//更新实体方块大小
 	updateSize(){
 		const size = {
-			x0: this.get("attr", "entityBlock", "size", "x0") || 0,
-			x1: this.get("attr", "entityBlock", "size", "x1") || 100,
-			y0: this.get("attr", "entityBlock", "size", "y0") || 0,
-			y1: this.get("attr", "entityBlock", "size", "y1") || 100,
-			z0: this.get("attr", "entityBlock", "size", "z0") || 0,
-			z1: this.get("attr", "entityBlock", "size", "z1") || 100
+			x0: this.get("attr", "size", "x0") || 0,
+			x1: this.get("attr", "size", "x1") || 100,
+			y0: this.get("attr", "size", "y0") || 0,
+			y1: this.get("attr", "size", "y1") || 100,
+			z0: this.get("attr", "size", "z0") || 0,
+			z1: this.get("attr", "size", "z1") || 100
 		};
 		size.x = size.x1 - size.x0,
 		size.y = size.y1 - size.y0,
@@ -580,7 +578,6 @@ class Entity extends Thing{
 			this.entity.added = false; //未加入scene
 		}
 		
-		this.attr = {};
 		if (opt.attr){
 			if (opt.attr.v){ //速度
 				this.attr.v = {};
@@ -650,10 +647,10 @@ class Tool extends Thing{
 		}
 		
 		//工具属性
-		this.attr.tool = {};
-		if (opt.attr && opt.attr.tool){
-			if (opt.attr.tool.hardness) this.attr.tool.hardness = opt.attr.tool.hardness; //硬度
-			if (opt.attr.tool.durability) this.attr.tool.durability = opt.attr.tool.durability; //耐久度/m³
+		this.attr = {};
+		if (opt.attr){
+			if (opt.attr.hardness) this.attr.hardness = opt.attr.hardness; //硬度
+			if (opt.attr.durability) this.attr.durability = opt.attr.durability; //耐久度/m³
 		}
 	}
 }
