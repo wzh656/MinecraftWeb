@@ -325,41 +325,26 @@ class ChunkMap{
 	//获取真正的方块及属性
 	getShould(x, y, z){
 		let block = this.get(x,y,z, true, true),
-			loaded = true; //是否预加载
+			added = true; //是否预加载
 		if (block === undefined){ //未加载
 			const cX = Math.round(x/this.size.x),
 				cZ = Math.round(z/this.size.z), //所属区块(Chunk)
 				edit = this.chunks[cX] && this.chunks[cX][cZ] && this.chunks[cX][cZ].edit;
 			block = new Block( this.preGet(x, y, z, edit||[]) ); //应该的方块
-			loaded = false;
+			added = false;
 		}
-		return {
-			block,
-			loaded,
-			attr:{
-				size: Object.or( //取默认值
-					block.get("attr", "size"),
-					{x0:0, x1:100, y0:0, y1:100, z0:0, z1:100}
-				),
-				transparent: block.get("attr", "transparent"),
-			}
-		}
+		return {block, added};
 	}
 	
 	//更新方块
 	update(x, y, z){
 		x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 		/* 单位: m */
-		let {
-			block: thisBlock,
-			loaded,
-			attr: {
-				size: thisSize,
-				transparent: thisTransparent
-			}
-		} = this.getShould(x, y, z);
+		let { block: thisBlock, added: thisAdded } = this.getShould(x, y, z),
+			thisSize = thisBlock.get("attr", "size") || {},
+			thisTransparent = thisBlock.get("attr", "noTransparent");
 		
-		if (thisBlock.name == "空气") return; //空气
+		if (thisBlock.name == "空气") return; //空气null 不用刷新
 		
 		const thisVisible = []; //本方块 可见值
 		
@@ -372,37 +357,62 @@ class ChunkMap{
 		}else{ //整体/部分可隐藏
 			if (typeof thisBlock.attr.transparent == "object") //部分不可隐藏
 				for (const [i,v] of Object.entries(thisBlock.attr.transparent))
-					if (v)
-						needLoad = thisVisible[i] = true;
+					if (v) needLoad = thisVisible[i] = true;
 			
-			for (const [i, [dx,dy,dz, posDir,norPos, oppDir,norOpp, othDir1, othDir2]] of Object.entries(ChunkMap.updateRule)){ //遍历旁边的方块
+			// for (const [i, [dx,dy,dz, posDir,norPos, oppDir,norOpp, othDir1, othDir2]] of Object.entries(ChunkMap.updateRule)){ //遍历旁边的方块
+			for (const [i, direction] of Object.entries(Block.directions)){ //遍历旁边的方块
 				if (thisVisible[i]) continue; //不可隐藏
 				
-				const px=x+dx, py=y+dy, pz=z+dz; //旁边方块位置
+				let px=x, py=y, pz=z, //旁边方块位置
+					side; //其他方向
+				switch (direction[0]){
+					case "x":
+						px += direction[1]*2 - 1;
+						side = ["y", "z"];
+						break;
+					case "y":
+						py += direction[1]*2 - 1;
+						side = ["x", "z"];
+						break;
+					case "z":
+						pz += direction[1]*2 - 1;
+						side = ["x", "y"];
+						break;
+				}
+				
 				if ( py < this.size[0].y ){ //位于最底层 不显示
 					thisVisible[i] = false;
 					continue;
 				}
 				
-				const {
-					block: thatBlock,
-					attr: {
-						size: thatSize,
-						transparent: thatTransparent
-					}
-				} = this.getShould(px, py, pz); //旁边方块
+				const { block: thatBlock } = this.getShould(px, py, pz); //旁边方块
+				if ( thatBlock.name == "空气" ){ //无方块 显示
+					needLoad = thisVisible[i] = true;
+					continue;
+				}
+				let thatSize = thatBlock.get("attr", "size") || {},
+					thatTransparent = thatBlock.get("attr", "noTransparent");
 				
-				if ( !thatBlock || thatBlock.name == "空气" ){ //无方块 显示
-					needLoad = thisVisible[i] = true;
-				}else if ( thisSize[posDir] != norPos || //本方块 正方向变小
-					thatSize[oppDir] != norOpp || //旁边方块 反方向变小
-					thisSize[othDir1+"0"] < thatSize[othDir1+"0"] ||
-					thisSize[othDir1+"1"] > thatSize[othDir1+"1"] ||
-					thisSize[othDir2+"0"] < thatSize[othDir2+"0"] ||
-					thisSize[othDir2+"1"] > thatSize[othDir2+"1"] //超出旁边方块
-				){ // 显示
-					needLoad = thisVisible[i] = true;
-				}else{
+				if (Object.keys(thisSize).length || Object.keys(thatSize).length){ //有大小
+					Object.map(Block.normalSize, (v,i,obj)=>{
+						thisSize[i] = thisSize[i] || v;
+						thatSize[i] = thatSize[i] || v;
+					}); //取默认值
+					
+					if ( thatSize[direction] != 100 - i%2 * 100 || //本方块 正方向变小  正方向 奇(1):0 偶(0):100
+						thatSize[direction[0] + (1-direction[1])] != i%2 * 100 || //旁边方块 反方向变小  反方向 奇(1):100 偶(0):0
+						thisSize[side[0]+"0"] < thatSize[side[0]+"0"] ||
+						thisSize[side[0]+"1"] > thatSize[side[0]+"1"] ||
+						thisSize[side[1]+"0"] < thatSize[side[1]+"0"] ||
+						thisSize[side[1]+"1"] > thatSize[side[1]+"1"] //超出旁边方块
+					){ //显示
+						needLoad = thisVisible[i] = true;
+					}else{ //判断透明
+						needLoad = needLoad || thatTransparent;
+						thisVisible[i] = thatTransparent; //方块透明 显示
+					}
+					
+				}else{ //无大小
 					needLoad = needLoad || thatTransparent;
 					thisVisible[i] = thatTransparent; //方块透明 显示
 				}
@@ -410,16 +420,19 @@ class ChunkMap{
 		}
 		
 		
-		if (!loaded){ //未加载
+		if (!thisAdded){ //未加载
 			const cX = Math.round(x/this.size.x),
 				cZ = Math.round(z/this.size.z);
 			if ( needLoad && this.getInitedChunks().some(v => v[0]==cX && v[1]==cZ) ){ //不可隐藏 且 在加载区块内
 				this.addID(thisBlock, {x,y,z});
 				thisBlock = this.get(x, y, z, true, true); //加载后的this方块
-				loaded = true;
+				thisAdded = true;
 			}
-			if ( !loaded || !thisBlock ) return; //无需加载 或 null（加载为空气）
+			if ( !thisAdded || !thisBlock ) return; //无需加载 或 null（加载为空气）
 		}
+		
+		if (thisBlock.block.added == true && !needLoad) debugger
+		if (thisBlock.block.added == false && needLoad) debugger
 		
 		const material = thisBlock.block.material;
 		for (let i=material.length-1; i>=0; i--)
@@ -1216,15 +1229,7 @@ class ChunkMap{
 		const ox = Math.round(x/this.size.x)*this.size.x,
 			oz = Math.round(z/this.size.z)*this.size.z,
 			dx = x-ox,
-			dz = z-oz,
-			rule = [
-				"x0",
-				"x1",
-				"y0",
-				"y1",
-				"z0",
-				"z1"
-			];
+			dz = z-oz;
 		
 		for (let y=this.size[0].y; y<=this.size[1].y; y++){
 			
@@ -1241,15 +1246,10 @@ class ChunkMap{
 				continue;
 			}
 			
-			const normal = {x0:0, x1:100, y0:0, y1:100, z0:0, z1:100}, //默认值
-				thisSize = Object.or( //取默认值
-					(thisBlock.attr && thisBlock.attr.size) ||
-						(Thing.TEMPLATES[thisName].attr.size) || {},
-					normal
-				),
+			let thisSize = (thisBlock.attr && thisBlock.attr.size) ||
+					(Thing.TEMPLATES[thisName].attr.size) || {},
 				thisTransparent = (thisBlock.attr && thisBlock.attr.transparent) ||
 					(Thing.TEMPLATES[thisName].attr.transparent);
-			
 			
 			const thisVisible = []; //本方块 可见值
 			let needLoad = false; //是否需要加载
@@ -1264,7 +1264,7 @@ class ChunkMap{
 						if (v)
 							needLoad = thisVisible[i] = true;
 				
-				for (const [i, direction] of Object.entries(rule)){ //遍历旁边的方块
+				for (const [i, direction] of Object.entries(Block.directions)){ //遍历旁边的方块
 				// for (const [i, [dx,dy,dz, posDir,norPos, oppDir,norOpp, othDir1, othDir2]] of Object.entries(ChunkMap.updateRule)){ //遍历旁边的方块
 					if (thisVisible[i]) continue; //不可隐藏
 					
@@ -1291,28 +1291,42 @@ class ChunkMap{
 					}
 					
 					//盘边方块
-					const thatBlock = columns[px] && columns[px][pz] && columns[px][pz][py];
+					const thatBlock = (px < this.size[0].x || px > this.size[1].x ||
+							py < this.size[0].y || py > this.size[1].y ||
+							pz < this.size[0].z || pz > this.size[1].z)?
+								this.getShould(ox+px, y, oz+pz).block //超出范围 取应该的方块
+							: (columns[px] && columns[px][pz] && columns[px][pz][py]);
 					if ( !thatBlock || thatBlock.name == "空气" ){ //无方块 显示
 						needLoad = thisVisible[i] = true;
 						continue;
 					}
-					const thatName = thatBlock.name,
-						thatSize = Object.or(
-							(thatBlock.attr && thatBlock.attr.size) ||
-								(Thing.TEMPLATES[thatName].attr.size) || {},
-							normal
-						);
+					let thatName = thatBlock.name,
+						thatSize = (thatBlock.attr && thatBlock.attr.size) ||
+							(Thing.TEMPLATES[thatName].attr.size) || {};
 					
-					if ( thatSize[direction] != i%2 * 100 || //本方块 正方向变小  正方向 奇(1):0 偶(0):100
-						thatSize[direction[0] + (1-direction[1])] != 100 - i%2 * 100 || //旁边方块 反方向变小  反方向 奇(1):100 偶(0):0
-						thisSize[side[0]+"0"] < thatSize[side[0]+"0"] ||
-						thisSize[side[0]+"1"] > thatSize[side[0]+"1"] ||
-						thisSize[side[1]+"0"] < thatSize[side[1]+"0"] ||
-						thisSize[side[1]+"1"] > thatSize[side[1]+"1"] //超出旁边方块
-					){ //显示
-						needLoad = thisVisible[i] = true;
-					}else{ //看透明属性
-						const visible = (thatBlock.attr && thatBlock.attr.transparent) ||
+					if (Object.keys(thisSize).length || Object.keys(thatSize).length){ //都有大小
+						Object.map(Block.normalSize, (v,i,obj)=>{
+							thisSize[i] = thisSize[i] || v;
+							thatSize[i] = thatSize[i] || v;
+						}); //取默认值
+						
+						if ( thatSize[direction] != 100 - i%2 * 100 || //本方块 正方向变小  正方向 奇(1):0 偶(0):100
+							thatSize[direction[0] + (1-direction[1])] != i%2 * 100 || //旁边方块 反方向变小  反方向 奇(1):100 偶(0):0
+							thisSize[side[0]+"0"] < thatSize[side[0]+"0"] ||
+							thisSize[side[0]+"1"] > thatSize[side[0]+"1"] ||
+							thisSize[side[1]+"0"] < thatSize[side[1]+"0"] ||
+							thisSize[side[1]+"1"] > thatSize[side[1]+"1"] //超出旁边方块
+						){ //显示
+							needLoad = thisVisible[i] = true;
+						}else{ //看透明属性
+							const visible = (thatBlock.attr && thatBlock.attr.transparent) || //旁边方块透明
+								(Thing.TEMPLATES[thatName].attr.transparent); //继承属性
+							needLoad = needLoad || visible;
+							thisVisible[i] = visible; //方块透明 显示
+						}
+						
+					}else{ //无大小
+						const visible = (thatBlock.attr && thatBlock.attr.transparent) || //旁边方块透明
 							(Thing.TEMPLATES[thatName].attr.transparent); //继承属性
 						needLoad = needLoad || visible;
 						thisVisible[i] = visible; //方块透明 显示
@@ -1384,7 +1398,7 @@ class ChunkMap{
 				
 				const material = block.block.material;
 				
-				if ( !block.get("attr", "noTransparent") ) //允许透明
+				if ( !thisTransparent ) //允许透明
 					for (let i=material.length-1; i>=0; i--)
 						material[i].visible = thisVisible[i];
 				
@@ -2384,14 +2398,3 @@ class ChunkMap{
 	}
 	
 }
-
-ChunkMap.updateRule = [
-	/* x,y,z偏移量 正方向 反方向 其他方向 */
-	[1,0,0, "x1",100, "x0",0, "y","z"],
-	[-1,0,0, "x0",0, "x1",100, "y","z"],
-	[0,1,0, "y1",100, "y0",0, "x","z"],
-	[0,-1,0, "y0",0, "y1",100, "x","z"],
-	[0,0,1, "z1",100, "z0",0, "x","y"],
-	[0,0,-1, "z0",0, "z1",100, "x","y"]
-];
-

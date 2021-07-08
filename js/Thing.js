@@ -305,7 +305,7 @@ class Block extends Thing{
 		if (geometry){
 			mesh = new THREE.Mesh(geometry, this.block.material);
 		}else{ //使用默认
-			mesh = new THREE.Mesh(this.constructor.prototype.normalGeometry, this.block.material);
+			mesh = new THREE.Mesh(this.constructor.normalGeometry, this.block.material);
 		}
 		mesh.castShadow = true;
 		mesh.receiveShadow = true;
@@ -333,7 +333,16 @@ class Block extends Thing{
 	}
 }
 Block.prototype.type = "Block"; //名称
-Block.prototype.normalGeometry = new THREE.BoxBufferGeometry(100, 100, 100); //通用几何体
+Block.normalGeometry = new THREE.BoxBufferGeometry(100, 100, 100); //通用几何体
+Block.normalSize = {
+	x1: 100,
+	x0: 0,
+	y1: 100,
+	y0: 0,
+	z1: 100,
+	z0: 0
+}; //大小默认值
+Block.directions = Object.keys(Block.normalSize); //各个方向（有顺序）
 
 
 /*
