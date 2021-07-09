@@ -63,7 +63,7 @@ const Events = {
 			//用手挖掘
 		if (hold == null){
 			free = deskgood.choice;
-			idealDigSpeed = thing.get("attr", "block", "idealDigSpeed", "手");
+			idealDigSpeed = thing.get("attr", "idealDigSpeed", "手");
 			
 			//实体无法用于挖掘
 		}else if (hold.type == "Entity"){
@@ -83,11 +83,11 @@ const Events = {
 				if (free == -1)
 					return print("东西太多，我拿不下了", "拿不下方块", 3, "#f00");
 			}
-			idealDigSpeed = thing.get("attr", "block", "idealDigSpeed", hold.name);
+			idealDigSpeed = thing.get("attr", "idealDigSpeed", hold.name);
 			
 			//方块或实体方块
 		}else{
-			if (hold.name != (thing.get("attr", "block", "digGet") || thing.name) || //非同种物体
+			if (hold.name != (thing.get("attr", "digGet") || thing.name) || //非同种物体
 				hold.get("attr", "stackable") != true //不可叠加
 			) return print("当前方块无法叠加", "无法挖掘", 3, "#f00");
 			
@@ -95,7 +95,7 @@ const Events = {
 				return print("东西太多，我没办法空出手来挖了", "没手挖方块", 3, "#f00");
 			
 			free = deskgood.choice; //挖到叠加
-			idealDigSpeed = thing.get("attr", "block", "idealDigSpeed", "手"); //用手挖掘
+			idealDigSpeed = thing.get("attr", "idealDigSpeed", "手"); //用手挖掘
 			take = hold;
 			if (hold.type == "Block") //要叠加的方块 转化为 实体方块
 				hold = deskgood.hold[deskgood.choice] = hold.toEntityBlock();
@@ -139,7 +139,7 @@ const Events = {
 			"idealDigSpeed:", idealDigSpeed*time.getSpeed(), "cm³/s, ", thingS/idealDigSpeed/time.getSpeed(), "s/cm") //现实时间
 		
 		//处理事件
-		if ( eval(thing.get("attr", "block", "onStartDig")) === false ) return;
+		if ( eval(thing.get("attr", "onStartDig")) === false ) return;
 		
 		//挖掘振动
 		if (typeof plus != "undefined"){
@@ -152,10 +152,10 @@ const Events = {
 		const func = ()=>{
 			
 			if (!take){
-				const digGet = entityBlock.get("attr", "block", "digGet");
+				const digGet = entityBlock.get("attr", "digGet");
 				if (digGet){ //指定获得方块
 					take = new EntityBlock({
-						name: entityBlock.get("attr", "block", "digGet"), //挖掘获得 （仅name）
+						name: entityBlock.get("attr", "digGet"), //挖掘获得 （仅name）
 						attr: {
 							entityBlock: {
 								size: entityBlock.get("attr", "entityBlock", "size")
@@ -214,7 +214,7 @@ const Events = {
 		
 		//处理事件
 		if ( this.digThing &&
-			eval(this.digThing.get("attr", "block", "onEndDig")) === false
+			eval(this.digThing.get("attr", "onEndDig")) === false
 		) return;
 		
 		console.log("endDig")
@@ -244,7 +244,7 @@ const Events = {
 		
 		//处理事件
 		if ( thing &&
-			eval(thing.get("attr", "block", "onStartPlace")) === false
+			eval(thing.get("attr", "onStartPlace")) === false
 		) return;
 		
 		//转换为真正选中位置
@@ -284,13 +284,13 @@ const Events = {
 		//是否在头上 且 不可穿过
 		if ( pos.distanceToSquared( deskgood.pos.clone() .divideScalar(100) )
 			< 0.5*0.5 && //距离**2 < 0.5**2 单位:m
-			hold.get("attr", "block", "through") !== true
+			hold.get("attr", "through") !== true
 		)  return print("想窒息吗？还往头上放方块！", "往头上放方块", 3); //放到头上
 		
 		//是否在腿上 且 不可穿过
 		if ( pos.distanceToSquared( deskgood.pos.clone() .divideScalar(100).add(new THREE.Vector3(0,-1,0) ) )
 			< 0.5*0.5 && //距离**2 < 0.5**2 单位:m
-			hold.get("attr", "block", "through") !== true
+			hold.get("attr", "through") !== true
 		)  return print("想卡死吗？还往腿上放方块！", "往腿上放方块"); //放到腿上
 		
 		this.digThing = hold; //正在放置的物体
@@ -308,7 +308,7 @@ const Events = {
 		
 		//处理事件
 		if ( this.placeThing &&
-			eval(this.placeThing.get("attr", "block", "onEndPlace")) === false
+			eval(this.placeThing.get("attr", "onEndPlace")) === false
 		) return;
 		
 		this.placing = false; //结束放置

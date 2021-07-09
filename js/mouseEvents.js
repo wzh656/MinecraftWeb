@@ -60,7 +60,7 @@ document.addEventListener("mousemove", function (e){
 		// mouse.choice.obj.splice(i,1); //已经删除！
 	}
 	
-	
+	if (!DEBUG) return;
 	const get = ray2D()[0];
 	if (!get) return (mouse.choice = {
 			view: mouse.choice.view,
@@ -75,47 +75,41 @@ document.addEventListener("mousemove", function (e){
 	mouse.choice.y = get.object.position.y;
 	mouse.choice.z = get.object.position.z;
 	mouse.choice.faceIndex = get.faceIndex;
-	mouse.choice.name = map.get(
-		get.object.position.x/100,
-		get.object.position.y/100,
-		get.object.position.z/100,
-		true, true
-	).name;
+	mouse.choice.name = get.object.userData.thingObject.name;
 	
-	if (mouse.choice.view){
-		const geometry1 = new THREE.BoxBufferGeometry(100, 100, 100),
-			material1 = new THREE.MeshBasicMaterial({
-				color: "blue",
-				transparent: true,
-				opacity: 0.3
-			}),
-			material2 = new THREE.MeshBasicMaterial({
-				color: "red",
-				wireframe: true //只显示框架
-			}),
-			mesh1 = new THREE.Mesh(geometry1, material1),
-			mesh2 = new THREE.Mesh(geometry1, material2);
-		
-		mesh1.position.x = mesh2.position.x = get.object.position.x;
-		mesh1.position.y = mesh2.position.y = get.object.position.y;
-		mesh1.position.z = mesh2.position.z = get.object.position.z;
-		scene.add(mesh1);
-		scene.add(mesh2);
-		mouse.choice.obj.push(mesh1);
-		mouse.choice.obj.push(mesh2);
-		/* let geometry2 = new THREE.BoxBufferGeometry(map.size.x*100, map.size.y*100, map.size.z*100);
-		let mesh3 = new THREE.Mesh(geometry2, new THREE.MeshBasicMaterial({
+	if (!mouse.choice.view) return;
+	const geometry1 = new THREE.BoxBufferGeometry(100, 100, 100),
+		material1 = new THREE.MeshBasicMaterial({
 			color: "blue",
 			transparent: true,
-			opacity: 0.1
-		}));
-		mesh3.position.x = Math.round(get.object.position.x/100/map.size.x)*100;
-		mesh3.position.y = map.size.y*100/2;
-		mesh3.position.z = Math.round(get.object.position.z/100/map.size.z)*100;
-		scene.add(mesh3);
-		console.log(mesh3)
-		mouse.choice.obj.push(mesh3); */
-	}
+			opacity: 0.3
+		}),
+		material2 = new THREE.MeshBasicMaterial({
+			color: "red",
+			wireframe: true //只显示框架
+		}),
+		mesh1 = new THREE.Mesh(geometry1, material1),
+		mesh2 = new THREE.Mesh(geometry1, material2);
+	
+	mesh1.position.x = mesh2.position.x = get.object.position.x;
+	mesh1.position.y = mesh2.position.y = get.object.position.y;
+	mesh1.position.z = mesh2.position.z = get.object.position.z;
+	scene.add(mesh1);
+	scene.add(mesh2);
+	mouse.choice.obj.push(mesh1);
+	mouse.choice.obj.push(mesh2);
+	/* let geometry2 = new THREE.BoxBufferGeometry(map.size.x*100, map.size.y*100, map.size.z*100);
+	let mesh3 = new THREE.Mesh(geometry2, new THREE.MeshBasicMaterial({
+		color: "blue",
+		transparent: true,
+		opacity: 0.1
+	}));
+	mesh3.position.x = Math.round(get.object.position.x/100/map.size.x)*100;
+	mesh3.position.y = map.size.y*100/2;
+	mesh3.position.z = Math.round(get.object.position.z/100/map.size.z)*100;
+	scene.add(mesh3);
+	console.log(mesh3)
+	mouse.choice.obj.push(mesh3); */
 });
 
 
