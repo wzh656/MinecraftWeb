@@ -118,19 +118,19 @@ const Events = {
 			case "Entity": //实体 无法挖掘 用事件特殊处理
 				break;
 		}
-		entityBlock.set("attr","entityBlock","size",direction,
-			entityBlock.get("attr","entityBlock","size",direction) || 100*direction[1] //x0: 0, x1: 100
+		entityBlock.set("attr", "size",direction,
+			entityBlock.get("attr", "size",direction) || 100*direction[1] //x0: 0, x1: 100
 		); //保证有值
 		
-		const thingS = ((entityBlock.get("attr","entityBlock","size", side[0]+"1") || 100) -
-				(entityBlock.get("attr","entityBlock","size", side[0]+"0") || 0)) *
-			((entityBlock.get("attr","entityBlock","size", side[1]+"1") || 100) -
-				(entityBlock.get("attr","entityBlock","size", side[1]+"0") || 0)), //挖掘面积
+		const thingS = ((entityBlock.get("attr", "size", side[0]+"1") || 100) -
+				(entityBlock.get("attr", "size", side[0]+"0") || 0)) *
+			((entityBlock.get("attr", "size", side[1]+"1") || 100) -
+				(entityBlock.get("attr", "size", side[1]+"0") || 0)), //挖掘面积
 			takeS = take?
-				((take.get("attr","entityBlock","size", side[0]+"1") || 100) -
-					(take.get("attr","entityBlock","size", side[0]+"0") || 0)) *
-				((take.get("attr","entityBlock","size", side[1]+"1") || 100) -
-					(take.get("attr","entityBlock","size", side[1]+"0") || 0))
+				((take.get("attr", "size", side[0]+"1") || 100) -
+					(take.get("attr", "size", side[0]+"0") || 0)) *
+				((take.get("attr", "size", side[1]+"1") || 100) -
+					(take.get("attr", "size", side[1]+"0") || 0))
 				:thingS; //拿走物体面积
 		
 		this.digging = true; //正在挖掘
@@ -165,20 +165,20 @@ const Events = {
 				}else{
 					take = entityBlock.cloneAttr();
 				}
-				take.set("attr","entityBlock","size", direction[0]+"1", 0); //x0,x1 -> x1
+				take.set("attr", "size", direction[0]+"1", 0); //x0,x1 -> x1
 				deskgood.hold.addOne(take, free); //克隆一个放在手中
 			}
 			
-			entityBlock.attr.entityBlock.size[direction] += 1-direction[1]*2; //x0 -> 1, x1 -> -1
-			take.attr.entityBlock.size[direction[0] + "1"] += thingS/takeS; //x1: 0 ~> 100
+			entityBlock.attr.size[direction] += 1-direction[1]*2; //x0 -> 1, x1 -> -1
+			take.attr.size[direction[0] + "1"] += thingS/takeS; //x1: 0 ~> 100
 			
-			console.log("Digging", entityBlock.attr.entityBlock.size[direction], take.attr.entityBlock.size[direction])
+			console.log("Digging", entityBlock.attr.size[direction], take.attr.size[direction])
 			entityBlock.updateSize(); //更新大小
 			
 			if (direction[1] == "0"){ //x0: ++
-				if (entityBlock.attr.entityBlock.size[direction]
+				if (entityBlock.attr.size[direction]
 					>=
-					entityBlock.attr.entityBlock.size[direction[0] + "1"]
+					entityBlock.attr.size[direction[0] + "1"]
 				){ //挖掘结束
 					time.clearInterval(this.digId);
 					this.digging = false; //挖掘结束
@@ -187,9 +187,9 @@ const Events = {
 				}
 				
 			}else{ //x1: --
-				if (entityBlock.attr.entityBlock.size[direction]
+				if (entityBlock.attr.size[direction]
 					<=
-					entityBlock.attr.entityBlock.size[direction[0] + "0"]
+					entityBlock.attr.size[direction[0] + "0"]
 				){ //挖掘结束
 					time.clearInterval(this.digId);
 					this.digging = false; //挖掘结束

@@ -1427,7 +1427,7 @@ class ChunkMap{
 		const edit = [];
 		db.readStep(TABLE.WORLD, {
 			index: "type",
-			range: ["only", 0],
+			range: ["only", 1], //方块
 			stepCallback: (res)=>{
 				if (
 					res.x >= ox+this.size[0].x && res.x <= ox+this.size[1].x &&
@@ -1896,7 +1896,7 @@ class ChunkMap{
 			const edit = [];
 			db.readStep(TABLE.WORLD, {
 				index: "type",
-				range: ["only", 0],
+				range: ["only", 1], //方块
 				stepCallback: (res)=>{
 					if (
 						res.x >= ox+this.size[0].x && res.x <= ox+this.size[1].x &&
@@ -2006,10 +2006,30 @@ class ChunkMap{
 				}
 			}
 			
-			const edit = [];
-			db.readStep(TABLE.WORLD, {
+			// const edit = [];
+			DB.readChunk(x, z, {
+				successCallback: (edit)=>{
+					const gener = gen( this.preGetChunk(x, z, edit), this ),
+						id = setInterval(function work(){
+							let res = {},
+								t0 = +new Date(),
+								num = 0;
+							while ( !res.done ){
+								res = gener.next();
+								if (new Date()-t0 >= breakTime) //超时
+									return;
+								if (res.value == true && ++num >= mostSpeed) //超数
+									return;
+							}
+							// if (finishCallback) finishCallback(); //加载完毕
+							clearInterval(id); //运行结束
+							resolve(); //加载完毕
+						}, 0);
+				}
+			});
+			/* db.readStep(TABLE.WORLD, {
 				index: "type",
-				range: ["only", 0],
+				range: ["only", 1], //方块
 				stepCallback: (res)=>{
 					if (
 						res.x >= ox+this.size[0].x && res.x <= ox+this.size[1].x &&
@@ -2038,7 +2058,7 @@ class ChunkMap{
 						}, 0);
 					return id;
 				},
-			});
+			}); */
 		});
 	}
 	

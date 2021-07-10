@@ -459,7 +459,7 @@ const deskgood = { //桌子好
 		//Y-
 		}else if (y < 0){ //下
 			let objs = ray3D(
-				{y: deskgood.pos.y-150},
+				{},
 				{y: -1},
 				0,
 				-y + deskgood.collisionBox["y-"]
@@ -898,10 +898,6 @@ if (DEBUG){
 		deskgood_folder.add(window, "stop").listen();
 		deskgood_folder.add(deskgood, "die").name("Game Over(自杀)");
 		deskgood_folder.add(deskgood, "sensitivity", 0.1, 10).name("灵敏度");
-		const deskgood_idealV_folder = deskgood_folder.addFolder("理想速度(ideal_v/(m/s))");
-			deskgood_idealV_folder.add(deskgood.ideal_v, "walk", 0, 10, 0.1).name("行走(walk)");
-			deskgood_idealV_folder.add(deskgood.ideal_v, "sprint", 0, 10, 0.1).name("疾跑(sprint)");
-			deskgood_idealV_folder.add(deskgood.ideal_v, "jump", 0, 36, 1).name("跳跃(jump)");
 		const deskgood_position_folder = deskgood_folder.addFolder("位置/px");
 		deskgood_position_folder.open();
 			deskgood_position_folder.add(deskgood.pos, "x", map.size[0].x*100, map.size[1].x*100, 0.01).listen();
@@ -918,6 +914,17 @@ if (DEBUG){
 			deskgood_look_folder.add(deskgood.look, "y", 0, 360, 0.1).listen();
 			deskgood_look_folder.add(deskgood.look, "z", -180, 180, 0.1).listen();
 			deskgood_look_folder.add(deskgood, "VR").name("VR模式").onChange(v =>{ if (!v) deskgood.look.z=0; });
+		const deskgood_idealV_folder = deskgood_folder.addFolder("理想速度(ideal_v/(m/s))");
+			deskgood_idealV_folder.add(deskgood.ideal_v, "walk", 0, 10, 0.1).name("行走(walk)");
+			deskgood_idealV_folder.add(deskgood.ideal_v, "sprint", 0, 10, 0.1).name("疾跑(sprint)");
+			deskgood_idealV_folder.add(deskgood.ideal_v, "jump", 0, 36, 1).name("跳跃(jump)");
+		const deskgood_collisionBox_folder = deskgood_folder.addFolder("碰撞箱大小(collisionBox)");
+			deskgood_collisionBox_folder.add(deskgood.collisionBox, "x+", 0, 200, 1);
+			deskgood_collisionBox_folder.add(deskgood.collisionBox, "x-", 0, 200, 1);
+			deskgood_collisionBox_folder.add(deskgood.collisionBox, "y+", 0, 200, 1);
+			deskgood_collisionBox_folder.add(deskgood.collisionBox, "y-", 0, 200, 1);
+			deskgood_collisionBox_folder.add(deskgood.collisionBox, "z+", 0, 200, 1);
+			deskgood_collisionBox_folder.add(deskgood.collisionBox, "z-", 0, 200, 1);
 		const deskgood_up_folder = deskgood_folder.addFolder("天旋地转（小心头晕）");
 			deskgood_up_folder.add(deskgood.up, "x", -1, 1, 0.01).onChange(function(){
 				print("头晕别怪我", "头晕");
@@ -931,12 +938,6 @@ if (DEBUG){
 		const deskgood_hold_folder = deskgood_folder.addFolder("工具栏(tools)");
 		deskgood_hold_folder.open();
 			deskgood_hold_folder.add(deskgood, "choice", 0, 3, 1).listen().name("选择工具").onChange(deskgood.hold.update);
-			const deskgood_hold_things_folder = deskgood_hold_folder.addFolder("物品(只读勿编辑)");
-			deskgood_hold_things_folder.open();
-				deskgood_hold_things_folder.add(deskgood.hold[0] || {name:0}, "name").name("0").listen().onChange(deskgood.hold.update);
-				deskgood_hold_things_folder.add(deskgood.hold[1] || {name:0}, "name").name("1").listen().onChange(deskgood.hold.update);
-				deskgood_hold_things_folder.add(deskgood.hold[2] || {name:0}, "name").name("2").listen().onChange(deskgood.hold.update);
-				deskgood_hold_things_folder.add(deskgood.hold[3] || {name:0}, "name").name("3").listen().onChange(deskgood.hold.update);
 }
 
 

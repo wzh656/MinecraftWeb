@@ -31,7 +31,7 @@ const DB = {
 		
 		db.readStep(TABLE.WORLD, {
 			index: "type",
-			range: ["only", 1],
+			range: ["only", 0],
 			dirt: "prev",
 			stepCallback: function(res){
 				console.log("存档read成功", res)
@@ -75,7 +75,7 @@ const DB = {
 	/* 保存存档 */
 	save(){
 		const data = {
-			type: 1,
+			type: 0,
 			pos: deskgood.pos.clone(), //位置
 			v: deskgood.v.clone(), //速度
 			look: { //朝向
@@ -111,7 +111,7 @@ const DB = {
 				let find = false;
 				db.readStep(TABLE.WORLD, {
 					index: "type",
-					range: ["only", 1],
+					range: ["only", 0],
 					dirt: "prev",
 					stepCallback: function(res){
 						if (find){
@@ -119,6 +119,36 @@ const DB = {
 							db.remove(TABLE.WORLD, res.key);
 						}else{
 							find = true;
+						}
+					}
+				});
+			}
+		});
+	},
+	
+	/* 添加数据 */
+	addBlock(x, y, z, name, attr={}){
+		db.addData(TABLE.WORLD, {
+			type: 1,
+			x,
+			y,
+			z,
+			name,
+			attr: JSON.stringify(attr).slice(1, -1)
+		}, {
+			successCallback: function(){
+				let find = false;
+				db.readStep(TABLE.WORLD, {
+					index: "type",
+					range: ["only", 1],
+					dirt: "prev",
+					stepCallback: function(res){
+						if (res.x!=x || res.y!=y || res.z!=z) return;
+						if (find){
+							// console.log("DB 删除多余", res.key, res);
+							db.remove(TABLE.WORLD, res.key);
+						}else{
+							find = true; //刚才添加的
 						}
 					}
 				});
@@ -134,7 +164,7 @@ const DB = {
 		const edit = [];
 		db.readStep(TABLE.WORLD, {
 			index: "type",
-			range: ["only", 0],
+			range: ["only", 1],
 			stepCallback: (res)=>{
 				if ( res.x >= ox+map.size[0].x && res.x <= ox+map.size[1].x &&
 					res.z >= oz+map.size[0].z && res.z <= oz+map.size[1].z

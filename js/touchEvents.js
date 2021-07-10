@@ -136,7 +136,7 @@ $("#control > .jump").on("touchstart", function(){
 	$("#control > .jump").addClass("active");
 	
 	if ( map.get(deskgood.pos.x/100,
-			deskgood.pos.y/100-2,
+			(deskgood.pos.y - deskgood.collisionBox["y-"] - 50)/100, //到方块中心
 			deskgood.pos.z/100) && //脚下有方块
 		time.getTime()-last_jump >= 1000*rnd_error() //达到休息时间
 	){
