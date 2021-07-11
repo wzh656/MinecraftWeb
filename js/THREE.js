@@ -245,9 +245,8 @@ const ambientColor = new ColorUpdater({
 }).autoUpdate(20*1000); // 20s/time
 
 //时间
-let daytime;
 const {latitude=40, longitude=116} = JSON.parse(localStorage.getItem("我的世界_position") || "{}");
-time.setInterval(function(time, speed){
+function colosUpdate(time, speed){
 	if (!speed) return;
 	const N = ~~(
 			( time - new Date(time.getFullYear(), 0, 1) )
@@ -289,7 +288,8 @@ time.setInterval(function(time, speed){
 		backgroundColor.config,
 		ambientColor.config
 	);
-}, 24*3600*1000).func(time.getTime(), true); // 24h/time
+}
+time.setInterval(colosUpdate, 24*3600*1000); // 24h/time
 
 /*function dateToNumber(h=0, m=0, s=0){
 	return (s/60+m)/60+h;

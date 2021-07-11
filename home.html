@@ -514,30 +514,29 @@ $(".more input[type='range']").change(function(){
 $(".more input[type='number']").change(function(){
 	if (isNaN(this.value))
 		this.value = this["data-init"];
-	$(this).prev().val( Number(this.value) );
+	$(this).prev().val( +this.value );
 	this.value=$(this).prev().val();
 });
 
 //time
-function dateToInputValue(date){
-	if (typeof date == "number") date = new Date(date);
-	return (
-			date.getFullYear() + "-"+
-			String( date.getMonth()+1 ).padStart(2, "0") + "-"+
-			String( date.getDate() ).padStart(2,"0") + "T"+
-			String( date.getHours() ).padStart(2,"0") + ":"+
-			String( date.getMinutes() ).padStart(2,"0")
-		);
+function date2InputValue(date){
+	return new Date(date).format("yyyy-MM-ddThh:mm:ss");
+	/* if (typeof date == "number") date = new Date(date);
+	return ( date.getFullYear()+"" ).padStart(4, "0") + "-"+
+			( date.getMonth()+1+"" ).padStart(2, "0") + "-"+
+			( date.getDate()+"" ).padStart(2,"0") + "T"+
+			( date.getHours()+"" ).padStart(2,"0") + ":"+
+			( date.getMinutes()+"" ).padStart(2,"0"); */
 }
-function inputValueToDate(date){
-	const [, year, mouth, day, hour, minute] = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(date);
-	return new Date(year, mouth-1, day, hour, minute);
+function inputValue2Date(date){
+	const [, year, mouth, day, hour, minute, second] = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/.exec(date);
+	return new Date(0, mouth-1, day, hour, minute, second).setFullYear(year);
 }
 $(".more > .time-position > input[name='time']")
-	.val( new Date(new Date().setFullYear(3000)).format("yyyy-MM-ddThh:mm") )
+	.val( date2InputValue(new Date().setFullYear(1)) )
 	.change(function(){
 		if (!this.value)
-			this.value = new Date(new Date().setFullYear(3000)).format("yyyy-MM-ddThh:mm");
+			this.value = date2InputValue(new Date().setFullYear(1));
 	});
 
 //position
@@ -796,7 +795,7 @@ if (localStorage.getItem("我的世界_seed") !== null){
 
 //生成世界
 $(".new_world > button:eq(1)").click(function(){
-	const time = +inputValueToDate( $(".more > .time-position > input[name='time']").val() )
+	const time = +inputValue2Date( $(".more > .time-position > input[name='time']").val() )
 		position = {
 			latitude: +$(".more > .time-position > input[name='latitude']").val(),
 			longitude: +$(".more > .time-position > input[name='longitude']").val()

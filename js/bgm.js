@@ -28,6 +28,7 @@ function playBGM(){
 				bgm_folder.add(bgm, "src").name("音乐路径(src)");
 			}
 		}, 1000);
+		
 	}else{
 		//console.log("already", bgm.paused);
 		bgm.play();

@@ -428,8 +428,8 @@ class ChunkMap{
 			if ( !thisAdded ) return; //无需加载
 		}
 		
-		if (thisBlock.block.added == true && !needLoad) debugger
-		if (thisBlock.block.added == false && needLoad) debugger
+		// if (thisBlock.block.added == true && !needLoad) debugger
+		// if (thisBlock.block.added == false && needLoad) debugger
 		
 		const material = thisBlock.block.material;
 		for (let i=material.length-1; i>=0; i--)
@@ -2009,6 +2009,7 @@ class ChunkMap{
 			// const edit = [];
 			DB.readChunk(x, z, {
 				successCallback: (edit)=>{
+					this.startLoadChunk(x, z, edit); //初始化区块
 					const gener = gen( this.preGetChunk(x, z, edit), this ),
 						id = setInterval(function work(){
 							let res = {},

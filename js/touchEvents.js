@@ -15,10 +15,10 @@ touch.control = {
 //start
 $("#control > .move").on("touchstart", function(e){
 	if (stop)
-		return false;
+		return;
 	
 	const {pageX: x, pageY: y} = e.originalEvent.targetTouches[0];
-	console.log("touchstart(control):", x, y);
+	// console.log("touchstart(control):", x, y);
 	
 	touch.control.x0 = x,
 	touch.control.y0 = y,
@@ -30,7 +30,7 @@ $("#control > .move").on("touchstart", function(e){
 			touch.control.y0 === null ||
 			touch.control.x === null ||
 			touch.control.y === null
-		) return false;
+		) return;
 		
 		const t = time.getTime() - touch.control.t0; //时间间隔（游戏时间） 单位: ms
 		touch.control.t0 = +time.getTime();
@@ -62,13 +62,13 @@ $("#control > .move").on("touchstart", function(e){
 		.css("left", x+"px")
 		.css("top", y+"px");
 	
-	return false;
+	return;
 });
 
 //move
 $("#control > .move").on("touchmove", function(e){
 	if (stop)
-		return false;
+		return;
 	
 	const {pageX: x, pageY: y} = e.originalEvent.targetTouches[0];
 	//console.log("touchmove(control):", x, y);
@@ -86,7 +86,7 @@ $("#control > .move").on("touchmove", function(e){
 		.css("left", touch.control.x0 + d.x + "px")
 		.css("top", touch.control.y0 + d.y + "px");
 	
-	return false;
+	return;
 });
 
 //end
@@ -104,7 +104,7 @@ $("#control > .move").on("touchend", function(e){
 	$("#control > .move > .direction").hide();
 	$("#control > .position").hide();
 	
-	return false;
+	return;
 });
 
 //cancel
@@ -118,7 +118,7 @@ $("#control > .move").on("touchcancel", function(e){
 	$("#control > .move > .direction").hide();
 	$("#control > .position").hide();
 	
-	return false;
+	return;
 });
 
 
@@ -129,7 +129,7 @@ $("#control > .move").on("touchcancel", function(e){
 //start
 $("#control > .jump").on("touchstart", function(){
 	if (stop)
-		return false;
+		return;
 	
 	console.log("try jump");
 	
@@ -144,16 +144,16 @@ $("#control > .jump").on("touchstart", function(){
 		last_jump = +time.getTime();
 	}
 	
-	return false;
+	return;
 });
 //end
 $("#control > .jump").on("touchend", function(){
 	if (stop)
-		return false;
+		return;
 	
 	$("#control > .jump").removeClass("active");
 	
-	return false;
+	return;
 });
 
 
@@ -173,7 +173,7 @@ touch.screen = {
 //start
 $("#game").on("touchstart", function (e){
 	if (stop)
-		return false;
+		return;
 	
 	const {pageX: x, pageY: y} = e.originalEvent.targetTouches[0];
 	
@@ -197,13 +197,13 @@ $("#game").on("touchstart", function (e){
 			Events.startDig(x ,y); //开始挖掘
 	}, 1000);
 	
-	return false;
+	return;
 });
 
 //move
 $("#game").on("touchmove", function (e){
 	if (stop)
-		return false;
+		return;
 	
 	const {pageX: x, pageY: y} = e.originalEvent.targetTouches[0];
 	//console.log("touchmove(start):", {x, y}, touch.screen);
@@ -235,13 +235,13 @@ $("#game").on("touchmove", function (e){
 		>= 36*36 //误差36px
 	) touch.screen.valid = false; //无效操作 仅滑动屏幕
 	
-	return false;
+	return;
 });
 
 //end
 $("#game").on("touchend", function (e){
 	if (stop)
-		return false;
+		return;
 	
 	const {pageX: x, pageY: y} = e.originalEvent.changedTouches[0];
 	//console.log("touchend(screen):", {x, y}, touch.screen);
@@ -271,13 +271,13 @@ $("#game").on("touchend", function (e){
 	
 	touch.screen.x = touch.screen.y = touch.screen.x0 = touch.screen.y0 = touch.screen.id = touch.screen.valid = null;
 	
-	return false;
+	return;
 });
 
 //cancel
 $("#game").on("touchcancel", function (e){
 	if (stop)
-		return false;
+		return;
 	
 	const {pageX: x, pageY: y} = e.originalEvent.changedTouches[0];
 	//console.log("touchcancel(screen):", {x, y}, touch.screen);
@@ -294,5 +294,5 @@ $("#game").on("touchcancel", function (e){
 	clearTimeout(touch.screen.id);
 	touch.screen.x = touch.screen.y = touch.screen.x0 = touch.screen.y0 = touch.screen.id = touch.screen.valid =null;
 	
-	return false;
+	return;
 });

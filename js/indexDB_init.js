@@ -48,6 +48,9 @@ const DB = {
 				deskgood.look.y = res.look.y; //朝向
 				//deskgood.look_update();
 				
+				time.game = res.time;
+				colosUpdate(time.getTime(), true); //更新环境色
+				
 				for (const t of ["hold", "head", "body", "leg", "foot"]){
 					for (const [i, v] of Object.entries(res[t])){
 						if (v){ //{name, attr}

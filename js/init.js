@@ -5,7 +5,7 @@ time.tmpSpeed = time.speed; //临时speed 防止调整过快
 
 setInterval(()=>{
 	if (time.speed != time.tmpSpeed){ //改变
-		time.speed = time.tmpSpeed;
+		time.setSpeed(time.tmpSpeed);
 		print("时间流逝改变："+Math.round(time.speed, 2)+"x");
 		console.log("time speed:",
 `${time.speed}s/s
