@@ -146,8 +146,9 @@ $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind�
 			//下一个
 			Events.choiceNext();
 			
-		}  
-	}  
+		}
+	}
+	return;
 });
 
 
@@ -166,10 +167,10 @@ document.addEventListener("mousedown", function (e){
 		
 		//处理事件
 		if (Events.onLeftMouseDown && Events.onLeftMouseDown() === false)
-			return;
+			return false;
 		if (thing &&
 			eval(thing.get("attr", "block", "onLeftMouseDown")) === false
-		) return;
+		) return false;
 		//开始挖掘
 		Events.startDig();
 		
@@ -177,10 +178,10 @@ document.addEventListener("mousedown", function (e){
 		
 		//处理事件
 		if (Events.onMiddleMouseDown && Events.onMiddleMouseDown() === false)
-			return;
+			return false;
 		if (thing &&
 			eval(thing.get("attr", "block", "onMiddleMouseDown")) === false
-		) return;
+		) return false;
 		//重置时间
 		Events.resetTime();
 		
@@ -188,10 +189,10 @@ document.addEventListener("mousedown", function (e){
 		
 		//处理事件
 		if (Events.onRightMouseDown && Events.onRightMouseDown() === false)
-			return;
+			return false;
 		if (thing &&
 			eval(thing.get("attr", "block", "onRightMouseDown")) === false
-		) return;
+		) return false;
 		//开始放置
 		Events.startPlace();
 		
@@ -215,10 +216,10 @@ document.addEventListener("mouseup", function (e){
 		
 		//处理事件
 		if (Events.onLeftMouseUp && Events.onLeftMouseUp() === false)
-			return;
+			return false;
 		if (thing &&
 			eval(thing.get("attr", "block", "onLeftMouseUp")) === false
-		) return;
+		) return false;
 		//结束挖掘
 		Events.endDig();
 		
@@ -226,19 +227,19 @@ document.addEventListener("mouseup", function (e){
 		
 		//处理事件
 		if (Events.onMiddleMouseUp && Events.onMiddleMouseUp() === false)
-			return;
+			return false;
 		if (thing &&
 			eval(thing.get("attr", "block", "onMiddleMouseUp")) === false
-		) return;
+		) return false;
 		
 	}else if (e.button == 2){ //右键（放置）
 		
 		//处理事件
 		if (Events.onRightMouseUp && Events.onRightMouseUp() === false)
-			return;
+			return false;
 		if (thing &&
 			eval(thing.get("attr", "block", "onRightMouseUp")) === false
-		) return;
+		) return false;
 		//结束挖掘
 		Events.endPlace();
 		

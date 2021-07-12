@@ -368,12 +368,12 @@ class EntityBlock extends Block{
 	//更新实体方块大小
 	updateSize(){
 		const size = {
-			x0: this.get("attr", "size", "x0") || 0,
-			x1: this.get("attr", "size", "x1") || 100,
-			y0: this.get("attr", "size", "y0") || 0,
-			y1: this.get("attr", "size", "y1") || 100,
-			z0: this.get("attr", "size", "z0") || 0,
-			z1: this.get("attr", "size", "z1") || 100
+			x0: OR(this.get("attr", "size", "x0"), 0),
+			x1: OR(this.get("attr", "size", "x1"), 100),
+			y0: OR(this.get("attr", "size", "y0"), 0),
+			y1: OR(this.get("attr", "size", "y1"), 100),
+			z0: OR(this.get("attr", "size", "z0"), 0),
+			z1: OR(this.get("attr", "size", "z1"), 100)
 		};
 		size.x = size.x1 - size.x0,
 		size.y = size.y1 - size.y0,

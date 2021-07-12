@@ -623,7 +623,7 @@ Copyleft by wzh 2020~2021
 			#printOutput > li{
 				display: block;
 				background-color: white;
-				opacity: 0.5;
+				/* opacity: 0.5; */
 			}
 			
 			
@@ -1091,21 +1091,26 @@ $("#setting > .back").click(function(){ //返回
 	document.body.requestPointerLock(); //请求成功后再继续游戏
 });
 
-function print(text, id=String.random(undefined, print.prototype.ids), time=3, color){
+function print(text, id=String.random(undefined, print.prototype.prints), time=3, color){
 	/* time 单位: s */
-	if (print.prototype.ids[id] == true) return; //已加载
-	print.prototype.ids[id] = true;
+	if (print.prototype.prints[id] !== undefined){ //已加载
+		const msg = print.prototype.prints[id];
+		msg.remove();
+	}
 	
-	const msg = $(`<li>${text}</li>`).css("backgroundColor", color);
-	$("#printOutput").append( msg.fadeIn("slow") );
+	const msg = $(`<li>${text}</li>`)
+		.css("backgroundColor", color)
+		.css("opacity", 0.5);
+	$("#printOutput").append( msg.hide().fadeIn("fast") );
+	print.prototype.prints[id] = msg;
 	setTimeout(()=>{
 		msg.fadeOut("slow", msg.remove);
-		print.prototype.ids[id] = false;
+		delete print.prototype.prints[id];
 		
 		$("#printOutput > li[style='display: none;']").remove(); //避免漏掉
 	}, time*1000);
 }
-print.prototype.ids = {};
+print.prototype.prints = {};
 
 //屏蔽鼠标右键
 document.oncontextmenu = function(e){

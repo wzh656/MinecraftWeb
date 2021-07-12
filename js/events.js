@@ -119,18 +119,18 @@ const Events = {
 				break;
 		}
 		entityBlock.set("attr", "size",direction,
-			entityBlock.get("attr", "size",direction) || 100*direction[1] //x0: 0, x1: 100
+			OR(entityBlock.get("attr", "size",direction), 100*direction[1]) //x0: 0, x1: 100
 		); //保证有值
 		
-		const thingS = ((entityBlock.get("attr", "size", side[0]+"1") || 100) -
-				(entityBlock.get("attr", "size", side[0]+"0") || 0)) *
-			((entityBlock.get("attr", "size", side[1]+"1") || 100) -
-				(entityBlock.get("attr", "size", side[1]+"0") || 0)), //挖掘面积
+		const thingS = (OR(entityBlock.get("attr", "size", side[0]+"1"), 100) -
+				OR(entityBlock.get("attr", "size", side[0]+"0"), 0)) *
+			(OR(entityBlock.get("attr", "size", side[1]+"1"), 100) -
+				OR(entityBlock.get("attr", "size", side[1]+"0"), 0)), //挖掘面积
 			takeS = take?
-				((take.get("attr", "size", side[0]+"1") || 100) -
-					(take.get("attr", "size", side[0]+"0") || 0)) *
-				((take.get("attr", "size", side[1]+"1") || 100) -
-					(take.get("attr", "size", side[1]+"0") || 0))
+				(OR(take.get("attr", "size", side[0]+"1"), 100) -
+					OR(take.get("attr", "size", side[0]+"0"), 0)) *
+				(OR(take.get("attr", "size", side[1]+"1"), 100) -
+					OR(take.get("attr", "size", side[1]+"0"), 0))
 				:thingS; //拿走物体面积
 		
 		this.digging = true; //正在挖掘
@@ -149,6 +149,16 @@ const Events = {
 		}
 		
 		//挖掘
+		if (take && take.attr && take.attr.size){ //有take
+			//预先判断 拿不下了
+			if (take.attr.size[direction[0]+"1"] === undefined) //该方向为默认值
+				return print("手里方块太大拿不下了", "手里方块拿不下了", 3, "#ff0");
+			
+			if (take.attr.size[direction[0]+"1"] >= 100){
+				take.attr.size[direction[0]+"1"] = 100;
+				return print("手里方块太大拿不下了", "手里方块拿不下了", 3, "#ff0");
+			}
+		}
 		const func = ()=>{
 			
 			if (!take){
@@ -158,7 +168,14 @@ const Events = {
 						name: entityBlock.get("attr", "digGet"), //挖掘获得 （仅name）
 						attr: {
 							entityBlock: {
-								size: entityBlock.get("attr", "entityBlock", "size")
+								size: {
+									x0: entityBlock.get("attr", "entityBlock", "size", "x0"),
+									x1: entityBlock.get("attr", "entityBlock", "size", "x1"),
+									y0: entityBlock.get("attr", "entityBlock", "size", "y0"),
+									y1: entityBlock.get("attr", "entityBlock", "size", "y1"),
+									z0: entityBlock.get("attr", "entityBlock", "size", "z0"),
+									z1: entityBlock.get("attr", "entityBlock", "size", "z1")
+								}
 							}
 						}
 					});
@@ -169,12 +186,22 @@ const Events = {
 				deskgood.hold.addOne(take, free); //克隆一个放在手中
 			}
 			
-			entityBlock.attr.size[direction] += 1-direction[1]*2; //x0 -> 1, x1 -> -1
+			//拿不下了
+			if (take.attr.size[direction[0]+"1"] === undefined) //该方向为默认值
+				return print("手里方块太大拿不下了", "手里方块拿不下了", 3, "#ff0");
+			
+			if (take.attr.size[direction[0]+"1"] >= 100){
+				take.attr.size[direction[0]+"1"] = 100;
+				return print("手里方块太大拿不下了", "手里方块拿不下了", 3, "#ff0");
+			}
+			
+			entityBlock.attr.size[direction] += 1 - direction[1]*2; //x0 -> 1, x1 -> -1
 			take.attr.size[direction[0] + "1"] += thingS/takeS; //x1: 0 ~> 100
 			
 			console.log("Digging", entityBlock.attr.size[direction], take.attr.size[direction])
 			entityBlock.updateSize(); //更新大小
 			
+			//挖完了
 			if (direction[1] == "0"){ //x0: ++
 				if (entityBlock.attr.size[direction]
 					>=
@@ -336,24 +363,48 @@ const Events = {
 	choicePrev(){
 		if ( keydown.key.has(16) ){ //shift
 			console.log("shift+上滚轮");
+			
+			//处理事件
+			if (Events.onTimeSpeedIncrease && Events.onTimeSpeedIncrease() === false)
+				return;
+			
 			time.tmpSpeed *= 1.5; //时间流逝加速
+			
+		}else if ( keydown.key.has(18) ){ //alt
+			console.log("alt+上滚轮");
+			const {hold, choice} = deskgood;
+			
+			if (hold[choice-1] === undefined) return; //左边无物品
+			
+			//处理事件
+			if ( hold[choice] &&
+				eval(hold[choice].get("attr", "onExchangeLeave")) === false //取消事件
+			) return;
+			if ( hold[choice-1] && //不是null空气
+				eval(hold[choice-1].get("attr", "onExchangeTo")) === false //取消事件
+			) return;
+			
+			//交换
+			[ hold[choice], hold[choice-1] ] = [ hold[choice-1], hold[choice] ];
+			hold.update(); //更新
 			
 		}else{
 			console.log("上滚轮");
-			const before = deskgood.choice; //之前的选择
-			if ( deskgood.hold[before] && //切换前事件
-				eval(deskgood.hold[before].get("attr", "onChangeLeave")) === false //取消事件
+			const hold = deskgood.hold,
+				before = deskgood.choice; //之前的选择
+			if ( hold[before] && //切换前事件
+				eval(hold[before].get("attr", "onChangeLeave")) === false //取消事件
 			) return;
 			
 			deskgood.choice--;
 			if (deskgood.choice < 0)
 				deskgood.choice = 3;
 			
-			if ( deskgood.hold[deskgood.choice] && //切换后事件
-				eval(deskgood.hold[deskgood.choice].get("attr", "onChangeTo")) === false //取消事件
+			if ( hold[deskgood.choice] && //切换后事件
+				eval(hold[deskgood.choice].get("attr", "onChangeTo")) === false //取消事件
 			) return (deskgood.choice = before); //恢复之前选择
 			
-			deskgood.hold.update(); //更新选择
+			hold.update(); //更新选择
 		}
 	},
 	
@@ -361,24 +412,48 @@ const Events = {
 	choiceNext(){
 		if ( keydown.key.has(16) ){ //shift
 			console.log("shift+下滚轮");
+			
+			//处理事件
+			if (Events.onTimeSpeedReduce && Events.onTimeSpeedReduce() === false)
+				return;
+			
 			time.tmpSpeed /= 1.5; //时间流逝减慢
+			
+		}else if ( keydown.key.has(18) ){ //alt
+			console.log("alt+下滚轮");
+			const {hold, choice} = deskgood;
+			
+			if (hold[choice+1] === undefined) return; //左边无物品
+			
+			//处理事件
+			if ( hold[choice] &&
+				eval(hold[choice].get("attr", "onExchangeLeave")) === false //取消事件
+			) return;
+			if ( hold[choice+1] && //不是null空气
+				eval(hold[choice+1].get("attr", "onExchangeTo")) === false //取消事件
+			) return;
+			
+			//交换
+			[ hold[choice], hold[choice+1] ] = [ hold[choice+1], hold[choice] ];
+			hold.update(); //更新
 			
 		}else{
 			console.log("下滚轮");
-			const before = deskgood.choice;
-			if ( deskgood.hold[before] && //切换前事件
-				eval(deskgood.hold[before].get("attr", "onChangeLeave")) === false //取消事件
+			const hold = deskgood.hold,
+				before = deskgood.choice;
+			if ( hold[before] && //切换前事件
+				eval(hold[before].get("attr", "onChangeLeave")) === false //取消事件
 			) return;
 			
 			deskgood.choice++;
 			if (deskgood.choice > 3)
 				deskgood.choice = 0;
 			
-			if ( deskgood.hold[deskgood.choice] && //切换后事件
-				eval(deskgood.hold[deskgood.choice].get("attr", "onChangeTo")) === false //取消事件
+			if ( hold[deskgood.choice] && //切换后事件
+				eval(hold[deskgood.choice].get("attr", "onChangeTo")) === false //取消事件
 			) return (deskgood.choice = before); //恢复之前选择
 			
-			deskgood.hold.update(); //更新选择
+			hold.update(); //更新选择
 		}
 	},
 	
