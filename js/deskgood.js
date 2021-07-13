@@ -204,7 +204,7 @@ const deskgood = { //桌子好
 	}),
 	// 死亡
 	die(reason="使用命令自杀"){
-		db.clearTable(TABLE.WORLD); //删表
+		db.clearTable(DB.TABLE.WORLD); //删表
 		indexedDB.deleteDatabase( db.db.name );
 		//db.remove(); //删库
 		localStorage.removeItem("我的世界_seed");
@@ -700,25 +700,28 @@ const deskgood = { //桌子好
 	place(thing, {x,y,z}){
 		/* 单位:m */
 		
+		//处理事件
 		if ( thing &&
 			eval(thing.get("attr", "onPut")) === false //放置事件
 		) return;
 		
 		console.log("deskgood.place", {x,y,z}, thing)
 		
-		map.addID(thing, {x,y,z});
+		map.addID(thing, {x,y,z}); //添加方块
 		
-		const attr = JSON.stringify(thing.attr).slice(1,-1),
+		const attr = JSON.stringify(thing.attr).slice(1,-1), //属性
 			cX = Math.round(x/map.size.x),
 			cZ = Math.round(z/map.size.z);
-		for (let i=map.chunks[cX][cZ].edit.length-1; i>=0; i--){ //删除数组元素需倒序
+		
+		//删除数组元素需倒序
+		for (let i=map.chunks[cX][cZ].edit.length-1; i>=0; i--){
 			v = map.chunks[cX][cZ].edit[i];
 			if (v.x == x && v.y == y && v.z == z)
 				map.chunks[cX][cZ].edit.splice(i, 1); //删除重复
 		}
 		
 		map.chunks[cX][cZ].edit.push({
-			type: 0,
+			type: DB.TYPE[thing.type],
 			x,
 			y,
 			z,
@@ -727,10 +730,16 @@ const deskgood = { //桌子好
 		}); //添加edit
 		map.updateRound(x, y, z); //刷新方块及周围
 		
+		console.time("db.addData1")
+		DB.addData(x,y,z, name, thing.type, attr, ()=>console.timeEnd("db.addData1"));
+		
+		
+		
 		// x = Math.round(x), y = Math.round(y), z = Math.round(z); //存储必须整数
 		//DB
-		db.addData(TABLE.WORLD, {
-			type: 0,
+		/* console.time("db.addData1")
+		db.addData(DB.TABLE.WORLD, {
+			type: DB.TYPE[thing.type],
 			x,
 			y,
 			z,
@@ -738,23 +747,24 @@ const deskgood = { //桌子好
 			attr
 		}, {
 			successCallback: function(){
+				console.timeEnd("db.addData1")
 				let find = false;
-				db.readStep(TABLE.WORLD, {
+				db.readStep(DB.TABLE.WORLD, {
 					index: "type",
-					range: ["only", 0],
+					range: ["only", DB.TYPE[thing.type]],
 					dirt: "prev",
 					stepCallback: function(res){
 						if (res.x!=x || res.y!=y || res.z!=z) return;
 						if (find){
 							// console.log("DB 删除多余", res.key, res);
-							db.remove(TABLE.WORLD, res.key);
+							db.remove(DB.TABLE.WORLD, res.key);
 						}else{
 							find = true;
 						}
 					}
 				});
 			}
-		});
+		}); */
 		/*db.deleteData(tableName, `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, ()=>{
 			sql.insertData(tableName, ["type", "x", "y", "z", "id", "attr"], [
 				0,
@@ -789,7 +799,7 @@ const deskgood = { //桌子好
 		}
 		
 		map.chunks[cX][cZ].edit.push({
-			type: 0,
+			type: DB.TYPE.Block,
 			x,
 			y,
 			z,
@@ -799,24 +809,26 @@ const deskgood = { //桌子好
 		
 		// x = Math.round(x), y = Math.round(y), z = Math.round(z); //存储必须整数
 		//DB
-		db.addData(TABLE.WORLD, {
-			type: 0,
+		console.time("db.addData2")
+		db.addData(DB.TABLE.WORLD, {
+			type: DB.TYPE.Block,
 			x,
 			y,
 			z,
 			name: "空气"
 		}, {
 			successCallback: function(){
+				console.timeEnd("db.addData2")
 				let find = false;
-				db.readStep(TABLE.WORLD, {
+				db.readStep(DB.TABLE.WORLD, {
 					index: "type",
-					range: ["only", 0],
+					range: ["only", DB.TYPE.Block],
 					dirt: "prev",
 					stepCallback: function(res){
 						if (res.x!=x || res.y!=y || res.z!=z) return;
 						if (find){
 							// console.log("DB 删除多余", res.key, res);
-							db.remove(TABLE.WORLD, res.key);
+							db.remove(DB.TABLE.WORLD, res.key);
 						}else{
 							find = true;
 						}

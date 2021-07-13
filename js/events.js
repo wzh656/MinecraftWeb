@@ -109,7 +109,7 @@ const Events = {
 			case "Block": //方块 转化为 实体方块
 				entityBlock = thing.toEntityBlock();
 				const pos = thing.block.mesh.position.clone(); //单位: px=cm
-				map.delete(thing);
+				deskgood.remove(thing);
 				map.addID(entityBlock, pos.divideScalar(100)); //单位: m
 				break;
 			case "EntityBlock": //实体方块
@@ -169,12 +169,15 @@ const Events = {
 						attr: {
 							entityBlock: {
 								size: {
-									x0: entityBlock.get("attr", "entityBlock", "size", "x0"),
-									x1: entityBlock.get("attr", "entityBlock", "size", "x1"),
-									y0: entityBlock.get("attr", "entityBlock", "size", "y0"),
-									y1: entityBlock.get("attr", "entityBlock", "size", "y1"),
-									z0: entityBlock.get("attr", "entityBlock", "size", "z0"),
-									z1: entityBlock.get("attr", "entityBlock", "size", "z1")
+									x0: 0,
+									x1: OR(entityBlock.get("attr", "entityBlock", "size", "x1"), 100) -
+										OR(entityBlock.get("attr", "entityBlock", "size", "x0"), 0),
+									y0: 0,
+									y1: OR(entityBlock.get("attr", "entityBlock", "size", "y1"), 100) -
+										OR(entityBlock.get("attr", "entityBlock", "size", "y0"), 0),
+									z0: 0,
+									z1: OR(entityBlock.get("attr", "entityBlock", "size", "z1"), 100) -
+										OR(entityBlock.get("attr", "entityBlock", "size", "z0"), 0)
 								}
 							}
 						}
@@ -184,15 +187,6 @@ const Events = {
 				}
 				take.set("attr", "size", direction[0]+"1", 0); //x0,x1 -> x1
 				deskgood.hold.addOne(take, free); //克隆一个放在手中
-			}
-			
-			//拿不下了
-			if (take.attr.size[direction[0]+"1"] === undefined) //该方向为默认值
-				return print("手里方块太大拿不下了", "手里方块拿不下了", 3, "#ff0");
-			
-			if (take.attr.size[direction[0]+"1"] >= 100){
-				take.attr.size[direction[0]+"1"] = 100;
-				return print("手里方块太大拿不下了", "手里方块拿不下了", 3, "#ff0");
 			}
 			
 			entityBlock.attr.size[direction] += 1 - direction[1]*2; //x0 -> 1, x1 -> -1
@@ -205,7 +199,7 @@ const Events = {
 			if (direction[1] == "0"){ //x0: ++
 				if (entityBlock.attr.size[direction]
 					>=
-					entityBlock.attr.size[direction[0] + "1"]
+					OR(entityBlock.attr.size[direction[0] + "1"], 100)
 				){ //挖掘结束
 					time.clearInterval(this.digId);
 					this.digging = false; //挖掘结束
@@ -216,13 +210,22 @@ const Events = {
 			}else{ //x1: --
 				if (entityBlock.attr.size[direction]
 					<=
-					entityBlock.attr.size[direction[0] + "0"]
+					OR(entityBlock.attr.size[direction[0] + "0"], 0)
 				){ //挖掘结束
 					time.clearInterval(this.digId);
 					this.digging = false; //挖掘结束
 					deskgood.remove( entityBlock ); //删除方块
 					return this.startDig(); //下一轮挖掘
 				}
+			}
+			
+			//拿不下了
+			if (take.attr.size[direction[0]+"1"] === undefined) //该方向为默认值
+				return print("手里方块太大拿不下了", "手里方块拿不下了", 3, "#ff0");
+			
+			if (take.attr.size[direction[0]+"1"] >= 100){
+				take.attr.size[direction[0]+"1"] = 100;
+				return print("手里方块太大拿不下了", "手里方块拿不下了", 3, "#ff0");
 			}
 			
 			const {x,y,z} = entityBlock.block.mesh.position.clone() .divideScalar(100).round(); //单位: m

@@ -2,7 +2,7 @@
 let openDBListener = null; //数据库加载完毕监听
 const db = new IndexDB("Minecraft", 1, {
 		updateCallback: function(){
-			db.createTable(TABLE.WORLD, {
+			db.createTable(DB.TABLE.WORLD, {
 				keyPath: "key", //主键
 				autoIncrement: true //自增
 			}, [
@@ -13,10 +13,7 @@ const db = new IndexDB("Minecraft", 1, {
 			if (openDBListener)
 				openDBListener();
 		}
-	}),
-	TABLE = {
-		WORLD: "world"
-	};
+	});
 
 db.setErrCallback(function(err){
 	console.error("DB运行出错", err);
@@ -24,14 +21,24 @@ db.setErrCallback(function(err){
 });
 
 const DB = {
+	TYPE: {
+		deskgood: 0,
+		Block: 1,
+		EntityBlock: 2,
+		Entity: 2
+	},
+	TABLE: {
+		WORLD: "world"
+	},
+	
 	/* 读取存档 */
 	read(){
 		if (!db.db) //未加载完毕
 			return (openDBListener = DB.read);
 		
-		db.readStep(TABLE.WORLD, {
+		db.readStep(DB.TABLE.WORLD, {
 			index: "type",
-			range: ["only", 0],
+			range: ["only", DB.TYPE.deskgood],
 			dirt: "prev",
 			stepCallback: function(res){
 				console.log("存档read成功", res)
@@ -78,7 +85,7 @@ const DB = {
 	/* 保存存档 */
 	save(){
 		const data = {
-			type: 0,
+			type: DB.TYPE.deskgood,
 			pos: deskgood.pos.clone(), //位置
 			v: deskgood.v.clone(), //速度
 			look: { //朝向
@@ -107,19 +114,19 @@ const DB = {
 					data[t][i] = null;
 				}
 		
-		db.addData(TABLE.WORLD, data, {
+		db.addData(DB.TABLE.WORLD, data, {
 			successCallback: function(){
 				console.log("存档save成功"/*, data*/);
 				
 				let find = false;
-				db.readStep(TABLE.WORLD, {
+				db.readStep(DB.TABLE.WORLD, {
 					index: "type",
-					range: ["only", 0],
+					range: ["only", DB.TYPE.deskgood],
 					dirt: "prev",
 					stepCallback: function(res){
 						if (find){
 							// console.log("DB 删除多余", res.key, res);
-							db.remove(TABLE.WORLD, res.key);
+							db.remove(DB.TABLE.WORLD, res.key);
 						}else{
 							find = true;
 						}
@@ -130,9 +137,9 @@ const DB = {
 	},
 	
 	/* 添加数据 */
-	addBlock(x, y, z, name, attr={}){
-		db.addData(TABLE.WORLD, {
-			type: 1,
+	addData(x, y, z, name, type, attr={}, successCallback){
+		db.addData(DB.TABLE.WORLD, {
+			type: type=="Block"? DB.TYPE.Block: DB.TYPE.ENTITY,
 			x,
 			y,
 			z,
@@ -141,19 +148,20 @@ const DB = {
 		}, {
 			successCallback: function(){
 				let find = false;
-				db.readStep(TABLE.WORLD, {
+				db.readStep(DB.TABLE.WORLD, {
 					index: "type",
-					range: ["only", 1],
+					range: ["only", DB.TYPE.Block],
 					dirt: "prev",
 					stepCallback: function(res){
 						if (res.x!=x || res.y!=y || res.z!=z) return;
 						if (find){
 							// console.log("DB 删除多余", res.key, res);
-							db.remove(TABLE.WORLD, res.key);
+							db.remove(DB.TABLE.WORLD, res.key);
 						}else{
 							find = true; //刚才添加的
 						}
-					}
+					},
+					successCallback
 				});
 			}
 		});
@@ -165,9 +173,9 @@ const DB = {
 		const ox = x*map.size.x,
 			oz = z*map.size.z; //区块中心坐标
 		const edit = [];
-		db.readStep(TABLE.WORLD, {
+		db.readStep(DB.TABLE.WORLD, {
 			index: "type",
-			range: ["only", 1],
+			range: ["only", DB.TYPE.Block],
 			stepCallback: (res)=>{
 				if ( res.x >= ox+map.size[0].x && res.x <= ox+map.size[1].x &&
 					res.z >= oz+map.size[0].z && res.z <= oz+map.size[1].z
