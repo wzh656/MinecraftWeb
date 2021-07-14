@@ -701,33 +701,49 @@ const deskgood = { //桌子好
 		/* 单位:m */
 		
 		//处理事件
-		if ( thing &&
-			eval(thing.get("attr", "onPut")) === false //放置事件
-		) return;
+		if ( eval(thing.get("attr", "onPut")) === false)
+			return;
 		
 		console.log("deskgood.place", {x,y,z}, thing)
 		
 		map.addID(thing, {x,y,z}); //添加方块
 		
 		const attr = JSON.stringify(thing.attr).slice(1,-1), //属性
-			cX = Math.round(x/map.size.x),
-			cZ = Math.round(z/map.size.z);
+			[cX, cZ] = map.p2c(x, z); //区块坐标
 		
-		//删除数组元素需倒序
-		for (let i=map.chunks[cX][cZ].edit.length-1; i>=0; i--){
+		for (let i=map.chunks[cX][cZ].edit.length-1; i>=0; i--){ //删除数组元素需倒序
 			v = map.chunks[cX][cZ].edit[i];
 			if (v.x == x && v.y == y && v.z == z)
 				map.chunks[cX][cZ].edit.splice(i, 1); //删除重复
 		}
 		
-		map.chunks[cX][cZ].edit.push({
-			type: DB.TYPE[thing.type],
-			x,
-			y,
-			z,
-			name: thing.name,
-			attr
-		}); //添加edit
+		switch (thing.type){
+			case "Block":
+				map.chunks[cX][cZ].edit.push({
+					type: DB.TYPE.Block,
+					x,
+					y,
+					z,
+					name: thing.name,
+					attr
+				}); //添加edit
+				break;
+				
+			case "EntityBlock":
+				const id = (+new Date()*10000 + ~~(Math.random()*10000)).toString(36);
+				thing.attr.entityID = id;
+				map.chunks[cX][cZ].edit.push({
+					type: DB.TYPE.EntityBlock,
+					id,
+					x,
+					y,
+					z,
+					name: thing.name,
+					attr
+				}); //添加edit
+				break;
+		}
+		
 		map.updateRound(x, y, z); //刷新方块及周围
 		
 		console.time("db.addData1")
@@ -779,37 +795,65 @@ const deskgood = { //桌子好
 	
 	// 移除方块
 	remove(thing){
-		const {x,y,z} = thing.type=="entity"?
-			thing.entity.mesh.position.clone().divideScalar(100).round()
-			: thing.block.mesh.position.clone().divideScalar(100).round(); //规范化 单位:m
+		const {x,y,z} = thing.block.mesh.position.clone().divideScalar(100).round(); //单位: m
 		
-		//移除事件
-		if ( eval(thing.get("attr", "onRemove")) === false ) return;
+		//处理事件
+		if ( eval(thing.get("attr", "onRemove")) === false)
+			return;
 		
-		console.log("deskgood.remove", {x,y,z}, thing)
+		console.log("deskgood.remove", thing)
 		
 		map.delete(thing); //删除方块
 		
-		const cX = Math.round(x/map.size.x),
-			cZ = Math.round(z/map.size.z);
-		for (let i=map.chunks[cX][cZ].edit.length-1; i>=0; i--){ //删除数组元素需倒序
-			v = map.chunks[cX][cZ].edit[i];
-			if (v.x == x && v.y == y && v.z == z)
-				map.chunks[cX][cZ].edit.splice(i, 1); //删除重复
-		}
+		const [cX, cZ] = map.p2c(x, z); //区块坐标
 		
-		map.chunks[cX][cZ].edit.push({
-			type: DB.TYPE.Block,
-			x,
-			y,
-			z,
-			name: "空气"
-		}); //添加edit
+		switch (thing.type){
+			case "Blcok":
+				// x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
+				
+				for (let i=map.chunks[cX][cZ].edit.length-1; i>=0; i--){ //删除数组元素需倒序
+					v = map.chunks[cX][cZ].edit[i];
+					if (v.x == x && v.y == y && v.z == z)
+						map.chunks[cX][cZ].edit.splice(i, 1); //删除重复
+				}
+				
+				map.chunks[cX][cZ].edit.push({
+					type: DB.TYPE.Block,
+					x,
+					y,
+					z,
+					name: "空气"
+				}); //添加edit
+				
+				console.time("db.addData2")
+				DB.addData(x, y, z, "空气", "Block").then(()=>console.timeEnd("db.addData2"));
+				break;
+				
+			case "EntityBlock":
+				for (let i=map.chunks[cX][cZ].edit.length-1; i>=0; i--){ //删除数组元素需倒序
+					v = map.chunks[cX][cZ].edit[i];
+					if (v.id == thing.attr.entityID)
+						map.chunks[cX][cZ].edit.splice(i, 1); //删除重复
+				}
+				
+				DB.deleteEntity(thing.attr.entityID);
+				
+				/* map.chunks[cX][cZ].edit.push({
+					type: DB.TYPE.Block,
+					x,
+					y,
+					z,
+					name: "空气"
+				}); //添加edit */
+				
+				break;
+		}
 		map.updateRound(x, y, z); //刷新方块及周围
 		
 		// x = Math.round(x), y = Math.round(y), z = Math.round(z); //存储必须整数
 		//DB
-		console.time("db.addData2")
+		/* console.time("db.addData2")
+		DB.addData(x, y, z, "空气", )
 		db.addData(DB.TABLE.WORLD, {
 			type: DB.TYPE.Block,
 			x,
@@ -835,7 +879,7 @@ const deskgood = { //桌子好
 					}
 				});
 			}
-		});
+		}); */
 		/*sql.deleteData(tableName, `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
 			sql.insertData(tableName, ["type", "x", "y", "z", "id"], [
 				0,

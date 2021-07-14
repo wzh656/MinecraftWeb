@@ -110,7 +110,7 @@ const Events = {
 				entityBlock = thing.toEntityBlock();
 				const pos = thing.block.mesh.position.clone(); //单位: px=cm
 				deskgood.remove(thing);
-				map.addID(entityBlock, pos.divideScalar(100)); //单位: m
+				deskgood.place(entityBlock, pos.divideScalar(100)); //单位: m
 				break;
 			case "EntityBlock": //实体方块
 				entityBlock = thing;

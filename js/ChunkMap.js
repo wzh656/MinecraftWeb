@@ -201,6 +201,19 @@ class ChunkMap{
 		if (num === true) return result[0];
 		return result;
 	}
+	//获取真正的方块及属性
+	getShould(x, y, z){
+		let block = this.get(x, y, z),
+			added = true; //是否预加载
+		
+		if (block === undefined){ //未加载
+			const [cX, cZ] = this.p2c(x, z), //区块
+				edit = this.chunks[cX] && this.chunks[cX][cZ] && this.chunks[cX][cZ].edit;
+			block = new Block( this.preGet(x, y, z, edit||[]) ); //应该的方块
+			added = false;
+		}
+		return {block, added};
+	}
 	
 	//设置方块
 	set(x, y, z, value){
@@ -335,19 +348,6 @@ class ChunkMap{
 	/*
 	* 更新操作(update)
 	*/
-	//获取真正的方块及属性
-	getShould(x, y, z){
-		let block = this.get(x, y, z),
-			added = true; //是否预加载
-		
-		if (block === undefined){ //未加载
-			const [cX, cZ] = this.p2c(x, z), //区块
-				edit = this.chunks[cX] && this.chunks[cX][cZ] && this.chunks[cX][cZ].edit;
-			block = new Block( this.preGet(x, y, z, edit||[]) ); //应该的方块
-			added = false;
-		}
-		return {block, added};
-	}
 	
 	//更新方块
 	update(x, y, z){
@@ -1198,7 +1198,8 @@ class ChunkMap{
 	//加载列
 	loadColumn(x, z, columns){
 		x = Math.round(x), z = Math.round(z); //规范化
-		const [ox, oz] = this.c2o(cX, cZ), //区块中心坐标
+		const [cX, cZ] = this.p2c(x, z), //区块坐标
+			[ox, oz] = this.c2o(cX, cZ), //区块中心坐标
 			dx = x-ox,
 			dz = z-oz;
 		
@@ -1363,8 +1364,20 @@ class ChunkMap{
 		if ( this.getInitedChunks().some(v => v[0]==cX && v[1]==cZ) ) //已初始化
 			return console.warn("loadChunk", cX, cZ, "already inited");
 		
-		const edit = [];
-		db.readStep(TABLE.WORLD, {
+		DB.readChunk(cX, cZ).then((edit)=>{
+			console.log("edit(DB):", cX, cZ, edit);
+			this.startLoadChunk(cX, cZ, edit); //初始化区块
+			
+			const columns = this.preGetChunk(cX, cZ, edit);
+			for (let dx=this.size[0].x; dx<=this.size[1].x; dx++)
+				for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
+					for (let dz=this.size[0].z; dz<=this.size[1].z; dz++)
+						this.loadColumn(ox+dx, oz+dz, columns);
+			
+			this.finishLoadChunk(cX, cZ); //区块加载完毕
+		});
+		/* const edit = [];
+		db.readStep(DB.TABLE.WORLD, {
 			index: "type",
 			range: ["only", DB.TYPE.Block], //方块
 			stepCallback: (res)=>{
@@ -1385,7 +1398,7 @@ class ChunkMap{
 				
 				this.finishLoadChunk(cX, cZ); //区块加载完毕
 			},
-		});
+		}); */
 		/* const edit = DB.readChunk(cX, cZ).then((edit)=>{
 			this.startLoadChunk(cX, cZ); //初始化区块
 			
@@ -1831,8 +1844,13 @@ class ChunkMap{
 			const edit = this.chunks[cX][CZ].edit;
 			func( this.preGetChunk(cX, cZ, edit) );
 		}else{
-			const edit = [];
-			db.readStep(TABLE.WORLD, {
+			DB.readChunk(cX, cZ).then((edit)=>{
+				console.log("edit(DB):", cX, cZ, edit);
+				this.startLoadChunk(cX, cZ, edit); //初始化区块
+				func( this.preGetChunk(cX, cZ, edit) );
+			});
+			/* const edit = [];
+			db.readStep(DB.TABLE.WORLD, {
 				index: "type",
 				range: ["only", DB.TYPE.Block], //方块
 				stepCallback: (res)=>{
@@ -1846,10 +1864,7 @@ class ChunkMap{
 					this.startLoadChunk(cX, cZ, edit); //初始化区块
 					func( this.preGetChunk(cX, cZ, edit) );
 				},
-			});
-			// const edit = DB.readChunk(cX, cZ).then((edit)=>{
-				
-			// });
+			}); */
 			/*sql.selectData(tableName, ["x", "y", "z", "id", "attr"],
 				`type=0 AND`+
 				` (x BETWEEN ${ ox+this.size[0].x } AND ${ ox+this.size[1].x }) AND`+
@@ -1944,29 +1959,28 @@ class ChunkMap{
 				}
 			}
 			
-			// const edit = [];
-			DB.readChunk(cX, cZ, {
-				successCallback: (edit)=>{
-					this.startLoadChunk(cX, cZ, edit); //初始化区块
-					const gener = gen( this.preGetChunk(cX, cZ, edit), this ),
-						id = setInterval(function work(){
-							let res = {},
-								t0 = +new Date(),
-								num = 0;
-							while ( !res.done ){
-								res = gener.next();
-								if (new Date()-t0 >= breakTime) //超时
-									return;
-								if (res.value == true && ++num >= mostSpeed) //超数
-									return;
-							}
-							// if (finishCallback) finishCallback(); //加载完毕
-							clearInterval(id); //运行结束
-							resolve(); //加载完毕
-						}, 0);
-				}
+			DB.readChunk(cX, cZ).then((edit)=>{
+				this.startLoadChunk(cX, cZ, edit); //初始化区块
+				const gener = gen( this.preGetChunk(cX, cZ, edit), this ),
+					id = setInterval(function work(){
+						let res = {},
+							t0 = +new Date(),
+							num = 0;
+						while ( !res.done ){
+							res = gener.next();
+							if (new Date()-t0 >= breakTime) //超时
+								return;
+							if (res.value == true && ++num >= mostSpeed) //超数
+								return;
+						}
+						// if (finishCallback) finishCallback(); //加载完毕
+						clearInterval(id); //运行结束
+						resolve(); //加载完毕
+					}, 0);
 			});
-			/* db.readStep(TABLE.WORLD, {
+			/* const edit = [];
+			console.time(">>>>>>		>>>>>>loadChunk "+cX+","+cZ)
+			db.readStep(DB.TABLE.WORLD, {
 				index: "type",
 				range: ["only", 1], //方块
 				stepCallback: (res)=>{
@@ -1976,6 +1990,7 @@ class ChunkMap{
 					) edit.push(res);
 				},
 				successCallback: ()=>{
+					console.timeEnd(">>>>>>		>>>>>>loadChunk "+cX+","+cZ)
 					console.log("edit(DB):", cX, cZ, edit);
 					this.startLoadChunk(cX, cZ, edit); //开始加载区块
 					

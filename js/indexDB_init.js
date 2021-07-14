@@ -1,7 +1,7 @@
 //数据库
 let openDBListener = null; //数据库加载完毕监听
-const db = new IndexDB("Minecraft", 1, {
-		updateCallback: function(){
+const db = new IndexDB("Minecraft", 3, {
+		updateCallback(){
 			db.createTable(DB.TABLE.WORLD, {
 				keyPath: "key", //主键
 				autoIncrement: true //自增
@@ -9,16 +9,14 @@ const db = new IndexDB("Minecraft", 1, {
 				{name:"type", attr:"type", unique:false}
 			]);
 		},
-		successCallback: function(){
+		successCallback(){
 			if (openDBListener)
 				openDBListener();
 		}
+	}).setErrCallback(function(err){
+		console.error("DB运行出错", err);
+		//alert("DB存档数据库 读取/写入 错误");
 	});
-
-db.setErrCallback(function(err){
-	console.error("DB运行出错", err);
-	//alert("DB存档数据库 读取/写入 错误");
-});
 
 const DB = {
 	TYPE: {
@@ -40,7 +38,7 @@ const DB = {
 			index: "type",
 			range: ["only", DB.TYPE.deskgood],
 			dirt: "prev",
-			stepCallback: function(res){
+			stepCallback(res){
 				console.log("存档read成功", res)
 				
 				deskgood.pos.x = res.pos.x,
@@ -77,9 +75,8 @@ const DB = {
 				try_start_load(); //加载区块
 				
 				return false; //停止查找
-			},
-			successCallback: try_start_load //没有数据也开始加载
-		});
+			}
+		}).then(try_start_load); //没有数据也开始加载
 	},
 	
 	/* 保存存档 */
@@ -114,41 +111,39 @@ const DB = {
 					data[t][i] = null;
 				}
 		
-		db.addData(DB.TABLE.WORLD, data, {
-			successCallback: function(){
-				console.log("存档save成功"/*, data*/);
-				
-				let find = false;
-				db.readStep(DB.TABLE.WORLD, {
-					index: "type",
-					range: ["only", DB.TYPE.deskgood],
-					dirt: "prev",
-					stepCallback: function(res){
-						if (find){
-							// console.log("DB 删除多余", res.key, res);
-							db.remove(DB.TABLE.WORLD, res.key);
-						}else{
-							find = true;
-						}
+		db.addData(DB.TABLE.WORLD, data).then(()=>{
+			console.log("存档save成功"/*, data*/);
+			
+			let find = false;
+			db.readStep(DB.TABLE.WORLD, {
+				index: "type",
+				range: ["only", DB.TYPE.deskgood],
+				dirt: "prev",
+				stepCallback: function(res){
+					if (find){
+						// console.log("DB 删除多余", res.key, res);
+						db.remove(DB.TABLE.WORLD, res.key);
+					}else{
+						find = true;
 					}
-				});
-			}
+				}
+			});
 		});
 	},
 	
 	/* 添加数据 */
-	addData(x, y, z, name, type, attr={}, successCallback){
-		db.addData(DB.TABLE.WORLD, {
-			type: type=="Block"? DB.TYPE.Block: DB.TYPE.ENTITY,
-			x,
-			y,
-			z,
-			name,
-			attr: JSON.stringify(attr).slice(1, -1)
-		}, {
-			successCallback: function(){
+	addData(x, y, z, name, type, attr={}){
+		return new Promise((resolve, reject)=>{
+			db.addData(DB.TABLE.WORLD, {
+				type: type=="Block"? DB.TYPE.Block: DB.TYPE.ENTITY,
+				x,
+				y,
+				z,
+				name,
+				attr: JSON.stringify(attr).slice(1, -1)
+			}).then(()=>{
 				let find = false;
-				db.readStep(DB.TABLE.WORLD, {
+				return db.readStep(DB.TABLE.WORLD, {
 					index: "type",
 					range: ["only", DB.TYPE.Block],
 					dirt: "prev",
@@ -160,29 +155,44 @@ const DB = {
 						}else{
 							find = true; //刚才添加的
 						}
-					},
-					successCallback
+					}
 				});
-			}
+			}).then(resolve);
+		});
+	},
+	
+	/* 删除数据 */
+	deleteEntity(id){
+		return new Promise((resolve, reject)=>{
+			db.readStep(DB.TABLE.WORLD, {
+				index: "type",
+				range: ["only", DB.TYPE.Block],
+				dirt: "prev",
+				stepCallback: function(res){
+					if (res.id == id){
+						// console.log("DB 删除多余", res.key, res);
+						db.remove(DB.TABLE.WORLD, res.key);
+					}
+				}
+			}).then(resolve);
 		});
 	},
 	
 	/* 读取区块信息 */
-	readChunk(x, z, opt={}){
-		const {successCallback, errorCallback} = opt;
-		const ox = x*map.size.x,
-			oz = z*map.size.z; //区块中心坐标
-		const edit = [];
-		db.readStep(DB.TABLE.WORLD, {
-			index: "type",
-			range: ["only", DB.TYPE.Block],
-			stepCallback: (res)=>{
-				if ( res.x >= ox+map.size[0].x && res.x <= ox+map.size[1].x &&
-					res.z >= oz+map.size[0].z && res.z <= oz+map.size[1].z
-				) edit.push(res);
-			},
-			successCallback: ()=> successCallback(edit),
-			errorCallback
+	readChunk(x, z){
+		return new Promise((resolve, reject)=>{
+			const ox = x*map.size.x,
+				oz = z*map.size.z; //区块中心坐标
+			const edit = [];
+			db.readStep(DB.TABLE.WORLD, {
+				index: "type",
+				range: ["only", DB.TYPE.Block],
+				stepCallback: (res)=>{
+					if ( res.x >= ox+map.size[0].x && res.x <= ox+map.size[1].x &&
+						res.z >= oz+map.size[0].z && res.z <= oz+map.size[1].z
+					) edit.push(res);
+				}
+			}).then(()=>resolve(edit));
 		});
 	}
 };
