@@ -302,8 +302,8 @@ class ChunkMap{
 			case "EntityBlock": //实体方块
 				this.add( thing.makeGeometry().updateSize().makeMesh(), {x,y,z}, type ); //以模板建立
 				break;
-				
-			case "Entity":
+			
+			case "Entity": //实体
 				this.add( thing, { x, y, z }, type ); //以模板建立
 				break;
 		}

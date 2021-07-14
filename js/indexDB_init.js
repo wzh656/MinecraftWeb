@@ -131,11 +131,11 @@ const DB = {
 		});
 	},
 	
-	/* 添加数据 */
-	addData(x, y, z, name, type, attr={}){
+	/* 添加方块 */
+	addBlock(x, y, z, name, attr={}){
 		return new Promise((resolve, reject)=>{
 			db.addData(DB.TABLE.WORLD, {
-				type: type=="Block"? DB.TYPE.Block: DB.TYPE.ENTITY,
+				type: DB.TYPE.Block,
 				x,
 				y,
 				z,
@@ -149,6 +149,37 @@ const DB = {
 					dirt: "prev",
 					stepCallback: function(res){
 						if (res.x!=x || res.y!=y || res.z!=z) return;
+						if (find){
+							// console.log("DB 删除多余", res.key, res);
+							db.remove(DB.TABLE.WORLD, res.key);
+						}else{
+							find = true; //刚才添加的
+						}
+					}
+				});
+			}).then(resolve);
+		});
+	},
+	
+	/* 添加实体 */
+	addEntity(id, x, y, z, name, attr={}){
+		return new Promise((resolve, reject)=>{
+			db.addData(DB.TABLE.WORLD, {
+				type: DB.TYPE.EntityBlock,
+				id,
+				x,
+				y,
+				z,
+				name,
+				attr: JSON.stringify(attr).slice(1, -1)
+			}).then(()=>{
+				let find = false;
+				return db.readStep(DB.TABLE.WORLD, {
+					index: "type",
+					range: ["only", DB.TYPE.Block],
+					dirt: "prev",
+					stepCallback: function(res){
+						if (res.id != id) return;
 						if (find){
 							// console.log("DB 删除多余", res.key, res);
 							db.remove(DB.TABLE.WORLD, res.key);

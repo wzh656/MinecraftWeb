@@ -709,17 +709,17 @@ const deskgood = { //桌子好
 		map.addID(thing, {x,y,z}); //添加方块
 		
 		const attr = JSON.stringify(thing.attr).slice(1,-1), //属性
-			[cX, cZ] = map.p2c(x, z); //区块坐标
-		
-		for (let i=map.chunks[cX][cZ].edit.length-1; i>=0; i--){ //删除数组元素需倒序
-			v = map.chunks[cX][cZ].edit[i];
-			if (v.x == x && v.y == y && v.z == z)
-				map.chunks[cX][cZ].edit.splice(i, 1); //删除重复
-		}
+			[cX, cZ] = map.p2c(x, z), //区块坐标
+			edit = map.chunks[cX][cZ].edit;
 		
 		switch (thing.type){
 			case "Block":
-				map.chunks[cX][cZ].edit.push({
+				for (let i=edit.length-1; i>=0; i--){ //删除数组元素需倒序
+					if (edit[i].x == x && edit[i].y == y && edit[i].z == z)
+						edit.splice(i, 1); //删除重复
+				}
+				
+				edit.push({
 					type: DB.TYPE.Block,
 					x,
 					y,
@@ -727,11 +727,21 @@ const deskgood = { //桌子好
 					name: thing.name,
 					attr
 				}); //添加edit
+				map.updateRound(x, y, z); //刷新方块及周围
+				
+				console.time("db.addData1")
+				DB.addBlock(x,y,z, name, attr)
+					.then(()=>console.timeEnd("db.addData1"));
 				break;
 				
 			case "EntityBlock":
-				const id = (+new Date()*10000 + ~~(Math.random()*10000)).toString(36);
-				thing.attr.entityID = id;
+				const id = thing.block.mesh.id;
+				
+				for (let i=edit.length-1; i>=0; i--){ //删除数组元素需倒序
+					if (edit[i].id == id)
+						map.chunks[cX][cZ].edit.splice(i, 1); //删除重复
+				}
+				
 				map.chunks[cX][cZ].edit.push({
 					type: DB.TYPE.EntityBlock,
 					id,
@@ -741,15 +751,13 @@ const deskgood = { //桌子好
 					name: thing.name,
 					attr
 				}); //添加edit
+				map.updateRound(x, y, z); //刷新方块及周围
+				
+				console.time("db.addData1")
+				DB.addEntity(id, x,y,z, name, attr)
+					.then(()=>console.timeEnd("db.addData1"));
 				break;
 		}
-		
-		map.updateRound(x, y, z); //刷新方块及周围
-		
-		console.time("db.addData1")
-		DB.addData(x,y,z, name, thing.type, attr, ()=>console.timeEnd("db.addData1"));
-		
-		
 		
 		// x = Math.round(x), y = Math.round(y), z = Math.round(z); //存储必须整数
 		//DB
@@ -826,7 +834,7 @@ const deskgood = { //桌子好
 				}); //添加edit
 				
 				console.time("db.addData2")
-				DB.addData(x, y, z, "空气", "Block").then(()=>console.timeEnd("db.addData2"));
+				DB.addBlock(x, y, z, "空气", "Block").then(()=>console.timeEnd("db.addData2"));
 				break;
 				
 			case "EntityBlock":
