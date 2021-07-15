@@ -261,8 +261,7 @@ const deskgood = { //桌子好
 	},*/
 	update_round_blocks(dx=1, dy=1, dz=1){
 		for (const i of body_blocks)
-			if (i)
-				map.update(i.x, i.y, i.z); //重新更新
+			if (i) map.update(i.x, i.y, i.z); //重新更新
 		
 		body_blocks.splice(0, body_blocks.length);
 		for (let x=deskgood.pos.x/100-dx; x<=deskgood.pos.x/100+dx; x++)
@@ -314,13 +313,13 @@ const deskgood = { //桌子好
 				) || !map.get(deskgood.pos.x/100, deskgood.pos.y/100, deskgood.pos.z/100) //没有方块在头上
 			){ */
 				const changed_x_z = deskgood.pos.x != x || deskgood.pos.z != z, //改变了x|z坐标
-					changed = changed_x_z || deskgood.pos.y != y;
+					changed = changed_x_z || deskgood.pos.y != y; //改变了x|y|z坐标
 				
 				deskgood.pos.x = x,
 				deskgood.pos.y = y,
 				deskgood.pos.z = z;
 				
-				//preloadChunk
+				//预加载区块
 				if (changed_x_z && !delay_id.preloadChunk)
 					delay_id.preloadChunk =  setTimeout(()=>{
 						map.preloadChunk();
@@ -331,7 +330,7 @@ const deskgood = { //桌子好
 					delay_id.update_block = setTimeout(()=>{
 						deskgood.update_round_blocks();
 						delay_id.update_block = null;
-					}, 36);
+					}, 100);
 			/* }else{
 				deskgood.v.y = 0;
 				throw "";
@@ -803,21 +802,21 @@ const deskgood = { //桌子好
 	
 	// 移除方块
 	remove(thing){
-		const {x,y,z} = thing.block.mesh.position.clone().divideScalar(100).round(); //单位: m
+		const {x,y,z} = thing.block.mesh.position.clone().divideScalar(100).round(), //单位: m
+			[cX, cZ] = map.p2c(x, z); //区块坐标
 		
 		//处理事件
 		if ( eval(thing.get("attr", "onRemove")) === false)
 			return;
 		
-		console.log("deskgood.remove", thing)
+		console.log("deskgood.remove", thing, {x,y,z}, {cX, cZ})
 		
-		map.delete(thing); //删除方块
-		
-		const [cX, cZ] = map.p2c(x, z); //区块坐标
+		map.delete(thing); //删除物体
 		
 		switch (thing.type){
-			case "Blcok":
+			case "Block":
 				// x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
+				map.addID({name: "空气"}, {x,y,z}); //换成空气 防止undefined更新
 				
 				for (let i=map.chunks[cX][cZ].edit.length-1; i>=0; i--){ //删除数组元素需倒序
 					v = map.chunks[cX][cZ].edit[i];
@@ -834,7 +833,7 @@ const deskgood = { //桌子好
 				}); //添加edit
 				
 				console.time("db.addData2")
-				DB.addBlock(x, y, z, "空气", "Block").then(()=>console.timeEnd("db.addData2"));
+				DB.addBlock(x, y, z, "空气").then(()=>console.timeEnd("db.addData2"));
 				break;
 				
 			case "EntityBlock":

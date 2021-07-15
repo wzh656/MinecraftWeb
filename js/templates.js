@@ -333,8 +333,8 @@ Thing.TEMPLATES["仙人掌"] = new Block({
 });
 
 // Tool
-Thing.TEMPLATES["木镐"] = new Tool({
-	name: "木镐",
+Thing.TEMPLATES["石镐"] = new Tool({
+	name: "石镐",
 	view: [2,2],
 	attr: {
 		stackable: 3, //可叠加在手中（最多3把）
@@ -342,8 +342,8 @@ Thing.TEMPLATES["木镐"] = new Tool({
 		durability: 1
 	}
 });
-Thing.TEMPLATES["木剑"] = new Tool({
-	name: "木剑",
+Thing.TEMPLATES["石剑"] = new Tool({
+	name: "石剑",
 	view: [3,2],
 	attr: {
 		stackable: 3, //可叠加在手中（最多3把）
@@ -351,8 +351,8 @@ Thing.TEMPLATES["木剑"] = new Tool({
 		durability: 1
 	}
 });
-Thing.TEMPLATES["木斧"] = new Tool({
-	name: "木斧",
+Thing.TEMPLATES["石斧"] = new Tool({
+	name: "石斧",
 	view: [4,2],
 	attr: {
 		stackable: 3, //可叠加在手中（最多3把）
@@ -360,8 +360,8 @@ Thing.TEMPLATES["木斧"] = new Tool({
 		durability: 1
 	}
 });
-Thing.TEMPLATES["木铲"] = new Tool({
-	name: "木铲",
+Thing.TEMPLATES["石铲"] = new Tool({
+	name: "石铲",
 	view: [5,2],
 	attr: {
 		stackable: 3, //可叠加在手中（最多3把）

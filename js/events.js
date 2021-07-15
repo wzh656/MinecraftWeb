@@ -73,8 +73,8 @@ const Events = {
 		}else if (hold.type == "Tool"){
 			const left = deskgood.hold[deskgood.choice-1];
 			if (left &&
-				hold.name == left.name && //同种方块
-				hold.get("attr", "stackable") == true //可叠加
+				left.name == (thing.get("attr", "digGet") || thing.name) && //同种方块
+				left.get("attr", "stackable") == true //可叠加
 			){ //放在左边
 				free = deskgood.choice - 1;
 				take = left;
@@ -164,21 +164,14 @@ const Events = {
 			if (!take){
 				const digGet = entityBlock.get("attr", "digGet");
 				if (digGet){ //指定获得方块
+					const {x0, x1, y0, y1, z0, z1} = entityBlock.get("attr", "entityBlock", "size") || {};
 					take = new EntityBlock({
 						name: entityBlock.get("attr", "digGet"), //挖掘获得 （仅name）
 						attr: {
-							entityBlock: {
-								size: {
-									x0: 0,
-									x1: OR(entityBlock.get("attr", "entityBlock", "size", "x1"), 100) -
-										OR(entityBlock.get("attr", "entityBlock", "size", "x0"), 0),
-									y0: 0,
-									y1: OR(entityBlock.get("attr", "entityBlock", "size", "y1"), 100) -
-										OR(entityBlock.get("attr", "entityBlock", "size", "y0"), 0),
-									z0: 0,
-									z1: OR(entityBlock.get("attr", "entityBlock", "size", "z1"), 100) -
-										OR(entityBlock.get("attr", "entityBlock", "size", "z0"), 0)
-								}
+							size: {
+								x1: (x1 || x0)? OR(x1, 100)-OR(x0, 0): undefined,
+								y1: (y1 || y0)? OR(y1, 100)-OR(y0, 0): undefined,
+								z1: (z1 || z0)? OR(z1, 100)-OR(z0, 0): undefined
 							}
 						}
 					});
@@ -375,33 +368,33 @@ const Events = {
 			
 		}else if ( keydown.key.has(18) ){ //alt
 			console.log("alt+上滚轮");
-			const {hold, choice} = deskgood;
-			
-			if (hold[choice-1] === undefined) return; //左边无物品
+			const {hold, choice} = deskgood,
+				nextChoice = Math.modRange(choice-1, 0, deskgood.hold.length); //左闭右开区间
 			
 			//处理事件
 			if ( hold[choice] &&
 				eval(hold[choice].get("attr", "onExchangeLeave")) === false //取消事件
 			) return;
-			if ( hold[choice-1] && //不是null空气
-				eval(hold[choice-1].get("attr", "onExchangeTo")) === false //取消事件
+			if ( hold[nextChoice] && //不是null空气
+				eval(hold[nextChoice].get("attr", "onExchangeTo")) === false //取消事件
 			) return;
 			
 			//交换
-			[ hold[choice], hold[choice-1] ] = [ hold[choice-1], hold[choice] ];
+			[ hold[choice], hold[nextChoice] ] = [ hold[nextChoice], hold[choice] ];
+			deskgood.choice = nextChoice;
 			hold.update(); //更新
 			
 		}else{
 			console.log("上滚轮");
 			const hold = deskgood.hold,
 				before = deskgood.choice; //之前的选择
-			if ( hold[before] && //切换前事件
+			
+			//处理事件
+			if ( hold[before] &&
 				eval(hold[before].get("attr", "onChangeLeave")) === false //取消事件
 			) return;
 			
-			deskgood.choice--;
-			if (deskgood.choice < 0)
-				deskgood.choice = 3;
+			deskgood.choice = Math.modRange(before-1, 0, deskgood.hold.length); //左闭右开区间
 			
 			if ( hold[deskgood.choice] && //切换后事件
 				eval(hold[deskgood.choice].get("attr", "onChangeTo")) === false //取消事件
@@ -424,33 +417,33 @@ const Events = {
 			
 		}else if ( keydown.key.has(18) ){ //alt
 			console.log("alt+下滚轮");
-			const {hold, choice} = deskgood;
-			
-			if (hold[choice+1] === undefined) return; //左边无物品
+			const {hold, choice} = deskgood,
+				nextChoice = Math.modRange(choice+1, 0, deskgood.hold.length); //左闭右开区间
 			
 			//处理事件
 			if ( hold[choice] &&
 				eval(hold[choice].get("attr", "onExchangeLeave")) === false //取消事件
 			) return;
-			if ( hold[choice+1] && //不是null空气
-				eval(hold[choice+1].get("attr", "onExchangeTo")) === false //取消事件
+			if ( hold[nextChoice] && //不是null空气
+				eval(hold[nextChoice].get("attr", "onExchangeTo")) === false //取消事件
 			) return;
 			
 			//交换
-			[ hold[choice], hold[choice+1] ] = [ hold[choice+1], hold[choice] ];
+			[ hold[choice], hold[nextChoice] ] = [ hold[nextChoice], hold[choice] ];
+			deskgood.choice = nextChoice;
 			hold.update(); //更新
 			
 		}else{
 			console.log("下滚轮");
 			const hold = deskgood.hold,
 				before = deskgood.choice;
-			if ( hold[before] && //切换前事件
+			
+			//处理事件
+			if ( hold[before] &&
 				eval(hold[before].get("attr", "onChangeLeave")) === false //取消事件
 			) return;
 			
-			deskgood.choice++;
-			if (deskgood.choice > 3)
-				deskgood.choice = 0;
+			deskgood.choice = Math.modRange(before+1, 0, deskgood.hold.length); //左闭右开区间
 			
 			if ( hold[deskgood.choice] && //切换后事件
 				eval(hold[deskgood.choice].get("attr", "onChangeTo")) === false //取消事件

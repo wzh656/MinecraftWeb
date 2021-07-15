@@ -97,7 +97,6 @@ class Thing{
 	cloneAttr(attr){
 		return new this.constructor({
 			name: this.name,
-			view: this.view,
 			attr: attr || this.attr
 		});
 	}
@@ -552,7 +551,7 @@ class EntityBlock extends Block{
 		this.this.geometry.faceVertexUvs[0][10] = [ uv[5][3], uv[5][0], uv[5][2] ];
 		this.this.geometry.faceVertexUvs[0][11] = [ uv[5][0], uv[5][1], uv[5][2] ]; */
 		
-		if ( this.have("block", "mesh") )
+		/* if ( this.have("block", "mesh") ){
 			this.block.mesh.position.copy( this.block.mesh.position.clone()
 				.divideScalar(100).round().multiplyScalar(100)
 				.add(new THREE.Vector3(
@@ -561,6 +560,14 @@ class EntityBlock extends Block{
 					(size.z0 + size.z1)/2 /100 -0.5
 				))
 			);
+		} */
+			/* this.block.mesh.position
+				.divideScalar(100).round().multiplyScalar(100) //规范化
+				.add(new THREE.Vector3(
+					(size.x0 + size.x1)/2 -50,
+					(size.y0 + size.y1)/2 -50,
+					(size.z0 + size.z1)/2 -50
+				)); */
 		
 		return this;
 	}
