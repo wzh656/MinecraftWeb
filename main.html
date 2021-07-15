@@ -1094,8 +1094,9 @@ $("#setting > .back").click(function(){ //返回
 function print(text, id=String.random(undefined, print.prototype.prints), time=3, color){
 	/* time 单位: s */
 	if (print.prototype.prints[id] !== undefined){ //已加载
-		const msg = print.prototype.prints[id];
-		msg.remove();
+		return;		
+		/*const msg = print.prototype.prints[id];
+		msg.remove();*/
 	}
 	
 	const msg = $(`<li>${text}</li>`)
