@@ -137,6 +137,7 @@ Thing.TEMPLATES["石头"] = new Block({
 		]
 	},
 	attr: {
+		digGet: "碎石",
 		idealDigSpeed: {
 			"石镐": 2,
 			"石斧": 2,

@@ -1,10 +1,6 @@
 /**
 * 玩家(deskgood)
 */
-const delay_id = {
-	update_block: null,
-	preloadChunk: null
-}, body_blocks = [];
 const deskgood = { //桌子好
 	v: new THREE.Vector3(),
 	pos: camera.position,
@@ -260,32 +256,24 @@ const deskgood = { //桌子好
 		}
 	},*/
 	update_round_blocks(dx=1, dy=1, dz=1){
-		for (const i of body_blocks)
-			if (i) map.update(i.x, i.y, i.z); //重新更新
+		const blocks = deskgood.update_round_blocks.blocks;
+		for (const pos of blocks)
+			map.update(pos.x, pos.y, pos.z); //重新更新
+		blocks.splice(0, blocks.length);
 		
-		body_blocks.splice(0, body_blocks.length);
 		for (let x=deskgood.pos.x/100-dx; x<=deskgood.pos.x/100+dx; x++)
 			for (let y=deskgood.pos.y/100-1-dy; y<=deskgood.pos.y/100+dy; y++)
 				for (let z=deskgood.pos.z/100-dz; z<=deskgood.pos.z/100+dz; z++)
-					body_blocks.push({x, y, z});
+					blocks.push({x, y, z});
 		
-		for (const i of body_blocks){
-			//[i.x, i.y, i.z] = [i.x, i.y, i.z].map(Math.round)
-			const block = map.get(i.x, i.y, i.z);
-			//if (i.x == 9 && i.y == 0 && i.z == 26) console.warn(block);
-			if (!block) continue;
+		for (const pos of blocks){
+			const {block, added} = map.getShould(pos.x, pos.y, pos.z);
+			if (block === null) continue; //空气不用显示
 			
-			block.block.material.forEach((item, index, arr) => {
-				arr[index].visible = true;
-			}); //显示所有
-			//if (i.x == 9 && i.y == 0 && i.z == 26) console.warn(block.block.material.map(v => v.visible));
-			// console.info("显示面", i, [i.x,i.y,i.z].map(Math.round), block);
-			if (!block.block.added){
-				//if (i.x == 9 && i.y == 0 && i.z == 26) console.warn("add", block.block.added);
-				scene.add(block.block.mesh);
-				block.block.added = true;
-				// console.info("显示体", i, [i.x,i.y,i.z].map(Math.round), block);
-			}
+			if (!added)
+				map.addID(block, pos);
+			
+			block.block.material.forEach(v => v.visible=true ); //显示所有面
 		}
 	},
 	// 移动
@@ -303,40 +291,25 @@ const deskgood = { //桌子好
 					item[1] == Math.round(z/100/map.size.z);
 			}) //含有（已加载和加载中的区块）
 		){
-			/* if (
-				(
-					map.get(deskgood.pos.x/100, deskgood.pos.y/100, deskgood.pos.z/100) && //有方块在头上
-					(
-						map.get(deskgood.pos.x/100, deskgood.pos.y/100, deskgood.pos.z/100).get("attr", "through") || //可穿透
-						map.get(deskgood.pos.x/100, deskgood.pos.y/100, deskgood.pos.z/100).get("attr", "transparent") //透明
-					)
-				) || !map.get(deskgood.pos.x/100, deskgood.pos.y/100, deskgood.pos.z/100) //没有方块在头上
-			){ */
-				const changed_x_z = deskgood.pos.x != x || deskgood.pos.z != z, //改变了x|z坐标
-					changed = changed_x_z || deskgood.pos.y != y; //改变了x|y|z坐标
-				
-				deskgood.pos.x = x,
-				deskgood.pos.y = y,
-				deskgood.pos.z = z;
-				
-				//预加载区块
-				if (changed_x_z && !delay_id.preloadChunk)
-					delay_id.preloadChunk =  setTimeout(()=>{
-						map.preloadChunk();
-						delay_id.preloadChunk = null;
-					}, 100);
-				//更新周围方块
-				if (changed && !delay_id.update_block)
-					delay_id.update_block = setTimeout(()=>{
-						deskgood.update_round_blocks();
-						delay_id.update_block = null;
-					}, 100);
-			/* }else{
-				deskgood.v.y = 0;
-				throw "";
-			} */
+			const changed_x_z = deskgood.pos.x != x || deskgood.pos.z != z, //改变了x|z坐标
+				changed = changed_x_z || deskgood.pos.y != y; //改变了x|y|z坐标
+			
+			deskgood.pos.set(x, y, z);
+			
+			const updater = deskgood.update_round_blocks;
+			//预加载区块
+			if (changed_x_z && !updater.preloadID)
+				updater.preloadID =  setTimeout(()=>{
+					map.preloadChunk();
+					updater.preloadID = null;
+				}, 100);
+			//更新周围方块
+			if (changed && !updater.updateID)
+				updater.updateID = setTimeout(()=>{
+					deskgood.update_round_blocks();
+					updater.updateID = null;
+				}, 100);
 		}else{
-			// throw "block";
 			print("区块暂未加载完成，无法进入<br/>（想加载快可以调节区块预加载范围）", "区块未加载完成", 1);
 		}
 	},
@@ -906,6 +879,10 @@ deskgood.goX = x=>deskgood.go(x);
 deskgood.goY = y=>deskgood.go(0,y);
 deskgood.goZ = z=>deskgood.go(0,0,z);
 
+deskgood.update_round_blocks.preloadID = null;
+deskgood.update_round_blocks.updateID = null;
+deskgood.update_round_blocks.blocks = [];
+
 
 /*window.addEventListener("deviceorientation", function(e){
 	/* e.alpha：左右旋转（度）
@@ -1007,8 +984,8 @@ if (DEBUG){
 /*
 * 卡住检测
 */
-setInterval(()=>{
-	const warn = [];
+/* setInterval(()=>{
+	// const warn = [];
 	if ( map.get(deskgood.pos.x/100,
 			deskgood.pos.y/100,
 			deskgood.pos.z/100) &&
@@ -1016,8 +993,8 @@ setInterval(()=>{
 			deskgood.pos.y/100,
 			deskgood.pos.z/100).get("attr", "through")
 	){ //头被卡住
-		warn.push("头被卡住？");
-		print("你的头竟然卡到方块里了，想窒息吗？看你怎么出来", "窒息", 1, "#f00");
+		// warn.push("头被卡住？");
+		// print("你的头竟然卡到方块里了，想窒息吗？看你怎么出来", "窒息", 1, "#f00");
 	}
 	if (map.get(deskgood.pos.x/100,
 			deskgood.pos.y/100-1,
@@ -1026,7 +1003,7 @@ setInterval(()=>{
 			deskgood.pos.y/100-1,
 			deskgood.pos.z/100).get("attr", "through")
 	){ //脚被卡住
-		warn.push("脚被卡住？");
+		// warn.push("脚被卡住？");
 	}
 	
 	// if (warn.length && !stop){
@@ -1048,9 +1025,9 @@ setInterval(()=>{
 			console.warn(warn[0], warn[1]);
 		}else{
 			console.warn(warn[0]);
-		} */
+		} *//*
 	// }
-}, 36);
+}, 36); */
 
 
 /*

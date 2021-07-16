@@ -252,9 +252,7 @@ class ChunkMap{
 			}
 		}
 		
-		thing.block.mesh.position.x = x*100;
-		thing.block.mesh.position.y = y*100;
-		thing.block.mesh.position.z = z*100;
+		thing.block.mesh.position.set(x*100, y*100, z*100);
 		
 		switch (thing.type){
 			case "Block":
@@ -267,7 +265,7 @@ class ChunkMap{
 				break;
 		}
 		scene.add( thing.block.mesh ); //网格模型添加到场景中
-		thing.block.added = true;
+		// thing.block.added = true; //已加入 //已废除 可通过undefined判断
 	}
 	
 	//根据 模板和name 添加方块
@@ -406,13 +404,14 @@ class ChunkMap{
 		}
 		
 		
-		if (!thisAdded){ //未加载
+		if (!thisAdded && needLoad){ //未加载 且 不可隐藏
 			const [cX, cZ] = this.p2c(x, z); //区块
-			if ( needLoad && this.getInitedChunks().some(v => v[0]==cX && v[1]==cZ) ){ //不可隐藏 且 在加载区块内
+			if (this.getInitedChunks().some(v => v[0]==cX && v[1]==cZ) ){ //在加载区块内
 				this.addID(thisBlock, {x,y,z});
 				thisAdded = true;
+			}else{ //不在加载区块内 无需加载
+				return;
 			}
-			if ( !thisAdded ) return; //无需加载
 		}
 		
 		// if (thisBlock.block.added == true && !needLoad) debugger
@@ -423,13 +422,15 @@ class ChunkMap{
 			material[i].visible = thisVisible[i];
 		
 		if (thisBlock.block.added == true && !needLoad){ //已加入 且 可隐藏
-			scene.remove( thisBlock.block.mesh );
-			thisBlock.block.added = false;
+			this.delete(thisBlock); //删除后 为undefined未加载
+			/* scene.remove( thisBlock.block.mesh );
+			thisBlock.block.added = false; */
 			// console.log("隐藏", this.map[x][y][z])
 		}
 		if (thisBlock.block.added == false && needLoad){ //未加入 且 不可隐藏
-			scene.add( thisBlock.block.mesh );
-			thisBlock.block.added = true;
+			this.addID(thisBlock, {x,y,z});
+			/* scene.add( thisBlock.block.mesh );
+			thisBlock.block.added = true; */
 			// console.log("显示", this.map[x][y][z])
 		}
 		
@@ -802,89 +803,35 @@ class ChunkMap{
 			}
 		} //未编辑
 		
-		let height = sNoise.height(this.seed.noise, this.seed.h, x, z);
-		height = Math.max( this.size[0].y, Math.min(height, this.size[1].y) );
-		/*if (height < this.size[0].y){
-			height = this.size[0].y;
-		}else if (height > this.size[1].y){
-			height = this.size[1].y;
-		}*/
-		/* let sNoise = ( t.noise.more3D(0.6, x/t.h.q, z/t.h.q, 3)+
-		t.noise.more3D(-3.1415926, x/t.h.q, z/t.h.q, 3)+
-		t.noise.more3D(54.782, x/t.h.q, z/t.h.q, 3) )/3;
-		noise = 1-Math.sin( (1-noise)*90/180*Math.PI );
-		let height = noise *t.h.k +t.h.b+
-		t.noise.more3D(-1428.57, x/t.h.e.q, z/t.h.e.q, 3) *t.h.e.k +t.h.e.b; */
+		const seed = this.seed,
+			noise = seed.noise;
 		
-		/*let noise = Math.abs(t.noise.more3D(0.6, x/t.h.q/2, z/t.h.q/2, 5));
-		let height = noise*noise*noise*(noise*(noise*6-15)+10) //*t.h.k +t.h.b;
-		height = Math.pow(t.h.k, height) + t.h.b;*/
-		// debugger
-		// let a = 1/(1+Math.pow(Math.E, 3)), // 1/(1+e^3)
-		// 	b = 1/(1+Math.pow(Math.E, -3)), // 1/(1+e^(-3))
-		// 	noise = (1+Math.pow(Math.E, -3*noise)-a)/(b-a); // (1+e^(-3x)-a)/(b-a)
-		// let height = (t.h.max -t.h.min)/(t.h.ave -1) *Math.pow(t.h.ave, noise) *(t.h.min *t.h.ave -t.h.max)/(t.h.ave -1);
-		// let height = Math.pow(1000, 0.5+0.5*noise, 3), 10);
-		// let height = t.noise.noise3D(0.6, x/t.h.q, z/t.h.q) *t.h.de + t.h.ave;
+		let height = Math.limitRange(
+				sNoise.height(noise, seed.h, x, z),
+				this.size[0].y,
+				this.size[1].y
+			),
+			// 90%+ 高原（草木不生，积雪覆盖）
+			// 70%+ 高山（无树，有草）
+			// 26+ 丘陵（树）
+			type = sNoise.type(noise, seed.t, x, z),
+			earth = height - height * sNoise.dirt(noise, seed.d, x, z),
+			treeHeight = sNoise.treeHeight(noise, seed.tH, x, z),
+			name;
 		
-		// let grass = false;
-		let type = sNoise.type(this.seed.noise, this.seed.t, x, z),
-		// 90%+ 高原（草木不生，积雪覆盖）
-		// 70%+ 高山（无树，有草）
-		// 26+ 丘陵（树）
-			//treeTop = null, //保留最高树干坐标
-			earth = height - height * sNoise.dirt(this.seed.noise, this.seed.d, x, z),
-			treeHeight = height + sNoise.treeHeight(this.seed.noise, this.seed.tH, x, z),
-			leaves = [+Infinity, -Infinity]; //(min, max]
-		
-		for ( const [dx,dz] of [[1,0], [-1,0], [0,1],[0,-1]] ){
-			const tH = sNoise.treeHeight(this.seed.noise, this.seed.tH, x+dx, z+dz);
-			if ( tH &&
-				!sNoise.type(this.seed.noise, this.seed.t, x+dx, z+dz) &&
-				!sNoise.openStone(this.seed.noise, this.seed.oS, x, z)
-			){ //有树 且 为森林 且 无石头
-				let lH = tH * sNoise.leavesScale(this.seed.noise, this.seed.lS, x+dz, z+dz), //叶高
-					h = sNoise.height(this.seed.noise, this.seed.h, x+dx, z+dz); //底面高度
-				h = Math.max( this.size[0].y, Math.min(h, this.size[1].y) );
-				leaves[1] = Math.max(leaves[1], h+tH);
-				leaves[0] = Math.min(leaves[0], h+tH-lH);
-				// console.log(`h:${h}, treeH:${tH}, leavesH:${lH}`, leaves)
-			}
-		}
-		
-		/* let earth = height - height * (t.noise.more3D(6.6, x/t.s.q, z/t.s.q, 6) *t.s.k +t.s.b)+
-		t.noise.more3D(-52.6338, x/t.s.e.q, z/t.s.e.q, 3) *t.s.e.k +t.s.e.b; */
-		let name = "空气";
 		switch (type){
 			case 0: //森林
 				
 				/* if (height > 0.9*this.size[1].y){ // 90%+ 高原（草木不生，积雪覆盖）
 					grass = true;
 				}else */if (height > 0.7*this.size[1].y){ // 70%+ 高山（无树，有草）
-					treeHeight = height;
+					treeHeight = 0;
 				}
-				if (sNoise.openStone(this.seed.noise, this.seed.oS, x, z)) //石头上不长树
-					treeHeight = height;
 				
-				if (y > treeHeight+1){
-					if (y <= leaves[1] && y > leaves[0]){
-						name = "疏树叶";
-					}else{
-						name = "空气";
-					}
-				}else if (y > treeHeight){
-					if ( treeHeight != height ||
-						(y <= leaves[1] && y > leaves[0])
-					){ //有树或旁边有树
-						name = "疏树叶";
-					}else{
-						name = "空气";
-					}
-				}else if (y > height){
-					//if (!treeTop) treeTop = y;
-					name = "细橡木";
-				}else if (y == Math.floor(height) && !(height > 0.9*this.size[1].y)){ // 90%+ 高原（草木不生，积雪覆盖）
-					if (sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
+				if (y > height){
+					name = "空气";
+				}else if (y == ~~height && height <= 0.9*this.size[1].y){ // 90%+ 高原（草木不生，积雪覆盖）
+					if (sNoise.openStone(noise, seed.oS, x, z)){
 						name = "石头";
 					}else{
 						name = "草方块";
@@ -896,10 +843,8 @@ class ChunkMap{
 						name = "草方块";
 						// grass = true;
 					} */
-				}/*else if (y == 0){
-					name = 2; //基岩
-				}*/else{
-					/* if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
+				}else{
+					/* if (!grass && !sNoise.openStone(noise, seed.oS, x, z)){
 						name = "草方块";
 						grass = true;
 					}else{ */
@@ -915,16 +860,9 @@ class ChunkMap{
 				} */
 				
 				if (y > height){
-					if (y <= leaves[1] && y > leaves[0]){
-						name = "疏树叶";
-					}else{
-						name = "空气";
-					}
-				}/* else if (y > height){
-					//if (!treeTop) treeTop = y;
-					name = 7.1; //橡木
-				} */else if (y == Math.floor(height) && !(height > 0.9*this.size[1].y)){ // 90%+ 高原（草木不生，积雪覆盖）
-					if (sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
+					name = "空气";
+				}else if (y == ~~height && height <= 0.9*this.size[1].y){ // 90%+ 高原（草木不生，积雪覆盖）
+					if (sNoise.openStone(noise, seed.oS, x, z)){
 						name = "石头";
 					}else{
 						name = "草方块";
@@ -937,7 +875,7 @@ class ChunkMap{
 						// grass = true;
 					} */
 				}else{
-					/* if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
+					/* if (!grass && !sNoise.openStone(noise, seed.oS, x, z)){
 						name = "草方块";
 						// grass = true;
 					}else{ */
@@ -949,15 +887,11 @@ class ChunkMap{
 			case 2: //沙漠
 				
 				if (y > height){
-					if (y <= leaves[1] && y > leaves[0]){
-						name = "疏树叶";
-					}else{
-						name = "空气";
-					}
+					name = "空气";
 				}else if (y > earth){
 					name = "沙子";
 				}else{
-					/* if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
+					/* if (!grass && !sNoise.openStone(noise, seed.oS, x, z)){
 						name = "沙子";
 						grass = true;
 					}else{ */
@@ -965,9 +899,6 @@ class ChunkMap{
 					// }
 				}
 				break;
-			
-			default:
-				name = "空气";
 		}
 		
 		return {name};
@@ -978,76 +909,35 @@ class ChunkMap{
 		// [x, z] = [Math.round(x), Math.round(z)]; //规范化
 		// console.warn("load", x, z)
 		
-		let column = [],
-			height = sNoise.height(this.seed.noise, this.seed.h, x, z);
-		height = Math.max( this.size[0].y, Math.min(height, this.size[1].y) );
-		/*if (height < this.size[0].y){
-			height = this.size[0].y;
-		}else if (height > this.size[1].y){
-			height = this.size[1].y;
-		}*/
-		/* let sNoise = ( t.noise.more3D(0.6, x/t.h.q, z/t.h.q, 3)+
-		t.noise.more3D(-3.1415926, x/t.h.q, z/t.h.q, 3)+
-		t.noise.more3D(54.782, x/t.h.q, z/t.h.q, 3) )/3;
-		noise = 1-Math.sin( (1-noise)*90/180*Math.PI );
-		let height = noise *t.h.k +t.h.b+
-		t.noise.more3D(-1428.57, x/t.h.e.q, z/t.h.e.q, 3) *t.h.e.k +t.h.e.b; */
-		
-		/*let noise = Math.abs(t.noise.more3D(0.6, x/t.h.q/2, z/t.h.q/2, 5));
-		let height = noise*noise*noise*(noise*(noise*6-15)+10) //*t.h.k +t.h.b;
-		height = Math.pow(t.h.k, height) + t.h.b;*/
-		// debugger
-		// let a = 1/(1+Math.pow(Math.E, 3)), // 1/(1+e^3)
-		// 	b = 1/(1+Math.pow(Math.E, -3)), // 1/(1+e^(-3))
-		// 	noise = (1+Math.pow(Math.E, -3*noise)-a)/(b-a); // (1+e^(-3x)-a)/(b-a)
-		// let height = (t.h.max -t.h.min)/(t.h.ave -1) *Math.pow(t.h.ave, noise) *(t.h.min *t.h.ave -t.h.max)/(t.h.ave -1);
-		// let height = Math.pow(1000, 0.5+0.5*noise, 3), 10);
-		// let height = t.noise.noise3D(0.6, x/t.h.q, z/t.h.q) *t.h.de + t.h.ave;
+		const column = [],
+			seed = this.seed,
+			noise = seed.noise;
 		
 		// let grass = false;
-		let type = sNoise.type(this.seed.noise, this.seed.t, x, z),
-				// 90%+ 高原（草木不生，积雪覆盖）
-				// 70%+ 高山（无树，有草）
-				// 26+ 丘陵（树）
-			//treeTop = null, //保留最高树干坐标
-			earth = height - height * sNoise.dirt(this.seed.noise, this.seed.d, x, z),
-			treeHeight = height + sNoise.treeHeight(this.seed.noise, this.seed.tH, x, z),
-			leaves = [+Infinity, -Infinity]; //(min, max]
+		let height = Math.limitRange(
+				sNoise.height(noise, seed.h, x, z),
+				this.size[0].y,
+				this.size[1].y
+			),
+			// 90%+ 高原（草木不生，积雪覆盖）
+			// 70%+ 高山（无树，有草）
+			// 26+ 丘陵（树）
+			type = sNoise.type(noise, seed.t, x, z),
+			earth = height - height * sNoise.dirt(noise, seed.d, x, z),
+			treeHeight = sNoise.treeHeight(noise, seed.tH, x, z);
 		
-		for ( const [dx,dz] of [[1,0], [-1,0], [0,1],[0,-1]] ){
-			const tH = sNoise.treeHeight(this.seed.noise, this.seed.tH, x+dx, z+dz);
-			if ( tH &&
-				!sNoise.type(this.seed.noise, this.seed.t, x+dx, z+dz) &&
-				!sNoise.openStone(this.seed.noise, this.seed.oS, x+dx, z+dz)
-			){ //有树 且 为森林 且 无石头
-				let lH = tH * sNoise.leavesScale(this.seed.noise, this.seed.lS, x+dz, z+dz), //叶高
-					h = sNoise.height(this.seed.noise, this.seed.h, x+dx, z+dz); //底面高度
-				h = Math.max( this.size[0].y, Math.min(h, this.size[1].y) );
-				leaves[1] = Math.max(leaves[1], h+tH);
-				leaves[0] = Math.min(leaves[0], h+tH-lH);
-				// console.log(`h:${h}, treeH:${tH}, leavesH:${lH}`, leaves)
-			}
-		}
+		edit.forEach((value)=>{
+			if ( value.x == x && value.z == z ) //同xz 被编辑
+				column[value.y] = {
+					name: value.name,
+					attr: value.attr? JSON.parse( "{"+value.attr+"}" ): {}
+				};
+		});
 		
 		for (let dy=this.size[1].y; dy>=this.size[0].y; dy--){ //注意：从上到下
 			
-			if (edit.some((value)=>{
-				if (
-					value.x == x &&
-					value.y == dy &&
-					value.z == z
-				){ //被编辑
-					column[dy] = {
-						name: value.name,
-						attr: value.attr? JSON.parse( "{"+value.attr+"}" ): {}
-					};
-					return true; //让下面continue
-				}
-			})) continue; //被编辑 跳过
-			//未编辑
+			if (column[dy]) continue; //被编辑 跳过
 			
-			/* let earth = height - height * (t.noise.more3D(6.6, x/t.s.q, z/t.s.q, 6) *t.s.k +t.s.b)+
-			t.noise.more3D(-52.6338, x/t.s.e.q, z/t.s.e.q, 3) *t.s.e.k +t.s.e.b; */
 			let name = "空气";
 			switch (type){
 				case 0: //森林
@@ -1055,30 +945,16 @@ class ChunkMap{
 					/* if (height > 0.9*this.size[1].y){ // 90%+ 高原（草木不生，积雪覆盖）
 						grass = true;
 					}else */if (height > 0.7*this.size[1].y){ // 70%+ 高山（无树，有草）
-						treeHeight = height;
+						treeHeight = 0;
 					}
-					if (sNoise.openStone(this.seed.noise, this.seed.oS, x, z)) //石头上不长树
-						treeHeight = height;
 					
-					if (dy > treeHeight+1){
-						if (dy <= leaves[1] && dy > leaves[0]){
-							name = "疏树叶";
-						}else{
-							name = "空气";
-						}
-					}else if (dy > treeHeight){
-						if ( treeHeight != height ||
-							(dy <= leaves[1] && dy > leaves[0])
-						){ //有树或旁边有树
-							name = "疏树叶";
-						}else{
-							name = "空气";
-						}
-					}else if (dy > height){
-						//if (!treeTop) treeTop = y;
-						name = "细橡木";
-					}else if (dy == Math.floor(height) && !(height > 0.9*this.size[1].y)){ // 90%+ 高原（草木不生，积雪覆盖）
-						if (sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
+					if (sNoise.openStone(noise, seed.oS, x, z)) //石头上不长树
+						treeHeight = 0;
+					
+					if (dy > height){
+						name = "空气";
+					}else if (dy == ~~height && height <= 0.9*this.size[1].y){ // 90%+ 高原（草木不生，积雪覆盖）
+						if (sNoise.openStone(noise, seed.oS, x, z)){
 							name = "石头";
 						}else{
 							name = "草方块";
@@ -1091,7 +967,7 @@ class ChunkMap{
 							// grass = true;
 						} */
 					}else{
-						/* if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
+						/* if (!grass && !sNoise.openStone(noise, seed.oS, x, z)){
 							name = "草方块";
 							grass = true;
 						}else{ */
@@ -1107,16 +983,9 @@ class ChunkMap{
 					} */
 					
 					if (dy > height){
-						if (dy <= leaves[1] && dy > leaves[0]){
-							name = "疏树叶";
-						}else{
-							name = "空气";
-						}
-					}/* else if (dy > height){
-						//if (!treeTop) treeTop = dy;
-						name = "细橡木";
-					} */else if (dy == Math.floor(height) && !(height > 0.9*this.size[1].y)){ // 90%+ 高原（草木不生，积雪覆盖）
-						if (sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
+						name = "空气";
+					}else if (dy == ~~height && height <= 0.9*this.size[1].y){ // 90%+ 高原（草木不生，积雪覆盖）
+						if (sNoise.openStone(noise, seed.oS, x, z)){
 							name = "石头";
 						}else{
 							name = "草方块";
@@ -1129,7 +998,7 @@ class ChunkMap{
 							// grass = true;
 						} */
 					}else{
-						/* if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
+						/* if (!grass && !sNoise.openStone(noise, seed.oS, x, z)){
 							name = "草方块";
 							// grass = true;
 						}else{ */
@@ -1141,16 +1010,12 @@ class ChunkMap{
 				case 2: //沙漠
 					
 					if (dy > height){
-						if (dy <= leaves[1] && dy > leaves[0]){
-							name = "疏树叶";
-						}else{
-							name = "空气";
-						}
+						name = "空气";
 					}else if (dy > earth){
 						name = "沙子";
 						//grass = true;
 					}else{
-						/*if (!grass && !sNoise.openStone(this.seed.noise, this.seed.oS, x, z)){
+						/*if (!grass && !sNoise.openStone(noise, seed.oS, x, z)){
 							name = "沙子";
 							grass = true;
 						}else{*/
@@ -1170,7 +1035,7 @@ class ChunkMap{
 	}
 	/*preGetColumn_worker(x, z, edit, finishCallback){
 		let worker = new Worker("./preGetColumn_worker.js");
-		worker.postMessage({x, z, edit, t:this.seed});
+		worker.postMessage({x, z, edit, t:seed});
 		worker.onmessage = function (event) {
 			console.log("Received message from", "preGetColumn_worker.js", event.data);
 			finishCallback(event.data);
