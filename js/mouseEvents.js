@@ -9,7 +9,8 @@ mouse.choice = {
 	y: -1,
 	z: -1,
 	faceIndex: -1,
-	name: -1
+	name: -1,
+	event: null
 };
 if (DEBUG){
 	const deskgood_choice_folder = gui.__folders["玩家/观察者(deskgood)"].addFolder("选择物体");
@@ -69,13 +70,15 @@ document.addEventListener("mousemove", function (e){
 			y: -1,
 			z: -1,
 			faceIndex: -1,
-			name: -1
+			name: -1,
+			event: null
 		});
 	mouse.choice.x = get.object.position.x;
 	mouse.choice.y = get.object.position.y;
 	mouse.choice.z = get.object.position.z;
 	mouse.choice.faceIndex = get.faceIndex;
 	mouse.choice.name = get.object.userData.thingObject.name;
+	mouse.choice.event = get;
 	
 	if (!mouse.choice.view) return;
 	const geometry1 = new THREE.BoxBufferGeometry(100, 100, 100),

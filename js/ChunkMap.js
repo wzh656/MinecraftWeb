@@ -795,22 +795,17 @@ class ChunkMap{
 				value.x == x &&
 				value.y == y &&
 				value.z == z
-			){ //被编辑
+			) //被编辑
 				return {
 					name: value.name,
 					attr: value.attr? JSON.parse( "{"+value.attr+"}" ): {}
 				};
-			}
 		} //未编辑
 		
 		const seed = this.seed,
 			noise = seed.noise;
 		
-		let height = Math.limitRange(
-				sNoise.height(noise, seed.h, x, z),
-				this.size[0].y,
-				this.size[1].y
-			),
+		let height = sNoise.height(noise, seed.h, x, z),
 			// 90%+ 高原（草木不生，积雪覆盖）
 			// 70%+ 高山（无树，有草）
 			// 26+ 丘陵（树）
@@ -822,65 +817,31 @@ class ChunkMap{
 		switch (type){
 			case 0: //森林
 				
-				/* if (height > 0.9*this.size[1].y){ // 90%+ 高原（草木不生，积雪覆盖）
-					grass = true;
-				}else */if (height > 0.7*this.size[1].y){ // 70%+ 高山（无树，有草）
+				if (height > 0.7*this.size[1].y){ // 70%+ 高山（无树，有草）
 					treeHeight = 0;
 				}
 				
 				if (y > height){
 					name = "空气";
 				}else if (y == ~~height && height <= 0.9*this.size[1].y){ // 90%+ 高原（草木不生，积雪覆盖）
-					if (sNoise.openStone(noise, seed.oS, x, z)){
-						name = "石头";
-					}else{
-						name = "草方块";
-					}
+					name = "草方块";
 				}else if (y > earth){
-					// if (grass){
-						name = "泥土";
-					/* }else{
-						name = "草方块";
-						// grass = true;
-					} */
+					name = "泥土";
 				}else{
-					/* if (!grass && !sNoise.openStone(noise, seed.oS, x, z)){
-						name = "草方块";
-						grass = true;
-					}else{ */
-						name = "石头";
-					// }
+					name = "石头";
 				}
 				break;
 				
 			case 1: //草原
 				
-				/* if (height > 0.9*this.size[1].y){ // 90%+ 高原（草木不生，积雪覆盖）
-					grass = true;
-				} */
-				
 				if (y > height){
 					name = "空气";
 				}else if (y == ~~height && height <= 0.9*this.size[1].y){ // 90%+ 高原（草木不生，积雪覆盖）
-					if (sNoise.openStone(noise, seed.oS, x, z)){
-						name = "石头";
-					}else{
-						name = "草方块";
-					}
+					name = "草方块";
 				}else if (y > earth){
-					// if (grass){
-						name = "泥土";
-					/* }else{
-						name = "草方块";
-						// grass = true;
-					} */
+					name = "泥土";
 				}else{
-					/* if (!grass && !sNoise.openStone(noise, seed.oS, x, z)){
-						name = "草方块";
-						// grass = true;
-					}else{ */
-						name = "石头";
-					// }
+					name = "石头";
 				}
 				break;
 				
@@ -888,15 +849,10 @@ class ChunkMap{
 				
 				if (y > height){
 					name = "空气";
-				}else if (y > earth){
+				}else if (y >= earth){
 					name = "沙子";
 				}else{
-					/* if (!grass && !sNoise.openStone(noise, seed.oS, x, z)){
-						name = "沙子";
-						grass = true;
-					}else{ */
-						name = "石头";
-					// }
+					name = "石头";
 				}
 				break;
 		}
@@ -914,11 +870,7 @@ class ChunkMap{
 			noise = seed.noise;
 		
 		// let grass = false;
-		let height = Math.limitRange(
-				sNoise.height(noise, seed.h, x, z),
-				this.size[0].y,
-				this.size[1].y
-			),
+		let height = sNoise.height(noise, seed.h, x, z),
 			// 90%+ 高原（草木不生，积雪覆盖）
 			// 70%+ 高山（无树，有草）
 			// 26+ 丘陵（树）
@@ -942,68 +894,31 @@ class ChunkMap{
 			switch (type){
 				case 0: //森林
 					
-					/* if (height > 0.9*this.size[1].y){ // 90%+ 高原（草木不生，积雪覆盖）
-						grass = true;
-					}else */if (height > 0.7*this.size[1].y){ // 70%+ 高山（无树，有草）
+					if (height > 0.7*this.size[1].y){ // 70%+ 高山（无树，有草）
 						treeHeight = 0;
 					}
-					
-					if (sNoise.openStone(noise, seed.oS, x, z)) //石头上不长树
-						treeHeight = 0;
 					
 					if (dy > height){
 						name = "空气";
 					}else if (dy == ~~height && height <= 0.9*this.size[1].y){ // 90%+ 高原（草木不生，积雪覆盖）
-						if (sNoise.openStone(noise, seed.oS, x, z)){
-							name = "石头";
-						}else{
-							name = "草方块";
-						}
+						name = "草方块";
 					}else if (dy > earth){
-						// if (grass){
-							name = "泥土";
-						/* }else{
-							name = "草方块";
-							// grass = true;
-						} */
+						name = "泥土";
 					}else{
-						/* if (!grass && !sNoise.openStone(noise, seed.oS, x, z)){
-							name = "草方块";
-							grass = true;
-						}else{ */
-							name = "石头";
-						// }
+						name = "石头";
 					}
 					break;
 					
 				case 1: //草原
 					
-					/* if (height > 0.9*this.size[1].y){ // 90%+ 高原（草木不生，积雪覆盖）
-						grass = true;
-					} */
-					
 					if (dy > height){
 						name = "空气";
 					}else if (dy == ~~height && height <= 0.9*this.size[1].y){ // 90%+ 高原（草木不生，积雪覆盖）
-						if (sNoise.openStone(noise, seed.oS, x, z)){
-							name = "石头";
-						}else{
-							name = "草方块";
-						}
+						name = "草方块";
 					}else if (dy > earth){
-						// if (grass){
-							name = "泥土";
-						/* }else{
-							name = "草方块";
-							// grass = true;
-						} */
+						name = "泥土";
 					}else{
-						/* if (!grass && !sNoise.openStone(noise, seed.oS, x, z)){
-							name = "草方块";
-							// grass = true;
-						}else{ */
-							name = "石头";
-						// }
+						name = "石头";
 					}
 					break;
 					
@@ -1011,16 +926,10 @@ class ChunkMap{
 					
 					if (dy > height){
 						name = "空气";
-					}else if (dy > earth){
+					}else if (dy >= earth){
 						name = "沙子";
-						//grass = true;
 					}else{
-						/*if (!grass && !sNoise.openStone(noise, seed.oS, x, z)){
-							name = "沙子";
-							grass = true;
-						}else{*/
-							name = "石头";
-						//}
+						name = "石头";
 					}
 					break;
 				

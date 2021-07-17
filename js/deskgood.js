@@ -264,14 +264,15 @@ const deskgood = { //桌子好
 		for (let x=deskgood.pos.x/100-dx; x<=deskgood.pos.x/100+dx; x++)
 			for (let y=deskgood.pos.y/100-1-dy; y<=deskgood.pos.y/100+dy; y++)
 				for (let z=deskgood.pos.z/100-dz; z<=deskgood.pos.z/100+dz; z++)
-					blocks.push({x, y, z});
+					blocks.push(new THREE.Vector3(x, y, z));
 		
 		for (const pos of blocks){
 			const {block, added} = map.getShould(pos.x, pos.y, pos.z);
-			if (block === null) continue; //空气不用显示
+			if (block === null || block.name === "空气") // 已加载 || 未加载
+				continue; //空气不用显示
 			
 			if (!added)
-				map.addID(block, pos);
+				map.addID(block, pos.round());
 			
 			block.block.material.forEach(v => v.visible=true ); //显示所有面
 		}

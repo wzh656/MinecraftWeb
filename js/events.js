@@ -197,6 +197,9 @@ const Events = {
 					time.clearInterval(this.digId);
 					this.digging = false; //挖掘结束
 					deskgood.remove( entityBlock ); //删除方块
+					if (Object.every(take.attr.size,
+						(v, i) => v == i[1]*100
+					)) deskgood.hold[free] = take.toBlock(); //转化为 方块
 					return this.startDig(); //下一轮挖掘
 				}
 				
@@ -208,6 +211,9 @@ const Events = {
 					time.clearInterval(this.digId);
 					this.digging = false; //挖掘结束
 					deskgood.remove( entityBlock ); //删除方块
+					if (Object.every(take.attr.size,
+						(v, i) => v == i[1]*100
+					)) deskgood.hold[free] = take.toBlock(); //转化为 方块
 					return this.startDig(); //下一轮挖掘
 				}
 			}

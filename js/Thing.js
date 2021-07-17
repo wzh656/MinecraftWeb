@@ -571,6 +571,15 @@ class EntityBlock extends Block{
 		
 		return this;
 	}
+	
+	//转换为方块
+	toBlock(){
+		const size = this.attr.size;
+		delete this.attr.size;
+		const block = new Block(this);
+		this.attr.size = size;
+		return block;
+	}
 }
 EntityBlock.prototype.type = "EntityBlock"; //名称
 
