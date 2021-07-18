@@ -160,16 +160,19 @@ Function.prototype.compress = function(){
 		.replace(/\s*,\s*/g, ",") //无需空白
 		.replace(/\s*:\s*/g, ":") //无需空白
 		.replace(/\s*;\s*/g, ";") //无需空白
-		.replace(/\(\s+/g, "(") //无需空白
-		.replace(/\s+\)/g, ")") //无需空白
-		.replace(/\[\s+/g, "[") //无需空白
-		.replace(/\s+\]/g, "]") //无需空白
-		.replace(/\{\s+/g, "{") //无需空白
-		.replace(/\s+\}/g, "}") //无需空白
+		.replace(/\s*\(\s*/g, "(") //无需空白
+		.replace(/\s*\)\s*/g, ")") //无需空白
+		.replace(/\s*\[\s*/g, "[") //无需空白
+		.replace(/\s*\]\s*/g, "]") //无需空白
+		.replace(/\s*\{\s*/g, "{") //无需空白
+		.replace(/\s*\}\s*/g, "}") //无需空白
 		.replace(/\s*\+\s*/g, "+") //无需空白
 		.replace(/\s*\-\s*/g, "-") //无需空白
 		.replace(/\s*\*\s*/g, "*") //无需空白
 		.replace(/\s*\/\s*/g, "/") //无需空白
+		.replace(/\s*=\s*/g, "=") //无需空白
+		.replace(/\s*<\s*/g, "<") //无需空白
+		.replace(/\s*>\s*/g, ">") //无需空白
 	return str;
 };
 

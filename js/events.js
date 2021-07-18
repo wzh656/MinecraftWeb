@@ -48,7 +48,7 @@ const Events = {
 				break;
 		}
 		
-		const thing = obj.object.userData.thingObject, //物体对象
+		let thing = obj.object.userData.thingObject, //物体对象
 			hold = deskgood.hold[deskgood.choice]; //挖掘工具
 		
 		//是否超出手长
@@ -97,8 +97,10 @@ const Events = {
 			free = deskgood.choice; //挖到叠加
 			idealDigSpeed = thing.get("attr", "idealDigSpeed", "手"); //用手挖掘
 			take = hold;
-			if (hold.type == "Block") //要叠加的方块 转化为 实体方块
+			if (hold.type == "Block"){ //要叠加的方块 转化为 实体方块
 				hold = deskgood.hold[deskgood.choice] = hold.toEntityBlock();
+				hold.set("attr", "size", {});
+			}
 		}
 		if (!idealDigSpeed)
 			return print("当前工具无法挖掘该方块", "无法挖掘", 3, "#f00");

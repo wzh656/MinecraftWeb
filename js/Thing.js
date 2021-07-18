@@ -102,7 +102,8 @@ class Thing{
 	}
 }
 Thing.prototype.type = "Thing"; //名称
-Thing.TEMPLATES = []; //模板
+Thing.TEMPLATES = {}; //模板
+Thing.TEMPLATES_EVENT = {}; //事件函数模板
 
 
 /*
