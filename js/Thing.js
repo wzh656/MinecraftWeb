@@ -153,19 +153,11 @@ class Block extends Thing{
 						this.attr.idealDigSpeed[name] = +value;
 				}
 			}
-			if (opt.attr.placeSpeed){ //放置速度(cm³/s)
-				if (typeof opt.attr.placeSpeed == "number"){
-					this.attr.placeSpeed = opt.attr.placeSpeed;
-				}else{
-					this.attr.placeSpeed = {};
-					for (const [name, value] of Object.entries(opt.attr.placeSpeed))
-						this.attr.placeSpeed[name] = +value;
-				}
-			}
 			
 			if (opt.attr.transparent) this.attr.transparent = opt.attr.transparent; //透明方块（其他方块必须显示，自己不可隐藏）
 			if (opt.attr.through) this.attr.through = opt.attr.through; //允许穿过
 			if (opt.attr.digGet) this.attr.digGet = opt.attr.digGet; //挖掘获得
+			if (opt.attr.directGet) this.attr.directGet = opt.attr.directGet; //直接获得
 			
 			if (opt.attr.onStartDig) this.attr.onStartDig = opt.attr.onStartDig; //开始挖掘
 			if (opt.attr.onEndDig) this.attr.onEndDig = opt.attr.onEndDig; //结束挖掘

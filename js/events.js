@@ -67,7 +67,7 @@ const Events = {
 			
 			//实体无法用于挖掘
 		}else if (hold.type == "Entity"){
-			return print("当前工具无法挖掘该方块", "无法挖掘", 3, "#f00");
+			return print("当前工具无法挖掘该方块", "无法挖掘", 3, "#ff0");
 			
 			//用工具挖掘
 		}else if (hold.type == "Tool"){
@@ -81,7 +81,7 @@ const Events = {
 			}else{ //放在空位
 				free = deskgood.hold.indexOf(null);
 				if (free == -1)
-					return print("东西太多，我拿不下了", "拿不下方块", 3, "#f00");
+					return print("东西太多，我拿不下了", "拿不下方块", 3, "#ff0");
 			}
 			idealDigSpeed = thing.get("attr", "idealDigSpeed", hold.name);
 			
@@ -89,21 +89,44 @@ const Events = {
 		}else{
 			if (hold.name != (thing.get("attr", "digGet") || thing.name) || //非同种物体
 				hold.get("attr", "stackable") != true //不可叠加
-			) return print("当前方块无法叠加", "无法挖掘", 3, "#f00");
+			) return print("当前方块无法叠加", "无法挖掘", 3, "#ff0");
 			
 			if (deskgood.hold.indexOf(null) == -1) //空出手来挖
-				return print("东西太多，我没办法空出手来挖了", "没手挖方块", 3, "#f00");
+				return print("东西太多，我没办法空出手来挖了", "没手挖方块", 3, "#ff0");
 			
 			free = deskgood.choice; //挖到叠加
 			idealDigSpeed = thing.get("attr", "idealDigSpeed", "手"); //用手挖掘
-			take = hold;
 			if (hold.type == "Block"){ //要叠加的方块 转化为 实体方块
 				hold = deskgood.hold[deskgood.choice] = hold.toEntityBlock();
 				hold.set("attr", "size", {});
 			}
+			take = hold;
 		}
-		if (!idealDigSpeed)
-			return print("当前工具无法挖掘该方块", "无法挖掘", 3, "#f00");
+		if (!idealDigSpeed){
+			idealDigSpeed = thing.get("attr", "idealDigSpeed"); //默认挖掘速度
+			return print("当前工具无法挖掘该方块", "无法挖掘", 3, "#ff0");
+		}
+		
+		
+		if (thing.get("attr", "directGet")){ //直接获得
+			const thingV = (OR(thing.get("attr", "size", "x1"), 100) -
+					OR(thing.get("attr", "size", "x0"), 0)) *
+				(OR(thing.get("attr", "size", "y1"), 100) -
+					OR(thing.get("attr", "size", "y0"), 0)) *
+				(OR(thing.get("attr", "size", "z1"), 100) -
+					OR(thing.get("attr", "size", "z0"), 0)); //物体体积 单位: cm³
+			
+			this.digging = false; //挖掘结束
+			this.digId = time.setTimeout(()=>{
+				this.digging = false; //挖掘结束
+				deskgood.hold.addOne(thing, free); //克隆一个放在手中
+				deskgood.remove( thing ); //删除方块
+				return this.startDig(OR(touch.screen.x, undefined), OR(touch.screen.y, undefined)); //下一轮挖掘
+			}, thingV/idealDigSpeed*rnd_error()*1000).id; //（游戏时间） 单位: ms
+			
+			return print("挖掘中……", "挖掘中", thingV/idealDigSpeed, "#fff");
+		}
+		
 		
 		//挖掘的物体 转化为 实体方块
 		let entityBlock;
@@ -127,16 +150,14 @@ const Events = {
 		const thingS = (OR(entityBlock.get("attr", "size", side[0]+"1"), 100) -
 				OR(entityBlock.get("attr", "size", side[0]+"0"), 0)) *
 			(OR(entityBlock.get("attr", "size", side[1]+"1"), 100) -
-				OR(entityBlock.get("attr", "size", side[1]+"0"), 0)), //挖掘面积
+				OR(entityBlock.get("attr", "size", side[1]+"0"), 0)), //挖掘面积 单位: cm²
 			takeS = take?
 				(OR(take.get("attr", "size", side[0]+"1"), 100) -
 					OR(take.get("attr", "size", side[0]+"0"), 0)) *
 				(OR(take.get("attr", "size", side[1]+"1"), 100) -
 					OR(take.get("attr", "size", side[1]+"0"), 0))
-				:thingS; //拿走物体面积
+				:thingS; //拿走物体面积 单位: cm²
 		
-		this.digging = true; //正在挖掘
-		this.digThing = entityBlock; //正在挖掘的物体
 		console.log("startDig", {thing, hold, direction},
 			"idealDigSpeed:", idealDigSpeed*time.getSpeed(), "cm³/s, ", thingS/idealDigSpeed/time.getSpeed(), "s/cm") //现实时间
 		
@@ -161,6 +182,10 @@ const Events = {
 				return print("手里方块太大拿不下了", "手里方块拿不下了", 3, "#ff0");
 			}
 		}
+		
+		this.digging = true; //正在挖掘
+		this.digThing = entityBlock; //正在挖掘的物体
+		let t0 = time.getTime(); //（游戏时间）
 		const func = ()=>{
 			
 			if (!take){
@@ -184,8 +209,14 @@ const Events = {
 				deskgood.hold.addOne(take, free); //克隆一个放在手中
 			}
 			
-			entityBlock.attr.size[direction] += 1 - direction[1]*2; //x0 -> 1, x1 -> -1
-			take.attr.size[direction[0] + "1"] += thingS/takeS; //x1: 0 ~> 100
+			const t = (time.getTime()-t0) / 1000, //时间间隔（游戏时间） 单位: s
+				thick = Math.limitRange(
+					t / (thingS/idealDigSpeed*rnd_error()),
+					0, entityBlock.attr.size[direction]
+				); //厚度（不超过剩下厚度）
+			entityBlock.attr.size[direction] += (1 - direction[1]*2) * thick; //x0 -> 1, x1 -> -1
+			take.attr.size[direction[0] + "1"] += thingS/takeS * thick; //x1: 0 ~> 100
+			t0 = time.getTime();
 			
 			console.log("Digging", entityBlock.attr.size[direction], take.attr.size[direction])
 			entityBlock.updateSize(); //更新大小
@@ -202,7 +233,7 @@ const Events = {
 					if (Object.every(take.attr.size,
 						(v, i) => v == i[1]*100
 					)) deskgood.hold[free] = take.toBlock(); //转化为 方块
-					return this.startDig(); //下一轮挖掘
+					return this.startDig(OR(touch.screen.x, undefined), OR(touch.screen.y, undefined)); //下一轮挖掘
 				}
 				
 			}else{ //x1: --
@@ -216,7 +247,7 @@ const Events = {
 					if (Object.every(take.attr.size,
 						(v, i) => v == i[1]*100
 					)) deskgood.hold[free] = take.toBlock(); //转化为 方块
-					return this.startDig(); //下一轮挖掘
+					return this.startDig(OR(touch.screen.x, undefined), OR(touch.screen.y, undefined)); //下一轮挖掘
 				}
 			}
 			
@@ -235,7 +266,7 @@ const Events = {
 			this.digId = time.setTimeout(func, thingS/idealDigSpeed*rnd_error()*1000).id; // 下一cm
 			
 		};
-		this.digId = time.setTimeout(func, thingS/idealDigSpeed*rnd_error()*1000).id; // s/cm 游戏时间 单位: ms
+		this.digId = time.setTimeout(func, thingS/idealDigSpeed*rnd_error()*1000).id; // s/cm （游戏时间） 单位: ms
 		
 	},
 	

@@ -31,19 +31,23 @@ Thing.TEMPLATES["命令方块"] = new Block({
 		]
 	},
 	attr: {
-		idealDigSpeed: {
-			"手": -1
-		},
 		directGet: true, //直接获取
+		idealDigSpeed: 0.5e6, //2s/个
 		
 		onPutToHead: Thing.TEMPLATES_EVENT.onPutToHead,
 		onPutToBody: Thing.TEMPLATES_EVENT.onPutToBody,
 		onPutToLeg: Thing.TEMPLATES_EVENT.onPutToLeg,
 		onPutToFoot: Thing.TEMPLATES_EVENT.onPutToFoot,
 		
-		onStartDig: "deskgood.hold.addOne(thing.cloneAttr(), free);deskgood.remove( entityBlock );false",
-		onRightMouseDown: "status('command');false", //打开界面
-		onShortTouch: "status('command');false", //打开界面
+		onRightMouseDown: function(){
+			status("command");
+			false;
+		}.compress(), //打开界面
+		
+		onShortTouch: function(){
+			status("command");
+			false;
+		}.compress() //打开界面
 	}
 });
 Thing.TEMPLATES["草方块"] = new Block({
@@ -143,6 +147,7 @@ Thing.TEMPLATES["松泥土"] = new Block({
 		},
 		
 		stackable: true, //可叠加
+		
 		onPutToHead: Thing.TEMPLATES_EVENT.onPutToHead,
 		onPutToBody: Thing.TEMPLATES_EVENT.onPutToBody,
 		onPutToLeg: Thing.TEMPLATES_EVENT.onPutToLeg,
@@ -201,6 +206,7 @@ Thing.TEMPLATES["碎石"] = new Block({
 		},
 		
 		stackable: true, //可叠加
+		
 		onPutToHead: Thing.TEMPLATES_EVENT.onPutToHead,
 		onPutToBody: Thing.TEMPLATES_EVENT.onPutToBody,
 		onPutToLeg: Thing.TEMPLATES_EVENT.onPutToLeg,
@@ -235,6 +241,7 @@ Thing.TEMPLATES["沙子"] = new Block({
 		},
 		
 		stackable: true, //可叠加
+		
 		onPutToHead: Thing.TEMPLATES_EVENT.onPutToHead,
 		onPutToBody: Thing.TEMPLATES_EVENT.onPutToBody,
 		onPutToLeg: Thing.TEMPLATES_EVENT.onPutToLeg,
@@ -251,12 +258,6 @@ Thing.TEMPLATES["细橡木"] = new EntityBlock({
 	},
 	attr: {
 		idealDigSpeed: {},
-		
-		size: {
-			x0: 30, x1: 70,
-			y0: 0, y1: 100,
-			z0: 30, z1: 70
-		},
 		
 		onPutToHead: Thing.TEMPLATES_EVENT.onPutToHead,
 		onPutToBody: Thing.TEMPLATES_EVENT.onPutToBody,
@@ -275,7 +276,9 @@ Thing.TEMPLATES["疏树叶"] = new Block({
 	attr: {
 		transparent: true, //透明方块
 		through: true, //可穿过
-		idealDigSpeed: 10e6,
+		
+		directGet: true, //直接获取
+		idealDigSpeed: 0.2e6, //5s/个
 		
 		onPutToHead: Thing.TEMPLATES_EVENT.onPutToHead,
 		onPutToBody: Thing.TEMPLATES_EVENT.onPutToBody,
@@ -294,7 +297,9 @@ Thing.TEMPLATES["密树叶"] = new Block({
 	attr: {
 		transparent: true, //透明方块
 		through: true, //可穿过
-		idealDigSpeed: 5e6,
+		
+		directGet: true, //直接获取
+		idealDigSpeed: 0.1e6, //10s/个
 		
 		onPutToHead: Thing.TEMPLATES_EVENT.onPutToHead,
 		onPutToBody: Thing.TEMPLATES_EVENT.onPutToBody,
@@ -311,7 +316,8 @@ Thing.TEMPLATES["木板"] = new Block({
 		]
 	},
 	attr: {
-		idealDigSpeed: {},
+		directGet: true, //直接获取
+		idealDigSpeed: 0.5e6, //2s/个
 		
 		onPutToHead: Thing.TEMPLATES_EVENT.onPutToHead,
 		onPutToBody: Thing.TEMPLATES_EVENT.onPutToBody,
@@ -328,7 +334,8 @@ Thing.TEMPLATES["砖"] = new Block({
 		]
 	},
 	attr: {
-		idealDigSpeed: {},
+		directGet: true, //直接获取
+		idealDigSpeed: 0.5e6, //2s/个
 		
 		onPutToHead: Thing.TEMPLATES_EVENT.onPutToHead,
 		onPutToBody: Thing.TEMPLATES_EVENT.onPutToBody,
@@ -345,7 +352,8 @@ Thing.TEMPLATES["仙人掌"] = new Block({
 		]
 	},
 	attr: {
-		idealDigSpeed: {},
+		directGet: true, //直接获取
+		idealDigSpeed: 0.3e6, //3+s/个
 		
 		onPutToHead: Thing.TEMPLATES_EVENT.onPutToHead,
 		onPutToBody: Thing.TEMPLATES_EVENT.onPutToBody,

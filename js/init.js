@@ -155,7 +155,6 @@ Function.prototype.compress = function(){
 		.replace(/\}$/g, "") //去除结尾
 		.trim() //去除首尾空白
 		.replace(/;$/g, "") //去除末尾分号
-		.replace(/;\}/g, "}") //无需分号
 		.replace(/\s+/g, " ") //去除重复空白
 		.replace(/\s*,\s*/g, ",") //无需空白
 		.replace(/\s*:\s*/g, ":") //无需空白
@@ -173,6 +172,7 @@ Function.prototype.compress = function(){
 		.replace(/\s*=\s*/g, "=") //无需空白
 		.replace(/\s*<\s*/g, "<") //无需空白
 		.replace(/\s*>\s*/g, ">") //无需空白
+		.replace(/;\}/g, "}") //无需分号
 	return str;
 };
 

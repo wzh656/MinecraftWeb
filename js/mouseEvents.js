@@ -133,7 +133,7 @@ $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind�
 			if (Events.onMouseWheelScrollUp && Events.onMouseWheelScrollUp() === false)
 				return;
 			if (thing &&
-				eval(thing.get("attr", "block", "onMouseWheelScrollUp")) === false
+				eval(thing.get("attr", "onMouseWheelScrollUp")) === false
 			) return;
 			//上一个
 			Events.choicePrev();
@@ -144,7 +144,7 @@ $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind�
 			if (Events.onMouseWheelScrollDown && Events.onMouseWheelScrollDown() === false)
 				return;
 			if (thing &&
-				eval(thing.get("attr", "block", "onMouseWheelScrollDown")) === false
+				eval(thing.get("attr", "onMouseWheelScrollDown")) === false
 			) return;
 			//下一个
 			Events.choiceNext();
@@ -172,7 +172,7 @@ document.addEventListener("mousedown", function (e){
 		if (Events.onLeftMouseDown && Events.onLeftMouseDown() === false)
 			return false;
 		if (thing &&
-			eval(thing.get("attr", "block", "onLeftMouseDown")) === false
+			eval(thing.get("attr", "onLeftMouseDown")) === false
 		) return false;
 		//开始挖掘
 		Events.startDig();
@@ -183,7 +183,7 @@ document.addEventListener("mousedown", function (e){
 		if (Events.onMiddleMouseDown && Events.onMiddleMouseDown() === false)
 			return false;
 		if (thing &&
-			eval(thing.get("attr", "block", "onMiddleMouseDown")) === false
+			eval(thing.get("attr", "onMiddleMouseDown")) === false
 		) return false;
 		//重置时间
 		Events.resetTime();
@@ -194,7 +194,7 @@ document.addEventListener("mousedown", function (e){
 		if (Events.onRightMouseDown && Events.onRightMouseDown() === false)
 			return false;
 		if (thing &&
-			eval(thing.get("attr", "block", "onRightMouseDown")) === false
+			eval(thing.get("attr", "onRightMouseDown")) === false
 		) return false;
 		//开始放置
 		Events.startPlace();
@@ -221,7 +221,7 @@ document.addEventListener("mouseup", function (e){
 		if (Events.onLeftMouseUp && Events.onLeftMouseUp() === false)
 			return false;
 		if (thing &&
-			eval(thing.get("attr", "block", "onLeftMouseUp")) === false
+			eval(thing.get("attr", "onLeftMouseUp")) === false
 		) return false;
 		//结束挖掘
 		Events.endDig();
@@ -232,7 +232,7 @@ document.addEventListener("mouseup", function (e){
 		if (Events.onMiddleMouseUp && Events.onMiddleMouseUp() === false)
 			return false;
 		if (thing &&
-			eval(thing.get("attr", "block", "onMiddleMouseUp")) === false
+			eval(thing.get("attr", "onMiddleMouseUp")) === false
 		) return false;
 		
 	}else if (e.button == 2){ //右键（放置）
@@ -241,7 +241,7 @@ document.addEventListener("mouseup", function (e){
 		if (Events.onRightMouseUp && Events.onRightMouseUp() === false)
 			return false;
 		if (thing &&
-			eval(thing.get("attr", "block", "onRightMouseUp")) === false
+			eval(thing.get("attr", "onRightMouseUp")) === false
 		) return false;
 		//结束挖掘
 		Events.endPlace();

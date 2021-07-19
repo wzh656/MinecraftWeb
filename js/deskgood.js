@@ -703,7 +703,7 @@ const deskgood = { //桌子好
 				map.updateRound(x, y, z); //刷新方块及周围
 				
 				console.time("db.addData1")
-				DB.addBlock(x,y,z, name, attr)
+				DB.addBlock(x,y,z, thing.name, attr)
 					.then(()=>console.timeEnd("db.addData1"));
 				break;
 				
@@ -727,7 +727,7 @@ const deskgood = { //桌子好
 				map.updateRound(x, y, z); //刷新方块及周围
 				
 				console.time("db.addData1")
-				DB.addEntity(id, x,y,z, name, attr)
+				DB.addEntity(id, x,y,z, thing.name, attr)
 					.then(()=>console.timeEnd("db.addData1"));
 				break;
 		}

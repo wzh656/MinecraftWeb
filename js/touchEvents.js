@@ -187,7 +187,7 @@ $("#game").on("touchstart", function (e){
 	if (Events.onTouchStart && Events.onTouchStart() === false)
 		return;
 	if (thing &&
-		eval(thing.get("attr", "block", "onTouchStart")) === false
+		eval(thing.get("attr", "onTouchStart")) === false
 	) return;
 	
 	touch.screen.x = touch.screen.x0 = x,
@@ -219,7 +219,7 @@ $("#game").on("touchmove", function (e){
 	if (Events.onTouchMove && Events.onTouchMove() === false)
 		return;
 	if (thing &&
-		eval(thing.get("attr", "block", "onTouchMove")) === false
+		eval(thing.get("attr", "onTouchMove")) === false
 	) return;
 	
 	touch.screen.x = x, touch.screen.y = y;
@@ -254,7 +254,7 @@ $("#game").on("touchend", function (e){
 	if (Events.onTouchEnd && Events.onTouchEnd() === false)
 		return;
 	if (thing &&
-		eval(thing.get("attr", "block", "onTouchEnd")) === false
+		eval(thing.get("attr", "onTouchEnd")) === false
 	) return;
 	
 	if (touch.screen.id === null){ //长按抬起
@@ -290,7 +290,7 @@ $("#game").on("touchcancel", function (e){
 	if (Events.onTouchCancel && Events.onTouchCancel() === false)
 		return;
 	if (thing &&
-		eval(thing.get("attr", "block", "onTouchCancel")) === false
+		eval(thing.get("attr", "onTouchCancel")) === false
 	) return;
 	
 	clearTimeout(touch.screen.id);
