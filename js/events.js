@@ -96,19 +96,17 @@ const Events = {
 			
 			free = deskgood.choice; //挖到叠加
 			idealDigSpeed = thing.get("attr", "idealDigSpeed", "手"); //用手挖掘
-			if (hold.type == "Block"){ //要叠加的方块 转化为 实体方块
-				hold = deskgood.hold[deskgood.choice] = hold.toEntityBlock();
-				hold.set("attr", "size", {});
-			}
 			take = hold;
 		}
 		if (!idealDigSpeed){
 			idealDigSpeed = thing.get("attr", "idealDigSpeed"); //默认挖掘速度
-			return print("当前工具无法挖掘该方块", "无法挖掘", 3, "#ff0");
+			if (!idealDigSpeed) //仍然无法挖掘
+				return print("当前工具无法挖掘该方块", "无法挖掘", 3, "#ff0");
 		}
 		
 		
-		if (thing.get("attr", "directGet")){ //直接获得
+		//直接获得 不用挖掘
+		if (thing.get("attr", "directGet")){
 			const thingV = (OR(thing.get("attr", "size", "x1"), 100) -
 					OR(thing.get("attr", "size", "x0"), 0)) *
 				(OR(thing.get("attr", "size", "y1"), 100) -
@@ -119,14 +117,38 @@ const Events = {
 			this.digging = false; //挖掘结束
 			this.digId = time.setTimeout(()=>{
 				this.digging = false; //挖掘结束
-				deskgood.hold.addOne(thing, free); //克隆一个放在手中
+				deskgood.hold.addOne(thing.cloneAttr(), free); //克隆一个放在手中
 				deskgood.remove( thing ); //删除方块
 				return this.startDig(OR(touch.screen.x, undefined), OR(touch.screen.y, undefined)); //下一轮挖掘
 			}, thingV/idealDigSpeed*rnd_error()*1000).id; //（游戏时间） 单位: ms
 			
-			return print("挖掘中……", "挖掘中", thingV/idealDigSpeed, "#fff");
+			return print("拿走中……", "拿走中", 3, "#fff");
 		}
 		
+		
+		const thingS = (OR(thing.get("attr", "size", side[0]+"1"), 100) -
+				OR(thing.get("attr", "size", side[0]+"0"), 0)) *
+			(OR(thing.get("attr", "size", side[1]+"1"), 100) -
+				OR(thing.get("attr", "size", side[1]+"0"), 0)), //挖掘面积 单位: cm²
+			takeS = take?
+				(OR(take.get("attr", "size", side[0]+"1"), 100) -
+					OR(take.get("attr", "size", side[0]+"0"), 0)) *
+				(OR(take.get("attr", "size", side[1]+"1"), 100) -
+					OR(take.get("attr", "size", side[1]+"0"), 0))
+				:thingS; //拿走物体面积 单位: cm²
+		
+		
+		//预先判断 是否拿不下了
+		if (take && take.attr){ //有take
+			if (!take.attr.size || //无大小
+				take.attr.size[direction[0]+"1"] === undefined //该方向为默认值
+			) return print("手里方块太大拿不下了", "手里方块拿不下了", 3, "#ff0");
+			
+			if (take.attr.size[direction[0]+"1"] >= 100){
+				take.attr.size[direction[0]+"1"] = 100;
+				return print("手里方块太大拿不下了", "手里方块拿不下了", 3, "#ff0");
+			}
+		}
 		
 		//挖掘的物体 转化为 实体方块
 		let entityBlock;
@@ -147,16 +169,11 @@ const Events = {
 			OR(entityBlock.get("attr", "size",direction), 100*direction[1]) //x0: 0, x1: 100
 		); //保证有值
 		
-		const thingS = (OR(entityBlock.get("attr", "size", side[0]+"1"), 100) -
-				OR(entityBlock.get("attr", "size", side[0]+"0"), 0)) *
-			(OR(entityBlock.get("attr", "size", side[1]+"1"), 100) -
-				OR(entityBlock.get("attr", "size", side[1]+"0"), 0)), //挖掘面积 单位: cm²
-			takeS = take?
-				(OR(take.get("attr", "size", side[0]+"1"), 100) -
-					OR(take.get("attr", "size", side[0]+"0"), 0)) *
-				(OR(take.get("attr", "size", side[1]+"1"), 100) -
-					OR(take.get("attr", "size", side[1]+"0"), 0))
-				:thingS; //拿走物体面积 单位: cm²
+		//用方块挖掘
+		if (hold && hold.type == "Block"){ //要叠加的方块 转化为 实体方块
+			hold = deskgood.hold[deskgood.choice] = hold.toEntityBlock();
+			hold.set("attr", "size", {});
+		}
 		
 		console.log("startDig", {thing, hold, direction},
 			"idealDigSpeed:", idealDigSpeed*time.getSpeed(), "cm³/s, ", thingS/idealDigSpeed/time.getSpeed(), "s/cm") //现实时间
@@ -169,18 +186,6 @@ const Events = {
 			plus.device.vibrate(20);
 		}else if ("vibrate" in navigator){
 			navigator.vibrate(20);
-		}
-		
-		//挖掘
-		if (take && take.attr && take.attr.size){ //有take
-			//预先判断 拿不下了
-			if (take.attr.size[direction[0]+"1"] === undefined) //该方向为默认值
-				return print("手里方块太大拿不下了", "手里方块拿不下了", 3, "#ff0");
-			
-			if (take.attr.size[direction[0]+"1"] >= 100){
-				take.attr.size[direction[0]+"1"] = 100;
-				return print("手里方块太大拿不下了", "手里方块拿不下了", 3, "#ff0");
-			}
 		}
 		
 		this.digging = true; //正在挖掘
@@ -209,11 +214,23 @@ const Events = {
 				deskgood.hold.addOne(take, free); //克隆一个放在手中
 			}
 			
-			const t = (time.getTime()-t0) / 1000, //时间间隔（游戏时间） 单位: s
+			const t = (time.getTime()-t0) / 1000; //时间间隔（游戏时间） 单位: s
+			let thick; //厚度（不超过剩下厚度）
+			if (direction[1] == "0"){ //x0: 0->100
 				thick = Math.limitRange(
 					t / (thingS/idealDigSpeed*rnd_error()),
-					0, entityBlock.attr.size[direction]
-				); //厚度（不超过剩下厚度）
+					0,
+					OR(entityBlock.attr.size[direction[0] + "1"], 100) - //对面的大小
+						entityBlock.attr.size[direction] //正面的大小
+				);
+			}else{ //x1: 100->0
+				thick = Math.limitRange(
+					t / (thingS/idealDigSpeed*rnd_error()),
+					0,
+					entityBlock.attr.size[direction] - //正面的大小
+						OR(entityBlock.attr.size[direction[0] + "0"], 0) //对面的大小
+				);
+			}
 			entityBlock.attr.size[direction] += (1 - direction[1]*2) * thick; //x0 -> 1, x1 -> -1
 			take.attr.size[direction[0] + "1"] += thingS/takeS * thick; //x1: 0 ~> 100
 			t0 = time.getTime();
@@ -231,7 +248,7 @@ const Events = {
 					this.digging = false; //挖掘结束
 					deskgood.remove( entityBlock ); //删除方块
 					if (Object.every(take.attr.size,
-						(v, i) => v == i[1]*100
+						(v, i) => NEAR(v, i[1]*100)
 					)) deskgood.hold[free] = take.toBlock(); //转化为 方块
 					return this.startDig(OR(touch.screen.x, undefined), OR(touch.screen.y, undefined)); //下一轮挖掘
 				}
@@ -245,7 +262,7 @@ const Events = {
 					this.digging = false; //挖掘结束
 					deskgood.remove( entityBlock ); //删除方块
 					if (Object.every(take.attr.size,
-						(v, i) => v == i[1]*100
+						(v, i) => NEAR(v, i[1]*100)
 					)) deskgood.hold[free] = take.toBlock(); //转化为 方块
 					return this.startDig(OR(touch.screen.x, undefined), OR(touch.screen.y, undefined)); //下一轮挖掘
 				}
@@ -285,10 +302,8 @@ const Events = {
 	},
 	
 	
-	placing: false, //正在放置
-	placeThing: null, //正在放置的物体
 	/* 开始放置 */
-	startPlace(x, y){
+	place(x, y){
 		console.log("try startPlace")
 		
 		//手上是否有效方块
@@ -302,40 +317,79 @@ const Events = {
 		if (!obj) return;
 		
 		const thing = obj.object.userData.thingObject, //物体对象
-			pos = obj.object.position.clone() .divideScalar(100); //单位:m
+			size = hold.get("attr", "size");
+		size.x = OR(size.x1, 100) - OR(size.x0, 0),
+		size.y = OR(size.y1, 100) - OR(size.y0, 0),
+		size.z = OR(size.z1, 100) - OR(size.z0, 0); //长宽高
+		
+		const pos = obj.point.clone(),
+			objs = {
+				x0: ray3D(obj.point.clone().add( new THREE.Vector3(1,0,0) ), //x++
+						{x: -1},
+						0,
+						OR(size.x/2, 50)
+					).filter(obj => obj.object instanceof THREE.Mesh)[0],
+					
+				x1: ray3D(obj.point.clone().add( new THREE.Vector3(-1,0,0) ), //x--
+						{x: 1},
+						0,
+						OR(size.x/2, 50)
+					).filter(obj => obj.object instanceof THREE.Mesh)[0],
+					
+				y0: ray3D(obj.point.clone().add( new THREE.Vector3(0,1,0) ), //y++
+						{y: -1},
+						0,
+						OR(size.y/2, 50)
+					).filter(obj => obj.object instanceof THREE.Mesh)[0],
+					
+				y1: ray3D(obj.point.clone().add( new THREE.Vector3(0,-1,0) ), //y--
+						{y: 1},
+						0,
+						OR(size.y/2, 50)
+					).filter(obj => obj.object instanceof THREE.Mesh)[0],
+					
+				z0: ray3D(obj.point.clone().add( new THREE.Vector3(0,0,1) ), //z++
+						{z: -1},
+						0,
+						OR(size.z/2, 50)
+					).filter(obj => obj.object instanceof THREE.Mesh)[0],
+					
+				z1: ray3D(obj.point.clone().add( new THREE.Vector3(0,0,-1) ), //z--
+						{z: 1},
+						0,
+						OR(size.z/2, 50)
+					).filter(obj => obj.object instanceof THREE.Mesh)[0]
+			};
+		
+		if (objs.x0 && objs.x1) return;
+		if (objs.y0 && objs.y1) return;
+		if (objs.z0 && objs.z1) return;
+		
+		if (objs.x0){
+			pos.x = objs.x0.point.x + 50;
+		}else if (objs.x1){
+			pos.x = objs.x1.point.x + 50;
+		}
+		
+		if (objs.y0){
+			pos.y = objs.y0.point.y + 50;
+		}else if (objs.y1){
+			pos.y = objs.y1.point.y + 50;
+		}
+		
+		if (objs.z0){
+			pos.z = objs.z0.point.z + 50;
+		}else if (objs.z1){
+			pos.z = objs.z1.point.z + 50;
+		}
+		
+		pos.divideScalar(100); //单位:m
+		
 		
 		//处理事件
 		if ( thing &&
 			eval(thing.get("attr", "onStartPlace")) === false
 		) return;
-		
-		//转换为真正选中位置
-		switch (obj.faceIndex){
-			case 0:
-			case 1:
-				pos.x++; //单位:m
-				break;
-			case 2:
-			case 3:
-				pos.x--;
-				break;
-			case 4:
-			case 5:
-				pos.y++;
-				break;
-			case 6:
-			case 7:
-				pos.y--;
-				break;
-			case 8:
-			case 9:
-				pos.z++;
-				break;
-			case 10:
-			case 11:
-				pos.z--;
-				break;
-		}
 		
 		//是否超出手长
 		if ( pos.clone() .multiplyScalar(100)
@@ -355,27 +409,10 @@ const Events = {
 			hold.get("attr", "through") !== true
 		)  return print("想卡死吗？还往腿上放方块！", "往腿上放方块"); //放到腿上
 		
-		this.digThing = hold; //正在放置的物体
-		this.placing = true; //正在放置
-		
 		deskgood.place(hold, pos); //放置方块 单位:m
 		deskgood.hold.delete(deskgood.choice); //删除手里的方块
 		
 		this.placing = false; //结束放置
-	},
-	
-	/* 结束放置 */
-	endPlace(){
-		console.log("try endPlace")
-		
-		//处理事件
-		if ( this.placeThing &&
-			eval(this.placeThing.get("attr", "onEndPlace")) === false
-		) return;
-		
-		this.placing = false; //结束放置
-		
-		console.log("endPlace")
 	},
 	
 	

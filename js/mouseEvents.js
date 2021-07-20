@@ -197,7 +197,7 @@ document.addEventListener("mousedown", function (e){
 			eval(thing.get("attr", "onRightMouseDown")) === false
 		) return false;
 		//开始放置
-		Events.startPlace();
+		Events.place();
 		
 	}
 	return false;
@@ -235,7 +235,7 @@ document.addEventListener("mouseup", function (e){
 			eval(thing.get("attr", "onMiddleMouseUp")) === false
 		) return false;
 		
-	}else if (e.button == 2){ //右键（放置）
+	}else if (e.button == 2){ //右键
 		
 		//处理事件
 		if (Events.onRightMouseUp && Events.onRightMouseUp() === false)
@@ -243,8 +243,6 @@ document.addEventListener("mouseup", function (e){
 		if (thing &&
 			eval(thing.get("attr", "onRightMouseUp")) === false
 		) return false;
-		//结束挖掘
-		Events.endPlace();
 		
 	}
 	return false;

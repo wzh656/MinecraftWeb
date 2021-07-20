@@ -347,12 +347,12 @@ class EntityBlock extends Block{
 		if (opt.attr){
 			if (opt.attr.size){ //挖掘大小程度
 				this.attr.size = {};
-				if (opt.attr.size.x0) this.attr.size.x0 = opt.attr.size.x0;
-				if (opt.attr.size.x1) this.attr.size.x1 = opt.attr.size.x1;
-				if (opt.attr.size.y0) this.attr.size.y0 = opt.attr.size.y0;
-				if (opt.attr.size.y1) this.attr.size.y1 = opt.attr.size.y1;
-				if (opt.attr.size.z0) this.attr.size.z0 = opt.attr.size.z0;
-				if (opt.attr.size.z1) this.attr.size.z1 = opt.attr.size.z1;
+				if (opt.attr.size.x0 !== undefined) this.attr.size.x0 = opt.attr.size.x0;
+				if (opt.attr.size.x1 !== undefined) this.attr.size.x1 = opt.attr.size.x1;
+				if (opt.attr.size.y0 !== undefined) this.attr.size.y0 = opt.attr.size.y0;
+				if (opt.attr.size.y1 !== undefined) this.attr.size.y1 = opt.attr.size.y1;
+				if (opt.attr.size.z0 !== undefined) this.attr.size.z0 = opt.attr.size.z0;
+				if (opt.attr.size.z1 !== undefined) this.attr.size.z1 = opt.attr.size.z1;
 			}
 		}
 	}

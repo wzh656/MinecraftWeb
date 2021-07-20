@@ -264,11 +264,7 @@ $("#game").on("touchend", function (e){
 		clearTimeout(touch.screen.id); //防止长按
 		
 		if (touch.screen.valid)
-			if (Events.placing){ //正在放置
-				Events.endPlace(); //结束放置
-			}else{ //不在放置
-				Events.startPlace(); //开始放置
-			}
+			Events.place(); //开始放置
 	}
 	
 	touch.screen.x = touch.screen.y = touch.screen.x0 = touch.screen.y0 = touch.screen.id = touch.screen.valid = null;
