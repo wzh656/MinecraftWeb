@@ -317,72 +317,127 @@ const Events = {
 		if (!obj) return;
 		
 		const thing = obj.object.userData.thingObject, //物体对象
-			size = hold.get("attr", "size");
+			size = hold.get("attr", "size") || {};
 		size.x = OR(size.x1, 100) - OR(size.x0, 0),
 		size.y = OR(size.y1, 100) - OR(size.y0, 0),
 		size.z = OR(size.z1, 100) - OR(size.z0, 0); //长宽高
 		
-		const pos = obj.point.clone(),
-			objs = {
-				x0: ray3D(obj.point.clone().add( new THREE.Vector3(1,0,0) ), //x++
-						{x: -1},
-						0,
-						OR(size.x/2, 50)
-					).filter(obj => obj.object instanceof THREE.Mesh)[0],
-					
-				x1: ray3D(obj.point.clone().add( new THREE.Vector3(-1,0,0) ), //x--
-						{x: 1},
-						0,
-						OR(size.x/2, 50)
-					).filter(obj => obj.object instanceof THREE.Mesh)[0],
-					
-				y0: ray3D(obj.point.clone().add( new THREE.Vector3(0,1,0) ), //y++
-						{y: -1},
-						0,
-						OR(size.y/2, 50)
-					).filter(obj => obj.object instanceof THREE.Mesh)[0],
-					
-				y1: ray3D(obj.point.clone().add( new THREE.Vector3(0,-1,0) ), //y--
-						{y: 1},
-						0,
-						OR(size.y/2, 50)
-					).filter(obj => obj.object instanceof THREE.Mesh)[0],
-					
-				z0: ray3D(obj.point.clone().add( new THREE.Vector3(0,0,1) ), //z++
-						{z: -1},
-						0,
-						OR(size.z/2, 50)
-					).filter(obj => obj.object instanceof THREE.Mesh)[0],
-					
-				z1: ray3D(obj.point.clone().add( new THREE.Vector3(0,0,-1) ), //z--
-						{z: 1},
-						0,
-						OR(size.z/2, 50)
-					).filter(obj => obj.object instanceof THREE.Mesh)[0]
-			};
+		mark([ obj.point, obj.point.clone().add(new THREE.Vector3(-OR(size.x/2, 50), 0, 0)) ], "#ff0000");
+		mark([ obj.point, obj.point.clone().add(new THREE.Vector3(OR(size.x/2, 50), 0, 0)) ], "#ff0000");
+		mark([ obj.point, obj.point.clone().add(new THREE.Vector3(0, -OR(size.x/2, 50), 0)) ], "#00ff00");
+		mark([ obj.point, obj.point.clone().add(new THREE.Vector3(0, OR(size.x/2, 50), 0)) ], "#00ff00");
+		mark([ obj.point, obj.point.clone().add(new THREE.Vector3(0, 0, -OR(size.x/2, 50))) ], "#0000ff");
+		mark([ obj.point, obj.point.clone().add(new THREE.Vector3(0, 0, OR(size.x/2, 50))) ], "#0000ff");
+		
+		const pos = obj.point.clone();
+		switch (obj.faceIndex){
+			case 0:
+			case 1:
+				console.log("x+")
+				pos.x += 3;
+				break;
+			case 2:
+			case 3:
+				console.log("x-")
+				pos.x -= 3;
+				break;
+			case 4:
+			case 5:
+				console.log("y+")
+				pos.y += 3;
+				break;
+			case 6:
+			case 7:
+				console.log("y-")
+				pos.y -= 3;
+				break;
+			case 8:
+			case 9:
+				console.log("z+")
+				pos.z += 3;
+				break;
+			case 10:
+			case 11:
+				console.log("z-")
+				pos.z -= 3;
+				break;
+			default:
+				throw ["faceIndex wrong:", obj.faceIndex];
+		}
+		console.log(pos)
+		const objs = {
+			x0: ray3D(obj.point.clone().add( new THREE.Vector3(1,0,0) ), //x++
+					{x: -1},
+					0,
+					size.x/2
+				).filter(obj => obj.object instanceof THREE.Mesh)[0],
+				
+			x1: ray3D(obj.point.clone().add( new THREE.Vector3(-1,0,0) ), //x--
+					{x: 1},
+					0,
+					size.x/2
+				).filter(obj => obj.object instanceof THREE.Mesh)[0],
+				
+			y0: ray3D(obj.point.clone().add( new THREE.Vector3(0,1,0) ), //y++
+					{y: -1},
+					0,
+					size.y/2
+				).filter(obj => obj.object instanceof THREE.Mesh)[0],
+				
+			y1: ray3D(obj.point.clone().add( new THREE.Vector3(0,-1,0) ), //y--
+					{y: 1},
+					0,
+					size.y/2
+				).filter(obj => obj.object instanceof THREE.Mesh)[0],
+				
+			z0: ray3D(obj.point.clone().add( new THREE.Vector3(0,0,1) ), //z++
+					{z: -1},
+					0,
+					size.z/2
+				).filter(obj => obj.object instanceof THREE.Mesh)[0],
+				
+			z1: ray3D(obj.point.clone().add( new THREE.Vector3(0,0,-1) ), //z--
+					{z: 1},
+					0,
+					size.z/2
+				).filter(obj => obj.object instanceof THREE.Mesh)[0]
+		};
+		
+		console.log(objs)
 		
 		if (objs.x0 && objs.x1) return;
 		if (objs.y0 && objs.y1) return;
 		if (objs.z0 && objs.z1) return;
 		
 		if (objs.x0){
-			pos.x = objs.x0.point.x + 50;
+			mark(objs.x0.object, "#ff0000");
+			pos.x = objs.x0.point.x + size.x/2;
 		}else if (objs.x1){
-			pos.x = objs.x1.point.x + 50;
+			mark(objs.x1.object, "#ff0000");
+			pos.x = objs.x1.point.x - size.x/2;
 		}
 		
 		if (objs.y0){
-			pos.y = objs.y0.point.y + 50;
+			mark(objs.y0.object, "#00ff00");
+			pos.y = objs.y0.point.y + size.y/2;
 		}else if (objs.y1){
-			pos.y = objs.y1.point.y + 50;
+			mark(objs.y1.object, "#00ff00");
+			pos.y = objs.y1.point.y - size.y/2;
 		}
 		
 		if (objs.z0){
-			pos.z = objs.z0.point.z + 50;
+			mark(objs.z0.object, "#0000ff");
+			pos.z = objs.z0.point.z + size.z/2;
 		}else if (objs.z1){
-			pos.z = objs.z1.point.z + 50;
+			mark(objs.z1.object, "#0000ff");
+			pos.z = objs.z1.point.z - size.z/2;
 		}
 		
+		pos.x += -size.x/2 + 50,
+		pos.y += -size.y/2 + 50,
+		pos.z += -size.z/2 + 50;
+		
+		mark(pos, 200);
 		pos.divideScalar(100); //单位:m
 		
 		

@@ -121,10 +121,10 @@ Thing.TEMPLATES["泥土"] = new Block({
 });
 Thing.TEMPLATES["松泥土"] = new Block({
 	name: "松泥土",
-	view: [5,0],
+	view: [6,0],
 	block: {
 		face: [
-			[5,0], [5,0], [5,0], [5,0], [5,0], [5,0]
+			[6,0], [6,0], [6,0], [6,0], [6,0], [6,0]
 		]
 	},
 	attr: {
@@ -156,10 +156,10 @@ Thing.TEMPLATES["松泥土"] = new Block({
 });
 Thing.TEMPLATES["石头"] = new Block({
 	name: "石头",
-	view: [7,0],
+	view: [0,1],
 	block: {
 		face: [
-			[7,0], [7,0], [7,0], [7,0], [7,0], [7,0]
+			[0,1], [0,1], [0,1], [0,1], [0,1], [0,1]
 		]
 	},
 	attr: {
@@ -182,10 +182,10 @@ Thing.TEMPLATES["石头"] = new Block({
 
 Thing.TEMPLATES["碎石"] = new Block({
 	name: "碎石",
-	view: [6,0],
+	view: [7,0],
 	block: {
 		face: [
-			[6,0], [6,0], [6,0], [6,0], [6,0], [6,0]
+			[7,0], [7,0], [7,0], [7,0], [7,0], [7,0]
 		]
 	},
 	attr: {
@@ -215,10 +215,10 @@ Thing.TEMPLATES["碎石"] = new Block({
 });
 Thing.TEMPLATES["沙子"] = new Block({
 	name: "沙子",
-	view: [0,1],
+	view: [1,1],
 	block: {
 		face: [
-			[0,1], [0,1], [0,1], [0,1], [0,1], [0,1]
+			[1,1], [1,1], [1,1], [1,1], [1,1], [1,1]
 		]
 	},
 	attr: {
@@ -250,10 +250,10 @@ Thing.TEMPLATES["沙子"] = new Block({
 });
 Thing.TEMPLATES["细橡木"] = new EntityBlock({
 	name: "细橡木",
-	view: [2,1],
+	view: [3,1],
 	block: {
 		face: [
-			[2,1], [2,1], [1,1], [1,1], [2,1], [2,1]
+			[3,1], [3,1], [2,1], [2,1], [3,1], [3,1]
 		],
 	},
 	attr: {
@@ -267,10 +267,10 @@ Thing.TEMPLATES["细橡木"] = new EntityBlock({
 });
 Thing.TEMPLATES["疏树叶"] = new Block({
 	name: "疏树叶",
-	view: [3,1],
+	view: [4,1],
 	block: {
 		face: [
-			[3,1], [3,1], [3,1], [3,1], [3,1], [3,1]
+			[4,1], [4,1], [4,1], [4,1], [4,1], [4,1]
 		]
 	},
 	attr: {
@@ -288,10 +288,10 @@ Thing.TEMPLATES["疏树叶"] = new Block({
 });
 Thing.TEMPLATES["密树叶"] = new Block({
 	name: "密树叶",
-	view: [4,1],
+	view: [5,1],
 	block: {
 		face: [
-			[4,1], [4,1], [4,1], [4,1], [4,1], [4,1]
+			[5,1], [5,1], [5,1], [5,1], [5,1], [5,1]
 		]
 	},
 	attr: {
@@ -309,24 +309,6 @@ Thing.TEMPLATES["密树叶"] = new Block({
 });
 Thing.TEMPLATES["木板"] = new Block({
 	name: "木板",
-	view: [5,1],
-	block: {
-		face: [
-			[5,1], [5,1], [5,1], [5,1], [5,1], [5,1]
-		]
-	},
-	attr: {
-		directGet: true, //直接获取
-		idealDigSpeed: 0.5e6, //2s/个
-		
-		onPutToHead: Thing.TEMPLATES_EVENT.onPutToHead,
-		onPutToBody: Thing.TEMPLATES_EVENT.onPutToBody,
-		onPutToLeg: Thing.TEMPLATES_EVENT.onPutToLeg,
-		onPutToFoot: Thing.TEMPLATES_EVENT.onPutToFoot,
-	}
-});
-Thing.TEMPLATES["砖"] = new Block({
-	name: "砖",
 	view: [6,1],
 	block: {
 		face: [
@@ -343,12 +325,30 @@ Thing.TEMPLATES["砖"] = new Block({
 		onPutToFoot: Thing.TEMPLATES_EVENT.onPutToFoot,
 	}
 });
-Thing.TEMPLATES["仙人掌"] = new Block({
-	name: "仙人掌",
-	view: [0,2],
+Thing.TEMPLATES["砖"] = new Block({
+	name: "砖",
+	view: [7,1],
 	block: {
 		face: [
-			[0,2], [0,2], [7,1], [1,2], [0,2], [0,2]
+			[7,1], [7,1], [7,1], [7,1], [7,1], [7,1]
+		]
+	},
+	attr: {
+		directGet: true, //直接获取
+		idealDigSpeed: 0.5e6, //2s/个
+		
+		onPutToHead: Thing.TEMPLATES_EVENT.onPutToHead,
+		onPutToBody: Thing.TEMPLATES_EVENT.onPutToBody,
+		onPutToLeg: Thing.TEMPLATES_EVENT.onPutToLeg,
+		onPutToFoot: Thing.TEMPLATES_EVENT.onPutToFoot,
+	}
+});
+Thing.TEMPLATES["仙人掌"] = new Block({
+	name: "仙人掌",
+	view: [1,2],
+	block: {
+		face: [
+			[1,2], [1,2], [0,2], [2,2], [1,2], [1,2]
 		]
 	},
 	attr: {
@@ -365,7 +365,7 @@ Thing.TEMPLATES["仙人掌"] = new Block({
 // Tool
 Thing.TEMPLATES["石镐"] = new Tool({
 	name: "石镐",
-	view: [2,2],
+	view: [3,2],
 	attr: {
 		stackable: 3, //可叠加在手中（最多3把）
 		hardnesss: 3,
@@ -374,7 +374,7 @@ Thing.TEMPLATES["石镐"] = new Tool({
 });
 Thing.TEMPLATES["石剑"] = new Tool({
 	name: "石剑",
-	view: [3,2],
+	view: [4,2],
 	attr: {
 		stackable: 3, //可叠加在手中（最多3把）
 		hardnesss: 3,
@@ -383,7 +383,7 @@ Thing.TEMPLATES["石剑"] = new Tool({
 });
 Thing.TEMPLATES["石斧"] = new Tool({
 	name: "石斧",
-	view: [4,2],
+	view: [5,2],
 	attr: {
 		stackable: 3, //可叠加在手中（最多3把）
 		hardnesss: 3,
@@ -392,7 +392,7 @@ Thing.TEMPLATES["石斧"] = new Tool({
 });
 Thing.TEMPLATES["石铲"] = new Tool({
 	name: "石铲",
-	view: [5,2],
+	view: [6,2],
 	attr: {
 		stackable: 3, //可叠加在手中（最多3把）
 		hardnesss: 3,

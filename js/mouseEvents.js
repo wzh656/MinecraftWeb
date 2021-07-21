@@ -77,7 +77,8 @@ document.addEventListener("mousemove", function (e){
 	mouse.choice.y = get.object.position.y;
 	mouse.choice.z = get.object.position.z;
 	mouse.choice.faceIndex = get.faceIndex;
-	mouse.choice.name = get.object.userData.thingObject.name;
+	if (get.object.userData.thingObject)
+		mouse.choice.name = get.object.userData.thingObject.name;
 	mouse.choice.event = get;
 	
 	if (!mouse.choice.view) return;
