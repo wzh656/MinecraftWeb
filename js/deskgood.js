@@ -1,3 +1,20 @@
+class Player{
+	constructor (opt){
+		this.position = opt.position; //位置
+		this.v = opt.v; //速度
+		this.ideal_v = opt.v; //理想速度
+		this.collisionBox = { //碰撞箱大小
+			x0: opt.collisionBox.x0,
+			x1: opt.collisionBox.x1,
+			y0: opt.collisionBox.y0,
+			y1: opt.collisionBox.y1,
+			z0: opt.collisionBox.z0,
+			z1: opt.collisionBox.z1
+		};
+		this.look = opt.look; //朝向
+		this.handLength = opt.handLength; //手长（谐音360°全方位手残）
+	}
+}
 /**
 * 玩家(deskgood)
 */
@@ -29,8 +46,6 @@ const deskgood = { //桌子好
 		get z(){ return THREE.Math.radToDeg(camera.rotation.z); },
 		set z(v){ camera.rotation.z = THREE.Math.degToRad(v); }
 	},
-	VR: false,
-	sensitivity: device? 2.6: 1, //灵敏度：手机2，电脑1
 	handLength: 360, //手长（谐音360°全方位手残）
 	choice: 0,
 	hold: new ThingGroup($("#tools")[0], {
@@ -938,7 +953,6 @@ if (DEBUG){
 	deskgood_folder.open();
 		deskgood_folder.add(window, "stop").listen();
 		deskgood_folder.add(deskgood, "die").name("Game Over(自杀)");
-		deskgood_folder.add(deskgood, "sensitivity", 0.1, 10).name("灵敏度");
 		const deskgood_position_folder = deskgood_folder.addFolder("位置/px");
 		deskgood_position_folder.open();
 			deskgood_position_folder.add(deskgood.pos, "x", map.size[0].x*100, map.size[1].x*100, 0.01).listen();
@@ -954,7 +968,6 @@ if (DEBUG){
 			deskgood_look_folder.add(deskgood.look, "x", -90, 90, 0.1).listen();
 			deskgood_look_folder.add(deskgood.look, "y", 0, 360, 0.1).listen();
 			deskgood_look_folder.add(deskgood.look, "z", -180, 180, 0.1).listen();
-			deskgood_look_folder.add(deskgood, "VR").name("VR模式").onChange(v =>{ if (!v) deskgood.look.z=0; });
 		const deskgood_idealV_folder = deskgood_folder.addFolder("理想速度(ideal_v/(m/s))");
 			deskgood_idealV_folder.add(deskgood.ideal_v, "walk", 0, 10, 0.1).name("行走(walk)");
 			deskgood_idealV_folder.add(deskgood.ideal_v, "sprint", 0, 10, 0.1).name("疾跑(sprint)");

@@ -104,6 +104,7 @@ class Thing{
 Thing.prototype.type = "Thing"; //名称
 Thing.TEMPLATES = {}; //模板
 Thing.TEMPLATES_EVENT = {}; //事件函数模板
+Thing.group = new THREE.Group(); //所有物体的父元素
 
 
 /*
@@ -137,7 +138,7 @@ class Block extends Thing{
 			if (opt.block.geometry) this.block.geometry = opt.block.geometry; //几何体
 			//mesh
 			if (opt.block.mesh) this.block.mesh = opt.block.mesh; //网格模型
-			this.block.added = false; //未加入scene
+			// this.block.added = false; //未加入scene
 		}
 		
 		//属性
@@ -593,7 +594,7 @@ class Entity extends Thing{
 			//mesh
 			if (opt.entity.mesh) this.entity.mesh = opt.entity.mesh; //网格模型
 			
-			this.entity.added = false; //未加入scene
+			// this.entity.added = false; //未加入scene
 		}
 		
 		if (opt.attr){

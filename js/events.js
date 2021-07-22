@@ -303,31 +303,37 @@ const Events = {
 	
 	
 	/* 开始放置 */
-	place(x, y){
+	placeThing: null, //放置的物体
+	startPlace(x, y){
 		console.log("try startPlace")
 		
 		//手上是否有效方块
-		const hold = deskgood.hold[deskgood.choice];
+		const hold = deskgood.hold[deskgood.choice] || this.placeThing;
 		if ( !(hold instanceof Block) &&
 			!(hold instanceof Entity) //非方块非实体（空气）
 		) return;
+		
+		if (this.placeThing)
+			scene.remove(this.placeThing.block.mesh); //先删除方块
 		
 		//获取物体和方块
 		const obj = ray2D(x, y).filter(obj => obj.object instanceof THREE.Mesh)[0]; //Mesh物体
 		if (!obj) return;
 		
 		const thing = obj.object.userData.thingObject, //物体对象
-			size = hold.get("attr", "size") || {};
-		size.x = OR(size.x1, 100) - OR(size.x0, 0),
-		size.y = OR(size.y1, 100) - OR(size.y0, 0),
-		size.z = OR(size.z1, 100) - OR(size.z0, 0); //长宽高
+			sizeAttr = hold.get("attr", "size") || {},
+			size = { //长宽高
+				x: OR(sizeAttr.x1, 100) - OR(sizeAttr.x0, 0),
+				y: OR(sizeAttr.y1, 100) - OR(sizeAttr.y0, 0),
+				z: OR(sizeAttr.z1, 100) - OR(sizeAttr.z0, 0)
+			};
 		
-		mark([ obj.point, obj.point.clone().add(new THREE.Vector3(-OR(size.x/2, 50), 0, 0)) ], "#ff0000");
-		mark([ obj.point, obj.point.clone().add(new THREE.Vector3(OR(size.x/2, 50), 0, 0)) ], "#ff0000");
-		mark([ obj.point, obj.point.clone().add(new THREE.Vector3(0, -OR(size.x/2, 50), 0)) ], "#00ff00");
-		mark([ obj.point, obj.point.clone().add(new THREE.Vector3(0, OR(size.x/2, 50), 0)) ], "#00ff00");
-		mark([ obj.point, obj.point.clone().add(new THREE.Vector3(0, 0, -OR(size.x/2, 50))) ], "#0000ff");
-		mark([ obj.point, obj.point.clone().add(new THREE.Vector3(0, 0, OR(size.x/2, 50))) ], "#0000ff");
+		// mark([ obj.point, obj.point.clone() .add(new THREE.Vector3(-OR(size.x/2, 50), 0, 0)) ], "#ff0000");
+		// mark([ obj.point, obj.point.clone() .add(new THREE.Vector3(OR(size.x/2, 50), 0, 0)) ], "#ff0000");
+		// mark([ obj.point, obj.point.clone() .add(new THREE.Vector3(0, -OR(size.x/2, 50), 0)) ], "#00ff00");
+		// mark([ obj.point, obj.point.clone() .add(new THREE.Vector3(0, OR(size.x/2, 50), 0)) ], "#00ff00");
+		// mark([ obj.point, obj.point.clone() .add(new THREE.Vector3(0, 0, -OR(size.x/2, 50))) ], "#0000ff");
+		// mark([ obj.point, obj.point.clone() .add(new THREE.Vector3(0, 0, OR(size.x/2, 50))) ], "#0000ff");
 		
 		const pos = obj.point.clone();
 		switch (obj.faceIndex){
@@ -403,33 +409,31 @@ const Events = {
 				).filter(obj => obj.object instanceof THREE.Mesh)[0]
 		};
 		
-		console.log(objs)
-		
 		if (objs.x0 && objs.x1) return;
 		if (objs.y0 && objs.y1) return;
 		if (objs.z0 && objs.z1) return;
 		
 		if (objs.x0){
-			mark(objs.x0.object, "#ff0000");
+			// mark(objs.x0.object, "#ff0000");
 			pos.x = objs.x0.point.x + size.x/2;
 		}else if (objs.x1){
-			mark(objs.x1.object, "#ff0000");
+			// mark(objs.x1.object, "#ff0000");
 			pos.x = objs.x1.point.x - size.x/2;
 		}
 		
 		if (objs.y0){
-			mark(objs.y0.object, "#00ff00");
+			// mark(objs.y0.object, "#00ff00");
 			pos.y = objs.y0.point.y + size.y/2;
 		}else if (objs.y1){
-			mark(objs.y1.object, "#00ff00");
+			// mark(objs.y1.object, "#00ff00");
 			pos.y = objs.y1.point.y - size.y/2;
 		}
 		
 		if (objs.z0){
-			mark(objs.z0.object, "#0000ff");
+			// mark(objs.z0.object, "#0000ff");
 			pos.z = objs.z0.point.z + size.z/2;
 		}else if (objs.z1){
-			mark(objs.z1.object, "#0000ff");
+			// mark(objs.z1.object, "#0000ff");
 			pos.z = objs.z1.point.z - size.z/2;
 		}
 		
@@ -437,37 +441,62 @@ const Events = {
 		pos.y += -size.y/2 + 50,
 		pos.z += -size.z/2 + 50;
 		
-		mark(pos, 200);
-		pos.divideScalar(100); //单位:m
-		
+		// mark(pos, 200);
 		
 		//处理事件
 		if ( thing &&
 			eval(thing.get("attr", "onStartPlace")) === false
 		) return;
 		
+		const distanceSquared = pos.distanceToSquared( deskgood.pos ); //距离的平方 单位: px²=cm²
 		//是否超出手长
-		if ( pos.clone() .multiplyScalar(100)
-				.distanceToSquared( deskgood.pos )
-			>= deskgood.handLength * deskgood.handLength
-		) return; //距离**2 >= 手长**2  单位:px=cm
+		if ( distanceSquared >= deskgood.handLength * deskgood.handLength
+		) return; //距离^2 >= 手长^2  单位: px=cm
 		
 		//是否在头上 且 不可穿过
-		if ( pos.distanceToSquared( deskgood.pos.clone() .divideScalar(100) )
-			< 0.5*0.5 && //距离**2 < 0.5**2 单位:m
+		if ( distanceSquared < 0.5*0.5 && //距离^2 < 0.5^2 单位: m
 			hold.get("attr", "through") !== true
-		)  return print("想窒息吗？还往头上放方块！", "往头上放方块", 3); //放到头上
+		) return print("想窒息吗？还往头上放方块！", "往头上放方块", 3); //放到头上
 		
-		//是否在腿上 且 不可穿过
-		if ( pos.distanceToSquared( deskgood.pos.clone() .divideScalar(100).add(new THREE.Vector3(0,-1,0) ) )
-			< 0.5*0.5 && //距离**2 < 0.5**2 单位:m
-			hold.get("attr", "through") !== true
-		)  return print("想卡死吗？还往腿上放方块！", "往腿上放方块"); //放到腿上
+		console.log("startPlace")
 		
-		deskgood.place(hold, pos); //放置方块 单位:m
-		deskgood.hold.delete(deskgood.choice); //删除手里的方块
+		if (this.placeThing){
+			this.placeThing.makeGeometry().updateSize().makeMesh();
+			this.placeThing.block.mesh.position.copy(pos); //单位: px=cm
+			scene.add(this.placeThing.block.mesh); //重新放置方块 单位:m
+			
+		}else{
+			deskgood.hold.delete(deskgood.choice); //删除手里的方块
+			
+			hold.makeGeometry().updateSize().makeMesh();
+			hold.block.mesh.position.copy(pos); //单位: px=cmm
+			scene.add(hold.block.mesh); //放置方块
+			
+			this.placeThing = hold;
+		}
+	},
+	
+	/* 结束放置 */
+	endPlace(){
+		console.log("try endPlace")
 		
-		this.placing = false; //结束放置
+		if (this.placeThing){
+			console.log("endPlace")
+			
+			const pos = this.placeThing.block.mesh.position.clone() .divideScalar(100); //单位: m
+			scene.remove(this.placeThing.block.mesh);
+			deskgood.place(this.placeThing, pos); //放置方块 单位:m
+			deskgood.hold.delete(deskgood.choice); //删除手里的方块
+			this.placeThing = null;
+		}
+	},
+	
+	/* 取消放置 */
+	cancelPlace(){
+		if (this.placeThing){
+			scene.remove(this.placeThing.block.mesh); //删除方块
+			this.placeThing = null;
+		}
 	},
 	
 	

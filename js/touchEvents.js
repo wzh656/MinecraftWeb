@@ -139,7 +139,7 @@ $("#control > .jump").on("touchstart", function(){
 		ray3D({},
 			{y:-1},
 			0,
-			x + deskgood.collisionBox["y-"] + 50
+			deskgood.collisionBox["y-"] + 50
 		).length > 0 //脚下有方块
 	){
 		deskgood.v.y += deskgood.ideal_v.jump * rnd_error();
@@ -225,8 +225,8 @@ $("#game").on("touchmove", function (e){
 	touch.screen.x = x, touch.screen.y = y;
 	
 	//console.log("moved(screen):", dx, dy);
-	deskgood.look.y += dx/$("#game")[0].offsetWidth*90*deskgood.sensitivity;
-	deskgood.look.x -= dy/$("#game")[0].offsetHeight*90*deskgood.sensitivity;
+	deskgood.look.y += dx/$("#game")[0].offsetWidth*90*SETTINGS.sensitivity;
+	deskgood.look.x -= dy/$("#game")[0].offsetHeight*90*SETTINGS.sensitivity;
 	
 	deskgood.look.x = Math.limitRange(deskgood.look.x, -89.9, 89.9);
 	deskgood.look.y = Math.modRange(deskgood.look.y, 0, 360); //限制范围
@@ -263,8 +263,10 @@ $("#game").on("touchend", function (e){
 	}else{ //短按抬起（放置）
 		clearTimeout(touch.screen.id); //防止长按
 		
-		if (touch.screen.valid)
-			Events.place(); //开始放置
+		if (touch.screen.valid){
+			Events.startPlace(); //开始放置
+			Events.endPlace(); //结束放置
+		}
 	}
 	
 	touch.screen.x = touch.screen.y = touch.screen.x0 = touch.screen.y0 = touch.screen.id = touch.screen.valid = null;

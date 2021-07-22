@@ -169,6 +169,14 @@ class RecordCanvas{
 
 
 
+/* 设置 */
+const SETTINGS = {
+	VR: false,
+	sensitivity: device? 2.6: 1 //灵敏度：手机2.6，电脑1
+}
+
+
+
 /* 时间流速 */
 const time = new GameTime(localStorage.getItem("我的世界_time"), 1); //游戏时间
 time.tmpSpeed = time.speed; //临时speed 防止调整过快
@@ -197,7 +205,7 @@ function ray2D(x=WIDTH/2, y=HEIGHT/2){
 	//以camera为z坐标，确定所点击物体的3D空间位置
 	ray.setFromCamera(mouse, camera);
 	//确定所点击位置上的物体数量
-	const objs = ray.intersectObjects(scene.children);
+	const objs = ray.intersectObjects(Thing.group.children);
 	//选中后进行的操作
 	return objs.filter(obj => obj.faceIndex !== null); //过滤
 }
@@ -218,7 +226,7 @@ function ray3D(start, end, near, far){
 		far
 	);
 	ray.camera = camera;
-	const objs = ray.intersectObjects(scene.children);
+	const objs = ray.intersectObjects(Thing.group.children);
 	return objs.filter(obj => obj.faceIndex !== null); //过滤
 }
 
@@ -228,7 +236,7 @@ function mark(obj, color="blue"){
 	if (obj instanceof THREE.Mesh){ //物体
 		const geometry = obj.geometry,
 			material1 = new THREE.MeshBasicMaterial({
-				color: color,
+				color,
 				transparent: true,
 				opacity: 0.3
 			}),
@@ -261,7 +269,27 @@ function mark(obj, color="blue"){
 		}
 		return arrowHelpers;
 		
-	}else{ //位置
+	}else if (obj.pos){ //物体
+		const geometry = obj.geometry || new THREE.BoxBufferGeometry(obj.x, obj.y, obj.z),
+			material1 = new THREE.MeshBasicMaterial({
+				color,
+				transparent: true,
+				opacity: 0.3
+			}),
+			material2 = new THREE.MeshBasicMaterial({
+				color: "red",
+				wireframe: true //只显示框架
+			}),
+			mesh1 = new THREE.Mesh(geometry, material1),
+			mesh2 = new THREE.Mesh(geometry, material2);
+		
+		mesh1.position.copy(obj.pos),
+		mesh2.position.copy(obj.pos);
+		
+		scene.add(mesh1, mesh2);
+		return [mesh1, mesh2];
+		
+	}{ //位置
 		const len = color=="blue"? 200: color;
 		const axesHelper = new THREE.AxesHelper(len);
 		axesHelper.position.copy(obj);

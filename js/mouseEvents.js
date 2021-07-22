@@ -41,8 +41,8 @@ document.addEventListener("mousemove", function (e){
 			e.webkitMovementY ||
 			0;
 	
-	const x = dx/$("#game")[0].offsetWidth*360 *deskgood.sensitivity,
-		y = dy/$("#game")[0].offsetHeight*360 *deskgood.sensitivity;
+	const x = dx/$("#game")[0].offsetWidth*360 *SETTINGS.sensitivity,
+		y = dy/$("#game")[0].offsetHeight*360 *SETTINGS.sensitivity;
 	
 	if (Math.sqrt(x**2 + y**2) > 15) return; //消除取消锁定前自动移动
 	
@@ -53,6 +53,10 @@ document.addEventListener("mousemove", function (e){
 	deskgood.look.y = Math.modRange(deskgood.look.y, 0, 360);
 	
 	//deskgood.look_update(); //刷新
+	
+	if (Events.placeThing) //鼠标左键 按下
+		Events.startPlace(); //开始放置
+	
 	
 	for (let i=mouse.choice.obj.length-1; i>=0; i--){
 		mouse.choice.obj[i].material.dispose();
@@ -175,6 +179,7 @@ document.addEventListener("mousedown", function (e){
 		if (thing &&
 			eval(thing.get("attr", "onLeftMouseDown")) === false
 		) return false;
+		
 		//开始挖掘
 		Events.startDig();
 		
@@ -186,6 +191,7 @@ document.addEventListener("mousedown", function (e){
 		if (thing &&
 			eval(thing.get("attr", "onMiddleMouseDown")) === false
 		) return false;
+		
 		//重置时间
 		Events.resetTime();
 		
@@ -197,8 +203,9 @@ document.addEventListener("mousedown", function (e){
 		if (thing &&
 			eval(thing.get("attr", "onRightMouseDown")) === false
 		) return false;
+		
 		//开始放置
-		Events.place();
+		Events.startPlace();
 		
 	}
 	return false;
@@ -224,6 +231,7 @@ document.addEventListener("mouseup", function (e){
 		if (thing &&
 			eval(thing.get("attr", "onLeftMouseUp")) === false
 		) return false;
+		
 		//结束挖掘
 		Events.endDig();
 		
@@ -236,7 +244,7 @@ document.addEventListener("mouseup", function (e){
 			eval(thing.get("attr", "onMiddleMouseUp")) === false
 		) return false;
 		
-	}else if (e.button == 2){ //右键
+	}else if (e.button == 2){ //右键（放置）
 		
 		//处理事件
 		if (Events.onRightMouseUp && Events.onRightMouseUp() === false)
@@ -244,6 +252,9 @@ document.addEventListener("mouseup", function (e){
 		if (thing &&
 			eval(thing.get("attr", "onRightMouseUp")) === false
 		) return false;
+		
+		//结束放置
+		Events.endPlace();
 		
 	}
 	return false;

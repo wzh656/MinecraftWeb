@@ -220,7 +220,7 @@ setInterval(function(){
 		ray3D({},
 			{y:-1},
 			0,
-			x + deskgood.collisionBox["y-"] + 50
+			deskgood.collisionBox["y-"] + 50
 		).length > 0 //脚下有方块
 	){
 		console.log("jump");

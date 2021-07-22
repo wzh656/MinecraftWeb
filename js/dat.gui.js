@@ -23,6 +23,7 @@ if (DEBUG){
 		return "未保存！";
 	}); */
 	
+	//时光流速
 	const time_folder = gui.addFolder("时光(Time)");
 		const time_now_folder = time_folder.addFolder("当前时间(time)");
 			time_now_folder.open();
@@ -60,4 +61,9 @@ if (DEBUG){
 		time_folder.add({
 			f(){ time.stopTime(); }
 		}, "f").name("暂停/继续时间");
+	
+	//设置
+	const settings_folder = gui.addFolder("设置(settings)");
+		settings_folder.add(SETTINGS, "VR");
+		settings_folder.add(SETTINGS, "sensitivity", 0.1, 10, 0.1);
 }

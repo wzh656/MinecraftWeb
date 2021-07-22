@@ -2,12 +2,13 @@
 * 创建场景对象Scene
 */
 const scene = new THREE.Scene();
+scene.add(Thing.group);
 scene.fog = new THREE.Fog("#fff", 0.01, 300*100);
 //						 雾气颜色，近处的距离，远处的距离(66m)
 
 if (DEBUG){
 	const scene_folder = gui.addFolder("场景(scene)");
-		scene_folder.add(scene.children, "length", 0, 10000).name("物体(object)个数").listen();
+		scene_folder.add(Thing.group.children, "length", 0, 10000).name("物体(object)个数").listen();
 		scene_folder.add(localStorage, "我的世界_seed").name("地图种子");
 		const scene_fog_folder = scene_folder.addFolder("雾(fog)");
 			scene_fog_folder.add(scene.fog, "far", 15*100, 1000*100, 100);
@@ -128,7 +129,7 @@ let WIDTH = window.innerWidth,
 const camera = new THREE.PerspectiveCamera(45, WIDTH/HEIGHT, 1, 1000*100);
 //								 view_angle, aspect, near, far(1km)
 camera.position.set(0, ( Math.floor(sNoise.height(map.seed.noise, map.seed.h, 0, 0))+2 )*100, 0); //设置相机位置
-camera.lookAt(scene.position); //设置相机方向(指向的场景对象)
+// camera.lookAt(scene.position); //设置相机方向(指向的场景对象)
 
 // 陀螺仪控制相机
 const controls = new THREE.DeviceOrientationControls(camera);
@@ -409,7 +410,7 @@ function render(){
 	requestAnimationFrame(render);
 	renderer.render(scene, camera); //执行渲染操作
 	
-	if (deskgood.VR && !stop)
+	if (SETTINGS.VR && !stop)
 		controls.update(); //陀螺仪更新
 	stats.update(); //stats.js更新
 	
