@@ -150,7 +150,7 @@ const Events = {
 			}
 		}
 		
-		//挖掘的物体 转化为 实体方块
+		//挖掘的物体 转化为 实体方块 （最后）
 		let entityBlock;
 		switch (thing.type){
 			case "Block": //方块 转化为 实体方块
@@ -247,9 +247,6 @@ const Events = {
 					time.clearInterval(this.digId);
 					this.digging = false; //挖掘结束
 					deskgood.remove( entityBlock ); //删除方块
-					if (Object.every(take.attr.size,
-						(v, i) => NEAR(v, i[1]*100)
-					)) deskgood.hold[free] = take.toBlock(); //转化为 方块
 					return this.startDig(OR(touch.screen.x, undefined), OR(touch.screen.y, undefined)); //下一轮挖掘
 				}
 				
@@ -261,9 +258,6 @@ const Events = {
 					time.clearInterval(this.digId);
 					this.digging = false; //挖掘结束
 					deskgood.remove( entityBlock ); //删除方块
-					if (Object.every(take.attr.size,
-						(v, i) => NEAR(v, i[1]*100)
-					)) deskgood.hold[free] = take.toBlock(); //转化为 方块
 					return this.startDig(OR(touch.screen.x, undefined), OR(touch.screen.y, undefined)); //下一轮挖掘
 				}
 			}
@@ -308,10 +302,12 @@ const Events = {
 		console.log("try startPlace")
 		
 		//手上是否有效方块
-		const hold = deskgood.hold[deskgood.choice] || this.placeThing;
+		let hold = deskgood.hold[deskgood.choice] || this.placeThing;
 		if ( !(hold instanceof Block) &&
 			!(hold instanceof Entity) //非方块非实体（空气）
 		) return;
+		if (hold.type == "Block") //方块 转化为 实体方块
+			hold = hold.toEntityBlock();
 		
 		if (this.placeThing)
 			scene.remove(this.placeThing.block.mesh); //先删除方块
@@ -339,38 +335,38 @@ const Events = {
 		switch (obj.faceIndex){
 			case 0:
 			case 1:
-				console.log("x+")
+				// console.log("x+")
 				pos.x += 3;
 				break;
 			case 2:
 			case 3:
-				console.log("x-")
+				// console.log("x-")
 				pos.x -= 3;
 				break;
 			case 4:
 			case 5:
-				console.log("y+")
+				// console.log("y+")
 				pos.y += 3;
 				break;
 			case 6:
 			case 7:
-				console.log("y-")
+				// console.log("y-")
 				pos.y -= 3;
 				break;
 			case 8:
 			case 9:
-				console.log("z+")
+				// console.log("z+")
 				pos.z += 3;
 				break;
 			case 10:
 			case 11:
-				console.log("z-")
+				// console.log("z-")
 				pos.z -= 3;
 				break;
 			default:
 				throw ["faceIndex wrong:", obj.faceIndex];
 		}
-		console.log(pos)
+		// console.log(pos)
 		const objs = {
 			x0: ray3D(obj.point.clone().add( new THREE.Vector3(1,0,0) ), //x++
 					{x: -1},
@@ -485,6 +481,15 @@ const Events = {
 			
 			const pos = this.placeThing.block.mesh.position.clone() .divideScalar(100); //单位: m
 			scene.remove(this.placeThing.block.mesh);
+			
+			if ( this.placeThing.type == "EntityBlock" &&
+				Object.map( pos, (v)=> NEAR(v, Math.round(v)) ) && //位置为整数
+				Object.map( this.placeThing.attr.size||{}, (v,i)=> !v || NEAR(v, i[1]*100) ) //大小为默认
+			){ //可转化为 方块
+				this.placeThing = this.placeThing.toBlock();
+				pos.round();
+			}
+			
 			deskgood.place(this.placeThing, pos); //放置方块 单位:m
 			deskgood.hold.delete(deskgood.choice); //删除手里的方块
 			this.placeThing = null;

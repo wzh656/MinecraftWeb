@@ -133,6 +133,7 @@ const DB = {
 	
 	/* 添加方块 */
 	addBlock(x, y, z, name, attr={}){
+		console.log("DB.addBlock", {x,y,z, name, attr})
 		return new Promise((resolve, reject)=>{
 			db.addData(DB.TABLE.WORLD, {
 				type: DB.TYPE.Block,
@@ -163,6 +164,7 @@ const DB = {
 	
 	/* 添加实体 */
 	addEntity(id, x, y, z, name, attr={}){
+		console.log("DB.addEntity", {x,y,z, id, name, attr})
 		return new Promise((resolve, reject)=>{
 			db.addData(DB.TABLE.WORLD, {
 				type: DB.TYPE.EntityBlock,
@@ -176,7 +178,7 @@ const DB = {
 				let find = false;
 				return db.readStep(DB.TABLE.WORLD, {
 					index: "type",
-					range: ["only", DB.TYPE.Block],
+					range: ["only", DB.TYPE.EntityBlock],
 					dirt: "prev",
 					stepCallback: function(res){
 						if (res.id != id) return;
@@ -194,10 +196,11 @@ const DB = {
 	
 	/* 删除数据 */
 	deleteEntity(id){
+		console.log("DB.deleteEntity", {id})
 		return new Promise((resolve, reject)=>{
 			db.readStep(DB.TABLE.WORLD, {
 				index: "type",
-				range: ["only", DB.TYPE.Block],
+				range: ["only", DB.TYPE.EntityBlock],
 				dirt: "prev",
 				stepCallback: function(res){
 					if (res.id == id){
@@ -212,17 +215,29 @@ const DB = {
 	/* 读取区块信息 */
 	readChunk(x, z){
 		return new Promise((resolve, reject)=>{
-			const ox = x*map.size.x,
-				oz = z*map.size.z; //区块中心坐标
-			const edit = [];
+			const [ox, oz] = map.c2o(x, z), //区块中心坐标
+				edit = {
+					block: [],
+					entity: [],
+				};
 			db.readStep(DB.TABLE.WORLD, {
 				index: "type",
 				range: ["only", DB.TYPE.Block],
 				stepCallback: (res)=>{
 					if ( res.x >= ox+map.size[0].x && res.x <= ox+map.size[1].x &&
 						res.z >= oz+map.size[0].z && res.z <= oz+map.size[1].z
-					) edit.push(res);
+					) edit.block.push(res);
 				}
+			}).then(()=>{
+				return db.readStep(DB.TABLE.WORLD, {
+					index: "type",
+					range: ["only", DB.TYPE.EntityBlock],
+					stepCallback: (res)=>{
+						if ( res.x >= ox+map.size[0].x && res.x <= ox+map.size[1].x &&
+							res.z >= oz+map.size[0].z && res.z <= oz+map.size[1].z
+						) edit.entity.push(res);
+					}
+				})
 			}).then(()=>resolve(edit));
 		});
 	}

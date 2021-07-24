@@ -1,5 +1,7 @@
 class ChunkMap{
-	constructor (size, seed, preloadLength){
+	constructor (opt={}){
+		const {scene, size, seed, preloadLength} = opt;
+		this.scene = scene; //所在的场景
 		//区块大小
 		this.size = {
 			x: Math.round(size[1].x - size[0].x)+1,
@@ -18,7 +20,7 @@ class ChunkMap{
 		};
 		
 		//所有方块
-		this.map = [];
+		this.blocks = [];
 		//所有区块信息(status, edit, weather)
 		this.chunks = [];
 		//区块预加载范围
@@ -166,16 +168,16 @@ class ChunkMap{
 		/* x,y,z,r 单位：m */
 		x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 		
-		return this.map[x] && this.map[x][y] && this.map[x][y][z];
+		return this.blocks[x] && this.blocks[x][y] && this.blocks[x][y][z];
 		
-		/*if (this.map[x] && this.map[x][y]){
-			return this.map[x][y][z];
+		/*if (this.blocks[x] && this.blocks[x][y]){
+			return this.blocks[x][y][z];
 		}else{
 			return undefined;
 		}*/
 		
 		/*try{
-			return this.map[x][y][z];
+			return this.blocks[x][y][z];
 		}catch(err){ //超过范围
 			return undefined;
 		}*/
@@ -220,11 +222,11 @@ class ChunkMap{
 		/* x,y,z 单位：m */
 		x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 		
-		if (!this.map[x])
-			this.map[x] = [];
-		if (!this.map[x][y])
-			this.map[x][y] = [];
-		this.map[x][y][z] = value;
+		if (!this.blocks[x])
+			this.blocks[x] = [];
+		if (!this.blocks[x][y])
+			this.blocks[x][y] = [];
+		this.blocks[x][y][z] = value;
 	}
 	
 	
@@ -240,13 +242,13 @@ class ChunkMap{
 				for (const i of this.get(x,y,z).block.mesh.material)
 					i.dispose();
 				this.get(x,y,z).block.mesh.geometry.dispose(); //清除内存
-				Thing.group.remove( this.get(x,y,z).block.mesh );
-				// this.map[x][y][z] = null;
-				delete this.map[x][y][z];
-				/*if (this.map[x][y].every(v => !v))
-					delete this.map[x][y];
-				if (this.map[x].every(v => !v))
-					delete this.map[x];*/
+				this.scene.remove( this.get(x,y,z).block.mesh );
+				// this.blocks[x][y][z] = null;
+				delete this.blocks[x][y][z];
+				/*if (this.blocks[x][y].every(v => !v))
+					delete this.blocks[x][y];
+				if (this.blocks[x].every(v => !v))
+					delete this.blocks[x];*/
 			}else{ //不替换
 				return;
 			}
@@ -264,7 +266,7 @@ class ChunkMap{
 				this.chunks[cX][cZ].entity.push(thing);
 				break;
 		}
-		Thing.group.add( thing.block.mesh ); //网格模型添加到场景中
+		this.scene.add( thing.block.mesh ); //网格模型添加到场景中
 		// thing.block.added = true; //已加入 //已废除 可通过undefined判断
 	}
 	
@@ -282,12 +284,12 @@ class ChunkMap{
 			if ( block ) //有方块（强制移除）
 				this.remove( block );
 			
-			// this.map[x][y][z] = null; //空气
+			// this.blocks[x][y][z] = null; //空气
 			this.set(x, y, z, null);
-			/* if (this.map[x][y].every(v => !v))
-				delete this.map[x][y];
-			if (this.map[x].every(v => !v))
-				delete this.map[x]; */
+			/* if (this.blocks[x][y].every(v => !v))
+				delete this.blocks[x][y];
+			if (this.blocks[x].every(v => !v))
+				delete this.blocks[x]; */
 			
 			return;
 		}
@@ -315,14 +317,14 @@ class ChunkMap{
 		
 		switch (thing.type){
 			case "Block": //方块
-				Thing.group.remove( thing.block.mesh );
+				this.scene.remove( thing.block.mesh );
 				thing.deleteMaterial().deleteGeometry().deleteMesh();
 				
-				delete this.map[x][y][z];
-				/* if (this.map[x][y].every(v => !v))
-					delete this.map[x][y];
-				if (this.map[x].every(v => !v))
-					delete this.map[x]; */
+				delete this.blocks[x][y][z];
+				/* if (this.blocks[x][y].every(v => !v))
+					delete this.blocks[x][y];
+				if (this.blocks[x].every(v => !v))
+					delete this.blocks[x]; */
 				
 				break;
 			case "EntityBlock": //实体方块
@@ -331,7 +333,7 @@ class ChunkMap{
 				if ( !this.chunks[cX][cZ].entity.some((v, i, arr)=>{
 					if (v != thing) return false; //未找到
 					
-					Thing.group.remove( thing.block.mesh );
+					this.scene.remove( thing.block.mesh );
 					thing.deleteMesh();
 					arr.splice(i, 1);
 					
@@ -423,15 +425,15 @@ class ChunkMap{
 		
 		if (thisBlock.block.added == true && !needLoad){ //已加入 且 可隐藏
 			this.delete(thisBlock); //删除后 为undefined未加载
-			/* Thing.group.remove( thisBlock.block.mesh );
+			/* this.scene.remove( thisBlock.block.mesh );
 			thisBlock.block.added = false; */
-			// console.log("隐藏", this.map[x][y][z])
+			// console.log("隐藏", this.blocks[x][y][z])
 		}
 		if (thisBlock.block.added == false && needLoad){ //未加入 且 不可隐藏
 			this.addID(thisBlock, {x,y,z});
-			/* Thing.group.add( thisBlock.block.mesh );
+			/* this.scene.add( thisBlock.block.mesh );
 			thisBlock.block.added = true; */
-			// console.log("显示", this.map[x][y][z])
+			// console.log("显示", this.blocks[x][y][z])
 		}
 		
 		/* if (thisBlock === undefined){ //未加载
@@ -508,14 +510,14 @@ class ChunkMap{
 				material[i].visible = thisVisible[i];
 			
 			if (thisBlock.block.added == true && thisVisible.every(value => !value)){ //已加入 且 可隐藏（每面都false）
-				Thing.group.remove(thisBlock.block.mesh);
+				this.scene.remove(thisBlock.block.mesh);
 				thisBlock.block.added = false;
-				// console.log("隐藏", this.map[x][y][z])
+				// console.log("隐藏", this.blocks[x][y][z])
 			}
 			if (thisBlock.block.added == false && thisVisible.some(value => value)){ //未加入 且 不可隐藏（有面true）
-				Thing.group.add(thisBlock.block.mesh);
+				this.scene.add(thisBlock.block.mesh);
 				thisBlockblock.added = true;
-				// console.log("显示", this.map[x][y][z])
+				// console.log("显示", this.blocks[x][y][z])
 			}
 		}catch(e){
 			debugger
@@ -1735,7 +1737,7 @@ class ChunkMap{
 			
 			DB.readChunk(cX, cZ).then((edit)=>{
 				this.startLoadChunk(cX, cZ, edit); //初始化区块
-				const gener = gen( this.preGetChunk(cX, cZ, edit), this ),
+				const gener = gen( this.preGetChunk(cX, cZ, edit.block), this ),
 					id = setInterval(function work(){
 						let res = {},
 							t0 = +new Date(),
@@ -1802,7 +1804,7 @@ class ChunkMap{
 		
 		//删除实体
 		for (const e of this.chunks[cX][cZ].entity){
-			Thing.group.remove(e.block.mesh);
+			this.scene.remove(e.block.mesh);
 			e.deleteMaterial().deleteGeometry().deleteMesh();
 		}
 		//删除方块
@@ -1843,7 +1845,7 @@ class ChunkMap{
 			num = 0;
 		//删除实体
 		for (const e of this.chunks[cX][cZ].entity){
-			Thing.group.remove(e.block.mesh);
+			this.scene.remove(e.block.mesh);
 			e.deleteMaterial().deleteGeometry().deleteMesh();
 		}
 		//删除方块
@@ -1910,13 +1912,13 @@ class ChunkMap{
 				//正常代码
 				for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
 					for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-						if (this.map[ox+dx][dy][oz+dz]){ //非空气 & 非未加载
-							for (let i of this.map[ox+dx][dy][oz+dz].block.mesh.material)
+						if (this.blocks[ox+dx][dy][oz+dz]){ //非空气 & 非未加载
+							for (let i of this.blocks[ox+dx][dy][oz+dz].block.mesh.material)
 								i.dispose();
-							this.map[ox+dx][dy][oz+dz].block.mesh.geometry.dispose(); //清除内存
-							Thing.group.remove(this.map[ox+dx][dy][oz+dz].block.mesh);
+							this.blocks[ox+dx][dy][oz+dz].block.mesh.geometry.dispose(); //清除内存
+							this.scene.remove(this.blocks[ox+dx][dy][oz+dz].block.mesh);
 						}
-						delete this.map[ox+dx][dy][oz+dz];
+						delete this.blocks[ox+dx][dy][oz+dz];
 					}
 				}
 				
@@ -1929,13 +1931,13 @@ class ChunkMap{
 					//正常代码
 					for (let dy=this.size[0].y; dy<=this.size[1].y; dy++){
 						for (let dz=this.size[0].z; dz<=this.size[1].z; dz++){
-							if (this.map[ox+dx][dy][oz+dz]){ //非空气 & 非未加载
-								for (let i of this.map[ox+dx][dy][oz+dz].block.mesh.material)
+							if (this.blocks[ox+dx][dy][oz+dz]){ //非空气 & 非未加载
+								for (let i of this.blocks[ox+dx][dy][oz+dz].block.mesh.material)
 									i.dispose();
-								this.map[ox+dx][dy][oz+dz].block.mesh.geometry.dispose(); //清除内存
-								Thing.group.remove(this.map[ox+dx][dy][oz+dz].block.mesh);
+								this.blocks[ox+dx][dy][oz+dz].block.mesh.geometry.dispose(); //清除内存
+								this.scene.remove(this.blocks[ox+dx][dy][oz+dz].block.mesh);
 							}
-							delete this.map[ox+dx][dy][oz+dz];
+							delete this.blocks[ox+dx][dy][oz+dz];
 						}
 					}
 					
@@ -1965,7 +1967,7 @@ class ChunkMap{
 			const gen = function* (_this){
 				//删除实体
 				for (const e of _this.chunks[cX][cZ].entity){
-					Thing.group.remove(e.block.mesh);
+					this.scene.remove(e.block.mesh);
 					e.deleteMaterial().deleteGeometry().deleteMesh();
 				}
 				//删除方块

@@ -15,8 +15,7 @@ function try_start_load(){
 		}).then(()=>{
 			$("#progress span").text("100");
 			$("#progress progress").val("1");
-			deskgood.update_round_blocks();
-			deskgood.update_round_blocks();
+			deskgood.updateRoundBlocks();
 			setTimeout(function(){
 				render(); //纹理贴图加载成功后，调用渲染函数执行渲染操作
 				$("#progress").remove();

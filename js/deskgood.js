@@ -1,8 +1,14 @@
 class Player{
 	constructor (opt){
-		this.position = opt.position; //位置
+		this.name = opt.name; //名称
+		this.map = opt.map; //所在的Map
+		this.pos = opt.position; //位置
 		this.v = opt.v; //速度
-		this.ideal_v = opt.v; //理想速度
+		this.ideal_v = {
+			walk: opt.ideal_v.walk, //行走
+			sprint: opt.ideal_v.sprint, //疾跑
+			jump: opt.ideal_v.jump //跳跃
+		}; //理想速度
 		this.collisionBox = { //碰撞箱大小
 			x0: opt.collisionBox.x0,
 			x1: opt.collisionBox.x1,
@@ -12,29 +18,545 @@ class Player{
 			z1: opt.collisionBox.z1
 		};
 		this.look = opt.look; //朝向
+		this.mesh = opt.mesh; //网格对象
 		this.handLength = opt.handLength; //手长（谐音360°全方位手残）
+		this.hold = opt.hold; //手上拿的物品
+		this.choice = 0; //手上拿的物品序号
+		this.head = opt.head; //头上
+		this.body = opt.body; //身
+		this.leg = opt.leg; //腿
+		this.foot = opt.foot; //脚
+		this.onKill = opt.onKill; //kill事件
+		this.ids = {
+			preload: null, //预加载区块
+			update: null, //更新周围方块
+			roundBlocks: [] //周围方块
+		};
+	}
+	
+	
+	
+	move(x=this.pos.x, y=this.pos.y, z=this.pos.z){
+		if (
+			this.map.get(x/100, y/100, z/100) !== undefined && //不能移动到未加载的方块
+			this.map.getInitedChunks().some((item)=>{
+				return item[0] == Math.round(x/100/this.map.size.x) &&
+					item[1] == Math.round(z/100/this.map.size.z);
+			}) //含有（已加载和加载中的区块）
+		){
+			const changed_x_z = this.pos.x != x || this.pos.z != z, //改变了x|z坐标
+				changed = changed_x_z || this.pos.y != y; //改变了x|y|z坐标
+			
+			this.pos.set(x, y, z);
+			
+			const ids = this.ids;
+			//预加载区块
+			if (changed_x_z && !ids.preload)
+				ids.preload =  setTimeout(()=>{
+					this.map.preloadChunk();
+					ids.preload = null;
+				}, 100);
+			//更新周围方块
+			if (changed && !ids.update)
+				ids.update = setTimeout(()=>{
+					this.updateRoundBlocks();
+					ids.update = null;
+				}, 100);
+		}else{
+			print("区块暂未加载完成，无法进入<br/>（想加载快可以调节区块预加载范围）", "区块未加载完成", 1);
+		}
+	}
+	moveX(x){
+		this.move(x);
+	}
+	moveY(y){
+		this.move(undefined, y);
+	}
+	moveZ(z){
+		this.move(undefined, undefined, z);
+	}
+	
+	
+	
+	go(x=0, y=0, z=0){
+		x = x*rnd_error(),
+		y = y*rnd_error(),
+		z = z*rnd_error(); //随机化
+		
+		const rt = [0,0,0]; //返回值
+		
+		if ( y < 0 && this.map.get(
+			this.pos.x/100,
+			this.pos.y/100-1,
+			this.pos.z/100
+		) ){ //腿上有方块
+			rt[1] = y;
+			y = 0;
+		}
+		
+		//X+
+		if (x > 0){
+			//上半身
+			let objs = ray3D(
+				{},
+				{x: 1},
+				0,
+				x + this.collisionBox.x1
+			).filter(value => value.object.userData.thingObject &&
+				value.object.userData.thingObject.get("attr", "through") != true
+			); //过滤透明方块
+			if (objs.length){ //被阻挡
+				const px = objs.map(v => v.point.x).min() - this.collisionBox.x1; //获取碰撞点，计算移动位置
+				rt[0] = px - (this.pos.x+x);
+				this.moveX(px);
+				// console.log("x+ 上 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), px, rt[0])
+			}else{ //无阻挡
+				this.moveX(this.pos.x + x);
+			}
+			
+			//下半身
+			objs = ray3D(
+				{y: this.pos.y-100},
+				{x: 1},
+				0,
+				x + this.collisionBox.x1
+			).filter(value => value.object.userData.thingObject &&
+				value.object.userData.thingObject.get("attr", "through") != true
+			); //过滤透明方块
+			if (objs.length){ //被阻挡
+				const px = objs.map(v => v.point.x).min() - this.collisionBox.x1; //获取碰撞点，计算移动位置
+				rt[0] = px - (this.pos.x + x);
+				this.moveX(px);
+				// console.log("x+ 下 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), px, rt[0])
+			}else{ //无阻挡
+				this.moveX(this.pos.x + x);
+			}
+		
+		// X-
+		}else if (x < 0){
+			//上半身
+			let objs = ray3D(
+				{},
+				{x: -1},
+				0,
+				-x + this.collisionBox.x0
+			).filter(value => value.object.userData.thingObject &&
+				value.object.userData.thingObject.get("attr", "through") != true
+			); //过滤透明方块
+			if (objs.length){ //被阻挡
+				const px = objs.map(v => v.point.x).max() + this.collisionBox.x0; //获取碰撞点，计算移动位置
+				rt[0] = px - (this.pos.x + x);
+				this.moveX(px);
+				// console.log("x- 上 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), px, rt[0])
+			}else{ //无阻挡
+				this.moveX(this.pos.x + x);
+				// console.log("x- 上 无碰撞",x)
+			}
+			
+			//下半身
+			objs = ray3D(
+				{y: this.pos.y-100},
+				{x: -1},
+				0,
+				-x + this.collisionBox.x0
+			).filter(value => value.object.userData.thingObject &&
+				value.object.userData.thingObject.get("attr", "through") != true
+			); //过滤透明方块
+			if (objs.length){ //被阻挡
+				const px = objs.map(v => v.point.x).max() + this.collisionBox.x0; //获取碰撞点，计算移动位置
+				rt[0] = px - (this.pos.x + x);
+				this.moveX(px);
+				// console.log("x- 下 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), px, rt[0])
+			}else{ //无阻挡
+				this.moveX(this.pos.x + x);
+				// console.log("x- 下 无碰撞",x)
+			}
+		}
+		
+		//Y+
+		if (y > 0){ //上
+			let objs = ray3D(
+				{},
+				{y: 1},
+				0,
+				y + this.collisionBox.y1
+			).filter(value => value.object.userData.thingObject &&
+				value.object.userData.thingObject.get("attr", "through") != true
+			); //过滤透明方块
+			if (objs.length){ //被阻挡
+				const py = objs.map(v => v.point.y).min() - this.collisionBox.y1; //获取碰撞点，计算移动位置
+				rt[1] = py - (this.pos.y + y);
+				this.moveY(py);
+			}else{ //无阻挡
+				this.moveY(this.pos.y + y);
+			}
+		
+		//Y-
+		}else if (y < 0){ //下
+			let objs = ray3D(
+				{},
+				{y: -1},
+				0,
+				-y + this.collisionBox.y0
+			).filter(value => value.object.userData.thingObject &&
+				value.object.userData.thingObject.get("attr", "through") != true
+			); //过滤透明方块
+			if (objs.length){ //被阻挡
+				const py = objs.map(v => v.point.y).max() + this.collisionBox.y0; //获取碰撞点，计算移动位置
+				rt[1] = py - (this.pos.y + y);
+				this.moveY(py);
+			}else{ //无阻挡
+				this.moveY(this.pos.y + y);
+			}
+		}
+		
+		//Z+
+		if (z > 0){
+			//上半身
+			let objs = ray3D(
+				{},
+				{z: 1},
+				0,
+				z + this.collisionBox.z1
+			).filter(value => value.object.userData.thingObject &&
+				value.object.userData.thingObject.get("attr", "through") != true
+			); //过滤透明方块
+			if (objs.length){ //被阻挡
+				const pz = objs.map(v => v.point.z).min() - this.collisionBox.z1; //获取碰撞点，计算移动位置
+				rt[2] = pz - (this.pos.z + z);
+				this.moveZ(pz);
+				// console.log("z+ 上 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), pz, rt[2])
+			}else{ //无阻挡
+				this.moveZ(this.pos.z + z);
+			}
+			//下半身
+			objs = ray3D(
+				{y: this.pos.y-100},
+				{z: 1},
+				0,
+				z + this.collisionBox.z1
+			).filter(value => value.object.userData.thingObject &&
+				value.object.userData.thingObject.get("attr", "through") != true
+			); //过滤透明方块
+			if (objs.length){ //被阻挡
+				const pz = objs.map(v => v.point.z).min() - this.collisionBox.z1; //获取碰撞点，计算移动位置
+				rt[2] = pz - (this.pos.z + z);
+				this.moveZ(pz);
+				// console.log("z+ 下 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), pz, rt[2])
+			}else{ //无阻挡
+				this.moveZ(this.pos.z + z);
+			}
+		
+		//Z-
+		}else if (z < 0){
+			//上半身
+			let objs = ray3D(
+				{},
+				{z: -1},
+				0,
+				-z + this.collisionBox.z0
+			).filter(value => value.object.userData.thingObject &&
+				value.object.userData.thingObject.get("attr", "through") != true
+			); //过滤透明方块
+			if (objs.length){ //被阻挡
+				const pz = objs.map(v => v.point.z).max() + this.collisionBox.z0; //获取碰撞点，计算移动位置
+				rt[2] = pz - (this.pos.z + z);
+				this.moveZ(pz);
+				// console.log("z- 上 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), pz, rt[2])
+			}else{ //无阻挡
+				this.moveZ(this.pos.z + z);
+				// console.log("z- 上 无碰撞",z)
+			}
+			//下半身
+			objs = ray3D(
+				{y: this.pos.y-100},
+				{z: -1},
+				0,
+				-z + this.collisionBox.z0
+			).filter(value => value.object.userData.thingObject &&
+				value.object.userData.thingObject.get("attr", "through") != true
+			); //过滤透明方块
+			if (objs.length){ //被阻挡
+				const pz = objs.map(v => v.point.z).max() + this.collisionBox.z0; //获取碰撞点，计算移动位置
+				rt[2] = pz - (this.pos.z + z);
+				this.moveZ(pz);
+				// console.log("z- 下 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), pz, rt[2])
+			}else{ //无阻挡
+				this.moveZ(this.pos.z + z);
+				// console.log("z- 下 无碰撞",z)
+			}
+		}
+		
+		return rt;
+	}
+	goX(x){
+		this.go(x);
+	}
+	goY(y){
+		this.go(0, y);
+	}
+	goZ(z){
+		this.go(0, 0, z);
+	}
+	
+	
+	//放置方块
+	place(thing, {x,y,z}){
+		/* 单位:m */
+		
+		//处理事件
+		if ( eval(thing.get("attr", "onPut")) === false)
+			return;
+		
+		console.log("player.place", {x,y,z}, thing)
+		
+		this.map.addID(thing, {x,y,z}); //添加方块
+		
+		const attr = JSON.stringify(thing.attr).slice(1,-1), //属性
+			[cX, cZ] = this.map.p2c(x, z), //区块坐标
+			edit = this.map.chunks[cX][cZ].edit;
+		
+		switch (thing.type){
+			case "Block":
+				for (let i=edit.length-1; i>=0; i--) //删除数组元素需倒序
+					if (edit[i].x == x && edit[i].y == y && edit[i].z == z)
+						edit.splice(i, 1); //删除重复
+				
+				edit.push({
+					type: DB.TYPE.Block,
+					x,
+					y,
+					z,
+					name: thing.name,
+					attr
+				}); //添加edit
+				this.map.updateRound(x, y, z); //刷新方块及周围
+				
+				console.time("db.addData1")
+				DB.addBlock(x,y,z, thing.name, attr)
+					.then(()=>console.timeEnd("db.addData1"));
+				break;
+				
+			case "EntityBlock":
+				const id = thing.block.mesh.id;
+				
+				for (let i=edit.length-1; i>=0; i--) //删除数组元素需倒序
+					if (edit[i].id == id)
+						this.map.chunks[cX][cZ].edit.splice(i, 1); //删除重复
+				
+				this.map.chunks[cX][cZ].edit.push({
+					type: DB.TYPE.EntityBlock,
+					id,
+					x,
+					y,
+					z,
+					name: thing.name,
+					attr
+				}); //添加edit
+				this.map.updateRound(x, y, z); //刷新方块及周围
+				
+				console.time("db.addData1")
+				DB.addEntity(id, x,y,z, thing.name, attr)
+					.then(()=>console.timeEnd("db.addData1"));
+				break;
+		}
+		
+		// x = Math.round(x), y = Math.round(y), z = Math.round(z); //存储必须整数
+		//DB
+		/* console.time("db.addData1")
+		db.addData(DB.TABLE.WORLD, {
+			type: DB.TYPE[thing.type],
+			x,
+			y,
+			z,
+			name: thing.name,
+			attr
+		}, {
+			successCallback: function(){
+				console.timeEnd("db.addData1")
+				let find = false;
+				db.readStep(DB.TABLE.WORLD, {
+					index: "type",
+					range: ["only", DB.TYPE[thing.type]],
+					dirt: "prev",
+					stepCallback: function(res){
+						if (res.x!=x || res.y!=y || res.z!=z) return;
+						if (find){
+							// console.log("DB 删除多余", res.key, res);
+							db.remove(DB.TABLE.WORLD, res.key);
+						}else{
+							find = true;
+						}
+					}
+				});
+			}
+		}); */
+		/*db.deleteData(tableName, `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, ()=>{
+			sql.insertData(tableName, ["type", "x", "y", "z", "id", "attr"], [
+				0,
+				x,
+				y,
+				z,
+				thing.id,
+				attr
+			])
+		});*/
+	}
+	
+	
+	
+	//移除方块
+	remove(thing){
+		const {x,y,z} = thing.block.mesh.position.clone().divideScalar(100).round(), //单位: m
+			[cX, cZ] = this.map.p2c(x, z), //区块坐标
+			edit = this.map.chunks[cX][cZ].edit;
+		
+		//处理事件
+		if ( eval(thing.get("attr", "onRemove")) === false)
+			return;
+		
+		console.log("player.remove", thing, {x,y,z}, {cX, cZ})
+		
+		switch (thing.type){
+			case "Block":
+				// x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
+				this.map.delete(thing); //删除物体
+				this.map.addID({name: "空气"}, {x,y,z}); //换成空气 防止undefined更新
+				
+				for (let i=edit.length-1; i>=0; i--) //删除数组元素需倒序
+					if (edit[i].x == x && edit[i].y == y && edit[i].z == z)
+						edit.splice(i, 1); //删除重复
+				
+				edit.push({
+					type: DB.TYPE.Block,
+					x,
+					y,
+					z,
+					name: "空气"
+				}); //添加edit
+				
+				console.time("db.addData2")
+				DB.addBlock(x, y, z, "空气").then(()=>console.timeEnd("db.addData2"));
+				break;
+				
+			case "EntityBlock":
+				const id = thing.block.mesh.id;
+				
+				this.map.delete(thing); //删除物体
+				
+				for (let i=edit.length-1; i>=0; i--) //删除数组元素需倒序
+					if (edit[i].id == id)
+						edit.splice(i, 1); //删除重复
+				
+				DB.deleteEntity(id);
+				
+				/* edit.push({
+					type: DB.TYPE.Block,
+					x,
+					y,
+					z,
+					name: "空气"
+				}); //添加edit */
+				
+				break;
+		}
+		this.map.updateRound(x, y, z); //刷新方块及周围
+		
+		// x = Math.round(x), y = Math.round(y), z = Math.round(z); //存储必须整数
+		//DB
+		/* console.time("db.addData2")
+		DB.addData(x, y, z, "空气", )
+		db.addData(DB.TABLE.WORLD, {
+			type: DB.TYPE.Block,
+			x,
+			y,
+			z,
+			name: "空气"
+		}, {
+			successCallback: function(){
+				console.timeEnd("db.addData2")
+				let find = false;
+				db.readStep(DB.TABLE.WORLD, {
+					index: "type",
+					range: ["only", DB.TYPE.Block],
+					dirt: "prev",
+					stepCallback: function(res){
+						if (res.x!=x || res.y!=y || res.z!=z) return;
+						if (find){
+							// console.log("DB 删除多余", res.key, res);
+							db.remove(DB.TABLE.WORLD, res.key);
+						}else{
+							find = true;
+						}
+					}
+				});
+			}
+		}); */
+		/*sql.deleteData(tableName, `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
+			sql.insertData(tableName, ["type", "x", "y", "z", "id"], [
+				0,
+				x,
+				y,
+				z,
+				0
+			]);
+		});*/
+	}
+	
+	
+	
+	kill(reason="未知"){
+		scene.remove(this.mesh);
+		this.onKill(reason);
+	}
+	
+	
+	
+	//更新周围方块
+	updateRoundBlocks(dx=1, dy=1, dz=1){
+		const blocks = this.ids.roundBlocks;
+		for (const pos of blocks)
+			this.map.update(pos.x, pos.y, pos.z); //重新更新
+		blocks.splice(0, blocks.length);
+		
+		for (let x=this.pos.x/100-dx; x<=this.pos.x/100+dx; x++)
+			for (let y=this.pos.y/100-1-dy; y<=this.pos.y/100+dy; y++)
+				for (let z=this.pos.z/100-dz; z<=this.pos.z/100+dz; z++)
+					blocks.push(new THREE.Vector3(x, y, z));
+		
+		for (const pos of blocks){
+			const {block, added} = this.map.getShould(pos.x, pos.y, pos.z);
+			if (block === null || block.name === "空气") // 已加载 || 未加载
+				continue; //空气不用显示
+			
+			if (!added)
+				this.map.addID(block, pos.round());
+			
+			block.block.material.forEach(v => v.visible=true ); //显示所有面
+		}
 	}
 }
 /**
 * 玩家(deskgood)
 */
-const deskgood = { //桌子好
-	v: new THREE.Vector3(),
-	pos: camera.position,
-	collisionBox: { //碰撞箱
-		"x+": 10,
-		"x-": 10,
-		"y+": 50,
-		"y-": 150,
-		"z+": 10,
-		"z-": 10
-	},
-	ideal_v: { //理想速度
+const deskgood = new Player({
+	name: "deskgood",
+	map,
+	position: camera.position,
+	v: new THREE.Vector3(0, 0, 0),
+	ideal_v: {
 		walk: 1, //行走：1m/s
 		sprint: 3, //疾跑：3m/s
 		jump: 5, //跳跃：5m/s
 	},
-	up: camera.up,
+	collisionBox: {
+		x0: 10,
+		x1: 10,
+		y0: 150,
+		y1: 50,
+		z0: 10,
+		z1: 10
+	},
 	look: {
 		get x(){ return THREE.Math.radToDeg(camera.rotation.x); },
 		set x(v){ camera.rotation.x = THREE.Math.degToRad(v); },
@@ -46,8 +568,8 @@ const deskgood = { //桌子好
 		get z(){ return THREE.Math.radToDeg(camera.rotation.z); },
 		set z(v){ camera.rotation.z = THREE.Math.degToRad(v); }
 	},
+	mesh: null, //暂无
 	handLength: 360, //手长（谐音360°全方位手残）
-	choice: 0,
 	hold: new ThingGroup($("#tools")[0], {
 		fixedLength: 4,
 		updateCallback(children){
@@ -213,11 +735,10 @@ const deskgood = { //桌子好
 			}
 		}
 	}),
-	// 死亡
-	die(reason="使用命令自杀"){
+	onKill(reason){
 		db.clearTable(DB.TABLE.WORLD); //删表
-		indexedDB.deleteDatabase( db.db.name );
-		//db.remove(); //删库
+		//db.remove();
+		indexedDB.deleteDatabase( db.db.name ); //删库
 		localStorage.removeItem("我的世界_seed");
 		localStorage.removeItem("我的世界_seed");
 		localStorage.removeItem("我的世界_time");
@@ -244,660 +765,8 @@ const deskgood = { //桌子好
 		bgm.play();
 		
 		console.warn("deskgood死亡");
-	},
-	/*// 旋转角&仰俯角更新
-	look_update(x,y,z){
-		if (x !== undefined || y !== undefined || z !== undefined){ //有不为undefined的值
-			x = x||deskgood.lookAt.x,
-			y = y||deskgood.lookAt.y,
-			z = z||deskgood.lookAt.z;
-			const v = new THREE.Vector3(x,y,z).setLength(1); //单位向量（标准化）
-			camera.lookAt(deskgood.pos.x+v.x, deskgood.pos.y+v.y, deskgood.pos.z+v.z);
-			deskgood.lookAt.x = v.x,
-			deskgood.lookAt.y = v.y,
-			deskgood.lookAt.z = v.z;
-		}else{ //无参数调用
-			const x =
-					Math.cos(deskgood.look.y/180*Math.PI)*
-					Math.cos(deskgood.look.x/180*Math.PI),
-				z =
-					Math.sin(deskgood.look.y/180*Math.PI)*
-					Math.cos(deskgood.look.x/180*Math.PI),
-				y = Math.sin(deskgood.look.x/180*Math.PI);
-			camera.lookAt(deskgood.pos.x+x, deskgood.pos.y+y, deskgood.pos.z+z);
-			deskgood.lookAt.x = x,
-			deskgood.lookAt.y = y,
-			deskgood.lookAt.z = z;
-		}
-	},*/
-	update_round_blocks(dx=1, dy=1, dz=1){
-		const blocks = deskgood.update_round_blocks.blocks;
-		for (const pos of blocks)
-			map.update(pos.x, pos.y, pos.z); //重新更新
-		blocks.splice(0, blocks.length);
-		
-		for (let x=deskgood.pos.x/100-dx; x<=deskgood.pos.x/100+dx; x++)
-			for (let y=deskgood.pos.y/100-1-dy; y<=deskgood.pos.y/100+dy; y++)
-				for (let z=deskgood.pos.z/100-dz; z<=deskgood.pos.z/100+dz; z++)
-					blocks.push(new THREE.Vector3(x, y, z));
-		
-		for (const pos of blocks){
-			const {block, added} = map.getShould(pos.x, pos.y, pos.z);
-			if (block === null || block.name === "空气") // 已加载 || 未加载
-				continue; //空气不用显示
-			
-			if (!added)
-				map.addID(block, pos.round());
-			
-			block.block.material.forEach(v => v.visible=true ); //显示所有面
-		}
-	},
-	// 移动
-	move (x=deskgood.pos.x, y=deskgood.pos.y, z=deskgood.pos.z){
-		/*[x, z] = [x, z].map(
-			value => value+(0.1*Math.random()-0.05)
-		); //随机化*/
-		
-		if (
-			( map.get(x/100, y/100, z/100) !== undefined ||
-				map.getEntity(x/100, y/100, z/100, true) !== undefined
-			) && //不能移动到未加载的方块
-			map.getInitedChunks().some((item)=>{
-				return item[0] == Math.round(x/100/map.size.x) &&
-					item[1] == Math.round(z/100/map.size.z);
-			}) //含有（已加载和加载中的区块）
-		){
-			const changed_x_z = deskgood.pos.x != x || deskgood.pos.z != z, //改变了x|z坐标
-				changed = changed_x_z || deskgood.pos.y != y; //改变了x|y|z坐标
-			
-			deskgood.pos.set(x, y, z);
-			
-			const updater = deskgood.update_round_blocks;
-			//预加载区块
-			if (changed_x_z && !updater.preloadID)
-				updater.preloadID =  setTimeout(()=>{
-					map.preloadChunk();
-					updater.preloadID = null;
-				}, 100);
-			//更新周围方块
-			if (changed && !updater.updateID)
-				updater.updateID = setTimeout(()=>{
-					deskgood.update_round_blocks();
-					updater.updateID = null;
-				}, 100);
-		}else{
-			print("区块暂未加载完成，无法进入<br/>（想加载快可以调节区块预加载范围）", "区块未加载完成", 1);
-		}
-	},
-	// 前进
-	go (x=0, y=0, z=0){
-		x = x*rnd_error(),
-		y = y*rnd_error(),
-		z = z*rnd_error(); //随机化
-		
-		const rt = [0,0,0]; //返回值
-		
-		if ( y<0 && map.get(
-			deskgood.pos.x/100,
-			deskgood.pos.y/100-1,
-			deskgood.pos.z/100
-		) ){ //腿上有方块
-			// console.warn("卡住leg go不了");
-			rt[1] = y;
-			y = 0;
-		}
-		
-		//X+
-		if (x > 0){
-			//上半身
-			let objs = ray3D(
-				{},
-				{x: 1},
-				0,
-				x + deskgood.collisionBox["x+"]
-			).filter(value => value.object.userData.thingObject &&
-				value.object.userData.thingObject.get("attr", "through") != true
-			); //过滤透明方块
-			if (objs.length){ //被阻挡
-				const px = objs.map(v => v.point.x).min() - deskgood.collisionBox["x+"]; //获取碰撞点，计算移动位置
-				rt[0] = px - (deskgood.pos.x+x);
-				deskgood.moveX(px);
-				// console.log("x+ 上 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), px, rt[0])
-			}else{ //无阻挡
-				deskgood.moveX(deskgood.pos.x + x);
-			}
-			
-			//下半身
-			objs = ray3D(
-				{y: deskgood.pos.y-100},
-				{x: 1},
-				0,
-				x + deskgood.collisionBox["x+"]
-			).filter(value => value.object.userData.thingObject &&
-				value.object.userData.thingObject.get("attr", "through") != true
-			); //过滤透明方块
-			if (objs.length){ //被阻挡
-				const px = objs.map(v => v.point.x).min() - deskgood.collisionBox["x+"]; //获取碰撞点，计算移动位置
-				rt[0] = px - (deskgood.pos.x + x);
-				deskgood.moveX(px);
-				// console.log("x+ 下 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), px, rt[0])
-			}else{ //无阻挡
-				deskgood.moveX(deskgood.pos.x + x);
-			}
-		
-		// X-
-		}else if (x < 0){
-			//上半身
-			let objs = ray3D(
-				{},
-				{x: -1},
-				0,
-				-x + deskgood.collisionBox["x+"]
-			).filter(value => value.object.userData.thingObject &&
-				value.object.userData.thingObject.get("attr", "through") != true
-			); //过滤透明方块
-			if (objs.length){ //被阻挡
-				const px = objs.map(v => v.point.x).max() + deskgood.collisionBox["x-"]; //获取碰撞点，计算移动位置
-				rt[0] = px - (deskgood.pos.x + x);
-				deskgood.moveX(px);
-				// console.log("x- 上 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), px, rt[0])
-			}else{ //无阻挡
-				deskgood.moveX(deskgood.pos.x + x);
-				// console.log("x- 上 无碰撞",x)
-			}
-			
-			//下半身
-			objs = ray3D(
-				{y: deskgood.pos.y-100},
-				{x: -1},
-				0,
-				-x + deskgood.collisionBox["x-"]
-			).filter(value => value.object.userData.thingObject &&
-				value.object.userData.thingObject.get("attr", "through") != true
-			); //过滤透明方块
-			if (objs.length){ //被阻挡
-				const px = objs.map(v => v.point.x).max() + deskgood.collisionBox["x-"]; //获取碰撞点，计算移动位置
-				rt[0] = px - (deskgood.pos.x + x);
-				deskgood.moveX(px);
-				// console.log("x- 下 碰撞",x, objs, objs.map(v => v.object.position), objs.map(v => v.point.x), px, rt[0])
-			}else{ //无阻挡
-				deskgood.moveX(deskgood.pos.x + x);
-				// console.log("x- 下 无碰撞",x)
-			}
-		}
-		
-		//Y+
-		if (y > 0){ //上
-			let objs = ray3D(
-				{},
-				{y: 1},
-				0,
-				y + deskgood.collisionBox["y+"]
-			).filter(value => value.object.userData.thingObject &&
-				value.object.userData.thingObject.get("attr", "through") != true
-			); //过滤透明方块
-			if (objs.length){ //被阻挡
-				const py = objs.map(v => v.point.y).min() - deskgood.collisionBox["y+"]; //获取碰撞点，计算移动位置
-				rt[1] = py - (deskgood.pos.y + y);
-				deskgood.moveY(py);
-			}else{ //无阻挡
-				deskgood.moveY(deskgood.pos.y + y);
-			}
-		
-		//Y-
-		}else if (y < 0){ //下
-			let objs = ray3D(
-				{},
-				{y: -1},
-				0,
-				-y + deskgood.collisionBox["y-"]
-			).filter(value => value.object.userData.thingObject &&
-				value.object.userData.thingObject.get("attr", "through") != true
-			); //过滤透明方块
-			if (objs.length){ //被阻挡
-				const py = objs.map(v => v.point.y).max() + deskgood.collisionBox["y-"]; //获取碰撞点，计算移动位置
-				rt[1] = py - (deskgood.pos.y + y);
-				deskgood.moveY(py);
-			}else{ //无阻挡
-				deskgood.moveY(deskgood.pos.y + y);
-			}
-		}
-		
-		//Z+
-		if (z > 0){
-			//上半身
-			let objs = ray3D(
-				{},
-				{z: 1},
-				0,
-				z + deskgood.collisionBox["z+"]
-			).filter(value => value.object.userData.thingObject &&
-				value.object.userData.thingObject.get("attr", "through") != true
-			); //过滤透明方块
-			if (objs.length){ //被阻挡
-				const pz = objs.map(v => v.point.z).min() - deskgood.collisionBox["z+"]; //获取碰撞点，计算移动位置
-				rt[2] = pz - (deskgood.pos.z + z);
-				deskgood.moveZ(pz);
-				// console.log("z+ 上 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), pz, rt[2])
-			}else{ //无阻挡
-				deskgood.moveZ(deskgood.pos.z + z);
-			}
-			//下半身
-			objs = ray3D(
-				{y: deskgood.pos.y-100},
-				{z: 1},
-				0,
-				z + deskgood.collisionBox["z+"]
-			).filter(value => value.object.userData.thingObject &&
-				value.object.userData.thingObject.get("attr", "through") != true
-			); //过滤透明方块
-			if (objs.length){ //被阻挡
-				const pz = objs.map(v => v.point.z).min() - deskgood.collisionBox["z+"]; //获取碰撞点，计算移动位置
-				rt[2] = pz - (deskgood.pos.z + z);
-				deskgood.moveZ(pz);
-				// console.log("z+ 下 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), pz, rt[2])
-			}else{ //无阻挡
-				deskgood.moveZ(deskgood.pos.z + z);
-			}
-		
-		//Z-
-		}else if (z < 0){
-			//上半身
-			let objs = ray3D(
-				{},
-				{z: -1},
-				0,
-				-z + deskgood.collisionBox["z-"]
-			).filter(value => value.object.userData.thingObject &&
-				value.object.userData.thingObject.get("attr", "through") != true
-			); //过滤透明方块
-			if (objs.length){ //被阻挡
-				const pz = objs.map(v => v.point.z).max() + deskgood.collisionBox["z-"]; //获取碰撞点，计算移动位置
-				rt[2] = pz - (deskgood.pos.z + z);
-				deskgood.moveZ(pz);
-				// console.log("z- 上 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), pz, rt[2])
-			}else{ //无阻挡
-				deskgood.moveZ(deskgood.pos.z + z);
-				// console.log("z- 上 无碰撞",z)
-			}
-			//下半身
-			objs = ray3D(
-				{y: deskgood.pos.y-100},
-				{z: -1},
-				0,
-				-z + deskgood.collisionBox["z-"]
-			).filter(value => value.object.userData.thingObject &&
-				value.object.userData.thingObject.get("attr", "through") != true
-			); //过滤透明方块
-			if (objs.length){ //被阻挡
-				const pz = objs.map(v => v.point.z).max() + deskgood.collisionBox["z-"]; //获取碰撞点，计算移动位置
-				rt[2] = pz - (deskgood.pos.z + z);
-				deskgood.moveZ(pz);
-				// console.log("z- 下 碰撞",z, objs, objs.map(v => v.object.position), objs.map(v => v.point.z), pz, rt[2])
-			}else{ //无阻挡
-				deskgood.moveZ(deskgood.pos.z + z);
-				// console.log("z- 下 无碰撞",z)
-			}
-		}
-		
-		return rt;
-		
-		/*if (x & z)
-			console.log(x,y,z);
-		
-		const rt = [false, false, false];
-		//x
-		if (x > 0){ //向前
-			for (var i=deskgood.pos.x; i<=deskgood.pos.x+x; i+=dx){
-				if (map.get(i/100,
-						deskgood.pos.y/100,
-						deskgood.pos.z/100)
-					!=
-						null
-				){
-					rt[0] = true;
-					// console.log("撞到脸，s:"+((deskgood.pos.x+x)-i));
-					break;
-				}
-				if (map.get((i+10)/100,
-						deskgood.pos.y/100-1,
-						deskgood.pos.z/100)
-					!=
-						null
-				){
-					rt[0] = true;
-					// console.log("撞到脚，s:"+((deskgood.pos.x+x)-i));
-					break;
-				}
-			}
-			deskgood.pos.x = i;
-		}else if (x < 0){ //向后
-			for (var i=deskgood.pos.x; i>=deskgood.pos.x+x; i-=dx){
-				if (map.get((i-10)/100,
-						deskgood.pos.y/100,
-						deskgood.pos.z/100)
-					!=
-						null
-				){
-					rt[0] = true;
-					// console.log("撞到后脑，s:"+(i-(deskgood.pos.x+x)));
-					break;
-				}
-				if (map.get((i-10)/100,
-						deskgood.pos.y/100-1,
-						deskgood.pos.z/100)
-					!=
-						null
-				){
-					rt[0] = true;
-					// console.log("撞到脚，s:"+(i-(deskgood.pos.x+x)));
-					break;
-				}
-			}
-			deskgood.pos.x = i;
-		}
-		//y
-		if (y > 0){ //向上
-			for (var j=deskgood.pos.y; j<=deskgood.pos.y+y; j+=dy){
-				if (map.get(deskgood.pos.x/100,
-						j/100,
-						deskgood.pos.z/100)
-					!=
-						null
-				){
-					rt[1] = true;
-					const s = (deskgood.pos.y-150+y)-j;
-					if (s)
-						// console.log("撞到天花板，s:", s);
-					break;
-				}
-			}
-			deskgood.pos.y = j;
-		}else if (y < 0){ //向下
-			for (var j=deskgood.pos.y-150; j>=deskgood.pos.y-150+y; j-=dy){
-				if (map.get(deskgood.pos.x/100,
-						j/100,
-						deskgood.pos.z/100)
-					!=
-						null
-				){
-					rt[1] = true;
-					const s = j-(deskgood.pos.y-150+y);
-					if (s)
-						console.log("撞到地面，s:", s);
-					break;
-				}
-			}
-			deskgood.pos.y = j+150;
-		}
-		
-		//z
-		if (z > 0){ //向右
-			for (var k=deskgood.pos.z; k<=deskgood.pos.z+z; k+=dz){
-				if (map.get((k+10)/100,
-						deskgood.pos.y/100,
-						deskgood.pos.z/100)
-					!=
-						null
-				){
-					rt[2] = true;
-					// console.log("撞到头，s:"+((deskgood.pos.z+z)-i));
-					break;
-				}
-				if (map.get((k+10)/100,
-						deskgood.pos.y/100-1,
-						deskgood.pos.z/100)
-					!=
-						null
-				){
-					rt[2] = true;
-					// console.log("撞到腿，s:"+((deskgood.pos.z+z)-k));
-					break;
-				}
-			}
-			deskgood.pos.z = k;
-		}else if (z < 0){ //向左
-			for (var k=deskgood.pos.z; k>=deskgood.pos.z+z; k-=dz){
-				if (map.get((k-10)/100,
-						deskgood.pos.y/100,
-						deskgood.pos.z/100)
-					!=
-						null
-				){
-					rt[2] = true;
-					// console.log("撞到头，s:"+(k-(deskgood.pos.z+z)));
-					break;
-				}
-				if (map.get((k-10)/100,
-						deskgood.pos.y/100-1,
-						deskgood.pos.z/100)
-					!=
-						null
-				){
-					rt[2] = true;
-					// console.log("撞到腿，s:"+(k-(deskgood.pos.z+z)));
-					break;
-				}
-			}
-			deskgood.pos.z = k;
-		}
-		return rt;*/
-	},
-	
-	// 放置方块
-	place(thing, {x,y,z}){
-		/* 单位:m */
-		
-		//处理事件
-		if ( eval(thing.get("attr", "onPut")) === false)
-			return;
-		
-		console.log("deskgood.place", {x,y,z}, thing)
-		
-		map.addID(thing, {x,y,z}); //添加方块
-		
-		const attr = JSON.stringify(thing.attr).slice(1,-1), //属性
-			[cX, cZ] = map.p2c(x, z), //区块坐标
-			edit = map.chunks[cX][cZ].edit;
-		
-		switch (thing.type){
-			case "Block":
-				for (let i=edit.length-1; i>=0; i--){ //删除数组元素需倒序
-					if (edit[i].x == x && edit[i].y == y && edit[i].z == z)
-						edit.splice(i, 1); //删除重复
-				}
-				
-				edit.push({
-					type: DB.TYPE.Block,
-					x,
-					y,
-					z,
-					name: thing.name,
-					attr
-				}); //添加edit
-				map.updateRound(x, y, z); //刷新方块及周围
-				
-				console.time("db.addData1")
-				DB.addBlock(x,y,z, thing.name, attr)
-					.then(()=>console.timeEnd("db.addData1"));
-				break;
-				
-			case "EntityBlock":
-				const id = thing.block.mesh.id;
-				
-				for (let i=edit.length-1; i>=0; i--){ //删除数组元素需倒序
-					if (edit[i].id == id)
-						map.chunks[cX][cZ].edit.splice(i, 1); //删除重复
-				}
-				
-				map.chunks[cX][cZ].edit.push({
-					type: DB.TYPE.EntityBlock,
-					id,
-					x,
-					y,
-					z,
-					name: thing.name,
-					attr
-				}); //添加edit
-				map.updateRound(x, y, z); //刷新方块及周围
-				
-				console.time("db.addData1")
-				DB.addEntity(id, x,y,z, thing.name, attr)
-					.then(()=>console.timeEnd("db.addData1"));
-				break;
-		}
-		
-		// x = Math.round(x), y = Math.round(y), z = Math.round(z); //存储必须整数
-		//DB
-		/* console.time("db.addData1")
-		db.addData(DB.TABLE.WORLD, {
-			type: DB.TYPE[thing.type],
-			x,
-			y,
-			z,
-			name: thing.name,
-			attr
-		}, {
-			successCallback: function(){
-				console.timeEnd("db.addData1")
-				let find = false;
-				db.readStep(DB.TABLE.WORLD, {
-					index: "type",
-					range: ["only", DB.TYPE[thing.type]],
-					dirt: "prev",
-					stepCallback: function(res){
-						if (res.x!=x || res.y!=y || res.z!=z) return;
-						if (find){
-							// console.log("DB 删除多余", res.key, res);
-							db.remove(DB.TABLE.WORLD, res.key);
-						}else{
-							find = true;
-						}
-					}
-				});
-			}
-		}); */
-		/*db.deleteData(tableName, `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, ()=>{
-			sql.insertData(tableName, ["type", "x", "y", "z", "id", "attr"], [
-				0,
-				x,
-				y,
-				z,
-				thing.id,
-				attr
-			])
-		});*/
-	},
-	
-	// 移除方块
-	remove(thing){
-		const {x,y,z} = thing.block.mesh.position.clone().divideScalar(100).round(), //单位: m
-			[cX, cZ] = map.p2c(x, z); //区块坐标
-		
-		//处理事件
-		if ( eval(thing.get("attr", "onRemove")) === false)
-			return;
-		
-		console.log("deskgood.remove", thing, {x,y,z}, {cX, cZ})
-		
-		map.delete(thing); //删除物体
-		
-		switch (thing.type){
-			case "Block":
-				// x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
-				map.addID({name: "空气"}, {x,y,z}); //换成空气 防止undefined更新
-				
-				for (let i=map.chunks[cX][cZ].edit.length-1; i>=0; i--){ //删除数组元素需倒序
-					v = map.chunks[cX][cZ].edit[i];
-					if (v.x == x && v.y == y && v.z == z)
-						map.chunks[cX][cZ].edit.splice(i, 1); //删除重复
-				}
-				
-				map.chunks[cX][cZ].edit.push({
-					type: DB.TYPE.Block,
-					x,
-					y,
-					z,
-					name: "空气"
-				}); //添加edit
-				
-				console.time("db.addData2")
-				DB.addBlock(x, y, z, "空气").then(()=>console.timeEnd("db.addData2"));
-				break;
-				
-			case "EntityBlock":
-				for (let i=map.chunks[cX][cZ].edit.length-1; i>=0; i--){ //删除数组元素需倒序
-					v = map.chunks[cX][cZ].edit[i];
-					if (v.id == thing.attr.entityID)
-						map.chunks[cX][cZ].edit.splice(i, 1); //删除重复
-				}
-				
-				DB.deleteEntity(thing.attr.entityID);
-				
-				/* map.chunks[cX][cZ].edit.push({
-					type: DB.TYPE.Block,
-					x,
-					y,
-					z,
-					name: "空气"
-				}); //添加edit */
-				
-				break;
-		}
-		map.updateRound(x, y, z); //刷新方块及周围
-		
-		// x = Math.round(x), y = Math.round(y), z = Math.round(z); //存储必须整数
-		//DB
-		/* console.time("db.addData2")
-		DB.addData(x, y, z, "空气", )
-		db.addData(DB.TABLE.WORLD, {
-			type: DB.TYPE.Block,
-			x,
-			y,
-			z,
-			name: "空气"
-		}, {
-			successCallback: function(){
-				console.timeEnd("db.addData2")
-				let find = false;
-				db.readStep(DB.TABLE.WORLD, {
-					index: "type",
-					range: ["only", DB.TYPE.Block],
-					dirt: "prev",
-					stepCallback: function(res){
-						if (res.x!=x || res.y!=y || res.z!=z) return;
-						if (find){
-							// console.log("DB 删除多余", res.key, res);
-							db.remove(DB.TABLE.WORLD, res.key);
-						}else{
-							find = true;
-						}
-					}
-				});
-			}
-		}); */
-		/*sql.deleteData(tableName, `type=0 AND x=${x} AND y=${y} AND z=${z}`, undefined, function(){
-			sql.insertData(tableName, ["type", "x", "y", "z", "id"], [
-				0,
-				x,
-				y,
-				z,
-				0
-			]);
-		});*/
 	}
-}
-deskgood.moveTo = deskgood.move;
-deskgood.moveX = x=>deskgood.move(x);
-deskgood.moveY = y=>deskgood.move(undefined, y);
-deskgood.moveZ = z=>deskgood.move(undefined, undefined, z);
-deskgood.goX = x=>deskgood.go(x);
-deskgood.goY = y=>deskgood.go(0,y);
-deskgood.goZ = z=>deskgood.go(0,0,z);
-
-deskgood.update_round_blocks.preloadID = null;
-deskgood.update_round_blocks.updateID = null;
-deskgood.update_round_blocks.blocks = [];
+});
 
 
 /*window.addEventListener("deviceorientation", function(e){
@@ -952,7 +821,7 @@ if (DEBUG){
 	const deskgood_folder = gui.addFolder("玩家/观察者(deskgood)");
 	deskgood_folder.open();
 		deskgood_folder.add(window, "stop").listen();
-		deskgood_folder.add(deskgood, "die").name("Game Over(自杀)");
+		deskgood_folder.add(deskgood, "kill").name("Game Over(自杀)");
 		const deskgood_position_folder = deskgood_folder.addFolder("位置/px");
 		deskgood_position_folder.open();
 			deskgood_position_folder.add(deskgood.pos, "x", map.size[0].x*100, map.size[1].x*100, 0.01).listen();
@@ -973,22 +842,12 @@ if (DEBUG){
 			deskgood_idealV_folder.add(deskgood.ideal_v, "sprint", 0, 10, 0.1).name("疾跑(sprint)");
 			deskgood_idealV_folder.add(deskgood.ideal_v, "jump", 0, 36, 1).name("跳跃(jump)");
 		const deskgood_collisionBox_folder = deskgood_folder.addFolder("碰撞箱大小(collisionBox)");
-			deskgood_collisionBox_folder.add(deskgood.collisionBox, "x+", 0, 200, 1);
-			deskgood_collisionBox_folder.add(deskgood.collisionBox, "x-", 0, 200, 1);
-			deskgood_collisionBox_folder.add(deskgood.collisionBox, "y+", 0, 200, 1);
-			deskgood_collisionBox_folder.add(deskgood.collisionBox, "y-", 0, 200, 1);
-			deskgood_collisionBox_folder.add(deskgood.collisionBox, "z+", 0, 200, 1);
-			deskgood_collisionBox_folder.add(deskgood.collisionBox, "z-", 0, 200, 1);
-		const deskgood_up_folder = deskgood_folder.addFolder("天旋地转（小心头晕）");
-			deskgood_up_folder.add(deskgood.up, "x", -1, 1, 0.01).onChange(function(){
-				print("头晕别怪我", "头晕");
-			});
-			deskgood_up_folder.add(deskgood.up, "y", -1, 1, 0.01).onChange(function(){
-				print("头晕别怪我", "头晕");
-			});
-			deskgood_up_folder.add(deskgood.up, "z", -1, 1, 0.01).onChange(function(){
-				print("头晕别怪我", "头晕");
-			});
+			deskgood_collisionBox_folder.add(deskgood.collisionBox, "x1", 0, 200, 1);
+			deskgood_collisionBox_folder.add(deskgood.collisionBox, "x0", 0, 200, 1);
+			deskgood_collisionBox_folder.add(deskgood.collisionBox, "y1", 0, 200, 1);
+			deskgood_collisionBox_folder.add(deskgood.collisionBox, "y0", 0, 200, 1);
+			deskgood_collisionBox_folder.add(deskgood.collisionBox, "z1", 0, 200, 1);
+			deskgood_collisionBox_folder.add(deskgood.collisionBox, "z0", 0, 200, 1);
 		const deskgood_hold_folder = deskgood_folder.addFolder("工具栏(tools)");
 		deskgood_hold_folder.open();
 			deskgood_hold_folder.add(deskgood, "choice", 0, 3, 1).listen().name("选择工具").onChange(deskgood.hold.update);
