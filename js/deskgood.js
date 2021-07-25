@@ -37,12 +37,8 @@ class Player{
 	
 	
 	move(x=this.pos.x, y=this.pos.y, z=this.pos.z){
-		if (
-			this.map.get(x/100, y/100, z/100) !== undefined && //不能移动到未加载的方块
-			this.map.getInitedChunks().some((item)=>{
-				return item[0] == Math.round(x/100/this.map.size.x) &&
-					item[1] == Math.round(z/100/this.map.size.z);
-			}) //含有（已加载和加载中的区块）
+		if ( this.map.get(x/100, y/100, z/100) !== undefined && //不能移动到未加载的方块
+			this.map.isInitedChunk( ...this.map.p2c(x/100, z/100) ) //已初始化
 		){
 			const changed_x_z = this.pos.x != x || this.pos.z != z, //改变了x|z坐标
 				changed = changed_x_z || this.pos.y != y; //改变了x|y|z坐标
@@ -313,11 +309,12 @@ class Player{
 		this.map.addID(thing, {x,y,z}); //添加方块
 		
 		const attr = JSON.stringify(thing.attr).slice(1,-1), //属性
-			[cX, cZ] = this.map.p2c(x, z), //区块坐标
-			edit = this.map.chunks[cX][cZ].edit;
+			[cX, cZ] = this.map.p2c(x, z); //区块坐标
 		
+		let edit;
 		switch (thing.type){
 			case "Block":
+				edit = this.map.chunks[cX][cZ].edit.block; //方块
 				for (let i=edit.length-1; i>=0; i--) //删除数组元素需倒序
 					if (edit[i].x == x && edit[i].y == y && edit[i].z == z)
 						edit.splice(i, 1); //删除重复
@@ -340,11 +337,12 @@ class Player{
 			case "EntityBlock":
 				const id = thing.block.mesh.id;
 				
+				edit = this.map.chunks[cX][cZ].edit.entityBlock; //实体方块
 				for (let i=edit.length-1; i>=0; i--) //删除数组元素需倒序
 					if (edit[i].id == id)
-						this.map.chunks[cX][cZ].edit.splice(i, 1); //删除重复
+						edit.splice(i, 1); //删除重复
 				
-				this.map.chunks[cX][cZ].edit.push({
+				edit.push({
 					type: DB.TYPE.EntityBlock,
 					id,
 					x,
@@ -356,7 +354,7 @@ class Player{
 				this.map.updateRound(x, y, z); //刷新方块及周围
 				
 				console.time("db.addData1")
-				DB.addEntity(id, x,y,z, thing.name, attr)
+				DB.addEntityBlock(id, x,y,z, thing.name, attr)
 					.then(()=>console.timeEnd("db.addData1"));
 				break;
 		}
@@ -404,12 +402,10 @@ class Player{
 	}
 	
 	
-	
 	//移除方块
 	remove(thing){
 		const {x,y,z} = thing.block.mesh.position.clone().divideScalar(100).round(), //单位: m
-			[cX, cZ] = this.map.p2c(x, z), //区块坐标
-			edit = this.map.chunks[cX][cZ].edit;
+			[cX, cZ] = this.map.p2c(x, z); //区块坐标
 		
 		//处理事件
 		if ( eval(thing.get("attr", "onRemove")) === false)
@@ -417,11 +413,14 @@ class Player{
 		
 		console.log("player.remove", thing, {x,y,z}, {cX, cZ})
 		
+		let edit;
 		switch (thing.type){
 			case "Block":
 				// x=Math.round(x), y=Math.round(y), z=Math.round(z); //规范化
 				this.map.delete(thing); //删除物体
 				this.map.addID({name: "空气"}, {x,y,z}); //换成空气 防止undefined更新
+				
+				edit = this.map.chunks[cX][cZ].edit.block; //方块
 				
 				for (let i=edit.length-1; i>=0; i--) //删除数组元素需倒序
 					if (edit[i].x == x && edit[i].y == y && edit[i].z == z)
@@ -444,11 +443,12 @@ class Player{
 				
 				this.map.delete(thing); //删除物体
 				
+				edit = this.map.chunks[cX][cZ].edit.entityBlock; //实体方块
 				for (let i=edit.length-1; i>=0; i--) //删除数组元素需倒序
 					if (edit[i].id == id)
 						edit.splice(i, 1); //删除重复
 				
-				DB.deleteEntity(id);
+				DB.deleteEntityBlock(id);
 				
 				/* edit.push({
 					type: DB.TYPE.Block,
@@ -503,6 +503,36 @@ class Player{
 		});*/
 	}
 	
+	
+	//方块更新属性
+	updateAttr(thing){
+		const attr = JSON.stringify(thing.attr).slice(1,-1), //属性
+			pos = thing.block.mesh.position.clone().divideScalar(100), //方块位置
+			[cX, cZ] = this.map.p2c(pos.x, pos.z); //区块坐标
+		
+		let edit;
+		switch (thing.type){
+			case "Block":
+				edit = this.map.chunks[cX][cZ].edit.block; //方块
+				for (let i=edit.length-1; i>=0; i--)
+					if (edit[i].x == pos.x && edit[i].y == pos.y && edit[i].z == pos.z)
+						edit.attr = attr;
+				
+				DB.updateBlockAttr(pos.x, pos.y, pos.z, attr);
+				break;
+				
+			case "EntityBlock":
+				const id = thing.block.mesh.id;
+				
+				edit = this.map.chunks[cX][cZ].edit.entityBlock; //实体方块
+				for (let i=edit.length-1; i>=0; i--)
+					if (edit[i].id == id)
+						edit.attr = attr;
+				
+				DB.updateEntityBlockAttr(thing.block.mesh.id, attr);
+				break;
+		}
+	}
 	
 	
 	kill(reason="未知"){

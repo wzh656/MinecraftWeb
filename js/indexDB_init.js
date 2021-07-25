@@ -23,7 +23,7 @@ const DB = {
 		deskgood: 0,
 		Block: 1,
 		EntityBlock: 2,
-		Entity: 2
+		Entity: 3
 	},
 	TABLE: {
 		WORLD: "world"
@@ -132,16 +132,15 @@ const DB = {
 	},
 	
 	/* 添加方块 */
-	addBlock(x, y, z, name, attr={}){
+	addBlock(x, y, z, name, attr=""){
 		console.log("DB.addBlock", {x,y,z, name, attr})
-		return new Promise((resolve, reject)=>{
-			db.addData(DB.TABLE.WORLD, {
+		return db.addData(DB.TABLE.WORLD, {
 				type: DB.TYPE.Block,
 				x,
 				y,
 				z,
 				name,
-				attr: JSON.stringify(attr).slice(1, -1)
+				attr
 			}).then(()=>{
 				let find = false;
 				return db.readStep(DB.TABLE.WORLD, {
@@ -158,22 +157,35 @@ const DB = {
 						}
 					}
 				});
-			}).then(resolve);
-		});
+			});
 	},
 	
-	/* 添加实体 */
-	addEntity(id, x, y, z, name, attr={}){
-		console.log("DB.addEntity", {x,y,z, id, name, attr})
-		return new Promise((resolve, reject)=>{
-			db.addData(DB.TABLE.WORLD, {
+	/* 更新方块属性 */
+	updateBlockAttr(x, y, z, attr=""){
+		console.log("DB.updateBlockAttr", {x,y,z, attr})
+		return db.readStep(DB.TABLE.WORLD, {
+				index: "type",
+				range: ["only", DB.TYPE.Block],
+				dirt: "prev",
+				stepCallback: function(res){
+					if (res.x!=x || res.y!=y || res.z!=z) return;
+					res.attr = attr;
+					db.updateData(DB.TABLE.WORLD, res);
+				}
+			});
+	},
+	
+	/* 添加实体方块 */
+	addEntityBlock(id, x, y, z, name, attr=""){
+		console.log("DB.addEntity", {id, x, y, z, name, attr})
+		return db.addData(DB.TABLE.WORLD, {
 				type: DB.TYPE.EntityBlock,
 				id,
 				x,
 				y,
 				z,
 				name,
-				attr: JSON.stringify(attr).slice(1, -1)
+				attr
 			}).then(()=>{
 				let find = false;
 				return db.readStep(DB.TABLE.WORLD, {
@@ -190,15 +202,13 @@ const DB = {
 						}
 					}
 				});
-			}).then(resolve);
-		});
+			});
 	},
 	
-	/* 删除数据 */
-	deleteEntity(id){
+	/* 删除实体方块 */
+	deleteEntityBlock(id){
 		console.log("DB.deleteEntity", {id})
-		return new Promise((resolve, reject)=>{
-			db.readStep(DB.TABLE.WORLD, {
+		return db.readStep(DB.TABLE.WORLD, {
 				index: "type",
 				range: ["only", DB.TYPE.EntityBlock],
 				dirt: "prev",
@@ -208,8 +218,22 @@ const DB = {
 						db.remove(DB.TABLE.WORLD, res.key);
 					}
 				}
-			}).then(resolve);
-		});
+			});
+	},
+	
+	/* 更新实体方块属性 */
+	updateEntityBlockAttr(id, attr=""){
+		console.log("DB.updateBlockAttr", {id, attr})
+		return db.readStep(DB.TABLE.WORLD, {
+				index: "type",
+				range: ["only", DB.TYPE.EntityBlock],
+				dirt: "prev",
+				stepCallback: function(res){
+					if (res.id == id) return;
+					res.attr = attr;
+					db.updateData(DB.TABLE.WORLD, res);
+				}
+			});
 	},
 	
 	/* 读取区块信息 */
@@ -218,7 +242,7 @@ const DB = {
 			const [ox, oz] = map.c2o(x, z), //区块中心坐标
 				edit = {
 					block: [],
-					entity: [],
+					entityBlock: [],
 				};
 			db.readStep(DB.TABLE.WORLD, {
 				index: "type",
@@ -235,7 +259,7 @@ const DB = {
 					stepCallback: (res)=>{
 						if ( res.x >= ox+map.size[0].x && res.x <= ox+map.size[1].x &&
 							res.z >= oz+map.size[0].z && res.z <= oz+map.size[1].z
-						) edit.entity.push(res);
+						) edit.entityBlock.push(res);
 					}
 				})
 			}).then(()=>resolve(edit));

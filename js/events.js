@@ -237,6 +237,7 @@ const Events = {
 			
 			console.log("Digging", entityBlock.attr.size[direction], take.attr.size[direction])
 			entityBlock.updateSize(); //更新大小
+			deskgood.updateAttr(entityBlock); //更新属性
 			
 			//挖完了
 			if (direction[1] == "0"){ //x0: ++
@@ -483,8 +484,8 @@ const Events = {
 			scene.remove(this.placeThing.block.mesh);
 			
 			if ( this.placeThing.type == "EntityBlock" &&
-				Object.map( pos, (v)=> NEAR(v, Math.round(v)) ) && //位置为整数
-				Object.map( this.placeThing.attr.size||{}, (v,i)=> !v || NEAR(v, i[1]*100) ) //大小为默认
+				Object.every( pos, (v)=> NEAR(v, Math.round(v)) ) && //位置为整数
+				Object.every( this.placeThing.attr.size||{}, (v,i)=> !v || NEAR(v, i[1]*100) ) //大小为默认
 			){ //可转化为 方块
 				this.placeThing = this.placeThing.toBlock();
 				pos.round();
