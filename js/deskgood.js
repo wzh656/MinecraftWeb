@@ -2,6 +2,7 @@ class Player{
 	constructor (opt){
 		this.name = opt.name; //名称
 		this.map = opt.map; //所在的Map
+		
 		this.pos = opt.position; //位置
 		this.v = opt.v; //速度
 		this.ideal_v = {
@@ -9,6 +10,7 @@ class Player{
 			sprint: opt.ideal_v.sprint, //疾跑
 			jump: opt.ideal_v.jump //跳跃
 		}; //理想速度
+		
 		this.collisionBox = { //碰撞箱大小
 			x0: opt.collisionBox.x0,
 			x1: opt.collisionBox.x1,
@@ -17,8 +19,10 @@ class Player{
 			z0: opt.collisionBox.z0,
 			z1: opt.collisionBox.z1
 		};
+		
 		this.look = opt.look; //朝向
-		this.mesh = opt.mesh; //网格对象
+		// this.mesh = opt.mesh; //网格对象
+		
 		this.handLength = opt.handLength; //手长（谐音360°全方位手残）
 		this.hold = opt.hold; //手上拿的物品
 		this.choice = 0; //手上拿的物品序号
@@ -26,14 +30,22 @@ class Player{
 		this.body = opt.body; //身
 		this.leg = opt.leg; //腿
 		this.foot = opt.foot; //脚
+		
+		this.health = opt.health; //健康 (0~1)
+		this.hunger = opt.hunger; //饥饿 (0~1)
+		this.thirst = opt.thirst; //口渴 (0~1)
+		this.mind = opt.mind; //神志 (0~1)
+		this.fatigue = opt.fatigue; //疲惫 (0~1)
+		this.experience = {}; //经验
+			
 		this.onKill = opt.onKill; //kill事件
+		
 		this.ids = {
 			preload: null, //预加载区块
 			update: null, //更新周围方块
 			roundBlocks: [] //周围方块
 		};
 	}
-	
 	
 	
 	move(x=this.pos.x, y=this.pos.y, z=this.pos.z){
@@ -71,7 +83,6 @@ class Player{
 	moveZ(z){
 		this.move(undefined, undefined, z);
 	}
-	
 	
 	
 	go(x=0, y=0, z=0){
@@ -401,7 +412,6 @@ class Player{
 		});*/
 	}
 	
-	
 	//移除方块
 	remove(thing){
 		const {x,y,z} = thing.block.mesh.position.clone().divideScalar(100).round(), //单位: m
@@ -503,7 +513,6 @@ class Player{
 		});*/
 	}
 	
-	
 	//方块更新属性
 	updateAttr(thing){
 		const attr = JSON.stringify(thing.attr).slice(1,-1), //属性
@@ -518,7 +527,7 @@ class Player{
 					if (edit[i].x == pos.x && edit[i].y == pos.y && edit[i].z == pos.z)
 						edit.attr = attr;
 				
-				DB.updateBlockAttr(pos.x, pos.y, pos.z, attr);
+				DB.updateBlock(pos.x, pos.y, pos.z, {attr});
 				break;
 				
 			case "EntityBlock":
@@ -529,17 +538,22 @@ class Player{
 					if (edit[i].id == id)
 						edit.attr = attr;
 				
-				DB.updateEntityBlockAttr(thing.block.mesh.id, attr);
+				DB.updateEntityBlock(thing.block.mesh.id, {attr});
 				break;
 		}
 	}
 	
 	
-	kill(reason="未知"){
-		scene.remove(this.mesh);
-		this.onKill(reason);
+	//状态值增加
+	addState(name, value=0){
+		const v = (1-this[name]) * this[name];
+		this[name] += v*value;
 	}
 	
+	//更新状态值
+	updateState(){
+		
+	}
 	
 	
 	//更新周围方块
@@ -564,6 +578,12 @@ class Player{
 			
 			block.block.material.forEach(v => v.visible=true ); //显示所有面
 		}
+	}
+	
+	
+	kill(reason="未知"){
+		// scene.remove(this.mesh);
+		this.onKill(reason);
 	}
 }
 /**
@@ -598,7 +618,8 @@ const deskgood = new Player({
 		get z(){ return THREE.Math.radToDeg(camera.rotation.z); },
 		set z(v){ camera.rotation.z = THREE.Math.degToRad(v); }
 	},
-	mesh: null, //暂无
+	// mesh: null,
+	
 	handLength: 360, //手长（谐音360°全方位手残）
 	hold: new ThingGroup($("#tools")[0], {
 		fixedLength: 4,
@@ -629,7 +650,7 @@ const deskgood = new Player({
 			}
 			children.push(
 				$("<li></li>").append( $("<img/>").attr("src", "./img/more.png") )
-				.click(()=>status("bag"))[0]
+				.click(()=>state("bag"))[0]
 			);
 		}
 	}),
@@ -765,6 +786,13 @@ const deskgood = new Player({
 			}
 		}
 	}),
+	
+	health: 0.8, //健康 (0~1)
+	hunger: 0.8, //饥饿 (0~1)
+	thirst: 0.8, //口渴 (0~1)
+	mind: 0.8, //神志 (0~1)
+	fatigue: 0.8, //疲惫 (0~1)
+	
 	onKill(reason){
 		db.clearTable(DB.TABLE.WORLD); //删表
 		//db.remove();

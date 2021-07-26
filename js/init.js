@@ -112,17 +112,25 @@ $(window).resize(function(){
 
 /* 游戏状态设置 */
 let stop = true; //游戏状态
-function status(id, pointerLock){
-	if ($("#"+id).css("display") != "none"){ //已显示
+function state(id, pointerLock){
+	if ($("#"+id).css("display") != "none"){ //已显示 需隐藏
 		$("#"+id).css("display", "none");
 		stop = false;
 		document.body.requestPointerLock();
 		console.log(id, ":close");
-	}else{ //未显示
+		
+		if (id == "bag")
+			bag_view.stop(); //停止动画
+		
+	}else{ //未显示 需显示
 		$("#"+id).css("display", $("#"+id).attr("data-display") || "block");
 		stop = id;
 		document.exitPointerLock();
 		console.log(id, ":open");
+		
+		if (id == "bag")
+			bag_view.start(); //开始动画
+		
 	}
 	return;
 }
@@ -132,7 +140,7 @@ function status(id, pointerLock){
 class RecordCanvas{
 	constructor(canvas){
 		this.canvas = canvas;
-		this.status = false;
+		this.state = false;
 	}
 	
 	start(opt={}){
@@ -146,7 +154,7 @@ class RecordCanvas{
 		});
 		
 		this.mediaRecord.start(); //开始录屏
-		this.status = true;
+		this.state = true;
 		
 		return this;
 	}
@@ -162,7 +170,7 @@ class RecordCanvas{
 				resolve( URL.createObjectURL(videoBlob) ); //url
 			};
 			this.mediaRecord.stop(); //结束录屏
-			this.status = false;
+			this.state = false;
 		});
 	}
 }

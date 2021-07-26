@@ -21,7 +21,7 @@ class ChunkMap{
 		
 		//所有方块
 		this.blocks = [];
-		//所有区块信息(status, edit, weather)
+		//所有区块信息(state, edit, weather)
 		this.chunks = [];
 		//区块预加载范围
 		this.preloadLength = preloadLength;
@@ -574,8 +574,8 @@ class ChunkMap{
 		
 		const [ox, oz] = this.c2o(cX, cZ); //区块中心坐标
 		
-		if ( this.chunks[cX][cZ].status !== true ) //未加载完毕
-			return console.warn("updateChunkAsync stop", cX, cZ, "status:", this.chunks[cX][cZ].status);
+		if ( this.chunks[cX][cZ].state !== true ) //未加载完毕
+			return console.warn("updateChunkAsync stop", cX, cZ, "state:", this.chunks[cX][cZ].state);
 		
 		let t0 = new Date(),
 			num = 0;
@@ -586,8 +586,8 @@ class ChunkMap{
 					this.update(ox+i, dy, oz+j);
 				
 				if (new Date()-t0 > breakTime){ //超时
-					if ( this.chunks[cX][cZ].status !== true ) //未加载完毕 终止更新
-						return console.warn("updateChunkAsync stop", cX, cZ, "status:", this.chunks[cX][cZ].status);
+					if ( this.chunks[cX][cZ].state !== true ) //未加载完毕 终止更新
+						return console.warn("updateChunkAsync stop", cX, cZ, "state:", this.chunks[cX][cZ].state);
 					return setTimeout(()=>{
 						this.updateChunkAsync(cX, cZ, {
 							finishCallback,
@@ -604,8 +604,8 @@ class ChunkMap{
 				progressCallback( (i-this.size[0].x) / (this.size[1].x-this.size[0].x) );
 			
 			if (++num >= mostSpeed){ //超数
-				if ( this.chunks[cX][cZ].status !== true ) //未加载完毕 终止更新
-					return console.warn("updateChunkAsync stop", cX, cZ, "status:", this.chunks[cX][cZ].status);
+				if ( this.chunks[cX][cZ].state !== true ) //未加载完毕 终止更新
+					return console.warn("updateChunkAsync stop", cX, cZ, "state:", this.chunks[cX][cZ].state);
 				return setTimeout(()=>{
 					this.updateChunkAsync(cX, cZ, {
 						finishCallback,
@@ -630,8 +630,8 @@ class ChunkMap{
 			
 			const [ox, oz] = this.c2o(cX, cZ); //区块中心坐标
 			
-			if ( this.chunks[cX][cZ].status !== true ) //未加载完毕
-				return console.warn("updateChunkGenerator stop", cX, cZ, "status:", this.chunks[cX][cZ].status);
+			if ( this.chunks[cX][cZ].state !== true ) //未加载完毕
+				return console.warn("updateChunkGenerator stop", cX, cZ, "state:", this.chunks[cX][cZ].state);
 			
 			const _this = this,
 				gen = function* (){
@@ -659,8 +659,8 @@ class ChunkMap{
 							return;
 						if (res.value == true && ++num >= mostSpeed) //超数
 							return;
-						if ( _this.chunks[cX][cZ].status !== true ){ //未加载完毕 终止更新
-							console.warn("updateChunkGenerator stop", cX, cZ, "status:", _this.chunks[cX][cZ].status);
+						if ( _this.chunks[cX][cZ].state !== true ){ //未加载完毕 终止更新
+							console.warn("updateChunkGenerator stop", cX, cZ, "state:", _this.chunks[cX][cZ].state);
 							clearInterval(id); //运行结束
 							return resolve();
 						}
@@ -676,7 +676,7 @@ class ChunkMap{
 	
 	/*
 	* 区块状态操作
-	* status: {true:已加载, false:加载/卸载中, undefined:已卸载}
+	* state: {true:已加载, false:加载/卸载中, undefined:已卸载}
 	*/
 	
 	//开始加载区块
@@ -689,7 +689,7 @@ class ChunkMap{
 			this.chunks[cX][cZ] = {};
 		
 		const chunk = this.chunks[cX][cZ];
-		chunk.status = false; //加载中
+		chunk.state = false; //加载中
 		chunk.edit = edit; //需存储的修改
 		
 		// console.log("weather:", sNoise.weatherRain( this.seed.noise, this.seed.wR, cX*this.size.x, cZ*this.size.z, time.getTime()/1000/60 ))
@@ -703,7 +703,7 @@ class ChunkMap{
 	}
 	//完成加载区块
 	finishLoadChunk(cX, cZ){
-		this.chunks[cX][cZ].status = true; //加载完毕
+		this.chunks[cX][cZ].state = true; //加载完毕
 		console.log("finish load chunk", cX, cZ)
 	}
 	//完成加载区块内实体
@@ -735,7 +735,7 @@ class ChunkMap{
 		if ( !this.chunks[cX][cZ] )
 			this.chunks[cX][cZ] = {};
 		
-		this.chunks[cX][cZ].status = false; //卸载中
+		this.chunks[cX][cZ].state = false; //卸载中
 	}
 	//完成卸载区块内实体
 	finishUnloadChunkEntity(cX, cZ){
@@ -752,7 +752,7 @@ class ChunkMap{
 		if (this.chunks[cX][cZ].weather)
 			this.chunks[cX][cZ].weather.clear_rain();
 		
-		delete this.chunks[cX][cZ].status; //已卸载
+		delete this.chunks[cX][cZ].state; //已卸载
 		console.log("finish unload chunk", cX, cZ)
 	}
 	
@@ -760,14 +760,14 @@ class ChunkMap{
 	isInitedChunk(cX, cZ){
 		return !!(this.chunks[cX] &&
 			this.chunks[cX][cZ] &&
-			this.chunks[cX][cZ].status !== undefined
+			this.chunks[cX][cZ].state !== undefined
 		);
 	}
 	//区块是否加载完成
 	isLoadedChunk(cX, cZ){
 		return !!(this.chunks[cX] &&
 			this.chunks[cX][cZ] &&
-			this.chunks[cX][cZ].status === true
+			this.chunks[cX][cZ].state === true
 		);
 	}
 	//区块内实体是否加载完成
@@ -777,21 +777,21 @@ class ChunkMap{
 			this.chunks[cX][cZ].entity !== undefined
 		);
 	}
-	//获取已初始化的区块(status:true/false)
+	//获取已初始化的区块(state:true/false)
 	getInitedChunks(){
 		const arr = [];
 		for (const i of Object.keys(this.chunks))
 			for (const j of Object.keys(this.chunks[i]))
-				if ( this.chunks[i][j].status !== undefined ) // true或false
+				if ( this.chunks[i][j].state !== undefined ) // true或false
 					arr.push([i, j])
 		return arr;
 	}
-	//获取已加载的区块(status:true)
+	//获取已加载的区块(state:true)
 	getLoadedChunks(){
 		const arr = [];
 		for (const i of Object.keys(this.chunks))
 			for (const j of Object.keys(this.chunks[i]))
-				if ( this.chunks[i][j].status === true )
+				if ( this.chunks[i][j].state === true )
 					arr.push([i, j])
 		return arr;
 	}
@@ -1824,6 +1824,7 @@ class ChunkMap{
 				y: e.y,
 				z: e.z
 			});
+			DB.updateEntityBlock(e.id, {id}); //更新id
 		}
 	}
 	

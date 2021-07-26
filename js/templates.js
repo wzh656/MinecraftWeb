@@ -40,12 +40,12 @@ Thing.TEMPLATES["命令方块"] = new Block({
 		onPutToFoot: Thing.TEMPLATES_EVENT.onPutToFoot,
 		
 		onRightMouseDown: function(){
-			status("command");
+			state("command");
 			false;
 		}.compress(), //打开界面
 		
 		onShortTouch: function(){
-			status("command");
+			state("command");
 			false;
 		}.compress() //打开界面
 	}

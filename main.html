@@ -456,7 +456,7 @@ Copyleft by wzh 2020~2021
 				font-size: 1.2em;
 				line-height: 6vh;
 			}
-			#bag > nav > label:not([onclick]):hover{ /* 悬停加深颜色 */
+			#bag > nav > label[class]:hover{ /* 悬停加深颜色 */
 				background-color: #ccd8c1;
 			}
 			#bag > nav > label.checked{ /* 被选中 */
@@ -466,7 +466,7 @@ Copyleft by wzh 2020~2021
 			}
 			
 			/* “关闭”按钮 */
-			#bag > nav > label[onclick]{
+			#bag > nav > label:not([class]){
 				width: 6vh;
 				flex: none;
 				
@@ -478,7 +478,7 @@ Copyleft by wzh 2020~2021
 				font-size: 0.86em;
 				font-weight: 900;
 			}
-			#bag > nav > label[onclick]:hover{
+			#bag > nav > label:not([class]):hover{
 				color: #876;
 				background-color: #ccd8c1;
 				border: 0.2rem solid #876;
@@ -501,43 +501,52 @@ Copyleft by wzh 2020~2021
 				display: flex;
 			}
 			
-			/* section1:背包 */
-			#bag > section:nth-of-type(1) > #bag_deskgood{ /* deskgood旋转动画 */
+			/* thing:物品 */
+			#bag > section.thing > #bag_deskgood{ /* deskgood旋转动画 */
 				margin: 1vmax;
 				border: 0.5vmax inset #fffae8;
 			}
-			#bag > section:nth-of-type(1) > ul{ /* 背包物品栏列表 */
+			#bag > section.thing > ul{ /* 背包物品栏列表 */
 				display: inline-flex;
 				flex-direction: column;
 				justify-content: space-around;
 				margin: 1vw;
 				padding: 0;
 			}
-			#bag > section:nth-of-type(1) > ul > li{ /* 背包物品栏 */
+			#bag > section.thing > ul > li{ /* 背包物品栏 */
 				display: block;
 				font-size: 1.2em;
 			}
-			#bag > section:nth-of-type(1) > ul > li > ol{ /* 背包物品栏图片项目列表 */
+			#bag > section.thing > ul > li > ol{ /* 背包物品栏图片项目列表 */
 				display: inline-flex;
 				margin: 0;
 				padding: 0;
 			}
-			#bag > section:nth-of-type(1) > ul > li > ol > li{ /* 背包物品图片项目 */
+			#bag > section.thing > ul > li > ol > li{ /* 背包物品图片项目 */
 				display: block;
 				width: 6vmax;
 				height: 6vmax;
 				margin: 0;
 				border: 0.3vmax inset #a6917c; /* 未选中 */
 			}
-			#bag > section:nth-of-type(1) > ul > li > ol > li:hover{ /* 悬停背景 */
+			#bag > section.thing > ul > li > ol > li:hover{ /* 悬停背景 */
 				background-color: #e0edd3;
 			}
-			#bag > section:nth-of-type(1) > ul > li > ol > li.checked{ /* 选中 */
+			#bag > section.thing > ul > li > ol > li.checked{ /* 选中 */
 				border: 0.5vmax inset #876;
 			}
-			#bag > section:nth-of-type(1) > ul > li > ol > li > img{ /* 背包物品图片 */
+			#bag > section.thing > ul > li > ol > li > img{ /* 背包物品图片 */
 				width: 100%;
 				height: 100%;
+			}
+			
+			/* state:状态 */
+			#bag > section.state{
+				flex-wrap: wrap;
+			}
+			#bag > section.state > p{
+				width: 50%;
+				margin: 0.3rem 0;
 			}
 			
 			
@@ -886,12 +895,12 @@ status("command");</textarea>
 		<!-- 1:背包 -->
 		<section id="bag" data-display="flex" style="z-index: 1; display: none;">
 			<nav>
-				<label class="checked">物品</label>
-				<label>状态</label>
-				<label>智造</label>
-				<label onclick="status('bag');">╳</label>
+				<label class="thing checked">物品</label>
+				<label class="state">状态</label>
+				<label class="make">智造</label>
+				<label>╳</label>
 			</nav>
-			<section class="checked">
+			<section class="thing checked">
 				<ul>
 					<li>
 						头(Head)：
@@ -919,18 +928,34 @@ status("command");</textarea>
 					</li>
 				</ul>
 			</section>
-			<section>
-				“状态”功能待开发中……
+			<section class="state">
+				<p class="health">健康：<span class="good">良好</span></p> <!-- 健康 -->
+				<p class="hunger">饥饿：<span class="good">良好</span></p> <!-- 饥饿 -->
+				<p class="thirst">口渴：<span class="good">良好</span></p> <!-- 口渴 -->
+				<p class="mind">神志：<span class="good">良好</span></p> <!-- 神志 -->
+				<p class="fatigue">疲惫：<span class="good">良好</span></p> <!-- 疲惫 -->
 			</section>
-			<section>
+			<section class="make">
 				“制造”功能待开发中……
 			</section>
 			<script>
-				for (const [i,v] of Object.entries($("#bag > nav > label:not([onclick])")))
-					v.onclick = function(){
-						$(this).addClass("checked").siblings().removeClass("checked");
-						$("#bag > section:eq("+i+")").addClass("checked").siblings().removeClass("checked");
-					};
+				$("#bag > nav > label[class]").click(function(){
+					const className = this.className.split(" ")[0];
+					console.log("bag check", className)
+					$(this).addClass("checked").siblings().removeClass("checked");
+					$("#bag > section." + className).addClass("checked").siblings().removeClass("checked");
+					switch (className){
+						case "thing":
+							bag_view.start(); //开始动画
+							break;
+						case "state":
+							deskgood.updateState(); //更新状态
+							bag_view.stop(); //停止动画
+							break;
+						case "make":
+							bag_view.stop(); //停止动画
+					}
+				});
 			</script>
 		</section>
 		
@@ -1043,11 +1068,11 @@ if (device < 0){ //手机
 			stop = true;
 			time.setStop(stop);
 			$("#pause").css("display", "inline-block");
-			DB.save();
 			if (Events.digging)
 				Events.endDig(); //停止挖掘
 			if (Events.placing)
 				Events.endPlace(); //停止放置
+			DB.save();
 		}
 	});
 	

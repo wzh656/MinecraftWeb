@@ -1,5 +1,5 @@
 //数据库
-let openDBListener = null; //数据库加载完毕监听
+let openDBCallback = null; //数据库打开成功监听
 const db = new IndexDB("Minecraft", 3, {
 		updateCallback(){
 			db.createTable(DB.TABLE.WORLD, {
@@ -10,8 +10,8 @@ const db = new IndexDB("Minecraft", 3, {
 			]);
 		},
 		successCallback(){
-			if (openDBListener)
-				openDBListener();
+			if (openDBCallback)
+				openDBCallback();
 		}
 	}).setErrCallback(function(err){
 		console.error("DB运行出错", err);
@@ -31,8 +31,10 @@ const DB = {
 	
 	/* 读取存档 */
 	read(){
-		if (!db.db) //未加载完毕
-			return (openDBListener = DB.read);
+		if (!db.success){ //未打开成功
+			openDBCallback = DB.read;
+			return console.log("DB:", db.success);
+		}
 		
 		db.readStep(DB.TABLE.WORLD, {
 			index: "type",
@@ -161,15 +163,16 @@ const DB = {
 	},
 	
 	/* 更新方块属性 */
-	updateBlockAttr(x, y, z, attr=""){
-		console.log("DB.updateBlockAttr", {x,y,z, attr})
+	updateBlock(x, y, z, obj={}){
+		console.log("DB.updateBlock", {x,y,z, obj})
 		return db.readStep(DB.TABLE.WORLD, {
 				index: "type",
 				range: ["only", DB.TYPE.Block],
 				dirt: "prev",
 				stepCallback: function(res){
 					if (res.x!=x || res.y!=y || res.z!=z) return;
-					res.attr = attr;
+					for (const [i,v] of Object.entries(obj))
+						res[i] = v;
 					db.updateData(DB.TABLE.WORLD, res);
 				}
 			});
@@ -213,24 +216,24 @@ const DB = {
 				range: ["only", DB.TYPE.EntityBlock],
 				dirt: "prev",
 				stepCallback: function(res){
-					if (res.id == id){
-						// console.log("DB 删除多余", res.key, res);
-						db.remove(DB.TABLE.WORLD, res.key);
-					}
+					if (res.id != id) return;
+					// console.log("DB 删除多余", res.key, res);
+					db.remove(DB.TABLE.WORLD, res.key);
 				}
 			});
 	},
 	
 	/* 更新实体方块属性 */
-	updateEntityBlockAttr(id, attr=""){
-		console.log("DB.updateBlockAttr", {id, attr})
+	updateEntityBlock(id, obj={}){
+		console.log("DB.updateBlock", {id, obj})
 		return db.readStep(DB.TABLE.WORLD, {
 				index: "type",
 				range: ["only", DB.TYPE.EntityBlock],
 				dirt: "prev",
 				stepCallback: function(res){
-					if (res.id == id) return;
-					res.attr = attr;
+					if (res.id != id) return;
+					for (const [i,v] of Object.entries(obj))
+						res[i] = v;
 					db.updateData(DB.TABLE.WORLD, res);
 				}
 			});

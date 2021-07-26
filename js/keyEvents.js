@@ -11,7 +11,7 @@ document.addEventListener("keydown", function (e){
 	if (e.keyCode == 69){ //E 切换背包
 		if (stop == "bag" || stop == false){
 			console.log("E:", keydown.key);
-			status("bag");
+			state("bag");
 			return false;
 		}
 	}
@@ -42,7 +42,7 @@ document.addEventListener("keydown", function (e){
 		if (stop){ //已暂停
 			if (typeof stop == "string"){ //已打开窗口
 				const stop0 = stop;
-				status(stop);
+				state(stop);
 				console.log("Pause-Break", stop0, "changeTo", stop);
 			}else{ //无抵抗窗口 继续
 				const stop0 = stop;
@@ -131,7 +131,7 @@ document.addEventListener("keyup", function (e){
 	}
 	
 	if (e.keyCode == 115){ //F4 录屏
-		if ( $("#game")[0].record.status ){ //正在录屏
+		if ( $("#game")[0].record.state ){ //正在录屏
 			$("#game")[0].record.stop().then((url)=>{
 				Img.download(url, "录屏.mp4");
 			});

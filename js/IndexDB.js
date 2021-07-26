@@ -3,6 +3,8 @@ class IndexDB{
 	constructor(dbName, version, opt={}){
 		const {updateCallback, successCallback, errorCallback} = opt;
 		
+		this.success = false; //是否成功打开
+		
 		const request = indexedDB.open(dbName, version);
 		
 		request.onerror = (e)=>{
@@ -17,6 +19,8 @@ class IndexDB{
 		request.onsuccess = (e)=>{
 			if (!update)
 				this.db = request.result;
+			
+			this.success = true;
 			
 			console.log("数据库打开success")
 			if (successCallback) successCallback();

@@ -71,9 +71,17 @@ bag_view.scene.add(bag_view.deskgood.group);
 bag_view.renderer.domElement.style.cursor = "pointer";
 bag_view.controls = new THREE.OrbitControls(bag_view.camera, bag_view.renderer.domElement); //创建控件对象
 let last = +new Date();
-setInterval(function(){
-	if (stop != "bag") return; //不显示
-	bag_view.deskgood.group.rotation.y += THREE.Math.degToRad(36)*(new Date()-last)/1000; // 36°/s
-	last = +new Date();
-	bag_view.renderer.render(bag_view.scene, bag_view.camera);
-},30);
+bag_view.start = function(){
+	if (bag_view.id)
+		clearInterval(bag_view.id);
+	bag_view.id = setInterval(function(){
+		if (stop != "bag") return; //不显示
+		bag_view.deskgood.group.rotation.y += THREE.Math.degToRad(36)*(new Date()-last)/1000; // 36°/s
+		last = +new Date();
+		bag_view.renderer.render(bag_view.scene, bag_view.camera);
+	}, 30);
+};
+bag_view.stop = function(){
+	clearInterval(bag_view.id);
+	bag_view.id = null;
+}

@@ -346,7 +346,7 @@ const Events = {
 				break;
 			case 4:
 			case 5:
-				// console.log("y+")
+				console.log("y+")
 				pos.y += 3;
 				break;
 			case 6:
