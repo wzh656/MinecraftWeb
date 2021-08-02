@@ -552,7 +552,16 @@ class Player{
 	
 	//更新状态值
 	updateState(){
-		
+		for (const [i, list] of Object.entries(this.constructor.adj)){
+			const adjs = {};
+			for (const [value, adj] of Object.entries(list)){
+				const abs = (value - this[i]);
+				adjs[adj] = (1 - 1/(1+Math.E ** (-abs))) * 1/(1+Math.E ** (-abs)) * 4; //模糊概率 ±E
+			}
+			const total = Object.values(adjs).sum(),
+				random = Math.random();
+			$("#bag > section.state > ."+i+" > span").val()
+		}
 	}
 	
 	
@@ -586,6 +595,46 @@ class Player{
 		this.onKill(reason);
 	}
 }
+Player.adj = {
+	health: { //健康
+		90: "极好",
+		70: "良好",
+		50: "一般",
+		30: "差",
+		10: "极差"
+	},
+	hunger: { //饥饿
+		90: "极饱",
+		70: "饱",
+		50: "果腹",
+		30: "饿",
+		10: "饥肠辘辘"
+	},
+	thirst: { //口渴
+		90: "极饱",
+		70: "良好",
+		50: "一般",
+		30: "口干舌燥",
+		10: "渴不可耐"
+	},
+	mind: { //神志
+		90: "头脑清醒",
+		70: "神志清晰",
+		50: "一般",
+		30: "无精打采",
+		10: "神情恍惚"
+	},
+	fatigue: { //疲惫
+		90: "浑身是劲",
+		70: "良好",
+		50: "一般",
+		30: "疲惫不堪",
+		10: "精疲力尽"
+	}
+};
+
+
+
 /**
 * 玩家(deskgood)
 */
@@ -811,7 +860,7 @@ const deskgood = new Player({
 		
 		document.exitPointerLock(); //取消鼠标锁定
 		gui.close(); //隐藏gui
-		$("body > h1, #command, #bag").hide(); //隐藏 遮罩、横屏提示
+		$("body > layer, #command, #bag").hide(); //隐藏 层、命令方块、背包
 		$("#die")
 			.css("display", "block")
 			.children(".resaon").html(reason);
