@@ -70,10 +70,10 @@ bag_view.scene.add(bag_view.deskgood.group);
 
 bag_view.renderer.domElement.style.cursor = "pointer";
 bag_view.controls = new THREE.OrbitControls(bag_view.camera, bag_view.renderer.domElement); //创建控件对象
-let last = +new Date();
 bag_view.start = function(){
 	if (bag_view.id)
 		clearInterval(bag_view.id);
+	let last = +new Date();
 	bag_view.id = setInterval(function(){
 		if (stop != "bag") return; //不显示
 		bag_view.deskgood.group.rotation.y += THREE.Math.degToRad(36)*(new Date()-last)/1000; // 36°/s

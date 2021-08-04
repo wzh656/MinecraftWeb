@@ -196,7 +196,7 @@ $("#game").on("touchstart", function (e){
 	touch.screen.id = setTimeout(()=>{ //长按1000ms（挖掘）
 		touch.screen.id = null;
 		if (touch.screen.valid)
-			Events.startDig(x ,y); //开始挖掘
+			Events.startDig(x, y); //开始挖掘
 	}, 1000);
 	
 	return;
@@ -264,7 +264,7 @@ $("#game").on("touchend", function (e){
 		clearTimeout(touch.screen.id); //防止长按
 		
 		if (touch.screen.valid){
-			Events.startPlace(); //开始放置
+			Events.startPlace(x, y); //开始放置
 			Events.endPlace(); //结束放置
 		}
 	}

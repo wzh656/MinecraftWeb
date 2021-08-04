@@ -453,7 +453,7 @@ Copyleft by wzh 2020~2021
 				border-top-right-radius: 2.6vw;
 				
 				text-align: center;
-				font-size: 1.2em;
+				font-size: 1.16em;
 				line-height: 6vh;
 			}
 			#bag > nav > label[class]:hover{ /* 悬停加深颜色 */
@@ -548,6 +548,7 @@ Copyleft by wzh 2020~2021
 				width: 50%;
 				margin: 0.3rem 0;
 			}
+			
 			
 			
 			/**
@@ -861,7 +862,7 @@ Copyleft by wzh 2020~2021
 			<li><img/></li>
 			<li><img/></li>
 			<li><img/></li>
-			<li><img src="./img/more.png" onclick="status('bag');" /></li>
+			<li><img src="./img/more.png" onclick="state('bag');" /></li>
 		</ul>
 		
 		<!-- 0:十字准星 -->
@@ -898,18 +899,18 @@ status("command");</textarea>
 				<label class="thing checked">物品</label>
 				<label class="state">状态</label>
 				<label class="make">智造</label>
-				<label>╳</label>
+				<label onclick="state('bag');">╳</label>
 			</nav>
 			<section class="thing checked">
 				<ul>
 					<li>
-						头(Head)：
+						头(head)：
 						<ol class="head">
 							<li class="checked"><img/></li>
 						</ol>
 					</li>
 					<li>
-						身(Body)：
+						身(body)：
 						<ol class="body">
 							<li class="checked"><img/></li>
 						</ol>

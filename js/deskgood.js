@@ -552,15 +552,23 @@ class Player{
 	
 	//更新状态值
 	updateState(){
-		for (const [i, list] of Object.entries(this.constructor.adj)){
-			const adjs = {};
-			for (const [value, adj] of Object.entries(list)){
-				const abs = (value - this[i]);
-				adjs[adj] = (1 - 1/(1+Math.E ** (-abs))) * 1/(1+Math.E ** (-abs)) * 4; //模糊概率 ±E
-			}
-			const total = Object.values(adjs).sum(),
-				random = Math.random();
-			$("#bag > section.state > ."+i+" > span").val()
+		for (const [name, rule] of Object.entries(this.constructor.adj)){
+			const value = this[name], //属性值
+				probability = [], //概率
+				adjs = Object.values(rule), //形容词列表
+				values = Object.keys(rule), //理想值列表
+				len = values.length-1;
+			
+			probability[0] = sigmoid(value - values[0], 0.05);
+			for (let i=1; i<len; i++)
+				probability[i] = dSigmoid(values[i] - value, 0.05) * 2; //模糊概率 ±5
+			probability[len] = sigmoid(values[len] - value, 0.05);
+			
+			const index = Array.range(0, len+1).randomSelect(probability);
+			$("#bag > section.state > ."+name+" > span")
+				.html( adjs[index].randomSelect() )
+				.css("color", `rgb(${255-255*value}, ${255*value}, ${255-Math.abs(127.5-value*255)*2})`)
+				.removeClass().addClass(Player.adjClass[index]);
 		}
 	}
 	
@@ -597,41 +605,43 @@ class Player{
 }
 Player.adj = {
 	health: { //健康
-		90: "极好",
-		70: "良好",
-		50: "一般",
-		30: "差",
-		10: "极差"
+		0.9: ["生龙活虎"],
+		0.7: ["身强力壮"],
+		0.5: ["勉勉强强"],
+		0.3: ["虚弱"],
+		0.1: ["奄奄一息"]
 	},
 	hunger: { //饥饿
-		90: "极饱",
-		70: "饱",
-		50: "果腹",
-		30: "饿",
-		10: "饥肠辘辘"
+		0.9: ["撑着", "有点撑着"],
+		0.7: ["饱腹", "吃饱了"],
+		0.5: ["一般", "正常", "果腹", "不大饿"],
+		0.3: ["食不果腹"],
+		0.1: ["饥肠辘辘", "腹中无食"]
 	},
 	thirst: { //口渴
-		90: "极饱",
-		70: "良好",
-		50: "一般",
-		30: "口干舌燥",
-		10: "渴不可耐"
+		0.9: ["撑着", "有点撑着"],
+		0.7: ["良好"],
+		0.5: ["一般", "正常", "不大渴"],
+		0.3: ["口干舌燥", "唇焦口燥"],
+		0.1: ["渴不可耐"]
 	},
 	mind: { //神志
-		90: "头脑清醒",
-		70: "神志清晰",
-		50: "一般",
-		30: "无精打采",
-		10: "神情恍惚"
+		0.9: ["神采奕奕"],
+		0.7: ["头脑清醒", "良好"],
+		0.5: ["普通", "一般"],
+		0.3: ["无精打采"],
+		0.1: ["神情恍惚"]
 	},
 	fatigue: { //疲惫
-		90: "浑身是劲",
-		70: "良好",
-		50: "一般",
-		30: "疲惫不堪",
-		10: "精疲力尽"
+		0.9: ["不知疲倦"],
+		0.7: ["良好", "不累"],
+		0.5: ["一般", "普通"],
+		0.3: ["疲惫不堪"],
+		0.1: ["精疲力尽"]
 	}
 };
+Player.adjClass = ["great", "good", "normal", "bad", "veryBad"];
+
 
 
 

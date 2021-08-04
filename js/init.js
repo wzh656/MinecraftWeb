@@ -4,6 +4,26 @@ function rnd_error(){
 }
 
 
+/* Sigmoid函数 */
+function sigmoid(x, r){
+	if (r){
+		return 1 / (1 + Math.E ** (-x *Math.E/r));
+	}else{
+		return 1 / (1 + Math.E ** (-x));
+	}
+}
+
+/* Sigmoid函数的导数 */
+function dSigmoid(x, r){
+	if (r){
+		const px = x*Math.E/r;
+		return (1 - sigmoid(px)) * sigmoid(px);
+	}else{
+		return (1 - sigmoid(x)) * sigmoid(x);
+	}
+}
+
+
 /* 函数压缩 */
 Function.prototype.compress = function(){
 	let str = this+"";
