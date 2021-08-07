@@ -567,8 +567,7 @@ class Player{
 			const index = Array.range(0, len+1).randomSelect(probability);
 			$("#bag > section.state > ."+name+" > span")
 				.html( adjs[index].randomSelect() )
-				.css("color", `rgb(${255-255*value}, ${255*value}, ${255-Math.abs(127.5-value*255)*2})`)
-				.removeClass().addClass(Player.adjClass[index]);
+				.css("color", `rgb(${255-255*value}, ${255*value}, ${255-Math.abs(127.5-value*255)*2})`);
 		}
 	}
 	
@@ -640,7 +639,6 @@ Player.adj = {
 		0.1: ["精疲力尽"]
 	}
 };
-Player.adjClass = ["great", "good", "normal", "bad", "veryBad"];
 
 
 

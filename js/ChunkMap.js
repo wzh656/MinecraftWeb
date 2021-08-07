@@ -777,6 +777,7 @@ class ChunkMap{
 			this.chunks[cX][cZ].entity !== undefined
 		);
 	}
+	
 	//获取已初始化的区块(state:true/false)
 	getInitedChunks(){
 		const arr = [];
@@ -796,7 +797,7 @@ class ChunkMap{
 		return arr;
 	}
 	//获取已加载实体的区块
-	getLoadedChunks(){
+	getLoadedChunksEntity(){
 		const arr = [];
 		for (const i of Object.keys(this.chunks))
 			for (const j of Object.keys(this.chunks[i]))
@@ -1813,7 +1814,7 @@ class ChunkMap{
 	}
 	//加载区块内实体
 	loadChunkEntity(cX, cZ){
-		this.startLoadChunkEntity(cX, cZ); //区块内实体加载完成
+		this.startLoadChunkEntity(cX, cZ); //开始加载区块内实体
 		const edit = this.chunks[cX][cZ].edit.entityBlock; //实体方块
 		for (const e of edit){
 			const id = this.addID(new EntityBlock({
@@ -2001,11 +2002,6 @@ class ChunkMap{
 			this.startUnloadChunk(cX, cZ); //开始卸载区块
 			
 			const gen = function* (_this){
-				//删除实体
-				for (const e of _this.chunks[cX][cZ].entity){
-					_this.scene.remove(e.block.mesh);
-					e.deleteMaterial().deleteGeometry().deleteMesh();
-				}
 				//删除方块
 				for (let i=_this.size[0].x; i<=_this.size[1].x; i++){
 					for (let j=_this.size[0].y; j<=_this.size[1].y; j++){
@@ -2046,6 +2042,17 @@ class ChunkMap{
 			// return id;
 		});
 	}
+	//卸载区块内实体
+	unloadChunkEntity(cX, cZ){
+		if (this.chunks[cX][cZ].entity === undefined)
+			return console.warn("unloadChunkEntity", cX, cZ, "entity not loaded");
+		//删除实体
+		for (const e of this.chunks[cX][cZ].entity){
+			this.scene.remove(e.block.mesh);
+			e.deleteMaterial().deleteGeometry().deleteMesh();
+		}
+		this.finishUnloadChunkEntity(cX, cZ); //区块内实体卸载完成
+	}
 	
 	//预加载区块
 	preloadChunk(opt={}){
@@ -2059,23 +2066,22 @@ class ChunkMap{
 			const chunks = [];
 			for (let x=-loadLength; x<=loadLength; x+=this.size.x){
 				for (let z=-loadLength; z<=loadLength; z+=this.size.z){
-					const push = [
-							Math.round( (deskgood.pos.x+x)/100/this.size.x ),
-							Math.round( (deskgood.pos.z+z)/100/this.size.z )
-						],
-						dx = push[0]*this.size.x*100 - deskgood.pos.x,
-						dz = push[1]*this.size.z*100 - deskgood.pos.z; //区块中心到玩家的距离 单位: px=cm
-					push[2] = ( //方向
+					const chunk = this.p2c((deskgood.pos.x+x)/100, (deskgood.pos.z+z)/100), //区块
+						center = this.c2o(...chunk), //区块中心 单位: m
+						dx = center[0]*100 - deskgood.pos.x,
+						dz = center[1]*100 - deskgood.pos.z; //区块中心到玩家的距离 单位: px=cm
+					
+					chunk[2] = ( //方向
 						Math.abs(dx) >= Math.abs(dz) ?(
 							dx >= 0? "x+": "x-"
 						): (
 							dz >= 0? "z+": "z-"
 						)
 					);
-					push[3] = dx*dx + dz*dz <= entityLength*entityLength; //是否加载实体
-				
-					if ( !chunks.some(v => v[0]==push[0] && v[1]==push[1]) ) //没有相同的
-						chunks.push(push);
+					chunk[3] = dx <= entityLength && dz <= entityLength; //是否加载实体
+					
+					if ( !chunks.some(v => v[0]==chunk[0] && v[1]==chunk[1]) ) //没有相同的
+						chunks.push(chunk);
 				}
 			}
 			
@@ -2086,6 +2092,7 @@ class ChunkMap{
 				resolve();
 			}
 			
+			//在需加载区块中 寻找 未加载区块
 			for (let i=chunks.length-1; i>=0; i--){
 				const [cX, cZ] = chunks[i];
 				if ( !this.isInitedChunk(cX, cZ) ){ //未初始化 不存在 或 不在加载中
@@ -2117,16 +2124,16 @@ class ChunkMap{
 				}
 			}
 			
+			//在已加载区块中 寻找 可卸载区块
 			for (const i of this.getLoadedChunks())
-				if (
-					chunks.every((chunk)=>{
+				if ( chunks.every((chunk)=>{
 						return i[0] != chunk[0] || i[1] != chunk[1];
 					}) //不与任何chunk相等 不用加载
 				){
 					loading++;
 					const [cX, cZ] = i;
-					//卸载区块
-					this.unloadChunkGenerator(cX, cZ, {
+					this.unloadChunkEntity(cX, cZ); //卸载实体
+					this.unloadChunkGenerator(cX, cZ, { //卸载区块
 						breakTime: 16,
 						progressCallback: (v)=>{
 							loading -= 1/(this.size.x);
