@@ -215,6 +215,7 @@ const Events = {
 			}
 			
 			const t = (time.getTime()-t0) / 1000; //时间间隔（游戏时间） 单位: s
+			t0 = time.getTime();
 			let thick; //厚度（不超过剩下厚度）
 			if (direction[1] == "0"){ //x0: 0->100
 				thick = Math.limitRange(
@@ -233,7 +234,9 @@ const Events = {
 			}
 			entityBlock.attr.size[direction] += (1 - direction[1]*2) * thick; //x0 -> 1, x1 -> -1
 			take.attr.size[direction[0] + "1"] += thingS/takeS * thick; //x1: 0 ~> 100
-			t0 = time.getTime();
+			deskgood.addState("hunger", -t*0.5/100); //饥饿 -0.5%/s
+			deskgood.addState("thirst", -t*0.5/100); //口渴 -0.5%/s
+			deskgood.addState("fatigue", -t*1/100); //疲惫 -1%/s
 			
 			console.log("Digging", entityBlock.attr.size[direction], take.attr.size[direction])
 			entityBlock.updateSize(); //更新大小

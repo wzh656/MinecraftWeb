@@ -198,9 +198,10 @@ class RecordCanvas{
 
 
 /* 设置 */
-const SETTINGS = {
-	VR: false,
-	sensitivity: device? 2.6: 1 //灵敏度：手机2.6，电脑1
+let SETTINGS;
+//加载配置settings.jsonp
+function settings_jsonp_callback(json){
+	SETTINGS = json;
 }
 
 

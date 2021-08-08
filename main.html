@@ -1034,6 +1034,7 @@ if (!DEBUG){
 <script src="./js/GameTime.js"></script> <!-- 游戏时间 -->
 <script src="./js/PointerLock.js"></script> <!-- 鼠标锁定 -->
 <script src="./js/init.js"></script> <!-- 初始化 -->
+<script src="./config/settings.jsonp"></script> <!-- 配置设置 -->
 <script>
 if (device < 0){ //手机
 	$("#control, #jump").css("display", "block"); //显示摇杆
@@ -1170,7 +1171,8 @@ document.oncontextmenu = function(e){
 		
 		<script src="./js/Thing.js"></script> <!-- Thing,Block,EntityBlock,Entity,Tool物品类 -->
 		<script src="./js/templates.js"></script> <!-- Thing模板；需置于Thing后 -->
-			
+		<script src="./config/templates.jsonp"></script> <!-- 加载templates配置 -->
+		
 		<script src="./js/simplexNoise.js"></script> <!-- 初始化柏林噪声simplexNoise函数 -->
 		<script src="./js/Weather.js"></script> <!-- Weather天气类 -->
 		<script src="./js/ChunkMap.js"></script> <!-- ChunkMap区块类 -->

@@ -139,7 +139,7 @@ $("#control > .jump").on("touchstart", function(){
 		ray3D({},
 			{y:-1},
 			0,
-			deskgood.collisionBox["y-"] + 50
+			deskgood.collisionBox.y0 + 50
 		).length > 0 //脚下有方块
 	){
 		deskgood.v.y += deskgood.ideal_v.jump * rnd_error();

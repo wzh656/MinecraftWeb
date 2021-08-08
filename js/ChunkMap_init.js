@@ -6,8 +6,8 @@ if (localStorage.getItem("我的世界_seed") === null){
 const map = new ChunkMap({
 	scene: Thing.group,
 	size: [
-		{x: -8, y: 0, z: -8},
-		{x: 8, y: 256, z: 8},
+		{x: -SETTINGS.chunk.size.x, y: 0, z: -SETTINGS.chunk.size.z},
+		{x: SETTINGS.chunk.size.x, y: SETTINGS.chunk.size.y, z: SETTINGS.chunk.size.z},
 	],
 	seed: {
 		seed: localStorage.getItem("我的世界_seed"),
@@ -78,6 +78,7 @@ const map = new ChunkMap({
 			}
 		},
 	},
-	preloadLength: 6*100
+	preloadLength: SETTINGS.chunk.preloadLength,
+	preloadEntityLength: SETTINGS.chunk.preloadEntityLength,
 });
 document.title = "我的世界:"+map.seed.seed||"读取数据失败";

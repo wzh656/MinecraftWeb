@@ -1,6 +1,6 @@
 class ChunkMap{
 	constructor (opt={}){
-		const {scene, size, seed, preloadLength} = opt;
+		const {scene, size, seed, preloadLength, preloadEntityLength} = opt;
 		this.scene = scene; //所在的场景
 		//区块大小
 		this.size = {
@@ -23,8 +23,10 @@ class ChunkMap{
 		this.blocks = [];
 		//所有区块信息(state, edit, weather)
 		this.chunks = [];
-		//区块预加载范围
+		//区块预加载范围 单位: px=cm
 		this.preloadLength = preloadLength;
+		 //区块实体预加载范围 单位: px=cm
+		this.preloadEntityLength = preloadEntityLength;
 		//种子设置
 		if (seed){
 			this.seed = {
@@ -708,6 +710,8 @@ class ChunkMap{
 	}
 	//完成加载区块内实体
 	startLoadChunkEntity(cX, cZ){
+		console.log("start load chunk entity", cX, cZ)
+		
 		const [ox, oz] = this.c2o(cX, cZ); //区块中心坐标
 		
 		this.chunks[cX][cZ].entity = []; //实体
@@ -722,8 +726,6 @@ class ChunkMap{
 			sNoise.weatherRain( this.seed.noise, this.seed.wR, cX*this.size.x, cZ*this.size.z, time.getTime() )
 		);
 		this.chunks[cX][cZ].weather.start_rain(); //开始下雨
-		
-		console.log("start load chunk entity", cX, cZ)
 	}
 	
 	//开始卸载区块
@@ -2059,7 +2061,7 @@ class ChunkMap{
 		return new Promise((resolve, reject)=>{
 			let {
 				loadLength=this.preloadLength, //区块加载范围（视野）
-				entityLength=this.preloadLength, //区块实体加载范围
+				entityLength=this.preloadEntityLength, //区块实体加载范围
 				progressCallback,
 				//finishCallback
 			} = opt;

@@ -1,19 +1,31 @@
 const Img = {
-	cache: {
-		get: {}
-	},
-	// 获取图片对象
-	get(src){
-		if (this.cache.get[src]) return this.cache.get[src]; //有缓存
+	cache: {},
+	
+	// 将图片载入缓存
+	load(src){
 		return new Promise((resolve,reject)=>{
-			let img = new Image();
+			const img = new Image();
 			img.src = src;
 			img.onload = ()=>{
-				this.cache.get[src] = img; //保存缓存
+				this.cache[src] = img; //保存缓存
 				resolve(img);
 			};
 		});
 	},
+	
+	// 获取图片对象
+	get(src){
+		if (this.cache[src]) return this.cache[src]; //有缓存
+		return new Promise((resolve,reject)=>{
+			const img = new Image();
+			img.src = src;
+			img.onload = ()=>{
+				this.cache[src] = img; //保存缓存
+				resolve(img);
+			};
+		});
+	},
+	
 	// 图片裁剪
 	clip(img, x, y, width, height){
 		const canvas1 = $("<canvas></canvas>").attr("width", img.width).attr("height", img.height)[0],
@@ -25,6 +37,7 @@ const Img = {
 		ctx2.putImageData(imgData, 0, 0);
 		return canvas2;
 	},
+	
 	// 旋转
 	rotate(img, angle, width, height){
 		const canvas = $("<canvas></canvas>").attr("width", width).attr("height", height)[0],
@@ -34,6 +47,7 @@ const Img = {
 		
 		return canvas;
 	},
+	
 	// 图片按照网格裁剪
 	grid(img, width, height){
 		let x_max = img.width/width,
@@ -47,6 +61,7 @@ const Img = {
 		}
 		return result;
 	},
+	
 	// 图片大小缩放
 	scale(img, width, height){
 		const canvas1 = $("<canvas></canvas>").attr("width", img.width).attr("height", img.height)[0],
@@ -72,6 +87,8 @@ const Img = {
 		}
 		return canvas2;
 	},
+	
+	//保存图片
 	download(url, name){
 		if (device == -2){ //html5+
 			const download = function(){

@@ -1,16 +1,14 @@
-//需要加载的贴图
-const REQUIRE_PICTURE = ["./img/textures/textures.png"];
-
 //确保所有图片载入cache以便后文同步获取
-const task = Img.get(REQUIRE_PICTURE[0]);
-for (let i=1; i<REQUIRE_PICTURE.length; i++)
-	task.then( ()=>Img.get(REQUIRE_PICTURE[i]) );
+const pictures = SETTINGS.img.require_pictures,
+	task = Img.load( pictures[0] );
+for (let i=1; i<pictures.length; i++)
+	task.then( ()=>Img.load(pictures[i]) );
 
 // 加载贴图
 let TEXTURES;
 task.then(()=>{
 	const keys = Object.keys(Thing.TEMPLATES); //（有序）
-	TEXTURES = Img.grid( Img.get("./img/textures/textures.png"), 16, 16 );
+	TEXTURES = Img.grid( Img.get( SETTINGS.img.textures_path ), 16, 16 );
 	
 	for (let x=0, len=TEXTURES.length; x<len; x++)
 		for (let y=0, len=TEXTURES[x].length; y<len; y++)
@@ -37,6 +35,7 @@ task.then(()=>{
 		block.makeMaterial().deleteTexture(); //制作材质
 		
 	}
+	
 	// 所有block贴图加载完毕
 	setTimeout(function(){
 		$("#progress header").text("载入方块中……");
@@ -46,6 +45,7 @@ task.then(()=>{
 		
 		try_start_load(); //加载区块
 	}, 0);
+	
 });
 
 

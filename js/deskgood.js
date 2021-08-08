@@ -651,19 +651,8 @@ const deskgood = new Player({
 	map,
 	position: camera.position,
 	v: new THREE.Vector3(0, 0, 0),
-	ideal_v: {
-		walk: 1, //行走：1m/s
-		sprint: 3, //疾跑：3m/s
-		jump: 5, //跳跃：5m/s
-	},
-	collisionBox: {
-		x0: 10,
-		x1: 10,
-		y0: 150,
-		y1: 50,
-		z0: 10,
-		z1: 10
-	},
+	ideal_v: SETTINGS.player.ideal_v,
+	collisionBox: SETTINGS.player.collisionBox,
 	look: {
 		get x(){ return THREE.Math.radToDeg(camera.rotation.x); },
 		set x(v){ camera.rotation.x = THREE.Math.degToRad(v); },
@@ -677,7 +666,7 @@ const deskgood = new Player({
 	},
 	// mesh: null,
 	
-	handLength: 360, //手长（谐音360°全方位手残）
+	handLength: SETTINGS.player.handLength, //手长
 	hold: new ThingGroup($("#tools")[0], {
 		fixedLength: 4,
 		updateCallback(children){

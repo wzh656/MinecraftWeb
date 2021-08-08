@@ -1,0 +1,33 @@
+settings_jsonp_callback({
+	VR: false, //是否启用VR模式
+	img: {
+		require_pictures: ["./img/textures/textures.png"], //需预先载入的图片
+		textures_path: "./img/textures/textures.png" //贴图路径
+	},
+	sensitivity: device? 2.6: 1, //灵敏度：手机2.6，电脑1
+	chunk: {
+		size: {
+			x: 8,
+			y: 256,
+			z: 8
+		},
+		preloadLength: 6*100, //区块预加载范围 单位: px=cm
+		preloadEntityLength: 6*100 //区块预加载实体范围 单位: px=cm
+	},
+	player: {
+		ideal_v: {
+			walk: 1, //行走：1m/s
+			sprint: 3, //疾跑：3m/s
+			jump: 5, //跳跃：5m/s
+		},
+		collisionBox: { //碰撞箱大小 单位: px=cm
+			x0: 10,
+			x1: 10,
+			y0: 150,
+			y1: 50,
+			z0: 10,
+			z1: 10
+		},
+		handLength: 360  //手长（谐音360°全方位手残） 单位: px=cm
+	}
+});
