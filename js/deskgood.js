@@ -546,7 +546,9 @@ class Player{
 	
 	//状态值增加
 	addState(name, value=0){
-		const v = (1-this[name]) * this[name];
+		if (this[name] === undefined)
+			return console.error("deskgood has no", name, "attr");
+		const v = (1-this[name]) * this[name] * rnd_error();
 		this[name] += v*value;
 	}
 	
@@ -564,11 +566,38 @@ class Player{
 				probability[i] = dSigmoid(values[i] - value, 0.05) * 2; //模糊概率 ±5
 			probability[len] = sigmoid(values[len] - value, 0.05);
 			
-			const index = Array.range(0, len+1).randomSelect(probability);
+			const index = Array.range(0, len+1).randomSelect(probability),
+				r = 255-255*value,
+				g = 255*value,
+				b = 255-Math.abs(127.5-value*255)*2;
 			$("#bag > section.state > ."+name+" > span")
 				.html( adjs[index].randomSelect() )
-				.css("color", `rgb(${255-255*value}, ${255*value}, ${255-Math.abs(127.5-value*255)*2})`);
+				.css("color", `rgb(${r*rnd_error()}, ${g*rnd_error()}, ${b*rnd_error()})`);
 		}
+	}
+	
+	//调试状态值
+	debuggerState(){
+		const output = {};
+		for (const [name, rule] of Object.entries(this.constructor.adj)){
+			const value = this[name], //属性值
+				probability = [], //概率
+				adjs = Object.values(rule), //形容词列表
+				values = Object.keys(rule), //理想值列表
+				len = values.length-1;
+			
+			probability[0] = sigmoid(value - values[0], 0.05);
+			for (let i=1; i<len; i++)
+				probability[i] = dSigmoid(values[i] - value, 0.05) * 2; //模糊概率 ±5
+			probability[len] = sigmoid(values[len] - value, 0.05);
+			
+			const r = 255-255*value,
+				g = 255*value,
+				b = 255-Math.abs(127.5-value*255)*2;
+			
+			output[name] = {value, probability, color: {r,g,b}};
+		}
+		console.log("deskgood state", output)
 	}
 	
 	
@@ -956,6 +985,27 @@ if (DEBUG){
 		deskgood_hold_folder.open();
 			deskgood_hold_folder.add(deskgood, "choice", 0, 3, 1).listen().name("选择工具").onChange(deskgood.hold.update);
 }
+
+
+/* 状态更新 */
+let lastStateUpdate = +time.getTime();
+setInterval(function(){
+	const t = (time.getTime()-lastStateUpdate)/1000; //单位: s
+	lastStateUpdate = +time.getTime();
+	
+	if (t == 0) return;
+	
+	//本底
+	deskgood.addState("health", -t/3600/24/30);
+	deskgood.addState("hunger", -t/3600/24/5);
+	deskgood.addState("thirst", -t/3600/24/3);
+	deskgood.addState("fatigue", -t/3600/24/7);
+	
+	//饥饿导致的健康下降
+	console.log(-1/3600/24/30/Math.abs(0.8-deskgood.hunger))
+	deskgood.addState("health", -t/3600/24/30/Math.abs(0.8-deskgood.hunger));
+	
+}, 36);
 
 
 /*

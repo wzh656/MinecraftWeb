@@ -143,6 +143,7 @@ function state(id, pointerLock){
 			bag_view.stop(); //停止动画
 		
 	}else{ //未显示 需显示
+		time.changeSpeed(1); //正常流速
 		$("#"+id).css("display", $("#"+id).attr("data-display") || "block");
 		stop = id;
 		document.exitPointerLock();
@@ -166,12 +167,17 @@ class RecordCanvas{
 	start(opt={}){
 		const {fps=30, audioBitsPerSecond=128000, videoBitsPerSecond=8500000} = opt;
 		
-		this.chunks = new Set();
+		this.chunks = [];
 		const mediaStream = this.canvas.captureStream(fps); // 设置帧频率(FPS)
 		this.mediaRecord = new MediaRecorder(mediaStream, {
 			audioBitsPerSecond,
 			videoBitsPerSecond
 		});
+		
+		this.mediaRecord.ondataavailable = (e)=>{ // 接收数据
+			console.log(e.data);
+			this.chunks.push(e.data);
+		};
 		
 		this.mediaRecord.start(); //开始录屏
 		this.state = true;
@@ -181,13 +187,9 @@ class RecordCanvas{
 	
 	stop(type="video/mp4"){
 		return new Promise((resolve, reject)=>{
-			this.mediaRecord.ondataavailable = (e)=>{ // 接收数据
-				this.chunks.add(e.data);
-				
-				console.log(e.data);
+			this.mediaRecord.onstop = (e)=>{ // 接收数据
 				const videoBlob = new Blob(this.chunks, {type}); //blob
-				
-				resolve( URL.createObjectURL(videoBlob) ); //url
+				URL.blob2base64(videoBlob).then(resolve); //url
 			};
 			this.mediaRecord.stop(); //结束录屏
 			this.state = false;
@@ -208,20 +210,35 @@ function settings_jsonp_callback(json){
 
 /* 时间流速 */
 const time = new GameTime(localStorage.getItem("我的世界_time"), 1); //游戏时间
-time.tmpSpeed = time.speed; //临时speed 防止调整过快
-
-setInterval(()=>{
-	if (time.speed != time.tmpSpeed){ //改变
-		time.setSpeed(time.tmpSpeed);
-		print("时间流逝改变："+Math.round(time.speed, 2)+"x");
-		console.log("time speed:",
-`${time.speed}s/s
-=${time.speed/60}min/s
-=${time.speed/3600}h/s
-=${time.speed/3600/24}day/s
-=${time.speed/3600/24/365.25}year/s`)
+time.lastChangeSpeed = +new Date();
+time.changeSpeedID = null;
+time.changeSpeed = function(speed){
+	const interval = new Date()-time.lastChangeSpeed, //距离上次修改间隔 单位: ms
+		func = ()=>{
+			time.setSpeed(speed);
+			time.lastChangeSpeed = +new Date();
+			
+			print("时间流逝改变："+Math.round(time.speed, 2)+"x");
+			console.log("time speed:",
+				`${time.speed}s/s
+				=${time.speed/60}min/s
+				=${time.speed/3600}h/s
+				=${time.speed/3600/24}day/s
+				=${time.speed/3600/24/365.25}year/s`)
+		}
+	if (interval > 666){
+		func();
+		
+	}else{
+		if (time.changeSpeedID) return;
+		time.changeSpeedID = setTimeout(()=>{
+			func();
+			time.changeSpeedID = null;
+			
+		}, 666-interval);
 	}
-}, 666);
+}
+
 
 
 /* 2维射线检测 */

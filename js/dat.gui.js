@@ -52,8 +52,8 @@ if (DEBUG){
 				get t(){ return String(time.getTime()); }
 			}, "t").name("描述字符串").listen();
 		time_folder.add({
-			get t(){ return time.tmpSpeed; },
-			set t(v){ time.tmpSpeed = v; }
+			get t(){ return time.speed; },
+			set t(v){ time.changeSpeed(v); }
 		}, "t", 1, 3600).name("时间流速(speed)").onChange(v => time.setSpeed(((v-1)/3599)**6*3599+1)).listen();
 		time_folder.add({
 			get t(){ return time.stop; }

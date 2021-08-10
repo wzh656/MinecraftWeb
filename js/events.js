@@ -234,9 +234,10 @@ const Events = {
 			}
 			entityBlock.attr.size[direction] += (1 - direction[1]*2) * thick; //x0 -> 1, x1 -> -1
 			take.attr.size[direction[0] + "1"] += thingS/takeS * thick; //x1: 0 ~> 100
-			deskgood.addState("hunger", -t*0.5/100); //饥饿 -0.5%/s
-			deskgood.addState("thirst", -t*0.5/100); //口渴 -0.5%/s
-			deskgood.addState("fatigue", -t*1/100); //疲惫 -1%/s
+			deskgood.addState("hunger", -t/5000); //饥饿 -0.02%/s
+			deskgood.addState("thirst", -t/5000); //口渴 -0.02%/s
+			deskgood.addState("fatigue", -t/5000); //疲惫 -0.02%/s
+			TIME += t;
 			
 			console.log("Digging", entityBlock.attr.size[direction], take.attr.size[direction])
 			entityBlock.updateSize(); //更新大小
@@ -516,7 +517,7 @@ const Events = {
 	/* 重置时间 */
 	resetTime(){
 		console.log("鼠标中键按下");
-		time.tmpSpeed = 1;
+		time.changeSpeed(1);
 	},
 	
 	
@@ -533,7 +534,7 @@ const Events = {
 			if (Events.onTimeSpeedIncrease && Events.onTimeSpeedIncrease() === false)
 				return;
 			
-			time.tmpSpeed *= 1.5; //时间流逝加速
+			time.changeSpeed( time.speed*1.5 ); //时间流逝加速
 			
 		}else if ( keydown.key.has(18) ){ //alt
 			console.log("alt+上滚轮");
@@ -582,7 +583,7 @@ const Events = {
 			if (Events.onTimeSpeedReduce && Events.onTimeSpeedReduce() === false)
 				return;
 			
-			time.tmpSpeed /= 1.5; //时间流逝减慢
+			time.changeSpeed( time.speed/1.5 ); //时间流逝减慢
 			
 		}else if ( keydown.key.has(18) ){ //alt
 			console.log("alt+下滚轮");

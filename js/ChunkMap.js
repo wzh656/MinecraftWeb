@@ -2065,7 +2065,8 @@ class ChunkMap{
 				progressCallback,
 				//finishCallback
 			} = opt;
-			const chunks = [];
+			const chunks = [], //需加载的区块
+				entityChunks = []; //去加载实体的区块
 			for (let x=-loadLength; x<=loadLength; x+=this.size.x){
 				for (let z=-loadLength; z<=loadLength; z+=this.size.z){
 					const chunk = this.p2c((deskgood.pos.x+x)/100, (deskgood.pos.z+z)/100), //区块
@@ -2080,10 +2081,17 @@ class ChunkMap{
 							dz >= 0? "z+": "z-"
 						)
 					);
-					chunk[3] = dx <= entityLength && dz <= entityLength; //是否加载实体
 					
 					if ( !chunks.some(v => v[0]==chunk[0] && v[1]==chunk[1]) ) //没有相同的
 						chunks.push(chunk);
+				}
+			}
+			for (let x=-loadLength; x<=loadLength; x+=this.size.x){
+				for (let z=-loadLength; z<=loadLength; z+=this.size.z){
+					const chunk = this.p2c((deskgood.pos.x+x)/100, (deskgood.pos.z+z)/100); //区块
+					
+					if ( !entityChunks.some(v => v[0]==chunk[0] && v[1]==chunk[1]) ) //没有相同的
+						entityChunks.push(chunk);
 				}
 			}
 			
@@ -2097,59 +2105,83 @@ class ChunkMap{
 			//在需加载区块中 寻找 未加载区块
 			for (let i=chunks.length-1; i>=0; i--){
 				const [cX, cZ] = chunks[i];
-				if ( !this.isInitedChunk(cX, cZ) ){ //未初始化 不存在 或 不在加载中
-					// this.initChunk(cX, cZ);
-					loading++;
-					
-					//用噪声填充区块
-					this.loadChunkGenerator(cX, cZ, {
-						breakTime: 16,
-						dir: chunks[i][2], //方向
-						progressCallback: (v)=>{
-							loading -= 1/this.size.x;
-							if (progressCallback)
-								progressCallback((total-loading) / total); //反馈进度
-						}
-					}).then(()=>{
-						if (chunks[i][3]){ //需加载实体
-							return this.loadChunkEntity(cX, cZ);
-						}else{
-							return new Promise((resolve)=>resolve());
-						}
-					}).then(()=>{
-						if (loading < 1e-6){ //完成所有
-							resolve();
-						}else if (progressCallback){
+				
+				if ( this.isInitedChunk(cX, cZ) ) continue; //已初始化 跳过
+				
+				loading++;
+				
+				//用噪声填充区块
+				this.loadChunkGenerator(cX, cZ, {
+					breakTime: 16,
+					dir: chunks[i][2], //方向
+					progressCallback: (v)=>{
+						loading -= 1/this.size.x;
+						if (progressCallback)
 							progressCallback((total-loading) / total); //反馈进度
-						}
-					});
-				}
+					}
+				}).then(()=>{
+					if (entityChunks.some(chunk =>
+						cX == chunk[0] || cZ == chunk[1]
+					)) this.loadChunkEntity(cX, cZ); //与一个entityChunk相等 加载实体
+					
+					if (loading < 1e-6){ //完成所有
+						resolve();
+					}else if (progressCallback){
+						progressCallback((total-loading) / total); //反馈进度
+					}
+				});
+				
+			}
+			
+			//在需加载实体的区块中 寻找 未加载实体的区块
+			for (let i=entityChunks.length-1; i>=0; i--){
+				const [cX, cZ] = entityChunks[i];
+				
+				if ( this.isLoadedChunkEntity(cX, cZ) ) continue; //已加载实体 跳过
+				if ( chunks.some(chunk =>
+						cX == chunk[0] || cZ == chunk[1]
+					) && //与一个chunk相等
+					!this.isInitedChunk(cX, cZ) //且未初始化
+				) continue; //将在区块加载完后加载实体 跳过
+				
+				this.loadChunkEntity(cX, cZ);
+			}
+			
+			
+			//在已加载实体的区块中 寻找 可卸载实体店的区块
+			for (const v of this.getLoadedChunksEntity()){
+				const [cX, cZ] = v;
+				if ( entityChunks.some(chunk =>
+					cX == chunk[0] || cZ == chunk[1]
+				) ) continue; //与一个chunk相等 需加载 跳过
+				
+				this.unloadChunkEntity(cX, cZ); //卸载实体
 			}
 			
 			//在已加载区块中 寻找 可卸载区块
-			for (const i of this.getLoadedChunks())
-				if ( chunks.every((chunk)=>{
-						return i[0] != chunk[0] || i[1] != chunk[1];
-					}) //不与任何chunk相等 不用加载
-				){
-					loading++;
-					const [cX, cZ] = i;
-					this.unloadChunkEntity(cX, cZ); //卸载实体
-					this.unloadChunkGenerator(cX, cZ, { //卸载区块
-						breakTime: 16,
-						progressCallback: (v)=>{
-							loading -= 1/(this.size.x);
-							if (progressCallback)
-								progressCallback((total-loading) / total); //反馈进度
-						}
-					}).then(()=>{
-						if (loading < 1e-6){ //完成所有
-							resolve();
-						}else if (progressCallback){
+			for (const v of this.getLoadedChunks()){
+				const [cX, cZ] = v;
+				if ( chunks.some(chunk=>
+					cX == chunk[0] || cZ == chunk[1]
+				) ) continue; //与一个chunk相等 需加载 跳过
+				
+				loading++;
+				this.unloadChunkEntity(cX, cZ); //卸载实体
+				this.unloadChunkGenerator(cX, cZ, { //卸载区块
+					breakTime: 16,
+					progressCallback: (v)=>{
+						loading -= 1/(this.size.x);
+						if (progressCallback)
 							progressCallback((total-loading) / total); //反馈进度
-						}
-					});
-				}
+					}
+				}).then(()=>{
+					if (loading < 1e-6){ //完成所有
+						resolve();
+					}else if (progressCallback){
+						progressCallback((total-loading) / total); //反馈进度
+					}
+				});
+			}
 			
 			total = loading;
 		});
