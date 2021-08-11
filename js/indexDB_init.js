@@ -74,11 +74,16 @@ const DB = {
 				deskgood.choice = res.choice; //选择方块
 				deskgood.sensitivity = res.sensitivity; //灵敏度
 				time.setTime(res.time); //设置时间
-				try_start_load(); //加载区块
+				
+				console.log("DB.read finished")
 				
 				return false; //停止查找
 			}
-		}).then(try_start_load); //没有数据也开始加载
+		}).then(()=>{
+			try_start_load(); //尝试开始加载区块
+			deskgood.startUpdateState(); //防止没有数据也开始加载
+		});
+		
 	},
 	
 	/* 保存存档 */

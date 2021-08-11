@@ -109,8 +109,14 @@ document.addEventListener("keydown", function (e){
 			new Date()-keydown.double_run[1] < 500
 		){ //松开后0.5s内再次按下W
 			keydown.double_run = true; //疾跑
+			deskgood.state.walking = false;
+			deskgood.state.sprinting = true;
 			console.log("run");
 		}
+	}
+	
+	if ([87, 83, 65, 63, 38, 40, 37, 39].indexOf(e.keyCode) != -1){
+		deskgood.state.walking = true;
 	}
 	
 	keydown.key.add(e.keyCode);
@@ -141,6 +147,11 @@ document.addEventListener("keyup", function (e){
 		}
 	}
 	
+	if ([87, 83, 65, 63, 38, 40, 37, 39].indexOf(e.keyCode) != -1){
+		deskgood.state.walking = false;
+		deskgood.state.sprinting = false;
+	}
+	
 	return false;
 }, true);
 
@@ -167,6 +178,8 @@ setInterval(function(){
 	
 	if ((keydown.key.has(87) || keydown.key.has(38)) & keydown.key.has(17)){ //control 按下
 		keydown.double_run = true;
+		deskgood.state.walking = false;
+		deskgood.state.sprinting = true;
 		console.log("run");
 	}
 	
@@ -226,5 +239,9 @@ setInterval(function(){
 		console.log("jump");
 		deskgood.v.y += y * deskgood.ideal_v.jump *rnd_error();
 		last_jump = +time.getTime();
+		deskgood.jumping = true;
+		setTimeout(function(){
+			deskgood.jumping = false;
+		}, 2000); //跳跃2s
 	}
 }, 16.667);

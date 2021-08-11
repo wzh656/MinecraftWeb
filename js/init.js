@@ -230,7 +230,8 @@ time.changeSpeed = function(speed){
 		func();
 		
 	}else{
-		if (time.changeSpeedID) return;
+		if (time.changeSpeedID)
+			clearTimeout(time.changeSpeedID);
 		time.changeSpeedID = setTimeout(()=>{
 			func();
 			time.changeSpeedID = null;

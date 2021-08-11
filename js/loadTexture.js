@@ -43,6 +43,7 @@ task.then(()=>{
 		$("#progress progress")[0].max = 1;
 		$("#progress progress")[0].value = 0;
 		
+		console.log("textures load finished")
 		try_start_load(); //加载区块
 	}, 0);
 	

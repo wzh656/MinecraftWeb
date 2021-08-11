@@ -31,11 +31,17 @@ class Player{
 		this.leg = opt.leg; //腿
 		this.foot = opt.foot; //脚
 		
-		this.health = opt.health; //健康 (0~1)
-		this.hunger = opt.hunger; //饥饿 (0~1)
-		this.thirst = opt.thirst; //口渴 (0~1)
-		this.mind = opt.mind; //神志 (0~1)
-		this.fatigue = opt.fatigue; //疲惫 (0~1)
+		this.state = { //状态
+			walking: false, //行走中
+			sprinting: false, //疾跑中
+			jumping: false, //跳跃中
+			
+			health: opt.health, //健康 (0~1)
+			hunger: opt.hunger, //饥饿 (0~1)
+			thirst: opt.thirst, //口渴 (0~1)
+			mind: opt.mind, //神志 (0~1)
+			fatigue: opt.fatigue //疲惫 (0~1)
+		};
 		this.experience = {}; //经验
 			
 		this.onKill = opt.onKill; //kill事件
@@ -546,10 +552,10 @@ class Player{
 	
 	//状态值增加
 	addState(name, value=0){
-		if (this[name] === undefined)
-			return console.error("deskgood has no", name, "attr");
-		const v = (1-this[name]) * this[name] * rnd_error();
-		this[name] += v*value;
+		if (this.state[name] === undefined)
+			return console.error("deskgood has no", name, "state");
+		const v = (1-this.state[name]) * this.state[name] * rnd_error();
+		this.state[name] += v*value;
 	}
 	
 	//更新状态值
@@ -974,6 +980,15 @@ if (DEBUG){
 			deskgood_idealV_folder.add(deskgood.ideal_v, "walk", 0, 10, 0.1).name("行走(walk)");
 			deskgood_idealV_folder.add(deskgood.ideal_v, "sprint", 0, 10, 0.1).name("疾跑(sprint)");
 			deskgood_idealV_folder.add(deskgood.ideal_v, "jump", 0, 36, 1).name("跳跃(jump)");
+		const deskgood_state_folder = deskgood_folder.addFolder("状态(ideal_v/(m/s))");
+			deskgood_state_folder.add(deskgood.state, "walking").name("行走(walking)").listen();
+			deskgood_state_folder.add(deskgood.state, "sprinting").name("疾跑(sprinting)").listen();
+			deskgood_state_folder.add(deskgood.state, "jumping").name("跳跃(jumping)").listen();
+			deskgood_state_folder.add(deskgood.state, "health", 0, 1, 0.00001).name("健康(health)").listen();
+			deskgood_state_folder.add(deskgood.state, "hunger", 0, 1, 0.00001).name("饥饿(hunger)").listen();
+			deskgood_state_folder.add(deskgood.state, "thirst", 0, 1, 0.00001).name("口渴(thirst)").listen();
+			deskgood_state_folder.add(deskgood.state, "mind", 0, 1, 0.00001).name("神志(mind)").listen();
+			deskgood_state_folder.add(deskgood.state, "fatigue", 0, 1, 0.00001).name("疲惫(mind)").listen();
 		const deskgood_collisionBox_folder = deskgood_folder.addFolder("碰撞箱大小(collisionBox)");
 			deskgood_collisionBox_folder.add(deskgood.collisionBox, "x1", 0, 200, 1);
 			deskgood_collisionBox_folder.add(deskgood.collisionBox, "x0", 0, 200, 1);
@@ -988,25 +1003,53 @@ if (DEBUG){
 
 
 /* 状态更新 */
-let lastStateUpdate = +time.getTime();
-setInterval(function(){
-	const t = (time.getTime()-lastStateUpdate)/1000; //单位: s
-	lastStateUpdate = +time.getTime();
-	
-	if (t == 0) return;
-	
-	//本底
-	deskgood.addState("health", -t/3600/24/30);
-	deskgood.addState("hunger", -t/3600/24/5);
-	deskgood.addState("thirst", -t/3600/24/3);
-	deskgood.addState("fatigue", -t/3600/24/7);
-	
-	//饥饿导致的健康下降
-	console.log(-1/3600/24/30/Math.abs(0.8-deskgood.hunger))
-	deskgood.addState("health", -t/3600/24/30/Math.abs(0.8-deskgood.hunger));
-	
-}, 36);
-
+deskgood.startUpdateState = function(){ //等待数据库加载完成后进行
+	let lastStateUpdate = +time.getTime();
+	setInterval(function(){
+		const t = (time.getTime()-lastStateUpdate)/1000; //单位: s
+		lastStateUpdate = +time.getTime();
+		
+		if (t == 0) return;
+		
+		//本底
+		deskgood.addState("health", -t/3600/24/30);
+		deskgood.addState("hunger", -t/3600/24/5);
+		deskgood.addState("thirst", -t/3600/24/3);
+		deskgood.addState("fatigue", -t/3600/24/7);
+		
+		//饥饿导致的 健康和神志下降
+		if (deskgood.state.hunger > 0.8){
+			const diff = (0.8 - deskgood.state.hunger) / 0.8;
+			deskgood.addState("health", -t/3600/24 * diff*diff);
+			deskgood.addState("mind", -t/3600/24/3 * diff*diff);
+		}else if (deskgood.state.hunger < 0.8){
+			const diff = (deskgood.state.hunger - 0.8) / 0.2;
+			deskgood.addState("health", -t/3600/24 * diff*diff);
+			deskgood.addState("mind", -t/3600/24/3 * diff*diff);
+		}
+		
+		//口渴导致的 健康和神志下降
+		if (deskgood.state.thirst > 0.8){
+			const diff = (0.8 - deskgood.state.thirst) / 0.8;
+			deskgood.addState("health", -t/3600/24 * diff*diff);
+			deskgood.addState("mind", -t/3600/24/3 * diff*diff);
+		}else if (deskgood.state.thirst < 0.8){
+			const diff = (deskgood.state.thirst - 0.8) / 0.2;
+			deskgood.addState("health", -t/3600/24 * diff*diff);
+			deskgood.addState("mind", -t/3600/24/3 * diff*diff);
+		}
+		
+		//疲惫导致的 健康和神志下降
+		deskgood.addState("health", -t/3600/24 * deskgood.state.fatigue**2);
+		deskgood.addState("mind", -t/3600/24/3 * deskgood.state.fatigue**2);
+		
+		//健康导致的 死亡
+		const probability = (1-deskgood.state.health) ** 66;
+		if (Math.random() < t*probability)
+			deskgood.kill("健康下降");
+		
+	}, 36);
+};
 
 /*
 * 卡住检测
