@@ -2121,7 +2121,7 @@ class ChunkMap{
 					}
 				}).then(()=>{
 					if (entityChunks.some(chunk =>
-						cX == chunk[0] || cZ == chunk[1]
+						cX == chunk[0] && cZ == chunk[1]
 					)) this.loadChunkEntity(cX, cZ); //与一个entityChunk相等 加载实体
 					
 					if (loading < 1e-6){ //完成所有
@@ -2139,7 +2139,7 @@ class ChunkMap{
 				
 				if ( this.isLoadedChunkEntity(cX, cZ) ) continue; //已加载实体 跳过
 				if ( chunks.some(chunk =>
-						cX == chunk[0] || cZ == chunk[1]
+						cX == chunk[0] && cZ == chunk[1]
 					) && //与一个chunk相等
 					!this.isInitedChunk(cX, cZ) //且未初始化
 				) continue; //将在区块加载完后加载实体 跳过
@@ -2148,11 +2148,11 @@ class ChunkMap{
 			}
 			
 			
-			//在已加载实体的区块中 寻找 可卸载实体店的区块
+			//在已加载实体的区块中 寻找 可卸载实体的区块
 			for (const v of this.getLoadedChunksEntity()){
 				const [cX, cZ] = v;
 				if ( entityChunks.some(chunk =>
-					cX == chunk[0] || cZ == chunk[1]
+					cX == chunk[0] && cZ == chunk[1]
 				) ) continue; //与一个chunk相等 需加载 跳过
 				
 				this.unloadChunkEntity(cX, cZ); //卸载实体
@@ -2162,11 +2162,12 @@ class ChunkMap{
 			for (const v of this.getLoadedChunks()){
 				const [cX, cZ] = v;
 				if ( chunks.some(chunk=>
-					cX == chunk[0] || cZ == chunk[1]
+					cX == chunk[0] && cZ == chunk[1]
 				) ) continue; //与一个chunk相等 需加载 跳过
 				
 				loading++;
-				this.unloadChunkEntity(cX, cZ); //卸载实体
+				if (this.isLoadedChunkEntity(cX, cZ))
+					this.unloadChunkEntity(cX, cZ); //卸载实体
 				this.unloadChunkGenerator(cX, cZ, { //卸载区块
 					breakTime: 16,
 					progressCallback: (v)=>{

@@ -561,7 +561,7 @@ class Player{
 	//更新状态值
 	updateState(){
 		for (const [name, rule] of Object.entries(this.constructor.adj)){
-			const value = this[name], //属性值
+			const value = this.state[name], //属性值
 				probability = [], //概率
 				adjs = Object.values(rule), //形容词列表
 				values = Object.keys(rule), //理想值列表
@@ -580,30 +580,6 @@ class Player{
 				.html( adjs[index].randomSelect() )
 				.css("color", `rgb(${r*rnd_error()}, ${g*rnd_error()}, ${b*rnd_error()})`);
 		}
-	}
-	
-	//调试状态值
-	debuggerState(){
-		const output = {};
-		for (const [name, rule] of Object.entries(this.constructor.adj)){
-			const value = this[name], //属性值
-				probability = [], //概率
-				adjs = Object.values(rule), //形容词列表
-				values = Object.keys(rule), //理想值列表
-				len = values.length-1;
-			
-			probability[0] = sigmoid(value - values[0], 0.05);
-			for (let i=1; i<len; i++)
-				probability[i] = dSigmoid(values[i] - value, 0.05) * 2; //模糊概率 ±5
-			probability[len] = sigmoid(values[len] - value, 0.05);
-			
-			const r = 255-255*value,
-				g = 255*value,
-				b = 255-Math.abs(127.5-value*255)*2;
-			
-			output[name] = {value, probability, color: {r,g,b}};
-		}
-		console.log("deskgood state", output)
 	}
 	
 	
@@ -642,20 +618,20 @@ Player.adj = {
 		0.9: ["生龙活虎"],
 		0.7: ["身强力壮"],
 		0.5: ["勉勉强强"],
-		0.3: ["虚弱"],
+		0.3: ["身体虚弱"],
 		0.1: ["奄奄一息"]
 	},
 	hunger: { //饥饿
 		0.9: ["撑着", "有点撑着"],
 		0.7: ["饱腹", "吃饱了"],
-		0.5: ["一般", "正常", "果腹", "不大饿"],
-		0.3: ["食不果腹"],
-		0.1: ["饥肠辘辘", "腹中无食"]
+		0.5: ["一般", "普通", "饿了", "勉强果腹"],
+		0.3: ["食不果腹", "腹中无食"],
+		0.1: ["饥肠辘辘"]
 	},
 	thirst: { //口渴
 		0.9: ["撑着", "有点撑着"],
 		0.7: ["良好"],
-		0.5: ["一般", "正常", "不大渴"],
+		0.5: ["一般", "普通", "想喝水"],
 		0.3: ["口干舌燥", "唇焦口燥"],
 		0.1: ["渴不可耐"]
 	},
@@ -663,7 +639,7 @@ Player.adj = {
 		0.9: ["神采奕奕"],
 		0.7: ["头脑清醒", "良好"],
 		0.5: ["普通", "一般"],
-		0.3: ["无精打采"],
+		0.3: ["无精打采", "头昏脑涨"],
 		0.1: ["神情恍惚"]
 	},
 	fatigue: { //疲惫
@@ -1005,6 +981,7 @@ if (DEBUG){
 /* 状态更新 */
 deskgood.startUpdateState = function(){ //等待数据库加载完成后进行
 	let lastStateUpdate = +time.getTime();
+	let lastDieUpdate = +time.getTime();
 	setInterval(function(){
 		const t = (time.getTime()-lastStateUpdate)/1000; //单位: s
 		lastStateUpdate = +time.getTime();
@@ -1013,40 +990,95 @@ deskgood.startUpdateState = function(){ //等待数据库加载完成后进行
 		
 		//本底
 		deskgood.addState("health", -t/3600/24/30);
-		deskgood.addState("hunger", -t/3600/24/5);
-		deskgood.addState("thirst", -t/3600/24/3);
+		deskgood.addState("hunger", -t/3600/30);
+		deskgood.addState("thirst", -t/3600/24);
 		deskgood.addState("fatigue", -t/3600/24/7);
+		
+		//行走导致的 健康上升 饥饿口渴神志下降
+		if (deskgood.state.walking){
+			deskgood.addState("health", t/3600/24/30);
+			deskgood.addState("hunger", -t/3600/15);
+			deskgood.addState("thirst", -t/3600/12);
+			deskgood.addState("fatigue", -t/3600/6);
+		}
+		//跑步导致的 健康上升 饥饿口渴神志下降
+		if (deskgood.state.sprinting){
+			const scale = deskgood.ideal_v.sprint /deskgood.ideal_v.jump;
+			deskgood.addState("health", t/3600/24/30 *scale);
+			deskgood.addState("hunger", -t/3600/15 *scale);
+			deskgood.addState("thirst", -t/3600/12 *scale);
+			deskgood.addState("fatigue", -t/3600/6 *scale);
+		}
+		//跑步导致的 健康上升 饥饿口渴神志下降
+		if (deskgood.state.sprinting){
+			const scale = deskgood.ideal_v.sprint /deskgood.ideal_v.jump;
+			deskgood.addState("health", t/3600/24/30 *scale);
+			deskgood.addState("hunger", -t/3600/15 *scale);
+			deskgood.addState("thirst", -t/3600/12 *scale);
+			deskgood.addState("fatigue", -t/3600/6 *scale);
+		}
 		
 		//饥饿导致的 健康和神志下降
 		if (deskgood.state.hunger > 0.8){
 			const diff = (0.8 - deskgood.state.hunger) / 0.8;
-			deskgood.addState("health", -t/3600/24 * diff*diff);
-			deskgood.addState("mind", -t/3600/24/3 * diff*diff);
+			deskgood.addState("health", -t/3600/24/20 * diff*diff);
+			deskgood.addState("mind", -t/3600/24/10 * diff*diff);
 		}else if (deskgood.state.hunger < 0.8){
 			const diff = (deskgood.state.hunger - 0.8) / 0.2;
-			deskgood.addState("health", -t/3600/24 * diff*diff);
-			deskgood.addState("mind", -t/3600/24/3 * diff*diff);
+			deskgood.addState("health", -t/3600/24/20 * diff*diff);
+			deskgood.addState("mind", -t/3600/24/10 * diff*diff);
 		}
 		
 		//口渴导致的 健康和神志下降
 		if (deskgood.state.thirst > 0.8){
 			const diff = (0.8 - deskgood.state.thirst) / 0.8;
-			deskgood.addState("health", -t/3600/24 * diff*diff);
-			deskgood.addState("mind", -t/3600/24/3 * diff*diff);
+			deskgood.addState("health", -t/3600/24/20 * diff*diff);
+			deskgood.addState("mind", -t/3600/24/10 * diff*diff);
 		}else if (deskgood.state.thirst < 0.8){
 			const diff = (deskgood.state.thirst - 0.8) / 0.2;
-			deskgood.addState("health", -t/3600/24 * diff*diff);
-			deskgood.addState("mind", -t/3600/24/3 * diff*diff);
+			deskgood.addState("health", -t/3600/24/20 * diff*diff);
+			deskgood.addState("mind", -t/3600/24/10 * diff*diff);
 		}
 		
 		//疲惫导致的 健康和神志下降
-		deskgood.addState("health", -t/3600/24 * deskgood.state.fatigue**2);
-		deskgood.addState("mind", -t/3600/24/3 * deskgood.state.fatigue**2);
+		deskgood.addState("health", -t/3600/24/20 * deskgood.state.fatigue**2);
+		deskgood.addState("mind", -t/3600/24/10 * deskgood.state.fatigue**2);
 		
-		//健康导致的 死亡
-		const probability = (1-deskgood.state.health) ** 66;
-		if (Math.random() < t*probability)
-			deskgood.kill("健康下降");
+		//死亡
+		const die_t = (time.getTime() - lastDieUpdate)/1000; //单位: s
+		if (die_t >= 1){
+			lastDieUpdate = +time.getTime();
+			for (let i=~~t; i>0; i--){
+				//健康导致的 死亡
+				if (deskgood.state.health < Math.random(0,0.2)*Math.random(0,0.2)){ //0~0.04 平均0.01
+					const probability = (1-deskgood.state.health) ** 66;
+					if (Math.random() < t*probability)
+						deskgood.kill("健康下降");
+				}
+				
+				//饥饿导致的 死亡
+				if (deskgood.state.hunger < Math.random(0,0.2)*Math.random(0,0.2)){ //0~0.04 平均0.01
+					const probability = (1-deskgood.state.hunger) ** 66;
+					if (Math.random() < t*probability)
+						deskgood.kill("饥饿");
+				}
+				
+				//口渴导致的 死亡
+				if (deskgood.state.thirst < Math.random(0,0.2)*Math.random(0,0.2)){ //0~0.04 平均0.01
+					const probability = (1-deskgood.state.thirst) ** 66;
+					if (Math.random() < t*probability)
+						deskgood.kill("口渴");
+				}
+				
+				//疲惫导致的 死亡
+				if (deskgood.state.fatigue < Math.random(0,0.2)*Math.random(0,0.2)){ //0~0.04 平均0.01
+					const probability = (1-deskgood.state.fatigue) ** 66;
+					if (Math.random() < t*probability)
+						deskgood.kill("劳累过度");
+				}
+			}
+		}
+		
 		
 	}, 36);
 };

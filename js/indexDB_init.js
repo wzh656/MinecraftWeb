@@ -55,6 +55,12 @@ const DB = {
 				deskgood.look.y = res.look.y; //朝向
 				//deskgood.look_update();
 				
+				deskgood.state.health = res.state.health;
+				deskgood.state.hunger = res.state.hunger;
+				deskgood.state.thirst = res.state.thirst;
+				deskgood.state.mind = res.state.mind;
+				deskgood.state.fatigue = res.state.fatigue;
+				
 				time.game = res.time;
 				colosUpdate(time.getTime(), true); //更新环境色
 				
@@ -72,7 +78,8 @@ const DB = {
 					deskgood[t].update(); //更新
 				}
 				deskgood.choice = res.choice; //选择方块
-				deskgood.sensitivity = res.sensitivity; //灵敏度
+				
+				SETTINGS.sensitivity = res.sensitivity; //灵敏度
 				time.setTime(res.time); //设置时间
 				
 				console.log("DB.read finished")
@@ -96,13 +103,23 @@ const DB = {
 				x: deskgood.look.x,
 				y: deskgood.look.y
 			},
+			
+			state: {
+				health: deskgood.state.health, //健康 (0~1)
+				hunger: deskgood.state.hunger, //饥饿 (0~1)
+				thirst: deskgood.state.thirst, //口渴 (0~1)
+				mind: deskgood.state.mind, //神志 (0~1)
+				fatigue: deskgood.state.fatigue //疲惫 (0~1)
+			},
+			
 			hold: [], //手
 			head: [], //头
 			body: [], //身
 			leg: [], //腿
 			foot: [], //脚
 			choice: deskgood.choice, //选择物品
-			sensitivity: deskgood.sensitivity, //灵敏度
+			
+			sensitivity: SETTINGS.sensitivity, //灵敏度
 			time: time.getTime() //当前时间
 		};
 		

@@ -1,0 +1,11 @@
+settings_jsonp_callback([
+	{
+		material: [
+			["橡木", 1]
+		],
+		product: [
+			["木板", 0.8],
+			["树皮", 0.2]
+		]
+	}
+]);

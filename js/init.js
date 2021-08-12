@@ -139,8 +139,10 @@ function state(id, pointerLock){
 		document.body.requestPointerLock();
 		console.log(id, ":close");
 		
-		if (id == "bag")
+		if (id == "bag"){
+			deskgood.updateState(); //更新状态
 			bag_view.stop(); //停止动画
+		}
 		
 	}else{ //未显示 需显示
 		time.changeSpeed(1); //正常流速
@@ -149,8 +151,10 @@ function state(id, pointerLock){
 		document.exitPointerLock();
 		console.log(id, ":open");
 		
-		if (id == "bag")
+		if (id == "bag"){
+			deskgood.updateState(); //更新状态
 			bag_view.start(); //开始动画
+		}
 		
 	}
 	return;

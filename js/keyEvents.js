@@ -102,10 +102,15 @@ document.addEventListener("keydown", function (e){
 		return false;
 	}
 	
+	if ([87, 83, 65, 63, 38, 40, 37, 39].indexOf(e.keyCode) != -1){
+		deskgood.state.walking = true;
+	}
+	
 	if (e.keyCode == 87 | e.keyCode == 38){ //W
 		if (keydown.double_run.length == 0){ //第一次按下W
 			keydown.double_run[0] = +new Date();
-		}else if (keydown.double_run.length == 2 &&
+			
+		}else if ( keydown.double_run.length == 2 &&
 			new Date()-keydown.double_run[1] < 500
 		){ //松开后0.5s内再次按下W
 			keydown.double_run = true; //疾跑
@@ -113,10 +118,6 @@ document.addEventListener("keydown", function (e){
 			deskgood.state.sprinting = true;
 			console.log("run");
 		}
-	}
-	
-	if ([87, 83, 65, 63, 38, 40, 37, 39].indexOf(e.keyCode) != -1){
-		deskgood.state.walking = true;
 	}
 	
 	keydown.key.add(e.keyCode);
@@ -239,9 +240,9 @@ setInterval(function(){
 		console.log("jump");
 		deskgood.v.y += y * deskgood.ideal_v.jump *rnd_error();
 		last_jump = +time.getTime();
-		deskgood.jumping = true;
+		deskgood.state.jumping = true;
 		setTimeout(function(){
-			deskgood.jumping = false;
-		}, 2000); //跳跃2s
+			deskgood.state.jumping = false;
+		}, 1000); //跳跃1s
 	}
 }, 16.667);
