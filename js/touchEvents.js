@@ -23,6 +23,8 @@ $("#control > .move").on("touchstart", function(e){
 	touch.control.x0 = x,
 	touch.control.y0 = y,
 	touch.control.t0 = +time.getTime();
+	deskgood.state.walking = true;
+	deskgood.state.sprinting = false;
 	
 	//循环
 	touch.control.id = setInterval(function(){
@@ -41,8 +43,12 @@ $("#control > .move").on("touchstart", function(e){
 		
 		if (len > 100){ //>100px 疾跑
 			d.setLength(deskgood.ideal_v.sprint * t * 0.1); // 1m/s = 100cm/s = 0.1cm/ms
+			deskgood.state.walking = false;
+			deskgood.state.sprinting = true;
 		}else{
 			d.setLength(len/100*deskgood.ideal_v.walk * t * 0.1);
+			deskgood.state.walking = true;
+			deskgood.state.sprinting = false;
 		}
 		
 		d.rotateAround(
@@ -96,6 +102,8 @@ $("#control > .move").on("touchend", function(e){
 	
 	clearInterval(touch.control.id);
 	touch.control.x0 = touch.control.y0 = touch.control.x = touch.control.y = touch.control.t0 = touch.control.id = null;
+	deskgood.state.walking = false;
+	deskgood.state.sprinting = false;
 	
 	$("#control > .move")
 		.css("left", "")
@@ -114,6 +122,8 @@ $("#control > .move").on("touchcancel", function(e){
 	
 	clearInterval(touch.control.id);
 	touch.control.x0 = touch.control.y0 = touch.control.x = touch.control.y = touch.control.t0 = touch.control.id = null;
+	deskgood.state.walking = false;
+	deskgood.state.sprinting = false;
 	
 	$("#control > .move > .direction").hide();
 	$("#control > .position").hide();
@@ -144,6 +154,10 @@ $("#control > .jump").on("touchstart", function(){
 	){
 		deskgood.v.y += deskgood.ideal_v.jump * rnd_error();
 		last_jump = +time.getTime();
+		deskgood.state.jumping = true;
+		setTimeout(function(){
+			deskgood.state.jumping = false;
+		}, 1000); //跳跃1s
 	}
 	
 	return;

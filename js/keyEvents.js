@@ -102,7 +102,7 @@ document.addEventListener("keydown", function (e){
 		return false;
 	}
 	
-	if ([87, 83, 65, 63, 38, 40, 37, 39].indexOf(e.keyCode) != -1){
+	if ([87, 83, 65, 68, 38, 40, 37, 39].indexOf(e.keyCode) != -1){
 		deskgood.state.walking = true;
 	}
 	
@@ -148,7 +148,15 @@ document.addEventListener("keyup", function (e){
 		}
 	}
 	
-	if ([87, 83, 65, 63, 38, 40, 37, 39].indexOf(e.keyCode) != -1){
+	if (!( keydown.key.has(87) ||
+		keydown.key.has(83) ||
+		keydown.key.has(65) ||
+		keydown.key.has(68) ||
+		keydown.key.has(38) ||
+		keydown.key.has(40) ||
+		keydown.key.has(37) ||
+		keydown.key.has(39)
+	)){
 		deskgood.state.walking = false;
 		deskgood.state.sprinting = false;
 	}

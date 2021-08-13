@@ -2,18 +2,19 @@
 * ThingGroup物品栏类 继承数组
 */
 class ThingGroup extends Array{
-	constructor(element, opt, ...array) {
+	constructor(element, opt={}, ...array) {
 		super(...array);
 		
 		this.e = element;
-		if (opt.fixedLength){ //固定长度
-			this.fixedLength = +opt.fixedLength;
+		const {fixedLength, maxLength, updateCallback} = opt;
+		if (fixedLength){ //固定长度
+			this.fixedLength = +fixedLength;
 			if (!opt.maxLength) //无最大长度
 				for (let i=0; i<this.fixedLength; i++)
 					if (!this[i]) this[i] = null;
 		}
-		if (opt.maxLength) this.maxLength = +opt.maxLength; //最大长度
-		if (opt.updateCallback) this.updateCallback = opt.updateCallback; //更新完回调
+		if (maxLength) this.maxLength = +maxLength; //最大长度
+		if (updateCallback) this.updateCallback = updateCallback; //更新完回调
 		
 		setTimeout( ()=>this.update(), 0 ); //自动更新
 	}

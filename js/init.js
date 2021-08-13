@@ -215,6 +215,7 @@ function settings_jsonp_callback(json){
 /* 时间流速 */
 const time = new GameTime(localStorage.getItem("我的世界_time"), 1); //游戏时间
 time.lastChangeSpeed = +new Date();
+time.nextSpeed = 1;
 time.changeSpeedID = null;
 time.changeSpeed = function(speed){
 	const interval = new Date()-time.lastChangeSpeed, //距离上次修改间隔 单位: ms
@@ -234,12 +235,14 @@ time.changeSpeed = function(speed){
 		func();
 		
 	}else{
-		if (time.changeSpeedID)
+		if (time.changeSpeedID){
 			clearTimeout(time.changeSpeedID);
+			time.changeSpeedID = null
+		}
+		time.nextSpeed = speed;
 		time.changeSpeedID = setTimeout(()=>{
 			func();
 			time.changeSpeedID = null;
-			
 		}, 666-interval);
 	}
 }

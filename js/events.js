@@ -2,13 +2,10 @@ const Events = {
 	/**
 	* 挖掘
 	*/
-	digging: false, //正在挖掘
 	digThing: null, //正在挖掘的物体
 	digId: null,
 	/* 开始挖掘 */
 	startDig(x, y){
-		console.log("try startDig")
-		
 		//获取物体和方块
 		const obj = ray2D(x, y).filter(obj => obj.object instanceof THREE.Mesh)[0]; //Mesh物体
 		if (!obj) return;
@@ -105,8 +102,8 @@ const Events = {
 		}
 		
 		
-		//直接获得 不用挖掘
-		if (thing.get("attr", "directGet")){
+		/* 直接获得 不用挖掘 */
+		if ( thing.get("attr", "directGet") ){
 			const thingV = (OR(thing.get("attr", "size", "x1"), 100) -
 					OR(thing.get("attr", "size", "x0"), 0)) *
 				(OR(thing.get("attr", "size", "y1"), 100) -
@@ -114,9 +111,22 @@ const Events = {
 				(OR(thing.get("attr", "size", "z1"), 100) -
 					OR(thing.get("attr", "size", "z0"), 0)); //物体体积 单位: cm³
 			
-			this.digging = false; //挖掘结束
+			//处理事件
+			if ( eval(thing.get("attr", "onStartDig")) === false ) return;
+			
+			console.log("startDig")
+			
+			//挖掘振动
+			if (typeof plus != "undefined"){
+				plus.device.vibrate(20);
+			}else if ("vibrate" in navigator){
+				navigator.vibrate(20);
+			}
+			
+			deskgood.state.digging = true; //挖掘开始
+			this.digThing = thing; //正在挖掘的物体
 			this.digId = time.setTimeout(()=>{
-				this.digging = false; //挖掘结束
+				deskgood.state.digging = false; //挖掘结束
 				deskgood.hold.addOne(thing.cloneAttr(), free); //克隆一个放在手中
 				deskgood.remove( thing ); //删除方块
 				return this.startDig(OR(touch.screen.x, undefined), OR(touch.screen.y, undefined)); //下一轮挖掘
@@ -175,11 +185,11 @@ const Events = {
 			hold.set("attr", "size", {});
 		}
 		
-		console.log("startDig", {thing, hold, direction},
-			"idealDigSpeed:", idealDigSpeed*time.getSpeed(), "cm³/s, ", thingS/idealDigSpeed/time.getSpeed(), "s/cm") //现实时间
-		
 		//处理事件
 		if ( eval(thing.get("attr", "onStartDig")) === false ) return;
+		
+		console.log("startDig", {thing, hold, direction},
+			"idealDigSpeed:", idealDigSpeed*time.getSpeed(), "cm³/s, ", thingS/idealDigSpeed/time.getSpeed(), "s/cm") //现实时间
 		
 		//挖掘振动
 		if (typeof plus != "undefined"){
@@ -188,7 +198,7 @@ const Events = {
 			navigator.vibrate(20);
 		}
 		
-		this.digging = true; //正在挖掘
+		deskgood.state.digging = true; //正在挖掘
 		this.digThing = entityBlock; //正在挖掘的物体
 		let t0 = time.getTime(); //（游戏时间）
 		const func = ()=>{
@@ -234,10 +244,6 @@ const Events = {
 			}
 			entityBlock.attr.size[direction] += (1 - direction[1]*2) * thick; //x0 -> 1, x1 -> -1
 			take.attr.size[direction[0] + "1"] += thingS/takeS * thick; //x1: 0 ~> 100
-			deskgood.addState("hunger", -t/5000); //饥饿 -0.02%/s
-			deskgood.addState("thirst", -t/5000); //口渴 -0.02%/s
-			deskgood.addState("fatigue", -t/5000); //疲惫 -0.02%/s
-			TIME += t;
 			
 			console.log("Digging", entityBlock.attr.size[direction], take.attr.size[direction])
 			entityBlock.updateSize(); //更新大小
@@ -250,7 +256,7 @@ const Events = {
 					OR(entityBlock.attr.size[direction[0] + "1"], 100)
 				){ //挖掘结束
 					time.clearInterval(this.digId);
-					this.digging = false; //挖掘结束
+					deskgood.state.digging = false; //挖掘结束
 					deskgood.remove( entityBlock ); //删除方块
 					return this.startDig(OR(touch.screen.x, undefined), OR(touch.screen.y, undefined)); //下一轮挖掘
 				}
@@ -261,7 +267,7 @@ const Events = {
 					OR(entityBlock.attr.size[direction[0] + "0"], 0)
 				){ //挖掘结束
 					time.clearInterval(this.digId);
-					this.digging = false; //挖掘结束
+					deskgood.state.digging = false; //挖掘结束
 					deskgood.remove( entityBlock ); //删除方块
 					return this.startDig(OR(touch.screen.x, undefined), OR(touch.screen.y, undefined)); //下一轮挖掘
 				}
@@ -296,7 +302,7 @@ const Events = {
 		) return;
 		
 		console.log("endDig")
-		this.digging = false; //挖掘结束
+		deskgood.state.digging = false; //挖掘结束
 		time.clearInterval(this.digId);
 	},
 	
@@ -460,6 +466,7 @@ const Events = {
 		) return print("想窒息吗？还往头上放方块！", "往头上放方块", 3); //放到头上
 		
 		console.log("startPlace")
+		deskgood.state.placing = true; //放置开始
 		
 		if (this.placeThing){
 			this.placeThing.makeGeometry().updateSize().makeMesh();
@@ -481,32 +488,35 @@ const Events = {
 	endPlace(){
 		console.log("try endPlace")
 		
-		if (this.placeThing){
-			console.log("endPlace")
-			
-			const pos = this.placeThing.block.mesh.position.clone() .divideScalar(100); //单位: m
-			scene.remove(this.placeThing.block.mesh);
-			
-			if ( this.placeThing.type == "EntityBlock" &&
-				Object.every( pos, (v)=> NEAR(v, Math.round(v)) ) && //位置为整数
-				Object.every( this.placeThing.attr.size||{}, (v,i)=> !v || NEAR(v, i[1]*100) ) //大小为默认
-			){ //可转化为 方块
-				this.placeThing = this.placeThing.toBlock();
-				pos.round();
-			}
-			
-			deskgood.place(this.placeThing, pos); //放置方块 单位:m
-			deskgood.hold.delete(deskgood.choice); //删除手里的方块
-			this.placeThing = null;
+		if (!this.placeThing) return; //无正在放置物体
+		
+		console.log("endPlace")
+		
+		const pos = this.placeThing.block.mesh.position.clone() .divideScalar(100); //单位: m
+		scene.remove(this.placeThing.block.mesh);
+		
+		if ( this.placeThing.type == "EntityBlock" &&
+			Object.every( pos, (v)=> NEAR(v, Math.round(v)) ) && //位置为整数
+			Object.every( this.placeThing.attr.size||{}, (v,i)=> !v || NEAR(v, i[1]*100) ) //大小为默认
+		){ //可转化为 方块
+			this.placeThing = this.placeThing.toBlock();
+			pos.round();
 		}
+		
+		deskgood.place(this.placeThing, pos); //放置方块 单位:m
+		deskgood.hold.delete(deskgood.choice); //删除手里的方块
+		deskgood.state.placing = false; //放置开始
+		this.placeThing = null;
 	},
 	
 	/* 取消放置 */
 	cancelPlace(){
-		if (this.placeThing){
-			scene.remove(this.placeThing.block.mesh); //删除方块
-			this.placeThing = null;
-		}
+		if (!this.placeThing) return; //无正在放置物体
+		
+		console.log("cancelPlace")
+		scene.remove(this.placeThing.block.mesh); //删除方块
+		deskgood.state.placing = false; //放置结束
+		this.placeThing = null;
 	},
 	
 	
@@ -534,7 +544,7 @@ const Events = {
 			if (Events.onTimeSpeedIncrease && Events.onTimeSpeedIncrease() === false)
 				return;
 			
-			time.changeSpeed( time.speed*1.5 ); //时间流逝加速
+			time.changeSpeed( time.nextSpeed*1.5 ); //时间流逝加速
 			
 		}else if ( keydown.key.has(18) ){ //alt
 			console.log("alt+上滚轮");
@@ -583,7 +593,7 @@ const Events = {
 			if (Events.onTimeSpeedReduce && Events.onTimeSpeedReduce() === false)
 				return;
 			
-			time.changeSpeed( time.speed/1.5 ); //时间流逝减慢
+			time.changeSpeed( time.nextSpeed/1.5 ); //时间流逝减慢
 			
 		}else if ( keydown.key.has(18) ){ //alt
 			console.log("alt+下滚轮");
