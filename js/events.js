@@ -88,7 +88,7 @@ const Events = {
 				hold.get("attr", "stackable") != true //不可叠加
 			) return print("当前方块无法叠加", "无法挖掘", 3, "#ff0");
 			
-			if (deskgood.hold.indexOf(null) == -1) //空出手来挖
+			if (deskgood.hold.length >= deskgood.hold.maxLength) //空出手来挖
 				return print("东西太多，我没办法空出手来挖了", "没手挖方块", 3, "#ff0");
 			
 			free = deskgood.choice; //挖到叠加

@@ -682,7 +682,8 @@ const deskgood = new Player({
 	
 	handLength: SETTINGS.player.handLength, //手长
 	hold: new ThingGroup($("#tools")[0], {
-		fixedLength: 4,
+		fixedLength: 1,
+		maxLength: 10,
 		updateCallback(children){
 			for (let i=0, len=children.length; i<len; i++){
 				$(children[i])
