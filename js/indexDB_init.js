@@ -75,9 +75,9 @@ const DB = {
 							deskgood[t][i] = null;
 						}
 					}
+					deskgood[t].select = res[t].select;
 					deskgood[t].update(); //更新
 				}
-				deskgood.choice = res.choice; //选择方块
 				
 				SETTINGS.sensitivity = res.sensitivity; //灵敏度
 				time.setTime(res.time); //设置时间
@@ -117,23 +117,24 @@ const DB = {
 			body: [], //身
 			leg: [], //腿
 			foot: [], //脚
-			choice: deskgood.choice, //选择物品
 			
 			sensitivity: SETTINGS.sensitivity, //灵敏度
 			time: time.getTime() //当前时间
 		};
 		
-		for (const t of ["hold", "head", "body", "leg", "foot"])
+		for (const t of ["hold", "head", "body", "leg", "foot"]){
 			for (let i=0,v=deskgood[t][i],len=deskgood[t].length; i<len; v=deskgood[t][++i])
 				if (v){ //{name, attr}
 					data[t][i] = {
 						type: v.type, //物品类型
 						name: v.name,
 						attr: JSON.stringify(v.attr).slice(1,-1)
-					}
+					};
 				}else{
 					data[t][i] = null;
 				}
+			data[t].select = deskgood[t].select;
+		}
 		
 		db.addData(DB.TABLE.WORLD, data).then(()=>{
 			console.log("存档save成功"/*, data*/);

@@ -3,7 +3,7 @@ Thing.TEMPLATES_EVENT.onPutToHead = Thing.TEMPLATES_EVENT.onPutToBody = function
 	const {x,y,z} = deskgood.pos.clone().divideScalar(100).round();
 	if (map.get(x, y, z) === null){
 		deskgood.place(choice, {x, y, z});
-		deskgood.hold.delete(deskgood.choice);
+		deskgood.hold.delete(deskgood.hold.select);
 	}
 	false;
 }.compress();
@@ -12,7 +12,7 @@ Thing.TEMPLATES_EVENT.onPutToLeg = Thing.TEMPLATES_EVENT.onPutToFoot = function(
 	const {x,y,z} = deskgood.pos.clone().divideScalar(100).round();
 	if (map.get(x, y-1, z) === null){
 		deskgood.place(choice, {x, y:y-1, z});
-		deskgood.hold.delete(deskgood.choice);
+		deskgood.hold.delete(deskgood.hold.select);
 	}
 	false;
 }.compress();

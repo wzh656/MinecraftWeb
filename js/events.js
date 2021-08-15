@@ -46,7 +46,8 @@ const Events = {
 		}
 		
 		let thing = obj.object.userData.thingObject, //物体对象
-			hold = deskgood.hold[deskgood.choice]; //挖掘工具
+			select = deskgood.hold.select,
+			hold = deskgood.hold[select]; //挖掘工具
 		
 		//是否超出手长
 		if ( obj.object.position .distanceToSquared( deskgood.pos )
@@ -59,7 +60,7 @@ const Events = {
 		//判断hold类型
 			//用手挖掘
 		if (hold == null){
-			free = deskgood.choice;
+			free = select;
 			idealDigSpeed = thing.get("attr", "idealDigSpeed", "手");
 			
 			//实体无法用于挖掘
@@ -68,12 +69,12 @@ const Events = {
 			
 			//用工具挖掘
 		}else if (hold.type == "Tool"){
-			const left = deskgood.hold[deskgood.choice-1];
+			const left = deskgood.hold[select-1];
 			if (left &&
 				left.name == (thing.get("attr", "digGet") || thing.name) && //同种方块
 				left.get("attr", "stackable") == true //可叠加
 			){ //放在左边
-				free = deskgood.choice - 1;
+				free = select - 1;
 				take = left;
 			}else{ //放在空位
 				free = deskgood.hold.indexOf(null);
@@ -91,7 +92,7 @@ const Events = {
 			if (deskgood.hold.length >= deskgood.hold.maxLength) //空出手来挖
 				return print("东西太多，我没办法空出手来挖了", "没手挖方块", 3, "#ff0");
 			
-			free = deskgood.choice; //挖到叠加
+			free = select; //挖到叠加
 			idealDigSpeed = thing.get("attr", "idealDigSpeed", "手"); //用手挖掘
 			take = hold;
 		}
@@ -127,7 +128,7 @@ const Events = {
 			this.digThing = thing; //正在挖掘的物体
 			this.digId = time.setTimeout(()=>{
 				deskgood.state.digging = false; //挖掘结束
-				deskgood.hold.addOne(thing.cloneAttr(), free); //克隆一个放在手中
+				deskgood.hold.add(thing.cloneAttr(), free); //克隆一个放在手中
 				deskgood.remove( thing ); //删除方块
 				return this.startDig(OR(touch.screen.x, undefined), OR(touch.screen.y, undefined)); //下一轮挖掘
 			}, thingV/idealDigSpeed*rnd_error()*1000).id; //（游戏时间） 单位: ms
@@ -181,7 +182,7 @@ const Events = {
 		
 		//用方块挖掘
 		if (hold && hold.type == "Block"){ //要叠加的方块 转化为 实体方块
-			hold = deskgood.hold[deskgood.choice] = hold.toEntityBlock();
+			hold = deskgood.hold[select] = hold.toEntityBlock();
 			hold.set("attr", "size", {});
 		}
 		
@@ -221,7 +222,7 @@ const Events = {
 					take = entityBlock.cloneAttr();
 				}
 				take.set("attr", "size", direction[0]+"1", 0); //x0,x1 -> x1
-				deskgood.hold.addOne(take, free); //克隆一个放在手中
+				deskgood.hold.add(take, free); //克隆一个放在手中
 			}
 			
 			const t = (time.getTime()-t0) / 1000; //时间间隔（游戏时间） 单位: s
@@ -313,7 +314,7 @@ const Events = {
 		console.log("try startPlace")
 		
 		//手上是否有效方块
-		let hold = deskgood.hold[deskgood.choice] || this.placeThing;
+		let hold = deskgood.hold[deskgood.hold.select] || this.placeThing;
 		if ( !(hold instanceof Block) &&
 			!(hold instanceof Entity) //非方块非实体（空气）
 		) return;
@@ -474,7 +475,7 @@ const Events = {
 			scene.add(this.placeThing.block.mesh); //重新放置方块 单位:m
 			
 		}else{
-			deskgood.hold.delete(deskgood.choice); //删除手里的方块
+			deskgood.hold.delete(deskgood.hold.select); //删除手里的方块
 			
 			hold.makeGeometry().updateSize().makeMesh();
 			hold.block.mesh.position.copy(pos); //单位: px=cmm
@@ -504,7 +505,7 @@ const Events = {
 		}
 		
 		deskgood.place(this.placeThing, pos); //放置方块 单位:m
-		deskgood.hold.delete(deskgood.choice); //删除手里的方块
+		deskgood.hold.delete(deskgood.hold.select); //删除手里的方块
 		deskgood.state.placing = false; //放置开始
 		this.placeThing = null;
 	},
@@ -561,24 +562,24 @@ const Events = {
 			
 			//交换
 			[ hold[choice], hold[nextChoice] ] = [ hold[nextChoice], hold[choice] ];
-			deskgood.choice = nextChoice;
+			deskgood.hold.select = nextChoice;
 			hold.update(); //更新
 			
 		}else{
 			console.log("上滚轮");
 			const hold = deskgood.hold,
-				before = deskgood.choice; //之前的选择
+				before = deskgood.hold.select; //之前的选择
 			
 			//处理事件
 			if ( hold[before] &&
 				eval(hold[before].get("attr", "onChangeLeave")) === false //取消事件
 			) return;
 			
-			deskgood.choice = Math.modRange(before-1, 0, deskgood.hold.length); //左闭右开区间
+			deskgood.hold.select = Math.modRange(before-1, 0, deskgood.hold.length); //左闭右开区间
 			
-			if ( hold[deskgood.choice] && //切换后事件
-				eval(hold[deskgood.choice].get("attr", "onChangeTo")) === false //取消事件
-			) return (deskgood.choice = before); //恢复之前选择
+			if ( hold[deskgood.hold.select] && //切换后事件
+				eval(hold[deskgood.hold.select].get("attr", "onChangeTo")) === false //取消事件
+			) return (deskgood.hold.select = before); //恢复之前选择
 			
 			hold.update(); //更新选择
 		}
@@ -610,24 +611,24 @@ const Events = {
 			
 			//交换
 			[ hold[choice], hold[nextChoice] ] = [ hold[nextChoice], hold[choice] ];
-			deskgood.choice = nextChoice;
+			deskgood.hold.select = nextChoice;
 			hold.update(); //更新
 			
 		}else{
 			console.log("下滚轮");
 			const hold = deskgood.hold,
-				before = deskgood.choice;
+				before = deskgood.hold.select;
 			
 			//处理事件
 			if ( hold[before] &&
 				eval(hold[before].get("attr", "onChangeLeave")) === false //取消事件
 			) return;
 			
-			deskgood.choice = Math.modRange(before+1, 0, deskgood.hold.length); //左闭右开区间
+			deskgood.hold.select = Math.modRange(before+1, 0, deskgood.hold.length); //左闭右开区间
 			
-			if ( hold[deskgood.choice] && //切换后事件
-				eval(hold[deskgood.choice].get("attr", "onChangeTo")) === false //取消事件
-			) return (deskgood.choice = before); //恢复之前选择
+			if ( hold[deskgood.hold.select] && //切换后事件
+				eval(hold[deskgood.hold.select].get("attr", "onChangeTo")) === false //取消事件
+			) return (deskgood.hold.select = before); //恢复之前选择
 			
 			hold.update(); //更新选择
 		}

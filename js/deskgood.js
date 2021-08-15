@@ -25,7 +25,7 @@ class Player{
 		
 		this.handLength = opt.handLength; //手长（谐音360°全方位手残）
 		this.hold = opt.hold; //手上拿的物品
-		this.choice = 0; //手上拿的物品序号
+		// this.choice = 0; //手上拿的物品序号
 		this.head = opt.head; //头上
 		this.body = opt.body; //身
 		this.leg = opt.leg; //腿
@@ -688,23 +688,23 @@ const deskgood = new Player({
 			for (let i=0, len=children.length; i<len; i++){
 				$(children[i])
 					.removeClass("checked")
-					.addClass(i==deskgood.choice? "checked": undefined);
-					/* .css("borderColor", (i==deskgood.choice)?"#cba":"#edc")
-					.css("borderWidth", (i==deskgood.choice)?"0.6vmax":"0.5vmax")
-					.css("transform", (i==deskgood.choice)?"translateY(-3px)":"")
+					.addClass(i==deskgood.hold.select? "checked": undefined);
+					/* .css("borderColor", (i==deskgood.hold.select)?"#cba":"#edc")
+					.css("borderWidth", (i==deskgood.hold.select)?"0.6vmax":"0.5vmax")
+					.css("transform", (i==deskgood.hold.select)?"translateY(-3px)":"")
 					.css("margin", "0 0"); */
 				children[i].onclick = ()=>{
-					const before = deskgood.choice;
+					const before = deskgood.hold.select;
 					
 					if ( deskgood.hold[before] &&
 						eval( deskgood.hold[before].get("attr", "onChangeLeave") ) === false
 					) return;
 					
-					deskgood.choice = i;
+					deskgood.hold.select = i;
 					
 					if ( deskgood.hold[i] &&
 						eval( deskgood.hold[i].get("attr", "onChangeTo") ) === false
-					) return (deskgood.choice = before);
+					) return (deskgood.hold.select = before);
 					
 					deskgood.hold.update();
 				};
@@ -732,17 +732,17 @@ const deskgood = new Player({
 							eval( deskgood.head[deskgood.head.length-1].get("attr", "onHold") ) === false
 						) return;
 						
-						deskgood.hold.addOne(deskgood.head[deskgood.head.length-1], deskgood.choice);
+						deskgood.hold.addOne(deskgood.head[deskgood.head.length-1], deskgood.hold.select);
 						deskgood.head.delete();
 					}else{ //无方块
-						const choice = deskgood.hold[deskgood.choice];
+						const choice = deskgood.hold[deskgood.hold.select];
 						if ( !choice ) return; //手上无方块
 						
 						if (eval( choice.get("attr", "onPutToHead") ) === false)
 							return;
 						
 						deskgood.head.addOne( choice );
-						deskgood.hold.delete(deskgood.choice);
+						deskgood.hold.delete(deskgood.hold.select);
 					}
 				};
 			}
@@ -765,17 +765,17 @@ const deskgood = new Player({
 							eval( deskgood.body[deskgood.body.length-1].get("attr", "onHold") ) === false
 						) return;
 						
-						deskgood.hold.addOne(deskgood.body[deskgood.body.length-1], deskgood.choice);
+						deskgood.hold.addOne(deskgood.body[deskgood.body.length-1], deskgood.hold.select);
 						deskgood.body.delete();
 					}else{ //无方块
-						const choice = deskgood.hold[deskgood.choice];
+						const choice = deskgood.hold[deskgood.hold.select];
 						if ( !choice ) return; //手上无方块
 						
 						if (eval( choice.get("attr", "onPutToBody") ) === false)
 							return;
 						
 						deskgood.body.addOne( choice );
-						deskgood.hold.delete(deskgood.choice);
+						deskgood.hold.delete(deskgood.hold.select);
 					}
 				};
 			}
@@ -798,17 +798,17 @@ const deskgood = new Player({
 							eval( deskgood.leg[deskgood.leg.length-1].get("attr", "onHold") ) === false
 						) return;
 						
-						deskgood.hold.addOne(deskgood.leg[deskgood.leg.length-1], deskgood.choice);
+						deskgood.hold.addOne(deskgood.leg[deskgood.leg.length-1], deskgood.hold.select);
 						deskgood.leg.delete();
 					}else{ //无方块
-						const choice = deskgood.hold[deskgood.choice];
+						const choice = deskgood.hold[deskgood.hold.select];
 						if ( !choice ) return; //手上无方块
 						
 						if ( eval( choice.get("attr", "onPutToLeg") ) === false )
 							return;
 						
 						deskgood.leg.addOne( choice );
-						deskgood.hold.delete(deskgood.choice);
+						deskgood.hold.delete(deskgood.hold.select);
 					}
 				};
 			}
@@ -831,17 +831,17 @@ const deskgood = new Player({
 						) return;
 						
 					if (deskgood.foot[i]){ //有方块（放到手上）
-						deskgood.hold.addOne(deskgood.foot[deskgood.foot.length-1], deskgood.choice);
+						deskgood.hold.addOne(deskgood.foot[deskgood.foot.length-1], deskgood.hold.select);
 						deskgood.foot.delete();
 					}else{ //无方块
-						const choice = deskgood.hold[deskgood.choice];
+						const choice = deskgood.hold[deskgood.hold.select];
 						if ( !choice ) return; //手上无方块
 						
 						if (eval( choice.get("attr", "onPutToFoot") ) === false)
 							return;
 						
 						deskgood.foot.addOne( choice );
-						deskgood.hold.delete(deskgood.choice);
+						deskgood.hold.delete(deskgood.hold.select);
 					}
 				};
 			}
@@ -980,9 +980,6 @@ if (DEBUG){
 			deskgood_collisionBox_folder.add(deskgood.collisionBox, "y0", 0, 200, 1);
 			deskgood_collisionBox_folder.add(deskgood.collisionBox, "z1", 0, 200, 1);
 			deskgood_collisionBox_folder.add(deskgood.collisionBox, "z0", 0, 200, 1);
-		const deskgood_hold_folder = deskgood_folder.addFolder("工具栏(tools)");
-		deskgood_hold_folder.open();
-			deskgood_hold_folder.add(deskgood, "choice", 0, 3, 1).listen().name("选择工具").onChange(deskgood.hold.update);
 }
 
 
