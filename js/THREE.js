@@ -49,7 +49,7 @@ if (DEBUG){
 
 //平行光
 const directionalLight = new THREE.DirectionalLight("#fff", 1);
-directionalLight.position.set(2, 1, 2);
+directionalLight.position.set(1, -1, 1);
 directionalLight.castShadow = true;
 directionalLight.onlyShadow = true;
 directionalLight.shadow.mapSize.width = 2**10;  // default:512

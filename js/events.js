@@ -89,7 +89,7 @@ const Events = {
 				hold.get("attr", "stackable") != true //不可叠加
 			) return print("当前方块无法叠加", "无法挖掘", 3, "#ff0");
 			
-			if (deskgood.hold.length >= deskgood.hold.maxLength) //空出手来挖
+			if (deskgood.hold.validLength >= deskgood.hold.maxLength) //空出手来挖
 				return print("东西太多，我没办法空出手来挖了", "没手挖方块", 3, "#ff0");
 			
 			free = select; //挖到叠加
@@ -567,21 +567,7 @@ const Events = {
 			
 		}else{
 			console.log("上滚轮");
-			const hold = deskgood.hold,
-				before = deskgood.hold.select; //之前的选择
-			
-			//处理事件
-			if ( hold[before] &&
-				eval(hold[before].get("attr", "onChangeLeave")) === false //取消事件
-			) return;
-			
-			deskgood.hold.select = Math.modRange(before-1, 0, deskgood.hold.length); //左闭右开区间
-			
-			if ( hold[deskgood.hold.select] && //切换后事件
-				eval(hold[deskgood.hold.select].get("attr", "onChangeTo")) === false //取消事件
-			) return (deskgood.hold.select = before); //恢复之前选择
-			
-			hold.update(); //更新选择
+			deskgood.hold.selectSub();
 		}
 	},
 	
@@ -616,21 +602,7 @@ const Events = {
 			
 		}else{
 			console.log("下滚轮");
-			const hold = deskgood.hold,
-				before = deskgood.hold.select;
-			
-			//处理事件
-			if ( hold[before] &&
-				eval(hold[before].get("attr", "onChangeLeave")) === false //取消事件
-			) return;
-			
-			deskgood.hold.select = Math.modRange(before+1, 0, deskgood.hold.length); //左闭右开区间
-			
-			if ( hold[deskgood.hold.select] && //切换后事件
-				eval(hold[deskgood.hold.select].get("attr", "onChangeTo")) === false //取消事件
-			) return (deskgood.hold.select = before); //恢复之前选择
-			
-			hold.update(); //更新选择
+			deskgood.hold.selectAdd();
 		}
 	},
 	

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh">
+	<head>
+		<meta charset="UTF-8" />
+		<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+		<title>我的世界</title>
+		
+		<!-- jquery -->
+		<script src="../../js/modules/jquery.min.js"></script>
+		<script>
+		let ipcRenderer;
+		if (typeof require != "undefined"){ //electron
+			window.$ = window.jQuery = require("./js/modules/jquery.min.js");
+			ipcRenderer = require('electron').ipcRenderer;
+		}
+		</script>
+		
+		<!-- 调试工具 -->
+		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
+		<script>
+		const DEBUG = localStorage.getItem("debug")=="false"? false: true;
+		//const DEBUG = false;
+		if (DEBUG &&
+			/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test( navigator.userAgent.toLowerCase() )
+		){ //手机
+			eruda.init();
+			new VConsole();
+		}
+		</script>
+		
+		<script src="../../js/modules/three.min.js"></script> <!-- three.js -->
+		<script src="../../js/Img.js"></script>
+		<script src="../../js/modules/js_plus.min.js"></script> <!-- js+ -->
+	</head>
+	
+	<body>
+		
+<script>
+//场景
+const scene = new THREE.Scene();
+
+//环境光
+const ambient = new THREE.AmbientLight("#aaa");
+scene.add(ambient);
+
+//户外光源
+const hemiLight = new THREE.HemisphereLight("#87ceeb", "#f5deb3", 0.4/*"#aaf", "#888", 1*/);
+hemiLight.position.set(0,500,0);
+scene.add(hemiLight);
+
+//平行光
+const directionalLight = new THREE.DirectionalLight("#fff", 1);
+directionalLight.position.set(1, -1, 1);
+scene.add(directionalLight);
+
+//相机
+const camera = new THREE.OrthographicCamera(-80, 80, -80, 80, 1, 1000);
+camera.position.set(100, 100, 100);
+camera.lookAt(scene.position); //设置相机方向(指向的场景对象)
+
+//渲染器
+const renderer = new THREE.WebGLRenderer({preserveDrawingBuffer: true, alpha: true});
+renderer.setSize(64, 64);//设置渲染区域尺寸
+renderer.setClearColor(0, 0, 0, 0); //设置透明背景
+renderer.render(scene, camera); //执行渲染操作   指定场景、相机作为参数
+renderer.domElement.style.margin = "0";
+document.body.appendChild(renderer.domElement); //body元素中插入canvas对象
+
+
+//加载贴图
+Img.load("../../img/textures/textures.png").then(()=>{
+	TEXTURES = Img.grid( Img.get("../../img/textures/textures.png"), 16, 16 );
+	
+	for (let x=0, len=TEXTURES.length; x<len; x++)
+		for (let y=0, len=TEXTURES[x].length; y<len; y++)
+			TEXTURES[x][y] = Img.scale(TEXTURES[x][y], 64, 64);
+	
+	const face = [
+			[4,0], [4,0], [3,0], [5,0], [4,0], [4,0]
+		],
+		textures = [];
+	for (let i=0; i<6; i++){
+		textures[i] = new THREE.TextureLoader().load(
+			TEXTURES[ face[i][0] ][ face[i][1] ].toDataURL("image/png")
+		);
+	}
+	
+	const geometry = new THREE.BoxBufferGeometry(100, 100, 100),
+		material = [
+			new THREE.MeshLambertMaterial({ map:textures[0], transparent: true }),
+			new THREE.MeshLambertMaterial({ map:textures[1], transparent: true }),
+			new THREE.MeshLambertMaterial({ map:textures[2], transparent: true }),
+			new THREE.MeshLambertMaterial({ map:textures[3], transparent: true }),
+			new THREE.MeshLambertMaterial({ map:textures[4], transparent: true }),
+			new THREE.MeshLambertMaterial({ map:textures[5], transparent: true })
+		],
+		mesh = new THREE.Mesh(geometry, material);
+	scene.add(mesh);
+	
+});
+
+setInterval(function(){
+	renderer.render(scene, camera); //执行渲染操作   指定场景、相机作为参数
+}, 16);
+</script>
+	</body>
+</html>

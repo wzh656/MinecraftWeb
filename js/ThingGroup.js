@@ -5,17 +5,20 @@ class ThingGroup extends Array{
 	constructor (element, opt={}, ...array){
 		super(...array);
 		
-		const {maxLength, fixedLength, updateCallback} = opt;
+		const {maxLength, fixedLength, onUpdate, onSelect} = opt;
 		this.e = element; //文档元素
 		this.maxLength = maxLength; //最大长度（包括固定）
 		this.fixedLength = fixedLength; //固定长度
 		this.validLength = this.length; //有效长度
-		this.updateCallback = updateCallback; //更新回调
+		this.onUpdate = onUpdate; //更新回调
+		this.onSelect = onSelect; //选择改变回调
 		
 		this.fix().update();
 		this.select = this.length-1;
+		this.setSelect(this.select); //更新css
 	}
 	
+	//添加项目
 	add(item){
 		if (this.validLength+1 > this.maxLength){
 			console.warn("ThingGroup.add", "full to add", item);
@@ -28,6 +31,7 @@ class ThingGroup extends Array{
 		return this.fix().update();
 	}
 	
+	//删除项目
 	delete(index, num=1){
 		if (index+num-1 >= this.validLength){
 			num = this.validLength-index;
@@ -38,6 +42,7 @@ class ThingGroup extends Array{
 		return this.fix().update();
 	}
 	
+	//更新固定
 	fix(){
 		const fixed = Math.min(this.fixedLength, this.maxLength-this.validLength); //可在末尾添加固定个数
 		for (let i=0; i<fixed; i++)
@@ -46,68 +51,79 @@ class ThingGroup extends Array{
 		return this;
 	}
 	
+	//设置选中项
+	setSelect(select){
+		const before = this.select,
+			after = Math.modRange(select, 0, this.length, 1);
+		
+		//onSelect事件
+		if (this.select != after && this.onSelect && this.onSelect(after, before) === false)
+			return;
+		
+		//改变并修改class
+		this.select = after;
+		$(this.e).children(":eq("+this.select+")").addClass("checked")
+			.siblings().removeClass("checked");
+		
+		return this.update();
+	}
+	
+	//选中项后移
+	selectAdd(num=1){
+		const before = this.select,
+			after = Math.modRange(this.select+num, 0, this.length, 1);
+		
+		//onSelect事件
+		if (this.select != after && this.onSelect && this.onSelect(after, before) === false)
+			return;
+		
+		//改变并修改class
+		this.select = after;
+		$(this.e).children(":eq("+this.select+")").addClass("checked")
+			.siblings().removeClass("checked");
+		
+		return this.update();
+	}
+	
+	//选中项前移
+	selectSub(num=1){
+		const before = this.select,
+			after = Math.modRange(this.select-num, 0, this.length, 1);
+		
+		//onSelect事件
+		if (this.select != after && this.onSelect && this.onSelect(after, before) === false)
+			return;
+		
+		//改变并修改class
+		this.select = after;
+		$(this.e).children(":eq("+this.select+")").addClass("checked")
+			.siblings().removeClass("checked");
+		
+		return this.update();
+	}
+	
+	//更新显示
 	update(retryTime=1000){
 		if (!TEXTURES) //贴图未加载 等待重试
 			return setTimeout(()=>this.update(retryTime), retryTime);
 		
 		const children = [];
-		for (let i=0; i<this.length; i++)
-			if ( this[i] ){
-				const canvas = $("<canvas></canvas>")
-					.css("width", "100%")
-					.css("height", "100%");
-				
-				children.push( $("<li></li>").append(canvas) );
-				
-				setTimeout(()=>{
-					const width = canvas.width(),
-						height = canvas.height();
-					
-					canvas.attr("width", width)
-						.attr("height", height);
-					
-					//场景
-					const scene = new THREE.Scene();
-					
-					//环境光
-					const ambient = new THREE.AmbientLight(0x444444);
-					scene.add(ambient);
-					
-					switch (this[i].type){
-						case "Block": //普通方块
-							this[i].makeMesh(); //以模板建立
-							break;
-						
-						case "EntityBlock": //实体方块
-							this[i].makeGeometry().updateSize().makeMesh(); //以模板建立
-							break;
-						
-						case "Entity": //实体
-							break;
-					}
-					scene.add(this[i].block.mesh);
-					
-					//相机
-					const camera = new THREE.PerspectiveCamera(45, width/height, 1, 1000*100);
-					
-					//渲染器
-					const renderer = new THREE.WebGLRenderer();
-					renderer.setSize(width, height);//设置渲染区域尺寸
-					renderer.setClearColor("rgba(0, 0, 0, 0)", 1); //设置背景颜色
-					renderer.domElement;
-					
-					renderer.render(scene, camera);
-				}, 0);
-				
-			}else{
-				children.push(
-					$("<li></li>")
-						.append(
-							$("<img/>").attr("src", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42m")
-						)
-				);
+		for (let i=0; i<this.length; i++){
+			let src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42m";
+			if (this[i]){
+				const [x, y] = this[i].get("view");
+				src = TEXTURES[x][y].toDataURL();
 			}
-		if (typeof this.updateCallback == "function") this.updateCallback(children);
+			children.push(
+				$("<li></li>")
+					.append(
+						$("<img/>").attr("src", src)
+					)
+					.addClass(i==this.select? "checked": "")
+			);
+		}
+		if (this.onUpdate)
+			this.onUpdate(children);
 		$(this.e).empty().append(...children);
 		
 		return this;
@@ -118,7 +134,7 @@ class ThingGroup extends Array{
 		super(...array);
 		
 		this.e = element;
-		const {fixedLength, maxLength, updateCallback} = opt;
+		const {fixedLength, maxLength, onUpdate} = opt;
 		if (fixedLength){ //固定长度
 			this.fixedLength = +fixedLength;
 			if (!opt.maxLength){ //无最大长度
@@ -130,7 +146,7 @@ class ThingGroup extends Array{
 			}
 		}
 		if (maxLength) this.maxLength = +maxLength; //最大长度
-		if (updateCallback) this.updateCallback = updateCallback; //更新完回调
+		if (onUpdate) this.onUpdate = onUpdate; //更新完回调
 		
 		// setTimeout( ()=>this.update(), 30 ); //自动更新
 	}
@@ -232,7 +248,7 @@ class ThingGroup extends Array{
 					)[0]
 				);
 		}
-		if (typeof this.updateCallback == "function") this.updateCallback(children);
+		if (typeof this.onUpdate == "function") this.onUpdate(children);
 		$(this.e).empty().append(...children);
 		return this;
 	}
