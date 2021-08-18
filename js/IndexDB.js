@@ -163,7 +163,7 @@ class IndexDB{
 		request.onsuccess = function(e){
 			const cursor = e.target.result;
 			if (cursor){
-				if (stepCallback && stepCallback(cursor.value, cursor) === false) return;
+				if (stepCallback && stepCallback(cursor.value, cursor) === false) return (successCallback && successCallback());
 				cursor.continue();
 			}else{
 				if (successCallback) successCallback(cursor);

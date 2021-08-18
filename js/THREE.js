@@ -64,9 +64,8 @@ setTimeout(function(){
 	`<font style="font-size:16px">`+
 		`如果设备`+
 			`<b>性能差</b>`+
-			`，使用光影效果将会导致`+
-			`<b>卡顿</b>。`+
-			`<button onclick="directionalLight.castShadow=false;message('关闭光影','妈妈再也不用担心手机卡还发烫了（只担心画质丑的一批）', 3);">`+
+			`，可以关闭调试模式和光影。`+
+			`<button onclick="directionalLight.castShadow=false;message('关闭光影','妈妈再也不用担心手机又卡又发烫还没180fps了（只担心画质丑的一批）', 3);">`+
 				`点此可关闭光影`+
 			`</button>`+
 		`</font>`, 5);

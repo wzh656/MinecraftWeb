@@ -77,10 +77,10 @@ document.addEventListener("keydown", function (e){
 	if (e.keyCode == 114){ //F3
 		if (e.shiftKey){ //shift+F3 切换调试
 			console.log("shift+F3:", keydown.key);
-			if (localStorage.getItem("我的世界_debug") == "false"){ //false
-				localStorage.setItem("我的世界_debug", true);
+			if (localStorage.getItem("我的世界_debug") == "0"){ //已关闭调试
+				localStorage.setItem("我的世界_debug", "1");
 			}else{ //true 或 null
-				localStorage.setItem("我的世界_debug", false);
+				localStorage.setItem("我的世界_debug", "0");
 			}
 			location.reload();
 		}else{ //F3 切换调试

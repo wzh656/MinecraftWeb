@@ -349,10 +349,10 @@ const deskgood = { //桌子好
 		if (x > 0){
 			//上半身
 			let objs = ray3D(
-				{x: deskgood.pos.x-50},
+				{},
 				{x: 1},
 				0,
-				x+60
+				x+10
 			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
 				const fx = Math.min(...objs.map(v => v.point.x))-10; //获取碰撞点，计算移动位置
@@ -364,10 +364,10 @@ const deskgood = { //桌子好
 			}
 			//下半身
 			objs = ray3D(
-				{x: deskgood.pos.x-50, y: deskgood.pos.y-100},
+				{y: deskgood.pos.y-100},
 				{x: 1},
 				0,
-				x+60
+				x+10
 			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
 				const fx = Math.min(...objs.map(v => v.point.x))-10; //获取碰撞点，计算移动位置
@@ -380,10 +380,10 @@ const deskgood = { //桌子好
 		}else if (x < 0){
 			//上半身
 			let objs = ray3D(
-				{x: deskgood.pos.x+50},
+				{},
 				{x: -1},
 				0,
-				-x+60
+				-x+10
 			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
 				const fx = Math.max(...objs.map(v => v.point.x))+10; //获取碰撞点，计算移动位置
@@ -396,10 +396,10 @@ const deskgood = { //桌子好
 			}
 			//下半身
 			objs = ray3D(
-				{x: deskgood.pos.x+50, y: deskgood.pos.y-100},
+				{y: deskgood.pos.y-100},
 				{x: -1},
 				0,
-				-x+60
+				-x+10
 			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
 				const fx = Math.max(...objs.map(v => v.point.x))+10; //获取碰撞点，计算移动位置
@@ -415,10 +415,10 @@ const deskgood = { //桌子好
 		//Y
 		if (y > 0){ //上
 			let objs = ray3D(
-				{y: deskgood.pos.y+50},
+				{},
 				{y: 1},
 				0,
-				y
+				y+50
 			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
 				/*const fy = Math.min(...ray3D(
@@ -433,10 +433,10 @@ const deskgood = { //桌子好
 			}
 		}else if (y < 0){ //下
 			let objs = ray3D(
-				{y: deskgood.pos.y-150},
+				{},
 				{y: -1},
 				0,
-				-y
+				-y+150
 			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
 				/*const fy = Math.max(...ray3D(
@@ -455,10 +455,10 @@ const deskgood = { //桌子好
 		if (z > 0){
 			//上半身
 			let objs = ray3D(
-				{z: deskgood.pos.z-50},
+				{},
 				{z: 1},
 				0,
-				z+60
+				z+10
 			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
 				const fz = Math.min(...objs.map(v => v.point.z))-10; //获取碰撞点，计算移动位置
@@ -470,10 +470,10 @@ const deskgood = { //桌子好
 			}
 			//下半身
 			objs = ray3D(
-				{z: deskgood.pos.z-50, y: deskgood.pos.y-100},
+				{y: deskgood.pos.y-100},
 				{z: 1},
 				0,
-				z+60
+				z+10
 			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
 				const fz = Math.min(...objs.map(v => v.point.z))-10; //获取碰撞点，计算移动位置
@@ -486,10 +486,10 @@ const deskgood = { //桌子好
 		}else if (z < 0){
 			//上半身
 			let objs = ray3D(
-				{z: deskgood.pos.z+50},
+				{},
 				{z: -1},
 				0,
-				-z+60
+				-z+10
 			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
 				const fz = Math.max(...objs.map(v => v.point.z))+10; //获取碰撞点，计算移动位置
@@ -502,10 +502,10 @@ const deskgood = { //桌子好
 			}
 			//下半身
 			objs = ray3D(
-				{z: deskgood.pos.z+50, y: deskgood.pos.y-100},
+				{y: deskgood.pos.y-100},
 				{z: -1},
 				0,
-				-z+60
+				-z+10
 			).filter(value => value.object.userData.through != true);
 			if (objs.length){ //被阻挡
 				const fz = Math.max(...objs.map(v => v.point.z))+10; //获取碰撞点，计算移动位置

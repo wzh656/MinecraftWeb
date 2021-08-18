@@ -1,6 +1,6 @@
 //数据库
 let openDBListener = null; //数据库加载完毕监听
-const db = new IndexDB("Minecraft", 1, {
+const db = new IndexDB("Minecraft", 2, {
 		updateCallback: function(){
 			db.createTable(TABLE.WORLD, {
 				keyPath: "key",
@@ -63,11 +63,11 @@ const DB = {
 				
 				time.setTime(res.time);
 				
-				try_start_load(); //加载区块
-				
 				return false; //停止查找
 			},
-			successCallback: try_start_load //没有数据也开始加载
+			successCallback: function(){
+				try_start_load(); //防止没有数据也开始加载
+			}
 		});
 	},
 	
