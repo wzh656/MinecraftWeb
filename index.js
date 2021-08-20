@@ -7,7 +7,7 @@ const child_process = require("child_process");
 let win;
 
 function createWindow(){ //创建了一个新的窗口
-	child_process.exec("创建桌面快捷方式.vbs");
+	// child_process.exec("创建桌面快捷方式.vbs");
 
 	win = new BrowserWindow({
 		minWidth: 300,
@@ -24,7 +24,7 @@ function createWindow(){ //创建了一个新的窗口
 
 	win.loadFile('home.html'); // 加载项目的home.html文件.
 
-	win.webContents.openDevTools(); // 打开开发工具
+	// win.webContents.openDevTools(); // 打开开发工具
 
 	win.on('closed', () => {
 		// 取消引用窗口对象, 如果你的应用程序支持多窗口，通常你会储存windows在数组中，这是删除相应元素的时候。
