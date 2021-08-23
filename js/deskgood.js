@@ -696,6 +696,10 @@ const deskgood = new Player({
 			) return false;
 		},
 		onUpdate(children){
+			for (const [i,v] of Object.entries(children))
+				v.click(function(){
+					deskgood.hold.setSelect(i);
+				});
 			children.push(
 				$("<li></li>").append( $("<img/>").attr("src", "./img/more.png") )
 					.click(()=> state("bag"))

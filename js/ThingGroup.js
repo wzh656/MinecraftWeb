@@ -36,7 +36,11 @@ class ThingGroup extends Array{
 		if (index+num-1 >= this.validLength){
 			num = this.validLength-index;
 		}
-		this.splice(index, num);
+		for (let i=index+num; i<this.length; i++){
+			this[i-num] = this[i];
+		}
+		delete this[this.length-1];
+		// this.splice(index, num);
 		this.validLength -= num;
 		
 		return this.fix().update();
