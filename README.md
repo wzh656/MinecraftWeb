@@ -35,7 +35,9 @@
 	
 	### 派生网站（国内）
 	> 由其他开发者clone项目部署产生的网站（鉴于其他开发者无法同步最新修改，推荐运行最新网页）
+	+ <https://www.mc244.com/game/Minecraft/home.html>
 	+ <https://jason-bowen-zheng.gitee.io/MinecraftWeb/>
+	+ <https://blog.greenhandzdl.tk/MinecraftWeb/home.html>
 	+ <https://mc.play.lancex.top/>
 	+ <https://webmc.minecraft.net.xmsmi.cn/>
 	
