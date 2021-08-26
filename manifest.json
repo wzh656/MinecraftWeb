@@ -3,10 +3,10 @@
     "id" : "H5296738F", /*应用的标识*/
     "name" : "Minecraft", /*应用名称，程序桌面图标名称*/
     "version" : {
-        "name" : "1.2.0-alpha", /*应用版本名称*/
-        "code" : "24"
+        "name" : "1.3-alpha", /*应用版本名称*/
+        "code" : 25
     },
-    "description" : "一个真实的我的世界游戏", /*应用描述信息*/
+    "description" : "一个独具创新与真实特色的我的世界风格仿制版游戏", /*应用描述信息*/
     "icons" : {
         "72" : "icon.png"
     },
@@ -46,9 +46,6 @@
         },
         "Gallery" : {
             "description" : "访问系统相册"
-        },
-        "Geolocation" : {
-            "description" : "访问位置信息"
         },
         "Invocation" : {
             "description" : "使用Native.js能力"
@@ -145,7 +142,15 @@
                         "spotlight-retina7" : "", /*iPhone4S/5/6 Spotlight搜索程序图标，分辨率：80x80*/
                         "settings-normal" : "", /*iPhone4设置页面程序图标，分辨率：29x29*/
                         "settings-retina" : "", /*iPhone4S/5/6设置页面程序图标，分辨率：58x58*/
-                        "settings-retina8" : "" /*iPhone6Plus设置页面程序图标，分辨率：87x87*/
+                        "settings-retina8" : "", /*iPhone6Plus设置页面程序图标，分辨率：87x87*/
+                        "app@2x" : "unpackage/res/icons/120x120.png",
+                        "app@3x" : "unpackage/res/icons/180x180.png",
+                        "notification@2x" : "unpackage/res/icons/40x40.png",
+                        "notification@3x" : "unpackage/res/icons/60x60.png",
+                        "settings@2x" : "unpackage/res/icons/58x58.png",
+                        "settings@3x" : "unpackage/res/icons/87x87.png",
+                        "spotlight@2x" : "unpackage/res/icons/80x80.png",
+                        "spotlight@3x" : "unpackage/res/icons/120x120.png"
                     },
                     "ipad" : {
                         "normal" : "", /*iPad普通屏幕程序图标，分辨率：72x72*/
@@ -157,15 +162,26 @@
                         "spotlight-normal7" : "", /*iPad iOS7 Spotlight搜索程序图标，分辨率：40x40*/
                         "spotlight-retina7" : "", /*iPad iOS7高分屏Spotlight搜索程序图标，分辨率：80x80*/
                         "settings-normal" : "", /*iPad设置页面程序图标，分辨率：29x29*/
-                        "settings-retina" : "" /*iPad高分屏设置页面程序图标，分辨率：58x58*/
-                    }
+                        "settings-retina" : "", /*iPad高分屏设置页面程序图标，分辨率：58x58*/
+                        "app" : "unpackage/res/icons/76x76.png",
+                        "app@2x" : "unpackage/res/icons/152x152.png",
+                        "notification" : "unpackage/res/icons/20x20.png",
+                        "notification@2x" : "unpackage/res/icons/40x40.png",
+                        "proapp@2x" : "unpackage/res/icons/167x167.png",
+                        "settings" : "unpackage/res/icons/29x29.png",
+                        "settings@2x" : "unpackage/res/icons/58x58.png",
+                        "spotlight" : "unpackage/res/icons/40x40.png",
+                        "spotlight@2x" : "unpackage/res/icons/80x80.png"
+                    },
+                    "appstore" : "unpackage/res/icons/1024x1024.png"
                 },
                 "android" : {
                     "mdpi" : "", /*普通屏程序图标，分辨率：48x48*/
                     "ldpi" : "", /*大屏程序图标，分辨率：48x48*/
-                    "hdpi" : "", /*高分屏程序图标，分辨率：72x72*/
-                    "xhdpi" : "", /*720P高分屏程序图标，分辨率：96x96*/
-                    "xxhdpi" : "" /*1080P 高分屏程序图标，分辨率：144x144*/
+                    "hdpi" : "unpackage/res/icons/72x72.png", /*高分屏程序图标，分辨率：72x72*/
+                    "xhdpi" : "unpackage/res/icons/96x96.png", /*720P高分屏程序图标，分辨率：96x96*/
+                    "xxhdpi" : "unpackage/res/icons/144x144.png", /*1080P 高分屏程序图标，分辨率：144x144*/
+                    "xxxhdpi" : "unpackage/res/icons/192x192.png"
                 }
             },
             "splashscreen" : {

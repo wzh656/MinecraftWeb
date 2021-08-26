@@ -217,7 +217,7 @@ const deskgood = { //桌子好
 		
 		const bgm = $("#bgm")[0];
 		bgm.volume = 1;
-		bgm.src = "./music/凉凉.mp3";
+		bgm.src = "./music/fail.mp3";
 		bgm.play();
 		
 		console.warn("deskgood死亡");
