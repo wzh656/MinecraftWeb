@@ -13,18 +13,22 @@
 
 > # 运行(Run)
 
-1. 手机版Android apk应用 / 电脑版Windows exe(electron实现)运行
+1. 安卓Android/电脑Windows平台apk/exe运行
 	
-    国内下载链接: [腾讯微云永久下载链接(v1.1.0+,apk&electron)](https://share.weiyun.com/WkQTgj8H)
-    | 版本(version)	| Android版下载(apk)																																		| Windows下载(electron)																		| Github查看(release)									|
-    | -----------------	| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	| ------------------------------------------------------------------------------------------------------	|
-    | v1.2.0-alpha	| [完整版(22.3MB)](https://github.com/wzh656/MinecraftWeb/releases/download/1.2.0-alpha/Minecraft-v1.2.0-alpha-full.apk)，[精简版(6.41MB)](https://github.com/wzh656/MinecraftWeb/releases/download/1.2.0-alpha/Minecraft-v1.2.0-alpha-simplified.apk)	| [exe安装程序(67.3MB)](https://github.com/wzh656/MinecraftWeb/releases/download/1.2.0-alpha/Minecraft-v1.2.0-win32-x64-installProgram.exe)	| [release](https://github.com/wzh656/MinecraftWeb/releases/tag/1.2.0-alpha)		|
-    | v1.1.0-alpha	| [完整版(22.49MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v1.1.0-alpha/Minecraft.apk)																							| 未打包(unpackaged)																		| [release](https://github.com/wzh656/MinecraftWeb/releases/tag/v1.1.0-alpha)	|
-    | v1.0.0.3-alpha	| [完整版(34.06MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v1.0.0.3-alpha/full.apk)，[精简版(6.5MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v1.0.0.3-alpha/simplified.apk)							| 未打包(unpackaged)																		| [release](https://github.com/wzh656/MinecraftWeb/releases/tag/v1.0.0.3-alpha)	|
-    | v1.0.0.1-alpha	| [完整版(23.88MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v1.0.0.1-alpha/Minecraft-full.apk)																					| 未打包(unpackaged)																		| [release](https://github.com/wzh656/MinecraftWeb/releases/tag/v1.0.0.1-alpha)	|
-    | v0.5.0-alpha	| [完整版(23.87MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v0.5.0-alpha/Minecraft-full.apk)，[精简版(5.35MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v0.5.0-alpha/Minecraft-simplified.apk)				| 未打包(unpackaged)																		| [release](https://github.com/wzh656/MinecraftWeb/releases/tag/v0.5.0-alpha)	|
-    | v0.4.0-alpha	| [完整版(23.85MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v0.4.0-alpha/Minecraft-full.apk)，[精简版(5.34MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v0.4.0-alpha/Minecraft-simplified.apk)				| 未打包(unpackaged)																		| [release](https://github.com/wzh656/MinecraftWeb/releases/tag/v0.4.0-alpha)	|
-    | v0.3.2-alpha	| [原始版(0.89MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v0.3.2-alpha/Minecraft_v0.3.2-alpha.apk)																				| 未打包(unpackaged)																		| [release](https://github.com/wzh656/MinecraftWeb/releases/tag/v0.3.2-alpha)	|
+    国内下载链接: 
+    +  [蓝奏云下载链接（密码wzh）](https://wwm.lanzouj.com/b02j8yogj)
+    +  [腾讯微云下载链接（需QQ登录）](https://share.weiyun.com/WkQTgj8H)
+
+    | 版本(version)     | Android版下载(apk)                                                                                                                                                                                                                                   | Windows下载(electron)                                                                                                                     | Github查看(release)                                                           |
+    | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+    | v1.3-alpha        | [完整版(30.2MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v1.3-alpha/Minecraft_v1.3-alpha.apk)                                                                                                                                       | [exe安装程序(67.3MB)](https://github.com/wzh656/MinecraftWeb/releases/download/1.2.0-alpha/Minecraft-v1.2.0-win32-x64-installProgram.exe) | [release](https://github.com/wzh656/MinecraftWeb/releases/tag/1.2.0-alpha)    |
+    | v1.2.0-alpha      | [完整版(22.3MB)](https://github.com/wzh656/MinecraftWeb/releases/download/1.2.0-alpha/Minecraft-v1.2.0-alpha-full.apk)，[精简版(6.41MB)](https://github.com/wzh656/MinecraftWeb/releases/download/1.2.0-alpha/Minecraft-v1.2.0-alpha-simplified.apk) | [exe安装程序(67.3MB)](https://github.com/wzh656/MinecraftWeb/releases/download/1.2.0-alpha/Minecraft-v1.2.0-win32-x64-installProgram.exe) | [release](https://github.com/wzh656/MinecraftWeb/releases/tag/1.2.0-alpha)    |
+    | v1.1.0-alpha      | [完整版(22.49MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v1.1.0-alpha/Minecraft.apk)                                                                                                                                               | 未打包(unpackaged)                                                                                                                        | [release](https://github.com/wzh656/MinecraftWeb/releases/tag/v1.1.0-alpha)   |
+    | v1.0.0.3-alpha    | [完整版(34.06MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v1.0.0.3-alpha/full.apk)，[精简版(6.5MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v1.0.0.3-alpha/simplified.apk)                                         | 未打包(unpackaged)                                                                                                                        | [release](https://github.com/wzh656/MinecraftWeb/releases/tag/v1.0.0.3-alpha) |
+    | v1.0.0.1-alpha    | [完整版(23.88MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v1.0.0.1-alpha/Minecraft-full.apk)                                                                                                                                        | 未打包(unpackaged)                                                                                                                        | [release](https://github.com/wzh656/MinecraftWeb/releases/tag/v1.0.0.1-alpha) |
+    | v0.5.0-alpha      | [完整版(23.87MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v0.5.0-alpha/Minecraft-full.apk)，[精简版(5.35MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v0.5.0-alpha/Minecraft-simplified.apk)                        | 未打包(unpackaged)                                                                                                                        | [release](https://github.com/wzh656/MinecraftWeb/releases/tag/v0.5.0-alpha)   |
+    | v0.4.0-alpha      | [完整版(23.85MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v0.4.0-alpha/Minecraft-full.apk)，[精简版(5.34MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v0.4.0-alpha/Minecraft-simplified.apk)                        | 未打包(unpackaged)                                                                                                                        | [release](https://github.com/wzh656/MinecraftWeb/releases/tag/v0.4.0-alpha)   |
+    | v0.3.2-alpha      | [原始版(0.89MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v0.3.2-alpha/Minecraft_v0.3.2-alpha.apk)                                                                                                                                   | 未打包(unpackaged)                                                                                                                        | [release](https://github.com/wzh656/MinecraftWeb/releases/tag/v0.3.2-alpha)   |
 
 2. 网页版运行：可以直接访问 <https://wzh656.github.io/MinecraftWeb/home.html> 运行。
     > 注意：
@@ -35,11 +39,11 @@
 	
 	### 派生网站（国内）
 	> 由其他开发者clone项目部署产生的网站（鉴于其他开发者无法同步最新修改，推荐运行最新网页）
-	+ <https://www.mc244.com/game/Minecraft/home.html>
+	+ （已失效）<https://www.mc244.com/game/Minecraft/home.html>
 	+ <https://jason-bowen-zheng.gitee.io/MinecraftWeb/>
 	+ <https://blog.greenhandzdl.tk/MinecraftWeb/home.html>
-	+ <https://mc.play.lancex.top/>
-	+ <https://webmc.minecraft.net.xmsmi.cn/>
+	+ （已失效）<https://mc.play.lancex.top/>
+	+ （已失效）<https://webmc.minecraft.net.xmsmi.cn/>
 	
 3. git clone：当然也可以直接克隆本仓库<https://github.com/wzh656/MinecraftWeb.git>，
     然后用浏览器（推荐Chrome）直接运行`home.html`（也可以放到服务器环境打开），
