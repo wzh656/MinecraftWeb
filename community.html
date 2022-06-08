@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Copyleft 2020~2021 by wzh -->
+<!-- Copyleft 2020~2022 by wzh -->
 <html lang="zh">
 	<head>
 		<meta charset="UTF-8" />
@@ -299,7 +299,7 @@
 		
 		<script src="./js/modules/sha512.js"></script> <!-- sha加密 -->
 		<script src="./js/modules/marked.min.js"></script> <!-- markdown -->
-
+		
 		<script src="https://wzh.glitch.me/socket.io/socket.io.js"></script> <!-- socket -->
 		
 		<script src="./js/modules/js_plus.min.js"></script> <!-- js+ -->
@@ -388,9 +388,15 @@ socket.on("error", function(data){
 	layer.msg("服务器连接错误！", {icon:2});
 });
 
+socket.on("chatroom_assignID", function(data){
+	console.log("↓ chatroom_assignID", data)
+	ID = data;
+	$(".state").html(`你的分配ID：${ID}`);
+});
+
 socket.on("chatroom_roomList", function(data){
 	console.log("↓ chatroom_roomList", data)
-	$(".state").html(`当前在线：${Object.keys(data).length}人`);
+	$(".state").html(`当前在线：${Object.keys(data).length}人（你的分配ID：${ID}）`);
 });
 
 //发送消息
