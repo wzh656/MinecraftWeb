@@ -100,6 +100,28 @@
 			font-size: 1.6em;
 			line-height: 2rem;
 		}
+
+		/* state */
+		.state{
+			flex: none;
+			margin: 0;
+			padding: 0;
+			text-align: center;
+			font-size: 0.6em;
+		}
+		.state.connecting{
+			background-color: yellow;
+			color: red;
+		}
+		.state.success{
+			/*display: none;*/
+			background-color: blue;
+			color: white;
+		}
+		.state.failed{
+			background-color: red;
+			color: white;
+		}
 		
 		
 		/* list */
@@ -277,6 +299,8 @@
 		
 		<script src="./js/modules/sha512.js"></script> <!-- sha加密 -->
 		<script src="./js/modules/marked.min.js"></script> <!-- markdown -->
+
+		<script src="https://wzh.glitch.me/socket.io/socket.io.js"></script> <!-- socket -->
 		
 		<script src="./js/modules/js_plus.min.js"></script> <!-- js+ -->
     	<script src="https://wzh656.github.io/MinecraftWeb/js/modules/dynamic.js" async></script> <!-- dynamic -->
@@ -287,6 +311,7 @@
 			<span id="exit">〈退出</span>
 			<h2>我的世界讨论区</h2>
 		</header>
+		<p class="state connecting">连接服务器中……</p>
 		<ul id="list"></ul>
 		<form>
 			<textarea id="msg" placeholder="shift+Enter发送（支持markdown/html格式）" contenteditable></textarea>
@@ -301,11 +326,90 @@
 		</footer>
 		
 <script>
+let socket, //socket.io
+	ID,
+	ROOM = "MinecraftCommunity";
+
+if (typeof io == "undefined"){ //未加载socket.io.js
+	$(".state").html("网络错误，请检查网络连接再刷新页面！")
+		.removeClass().addClass("state failed");
+	layer.alert("网络错误，请检查网络连接再刷新页面！", {icon:2});
+	throw "";
+}
+
+socket = io("https://wzh.glitch.me/");
+
+function emit(name, ...data){
+	console.log("↑", name, data);
+	socket.emit(name, ...data);
+};
+
+socket.on("connecting", function(data){
+	$(".state").html("连接服务器中……")
+		.removeClass().addClass("state connecting");
+});
+socket.on("connect", function(data){
+	emit("type", "chatroom"); //type
+	emit("chatroom_room", ROOM); //room
+	$(".state").html("服务器连接成功")
+		.removeClass().addClass("state success");
+	layer.msg("服务器连接成功", {icon:1});
+});
+socket.on("connect_failed", function(data){
+	$(".state").html("服务器连接失败")
+		.removeClass().addClass("state failed");
+	layer.msg("服务器连接失败", {icon:2});
+});
+socket.on("disconnect", function(data){
+	$(".state").html("与服务器连接断开")
+		.removeClass().addClass("state failed");
+	layer.msg("与服务器连接断开", {icon:2});
+});
+socket.on("reconnecting", function(data){
+	$(".state").html("重连中……")
+		.removeClass().addClass("state connecting");
+});
+socket.on("reconnect", function(data){
+	emit("type", "chatroom"); //type
+	emit("chatroom_room", ROOM); //room
+	$(".state").html("服务器重连成功")
+		.removeClass().addClass("state success");
+	layer.msg("服务器重连成功", {icon:1});
+});
+socket.on("reconnect_failed", function(data){
+	$(".state").html("服务器重连失败")
+		.removeClass().addClass("state failed");
+	layer.msg("服务器重连失败", {icon:2});
+});
+socket.on("error", function(data){
+	console.error(data);
+	$(".state").html("服务器连接错误！")
+		.removeClass().addClass("state failed");
+	layer.msg("服务器连接错误！", {icon:2});
+});
+
+socket.on("chatroom_roomList", function(data){
+	console.log("↓ chatroom_roomList", data)
+	$(".state").html(`当前在线：${Object.keys(data).length}人`);
+});
+
 //发送消息
 function send(name, msg, attr={}){
 	return new Promise((resolve, reject)=>{
-		console.log("send", name, msg, attr)
-		$.ajax({
+		console.log("send", {name, msg, attr})
+		emit("chatroom_send", {
+			room: ROOM,
+			name,
+			msg,
+			attr
+		});
+		socket.on("chatroom_send", function(){
+			resovle();
+		});
+		socket.on("chatroom_send_failed", function(err){
+			console.error(err);
+		});
+		/*$.ajax({
 			url: "https://wzh.glitch.me/chatroom/MinecraftCommunity/send",
 			data: {name, msg, attr},
 			type: "GET",
@@ -318,14 +422,22 @@ function send(name, msg, attr={}){
 				alert(`发送请求错误！\nstatus: ${status}\nresponse: ${response}`);
 				reject(response, status, xhr);
 			}
-		});
+		});*/
 	});
 }
+
 //获取消息
 function get(date){
 	return new Promise((resolve, reject)=>{
 		console.log("get", date)
-		$.ajax({
+		emit("chatroom_get", ROOM, date);
+		socket.on("chatroom_get", function(data){
+			resolve(data);
+		});
+		socket.on("chatroom_get_failed", function(err){
+			console.error(err);
+		});
+		/*$.ajax({
 			url: "https://wzh.glitch.me/chatroom/MinecraftCommunity/get",
 			data: {date},
 			type: "GET",
@@ -338,14 +450,22 @@ function get(date){
 				alert(`发送请求错误！\nstatus: ${status}\nresponse: ${response}`);
 				reject(response, status, xhr);
 			}
-		});
+		});*/
 	});
 }
+
 //获取所有日期
 function dates(){
 	return new Promise((resolve, reject)=>{
 		console.log("dates")
-		$.ajax({
+		emit("chatroom_dates", ROOM);
+		socket.on("chatroom_dates", function(data){
+			resolve(data);
+		});
+		socket.on("chatroom_dates_failed", function(err){
+			console.error(err);
+		});
+		/*$.ajax({
 			url: "https://wzh.glitch.me/chatroom/MinecraftCommunity/dates",
 			data: {},
 			type: "GET",
@@ -358,7 +478,7 @@ function dates(){
 				alert(`发送请求错误！\nstatus: ${status}\nresponse: ${response}`);
 				reject(response, status, xhr);
 			}
-		});
+		});*/
 	});
 }
 
