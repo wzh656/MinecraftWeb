@@ -7,10 +7,10 @@
 		<title>我的世界 | 交流区</title>
 		
 		<!--icon-->
-		<link href="./img/icon.png" rel="icon" type="image/x-icon"/>
+		<link href="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/img/icon.png" rel="icon" type="image/x-icon"/>
 		
 		<!-- 异步fonts加载 -->
-		<script src="./js/modules/webfontloader.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/js/modules/webfontloader.js"></script>
 		<script>
 		if (typeof require != "undefined"){ //electron
 			console.log("electron")
@@ -23,7 +23,7 @@
 			WebFont.load({
 				google: {
 					families: ["kt", "st", "xs", "zyyt"],
-					api: "./css/fonts.css"
+					api: "https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/css/fonts.css"
 				}
 			});
 		}
@@ -263,7 +263,7 @@
 		</style>
 		
 		<!-- jquery -->
-		<script src="./js/modules/jquery.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/js/modules/jquery.min.js"></script>
 		<script>
 		if (typeof require != "undefined") //electron
 			window.$ = window.jQuery = require("./js/modules/jquery.min.js");
@@ -272,7 +272,7 @@
 		<!-- layui -->
 		<!--<link rel="stylesheet" href="https://unpkg.com/layui@2.6.4/dist/css/layui.css">-->
 		<script src="https://unpkg.com/layui@2.6.8/dist/layui.js"></script>
-		<!--<script src="./js/modules/layui.js"></script>-->
+		<!--<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/js/modules/layui.js"></script>-->
 		
 		<!-- 流量统计 -->
 		<script src="https://wzh656.github.io/MinecraftWeb/js/modules/count.js" async></script>
@@ -297,12 +297,12 @@
 		}
 		</script>
 		
-		<script src="./js/modules/sha512.js"></script> <!-- sha加密 -->
-		<script src="./js/modules/marked.min.js"></script> <!-- markdown -->
+		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/js/modules/sha512.js"></script> <!-- sha加密 -->
+		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/js/modules/marked.min.js"></script> <!-- markdown -->
 		
 		<script src="https://wzh.glitch.me/socket.io/socket.io.js"></script> <!-- socket -->
 		
-		<script src="./js/modules/js_plus.min.js"></script> <!-- js+ -->
+		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/js/modules/js_plus.min.js"></script> <!-- js+ -->
     	<script src="https://wzh656.github.io/MinecraftWeb/js/modules/dynamic.js" async></script> <!-- dynamic -->
 		
 	</head>
@@ -410,7 +410,7 @@ function send(name, msg, attr={}){
 			attr
 		});
 		socket.on("chatroom_send", function(){
-			resovle();
+			resolve();
 		});
 		socket.on("chatroom_send_failed", function(err){
 			console.error(err);
@@ -504,7 +504,7 @@ while (!NAME){
 
 //新手提示
 if (!localStorage.getItem("MinecraftCommunity_help")){
-	layer.alert("操作提示：下拉（或鼠标滚动）消息列表可加载上一天消息记录");
+	alert("操作提示：下滑（或鼠标滚动）消息列表可加载上一天消息记录");
 	localStorage.setItem("MinecraftCommunity_help", 1);
 }
 
@@ -572,7 +572,7 @@ async function update(loadLayer=false, date=DATES[DATES.length-1] || new Date().
 		layer.close(waitLayerId);
 }
 
-dates().then((res) => {
+dates().then(res => {
 	DATES = res;
 	DATE = DATES.length-1;
 	update(true);
@@ -589,7 +589,7 @@ async function sendmsg(){
 	const msg = marked( $("#msg").val() ).replace(/\n+/g, "").replace(/<script[\s\S]+<\/script>/g, ""); //处理
 	await send(NAME, msg, {}); //发送
 	$("#msg").val(""); //清除发送框内容
-	await update(); //刷新
+	await update(false); //刷新
 	
 	layer.close(waitLayerId);
 }
@@ -642,7 +642,7 @@ $(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind�
 //退出
 $("#exit").click(() => {
 	layer.load(0);
-	location.href = "./home.html";
+	location.href = "home.html";
 });
 
 //发送消息

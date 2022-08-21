@@ -2,7 +2,7 @@
 let TEXTURES;
 async function loadTextures(){
 	const keys = Object.keys(TEMPLATES);
-	TEXTURES = Img.grid(await Img.get("./img/textures/textures.png"), 16, 16);
+	TEXTURES = Img.grid(await Img.get("https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/img/textures/textures.png"), 16, 16);
 	for (const i of keys.slice(1)){ //除去空气
 		const block = TEMPLATES[i];
 		for (let j=0; j<block.block.face.length; j++){
