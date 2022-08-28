@@ -7,10 +7,10 @@
 		<title>我的世界 | 交流区</title>
 		
 		<!--icon-->
-		<link href="./img/icon.png" rel="icon" type="image/x-icon"/>
+		<link href="https://pic.imgdb.cn/item/6301e20f16f2c2beb152e797.png" rel="icon" type="image/x-icon"/>
 		
 		<!-- 异步fonts加载 -->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/js/modules/webfontloader.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/js/modules/webfontloader.js"></script>
 		<script>
 		if (typeof require != "undefined"){ //electron
 			console.log("electron")
@@ -18,12 +18,12 @@
 			window.onload = function(){
 				console.log("onload")
 				$("body").addClass("wf-active");
-			}
+			};
 		}else{
 			WebFont.load({
 				google: {
 					families: ["kt", "st", "xs", "zyyt"],
-					api: "https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/css/fonts.css"
+					api: "https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/css/fonts.css"
 				}
 			});
 		}
@@ -263,7 +263,7 @@
 		</style>
 		
 		<!-- jquery -->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/js/modules/jquery.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/js/modules/jquery.min.js"></script>
 		<script>
 		if (typeof require != "undefined") //electron
 			window.$ = window.jQuery = require("./js/modules/jquery.min.js");
@@ -272,7 +272,7 @@
 		<!-- layui -->
 		<!--<link rel="stylesheet" href="https://unpkg.com/layui@2.6.4/dist/css/layui.css">-->
 		<script src="https://unpkg.com/layui@2.6.8/dist/layui.js"></script>
-		<!--<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/js/modules/layui.js"></script>-->
+		<!--<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/js/modules/layui.js"></script>-->
 		
 		<!-- 流量统计 -->
 		<script src="https://wzh656.github.io/MinecraftWeb/js/modules/count.js" async></script>
@@ -297,12 +297,12 @@
 		}
 		</script>
 		
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/js/modules/sha512.js"></script> <!-- sha加密 -->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/js/modules/marked.min.js"></script> <!-- markdown -->
+		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/js/modules/sha512.js"></script> <!-- sha加密 -->
+		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/js/modules/marked.min.js"></script> <!-- markdown -->
 		
 		<script src="https://wzh.glitch.me/socket.io/socket.io.js"></script> <!-- socket -->
 		
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/js/modules/js_plus.min.js"></script> <!-- js+ -->
+		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/js/modules/js_plus.min.js"></script> <!-- js+ -->
     	<script src="https://wzh656.github.io/MinecraftWeb/js/modules/dynamic.js" async></script> <!-- dynamic -->
 		
 	</head>
