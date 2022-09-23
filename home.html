@@ -6,7 +6,7 @@
 └╯│    ┌────┐			Z
 　│　├─┐ ├────┤			H
 　╰┘└　 └────╯
-Copyleft by wzh 2020~2021
+Copyleft by wzh 2020~2022
 允许非商业用途的阅读、使用、复制、分发代码，
 修改借鉴代码和派生作品请告知作者，
 欢迎为代码的完善和新的功能提出建议或想法。
@@ -18,10 +18,10 @@ Copyleft by wzh 2020~2021
 		<title>我的世界</title>
 		
 		<!--icon-->
-		<link href="./icon.png" rel="icon" type="image/x-icon"/>
+		<link href="https://files.imgdb.cn/static/images/e7/97/6301e20f16f2c2beb152e797.png" rel="icon" type="image/x-icon"/>
 		
 		<!-- 异步fonts加载 -->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/js/modules/webfontloader.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/js/modules/webfontloader.js"></script>
 		<script>
 		if (typeof require != "undefined"){ //electron
 			console.log("electron")
@@ -34,14 +34,14 @@ Copyleft by wzh 2020~2021
 			WebFont.load({
 				google: {
 					families: ["kt", "st", "xs", "zyyt"],
-					api: "https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/css/fonts.css"
+					api: "https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/css/fonts.css"
 				}
 			});
 		}
 		</script>
 
 		
-		<link href="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/css/bootstrap.css" rel="stylesheet" type="text/css" />
+		<link href="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/css/bootstrap.css" rel="stylesheet" type="text/css" />
 		<style>
 		/* 字体缩放方案 */
 		@media screen and (max-width:320px){
@@ -62,7 +62,7 @@ Copyleft by wzh 2020~2021
 			
 			/* 背景 */
 			min-height: 100%;
-			background: #1b2036 url("./img/background.jpg") no-repeat fixed center;
+			background: #1b2036 url("https://files.imgdb.cn/static/images/bb/ab/6301e1b616f2c2beb152bbab.jpg") no-repeat fixed center;
 			background-size: cover;
 			max-width: 100%;
 			margin: auto;
@@ -288,7 +288,7 @@ Copyleft by wzh 2020~2021
 		</style>
 		
 		<!-- jquery -->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/js/modules/jquery.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/js/modules/jquery.min.js"></script>
 		<script>
 		if (typeof require != "undefined") //electron
 			window.$ = window.jQuery = require("./js/modules/jquery.min.js");
@@ -297,7 +297,7 @@ Copyleft by wzh 2020~2021
 		<!-- layui -->
 		<!--<link rel="stylesheet" href="https://unpkg.com/layui@2.6.4/dist/css/layui.css">-->
 		<script src="https://unpkg.com/layui@2.6.8/dist/layui.js"></script>
-		<!--<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/js/modules/layui.js"></script>-->
+		<!--<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/js/modules/layui.js"></script>-->
 
 		<!-- 流量统计 -->
 		<script src="https://wzh656.github.io/MinecraftWeb/js/modules/count.js" async></script>
@@ -312,7 +312,7 @@ Copyleft by wzh 2020~2021
 		</script>
 		
 		<!-- 调试工具 -->
-		<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+		<!--<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
 		<script>
 		if ( /ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test( navigator.userAgent.toLowerCase() ) ){
@@ -320,7 +320,7 @@ Copyleft by wzh 2020~2021
 			eruda.init();
 			new VConsole();
 		}
-		</script>
+		</script>-->
 
 		<!-- DaoVoice -->
 		<script async defer>(function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/cfb04fc0.js","daovoice")</script>
@@ -339,7 +339,7 @@ Copyleft by wzh 2020~2021
 		</script>
 		<script src="https://sidecar.gitter.im/dist/sidecar.v1.js" async defer></script>
 		
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/js/modules/js_plus.min.js"></script> <!-- js+ -->
+		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/js/modules/js_plus.min.js"></script> <!-- js+ -->
     	<script src="https://wzh656.github.io/MinecraftWeb/js/modules/dynamic.js" async></script> <!-- dynamic -->
 		
 	</head>
@@ -504,9 +504,10 @@ Copyleft by wzh 2020~2021
 				<ul>
 					<li>4D五子棋：
 						<ul>
-							<li>直接游玩：<a href="https://wzh656.github.io/gobang">https://wzh656.github.io/gobang</a></li>
+							<li>直接游玩：<a href="https://gobang-4d.vercel.app/">https://gobang-4d.vercel.app/</a></li>
+							<li>Github版（网速较慢）：<a href="https://wzh656.github.io/gobang">https://wzh656.github.io/gobang/</a></li>
 							<li>TapTap链接：<a href="https://www.taptap.com/app/222701">https://www.taptap.com/app/222701</a></li>
-							<li>国内派生网站：<a href="http://wzq.fuengby.top/">http://wzq.fuengby.top/</a></li>
+							<li>国内派生网站（版本较旧）：<a href="http://wzq.fuengby.top/">http://wzq.fuengby.top/</a></li>
 							<li>蓝奏云下载链接：<a href="https://wwm.lanzouj.com/b02ibn2yb">https://wwm.lanzouj.com/b02ibn2yb</a>（密码wzh）</li>
 						</ul>
 					</li>

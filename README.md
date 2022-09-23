@@ -30,7 +30,8 @@
     | v0.4.0-alpha      | [完整版(23.85MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v0.4.0-alpha/Minecraft-full.apk)，[精简版(5.34MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v0.4.0-alpha/Minecraft-simplified.apk)                        | 未打包(unpackaged)                                                                                                                        | [release](https://github.com/wzh656/MinecraftWeb/releases/tag/v0.4.0-alpha)   |
     | v0.3.2-alpha      | [原始版(0.89MB)](https://github.com/wzh656/MinecraftWeb/releases/download/v0.3.2-alpha/Minecraft_v0.3.2-alpha.apk)                                                                                                                                   | 未打包(unpackaged)                                                                                                                        | [release](https://github.com/wzh656/MinecraftWeb/releases/tag/v0.3.2-alpha)   |
 
-2. 网页版运行：可以直接访问 <https://wzh656.github.io/MinecraftWeb/home.html> 运行。
+2. 网页版运行：可以直接访问 <https://myminecraft.vercel.app/home.html> （较快）
+    或 <https://wzh656.github.io/MinecraftWeb/home.html> （GitHub版） 运行。
     > 注意：
     > 1. GitHub是国外网站，网络不好将**无法访问**
     > 2. 部分旧版浏览器可能不支持（推荐使用*Chrome最新版浏览器*以便正常运行）
