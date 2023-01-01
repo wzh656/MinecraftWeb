@@ -8,7 +8,7 @@ let bag_view = {
 	deskgood: {
 		group: new THREE.Group(),
 		material: new THREE.MeshBasicMaterial({
-			map: new THREE.TextureLoader().load("https://files.imgdb.cn/static/images/0f/04/6301e25b16f2c2beb1530f04.jpg")
+			map: new THREE.TextureLoader().load("./img/deskgood.jpg")
 		}),
 		top: {},
 		legs: []
