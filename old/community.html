@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<!-- Copyleft 2020~2023 by wzh -->
+<html lang="zh">
+	<head>
+		<meta charset="UTF-8" />
+		<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+		<title>我的世界 | 交流区</title>
+		
+		<!--icon-->
+		<link href="https://pic.imgdb.cn/item/6301e20f16f2c2beb152e797.png" rel="icon" type="image/x-icon"/>
+		
+		<!-- 异步fonts加载 -->
+		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/js/modules/webfontloader.js"></script>
+		<script>
+		if (typeof require != "undefined"){ //electron
+			console.log("electron")
+			document.write(`<link href="./css/fonts.css" rel="stylesheet" type="text/css" />`);
+			window.onload = function(){
+				console.log("onload")
+				$("body").addClass("wf-active");
+			};
+		}else{
+			WebFont.load({
+				google: {
+					families: ["kt", "st", "xs", "zyyt"],
+					api: "https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/css/fonts.css"
+				}
+			});
+		}
+		</script>
+		
+		<style>
+		/* 字体缩放方案 */
+		@media screen and (max-width:320px){
+			body {font-size: calc(0.016 * 320px + 9px);}
+		}
+		body{
+			font-size: calc(1.6vw + 9px);
+		}
+		@media screen and (min-width: 960px){
+			body {font-size: calc(0.016 * 960px + 9px);}
+		}
+		
+		/* element */
+		*{
+			outline: none;
+		}
+		html{
+			-moz-user-select: none;
+			-khtml-user-select: none;
+			user-select: none;
+		}
+		code{
+			background-color: rgba(236, 236, 236, 0.8);
+		}
+		blockquote{
+			background-color: rgba(236, 236, 236, 0.8);
+		}
+		/*blockquote:before{
+			width: 0.2rem;
+			height: 100%;
+			background-color: #aaa;
+		}*/
+		
+		
+		/* body */
+		body{
+			position: absolute;
+			left: 0;
+			top: 0;
+			display: flex;
+			flex-direction: column;
+			width: 100%;
+			height: 100%;
+			margin: 0;
+			background-color: #fffae8;
+		}
+		
+		
+		/* header */
+		body > header{
+			flex: none;
+			height: 2rem;
+			padding: 0.6rem;
+			background-color: #cef;
+		}
+		body > header > span{ /* 退出 */
+			position: absolute;
+			display: inline-block;
+			left: 0.1rem;
+			height: 2rem;
+			
+			border: none;
+			font-size: 1.2em;
+			line-height: 2rem;
+		}
+		body > header > span:active{
+			background-color: #bde;
+		}
+		body > header > h2{
+			margin: 0;
+			text-align: center;
+			font-size: 1.6em;
+			line-height: 2rem;
+		}
+
+		/* state */
+		.state{
+			flex: none;
+			margin: 0;
+			padding: 0;
+			text-align: center;
+			font-size: 0.6em;
+			box-shadow: 0px 3px 3px lavender;
+			border-radius: 0px 0px 0.5rem 0.5rem;
+		}
+		.state.connecting{
+			background-color: yellow;
+			color: red;
+		}
+		.state.success{
+			/*display: none;*/
+			background-color: blue;
+			color: white;
+		}
+		.state.failed{
+			background-color: red;
+			color: white;
+		}
+		
+		
+		/* list */
+		#list{
+			width: 100%;
+			height: 100%;
+			overflow-y: auto;
+			margin: 0;
+			padding: 0;
+			border-radius: 6px;
+		}
+		
+		#list > li{
+			display: block;
+			margin: 0;
+			padding: 0;
+		}
+		#list > li > ul{
+			margin: 0;
+			padding: 0;
+		}
+		
+		#list > li > ul > li{
+			display: flex;
+			flex-direction: column;
+			margin: 0.6rem;
+			padding: 0;
+		}
+		#list > li > ul > li > time{ /* time */
+			display: inline-block;
+			margin: 0 auto;
+			padding: 0.1rem 0.2rem;
+			
+			background-color: rgba(236, 236, 236, 0.8);
+			border-radius: 10px;
+			font-size: 0.8em;
+			box-shadow: 3px 2px 3px #e0d3ed;
+		}
+		#list > li > ul > li > div{ /* main */
+			display: flex;
+			text-align: left;
+		}
+		#list > li > ul > li.right > div{
+			flex-direction: row-reverse;
+		}
+		#list > li > ul > li > div > span{ /* icon */
+			display: inline-block;
+			width: 2rem;
+			height: 2rem;
+			margin: 0.2rem;
+			flex: none;
+			
+			background-color: #d3e0ed;
+			border-radius: 50%;
+			font-size: 1.1em;
+			text-align: center;
+			line-height: 2rem;
+			box-shadow: 0px 0px 5px gray,
+				0px 0px 10px #fff,
+				0px 0px 15px #fff;
+		}
+		#list > li > ul > li > div > span.v:after{
+			content: "V";
+			position: relative;
+			top: -2rem;
+			left: 2rem;
+			display: block;
+			width: 0.6rem;
+			height: 0.6rem;
+			
+			color: white;
+			background-color: #00f;
+			border-radius: 50%;
+			font-size: 0.3em;
+			text-align: center;
+			line-height: 0.6rem;
+		}
+		#list > li > ul > li > div > div{ /* name,msg */
+			display: inline-flex;
+			flex-direction: column;
+		}
+		#list > li > ul > li > div > div > span{ /* name */
+			margin: 0.1rem;
+			color: grey;
+			font-size: 0.8em;
+		}
+		#list > li > ul > li.right > div > div > span{
+			text-align: right;
+		}
+		#list > li > ul > li > div > div > article{ /* msg */
+			margin: 0.1rem;
+			padding: 0.2rem;
+			background-color: #e0edd3;
+			border-radius: 6px;
+			user-select: text; /* 可复制 */
+			word-break: break-all; /* 自动换行 */
+			box-shadow: 0px 0px 5px gray;
+		}
+		#list > li > ul > li > div > div > article > *{
+			font-family: zyyt; /* 字体修正 */
+		}
+		
+		
+		/* form */
+		body > form{
+			display: flex;
+			flex: none;
+			height: 3rem;
+			margin: 1px;
+			padding: 0.5rem;
+			border-radius: 1rem 1rem 0px 0px;
+			box-shadow: 0px -3px 5px #ede0d3;
+		}
+		body > form > textarea{
+			width: 100%;
+			height: 100%;
+			background-color: white;
+			border: 1px solid #6af;
+			border-radius: 1rem;
+			text-align: left;
+			resize: none; /* 禁止调整大小 */
+			box-shadow: 0px 0px 5px #cef;
+		}
+		body > form > button{
+			flex: none;
+			
+			border: 1px solid #6af;
+			border-radius: 999vw;
+			font-size: 1em;
+			background-color: #cef;
+			text-shadow: 0px 0px 3px gray;
+			box-shadow: 0px 0px 5px #cef;
+		}
+		body > form > button:active{
+			background-color: #bde;
+		}
+		
+		
+		/* noscript */
+		noscript{
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: #fffae8;
+			text-align: center;
+		}
+		</style>
+		
+		<!-- jquery -->
+		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/js/modules/jquery.min.js"></script>
+		<script>
+		if (typeof require != "undefined") //electron
+			window.$ = window.jQuery = require("./js/modules/jquery.min.js");
+		</script>
+		
+		<!-- layui -->
+		<!--<link rel="stylesheet" href="https://unpkg.com/layui@2.6.4/dist/css/layui.css">-->
+		<script src="https://unpkg.com/layui@2.6.8/dist/layui.js"></script>
+		<!--<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/js/modules/layui.js"></script>-->
+		
+		<!-- 流量统计 -->
+		<script src="https://wzh656.github.io/MinecraftWeb/js/modules/count.js" async></script>
+		<script>
+		var _hmt = _hmt || [];
+		(function() {
+			var hm = document.createElement("script");
+			hm.src = "https://hm.baidu.com/hm.js?c6b8f0ad7ec671e54d83e86a67280999";
+			var s = document.getElementsByTagName("script")[0]; 
+			s.parentNode.insertBefore(hm, s);
+		})();
+		</script>
+		
+		<!-- Google tag (gtag.js) -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-FFD7GVHXJB"></script>
+		<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+			
+		gtag('config', 'G-FFD7GVHXJB');
+		</script>
+		
+		<!-- 调试工具 -->
+		<!-- <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+		<script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
+		<script>
+		if ( /ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test( navigator.userAgent.toLowerCase() ) ){
+			//手机
+			eruda.init();
+			new VConsole();
+		}
+		</script> -->
+		
+		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/js/modules/sha512.js"></script> <!-- sha加密 -->
+		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/js/modules/marked.min.js"></script> <!-- markdown -->
+		
+		<script src="https://wzh.glitch.me/socket.io/socket.io.js"></script> <!-- socket -->
+		
+		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/js/modules/js_plus.min.js"></script> <!-- js+ -->
+    		<script src="https://wzh656.github.io/MinecraftWeb/js/modules/dynamic.js" async></script> <!-- dynamic -->
+		
+	</head>
+	<body>
+		<header>
+			<span id="exit">〈退出</span>
+			<h2>我的世界讨论区</h2>
+		</header>
+		<p class="state connecting">连接服务器中……</p>
+		<ul id="list"></ul>
+		<form>
+			<textarea id="msg" placeholder="shift+Enter发送（支持markdown/html格式）" contenteditable></textarea>
+			<button type="button" id="send">发送</button>
+		</form>
+		
+		<!-- 1:不支持js -->
+		<noscript style="z-index: 1;"><h1>你的浏览器不支持JavaScript，无法运行！</h1></noscript>
+		
+		<footer style="display: none;">
+			<script type="text/javascript">document.write(unescape("%3Cspan id='cnzz_stat_icon_1280239030'%3E%3C/span%3E%3Cscript src='https://v1.cnzz.com/z_stat.php%3Fid%3D1280239030%26online%3D1%26show%3Dline' type='text/javascript'%3E%3C/script%3E"));</script>
+		</footer>
+		
+<script>
+let socket, //socket.io
+	ID,
+	ROOM = "MinecraftCommunity";
+
+if (typeof io == "undefined"){ //未加载socket.io.js
+	$(".state").html("网络错误，请检查网络连接再刷新页面！")
+		.removeClass().addClass("state failed");
+	layer.alert("网络错误，请检查网络连接再刷新页面！", {icon:2});
+	throw "";
+}
+
+socket = io("https://wzh.glitch.me/");
+
+function emit(name, ...data){
+	console.log("↑", name, data);
+	socket.emit(name, ...data);
+};
+
+socket.on("connecting", function(data){
+	$(".state").html("连接服务器中……")
+		.removeClass().addClass("state connecting");
+});
+socket.on("connect", function(data){
+	emit("type", "chatroom"); //type
+	emit("chatroom_room", ROOM); //room
+	$(".state").html("服务器连接成功")
+		.removeClass().addClass("state success");
+	layer.msg("服务器连接成功", {icon:1});
+});
+socket.on("connect_failed", function(data){
+	$(".state").html("服务器连接失败")
+		.removeClass().addClass("state failed");
+	layer.msg("服务器连接失败", {icon:2});
+});
+socket.on("disconnect", function(data){
+	$(".state").html("与服务器连接断开")
+		.removeClass().addClass("state failed");
+	layer.msg("与服务器连接断开", {icon:2});
+});
+socket.on("reconnecting", function(data){
+	$(".state").html("重连中……")
+		.removeClass().addClass("state connecting");
+});
+socket.on("reconnect", function(data){
+	emit("type", "chatroom"); //type
+	emit("chatroom_room", ROOM); //room
+	$(".state").html("服务器重连成功")
+		.removeClass().addClass("state success");
+	layer.msg("服务器重连成功", {icon:1});
+});
+socket.on("reconnect_failed", function(data){
+	$(".state").html("服务器重连失败")
+		.removeClass().addClass("state failed");
+	layer.msg("服务器重连失败", {icon:2});
+});
+socket.on("error", function(data){
+	console.error(data);
+	$(".state").html("服务器连接错误！")
+		.removeClass().addClass("state failed");
+	layer.msg("服务器连接错误！", {icon:2});
+});
+
+socket.on("chatroom_assignID", function(data){
+	console.log("↓ chatroom_assignID", data)
+	ID = data;
+	$(".state").html(`你的分配ID：${ID}`);
+});
+
+socket.on("chatroom_roomList", function(data){
+	console.log("↓ chatroom_roomList", data)
+	$(".state").html(`当前在线：${Object.keys(data).length}人（你的分配ID：${ID}）`);
+});
+
+//发送消息
+function send(name, msg, attr={}){
+	return new Promise((resolve, reject)=>{
+		console.log("send", {name, msg, attr})
+		emit("chatroom_send", {
+			room: ROOM,
+			name,
+			msg,
+			attr
+		});
+		socket.on("chatroom_send", function(){
+			resolve();
+		});
+		socket.on("chatroom_send_failed", function(err){
+			console.error(err);
+		});
+		/*$.ajax({
+			url: "https://wzh.glitch.me/chatroom/MinecraftCommunity/send",
+			data: {name, msg, attr},
+			type: "GET",
+			dataType: "jsonp",
+			success: (response, status, xhr)=>{
+				console.log("send", {name, msg, attr}, response)
+				resolve(response);
+			},
+			error: (response, status, xhr)=>{
+				alert(`发送请求错误！\nstatus: ${status}\nresponse: ${response}`);
+				reject(response, status, xhr);
+			}
+		});*/
+	});
+}
+
+//获取消息
+function get(date){
+	return new Promise((resolve, reject)=>{
+		console.log("get", date)
+		emit("chatroom_get", ROOM, date);
+		socket.on("chatroom_get", function(data){
+			resolve(data);
+		});
+		socket.on("chatroom_get_failed", function(err){
+			console.error(err);
+		});
+		/*$.ajax({
+			url: "https://wzh.glitch.me/chatroom/MinecraftCommunity/get",
+			data: {date},
+			type: "GET",
+			dataType: "jsonp",
+			success: (response, status, xhr)=>{
+				console.log("get", {date}, response)
+				resolve(response);
+			},
+			error: (response, status, xhr)=>{
+				alert(`发送请求错误！\nstatus: ${status}\nresponse: ${response}`);
+				reject(response, status, xhr);
+			}
+		});*/
+	});
+}
+
+//获取所有日期
+function dates(){
+	return new Promise((resolve, reject)=>{
+		console.log("dates")
+		emit("chatroom_dates", ROOM);
+		socket.on("chatroom_dates", function(data){
+			resolve(data);
+		});
+		socket.on("chatroom_dates_failed", function(err){
+			console.error(err);
+		});
+		/*$.ajax({
+			url: "https://wzh.glitch.me/chatroom/MinecraftCommunity/dates",
+			data: {},
+			type: "GET",
+			dataType: "jsonp",
+			success: (response, status, xhr)=>{
+				console.log("dates", response)
+				resolve(response);
+			},
+			error: (response, status, xhr)=>{
+				alert(`发送请求错误！\nstatus: ${status}\nresponse: ${response}`);
+				reject(response, status, xhr);
+			}
+		});*/
+	});
+}
+
+
+
+let NAME = localStorage.getItem("MinecraftCommunity_name"),
+	DATES, //所有聊天记录
+	DATE;
+while (!NAME){
+	do{
+		NAME = prompt("请输入你的昵称（确认后无法修改）");
+	}while (NAME == "wzh");
+	localStorage.setItem("MinecraftCommunity_name", NAME);
+}
+
+
+
+//新手提示
+if (!localStorage.getItem("MinecraftCommunity_help")){
+	alert("操作提示：下滑（或鼠标滚动）消息列表可加载上一天消息记录");
+	localStorage.setItem("MinecraftCommunity_help", 1);
+}
+
+
+//刷新消息
+async function update(loadLayer=false, date=DATES[DATES.length-1] || new Date().format("yyyy-MM-dd")){
+	console.log("update", date)
+	let waitLayerId;
+	if (loadLayer)
+		waitLayerId = layer.load(1);
+	
+	const res = await get(date);
+	
+	const list = $("#list > li");
+	let elem = $("#list > li.d"+date);
+	console.log(list)
+	if (elem.length == 0){
+		for (let i=-1; i<list.length; i++){
+			const before = $(list[i]).data("date") || -Infinity,
+				after = $(list[+i+1]).data("date") || Infinity,
+				now = +new Date(date);
+			console.log(i, before, after, now)
+			if ( +before < now && now < +after){
+				console.log("ok");
+				elem = $("<li><ul></ul></li>").addClass("d"+date)
+					.data("date", +new Date(date));
+				console.log("add", elem)
+				if (list[i]){
+					list[i].after(elem);
+				}else{
+					$("#list").prepend(elem);
+				}
+				break;
+			}
+		}
+	}
+	
+	elem.children("ul").empty();
+	for (const {time, name, msg, attr} of res)
+		elem.children("ul").append(
+			$("<li></li>")
+				.addClass(name==NAME? "right": "left")
+				.append(
+					$("<time></time>").html( date+" "+time )
+				)
+				.append( //main
+					$("<div></div>")
+					.append( //icon
+						$("<span></span>").html( name.substr(0,1) )
+							.addClass( name=="wzh"? "v": ""  )
+					)
+					.append( //name, msg
+						$("<div></div>")
+						.append( //name
+							$("<span></span>").html( name )
+						)
+						.append( //msg
+							$("<article>"+msg+"</article>")
+						)
+					)
+				)
+		);
+	
+	if (loadLayer)
+		layer.close(waitLayerId);
+}
+
+dates().then(res => {
+	DATES = res;
+	DATE = DATES.length-1;
+	update(true);
+	setInterval(update, 6666); //6s/次
+});
+
+
+//发送消息
+async function sendmsg(){
+	if (!$("#msg").val()) return update(true); //无输入 刷新
+	
+	const waitLayerId = layer.load(1);
+	
+	const msg = marked( $("#msg").val() ).replace(/\n+/g, "").replace(/<script[\s\S]+<\/script>/g, ""); //处理
+	await send(NAME, msg, {}); //发送
+	$("#msg").val(""); //清除发送框内容
+	await update(false); //刷新
+	
+	layer.close(waitLayerId);
+}
+
+
+//刷新
+const touch = {x: null, y: null};
+$("#list").on("touchstart", function(e){
+	if ($("#list")[0].scrollTop != 0) return; //未到顶
+	
+	const t = e.originalEvent.targetTouches[0];
+	[touch.x, touch.y] = [t.screenX, t.screenY];
+});
+$("#list").on("touchend", function(e){
+	if ($("#list")[0].scrollTop != 0) return; //未到顶
+	
+	const t = e.originalEvent.changedTouches[0],
+		[dx, dy] = [t.screenX-touch.x, t.screenY-touch.y];
+	touch.x = touch.y = null;
+	
+	if (Math.abs(dx) < 60 && dy > 100){ //偏移较小 下拉
+		if (!DATES[--DATE])
+			return layer.msg("没有更早的记录了");
+		
+		update(true, DATES[DATE]);
+		layer.msg(DATES[DATE], {time: 2000});
+	}
+});
+
+let scroll_limit = false; //限制刷新过快
+$(document).on("mousewheel DOMMouseScroll", function(event){ //on也可以 bind监听
+	const wheel = event.originalEvent.wheelDelta || event.originalEvent.detail; //判断浏览器IE,谷歌滚轮事件 Firefox滚轮事件
+	if (wheel > 0){ //上滚轮
+		console.log("mouseWheelScroll Up", scroll_limit)
+		if (!scroll_limit && $("#list")[0].scrollTop == 0){ //未限制 且 到顶
+			if (!DATES[--DATE])
+				return layer.msg("没有更早的记录了");
+			
+			update(true, DATES[DATE]);
+			layer.msg(DATES[DATE], {time: 2000});
+			scroll_limit = true;
+			
+			setTimeout(function(){
+				scroll_limit = false;
+			}, 2000);
+		}
+	}
+});
+
+//退出
+$("#exit").click(() => {
+	layer.load(0);
+	location.href = "home.html";
+});
+
+//发送消息
+$("#send").click(sendmsg);
+$("#msg").keydown(function(e){
+	if (e.keyCode == 13 && e.shiftKey){ //shift+回车
+		sendmsg();
+		e.stopPropagation();
+		e.cancelBubble = true;
+		return false;
+	}
+});
+</script>
+	</body>
+</html>

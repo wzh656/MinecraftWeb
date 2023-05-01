@@ -1,0 +1,71 @@
+﻿/* 字体 */
+@font-face{
+	font-family: kt; /*楷体*/
+	src:url("https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/fonts/kt.ttf");
+}
+@font-face{
+	font-family: st; /*宋体*/
+	src:url("https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/fonts/st.ttf");
+}
+@font-face{
+	font-family: xs; /*QQ*/
+	src:url("https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/fonts/qq1.ttf");
+}
+@font-face{
+	font-family: zyyt; /*资源圆体*/
+	src:url("https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/fonts/zyyt.woff2");
+}
+/*@font-face{
+	font-family:hwxk; /*华文楷体*//*
+	src:url("https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/fonts/hwxk.ttf");
+}
+@font-face{
+	font-family:fzybxskt; /*方正硬笔行书楷体*//*
+	src:url("https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/fonts/fzybxskt.ttf");
+}
+@font-face{
+	font-family:fzqtjt; /*方正启体简体*//*
+	src:url("https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/fonts/fzqtjt.ttf");
+}
+@font-face{
+	font-family:qq1; /*QQ*//*
+	src:url("https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/fonts/qq1.ttf");
+}
+@font-face{
+	font-family:qq2; /*QQ*//*
+	src:url("https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/fonts/qq2.ttf");
+}
+@font-face{
+	font-family:huawei; /*HUAWEI*//*
+	src:url("https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb/fonts/huawei.ttf");
+}*/
+
+
+/* 字体加载完成 */
+.wf-active *{
+	font-family: zyyt, serif;
+	outline: none;
+}
+.wf-active h1,
+.wf-active h2,
+.wf-active h3,
+.wf-active h4,
+.wf-active h5,
+.wf-active h6,
+.wf-active h1 *,
+.wf-active h2 *,
+.wf-active h3 *,
+.wf-active h4 *,
+.wf-active h5 *,
+.wf-active h6 *{
+	font-family: st, serif;
+}
+.wf-active label,
+.wf-active label *{
+	font-family: kt, serif;
+}
+.wf-active button,
+.wf-active button *{
+	font-family: xs, serif;
+	font-weight: bold;
+}
