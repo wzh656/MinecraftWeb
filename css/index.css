@@ -87,7 +87,7 @@ app > header, app > footer{
 .main .btnGroup .btn1, .download .btnGroup .btn1{
 	background: linear-gradient(45deg, #00bfff 0%, #ce87fa 100%);
 }
-.main .btnGroup .btn2{
+.main .btnGroup .btn2, .download .btnGroup .btn2{
 	background: linear-gradient(-45deg, #00ffbf 0%, #87cefa 100%);
 }
 
