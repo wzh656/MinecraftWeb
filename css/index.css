@@ -133,7 +133,7 @@ app > header, app > footer{
 	overflow-x: auto;
 }
 .sponsor .imgGroup img{
-	width: 50%;
+	width: 33%;
 	max-width: 360px;
 }
 
