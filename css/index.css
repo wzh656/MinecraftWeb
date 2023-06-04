@@ -55,7 +55,7 @@ app > header, app > footer{
 }
 
 
-.main .btnGroup, .download .btnGroup{
+.btnGroup{
 	width: calc(100% - 2 * 1rem);
 	display: flex;
 	justify-content: space-around;
@@ -63,7 +63,7 @@ app > header, app > footer{
 	margin: 1rem;
 }
 
-.main .btnGroup a, .download .btnGroup a{
+.btnGroup a{
 	display: block;
 	margin: 5px;
 	padding: 10px 20px;
@@ -79,16 +79,23 @@ app > header, app > footer{
 	transition: all 0.3s ease-in-out;
 }
 
-.main .btnGroup a:hover, .download .btnGroup a:hover{
+.btnGroup a:hover{
 	transform: translateY(-3px);
 	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
 }
 
-.main .btnGroup .btn1, .download .btnGroup .btn1{
+.btn1{
 	background: linear-gradient(45deg, #00bfff 0%, #ce87fa 100%);
 }
-.main .btnGroup .btn2, .download .btnGroup .btn2{
+.btn2{
 	background: linear-gradient(-45deg, #00ffbf 0%, #87cefa 100%);
+}
+.btn3{
+	background: linear-gradient(135deg, #bf00ff 0%, #face87 100%);
+}
+.btn4{
+	background-color: #8462db;
+	color: white;
 }
 
 
@@ -133,6 +140,7 @@ app > header, app > footer{
 	overflow-x: auto;
 }
 .sponsor .imgGroup img{
+	display: inline-block;
 	width: 33%;
 	max-width: 360px;
 }
