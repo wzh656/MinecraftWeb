@@ -21,7 +21,7 @@ Copyleft by wzh 2020~2022
 		<link href="https://pic.imgdb.cn/item/6301e20f16f2c2beb152e797.png" rel="icon" type="image/x-icon"/>
 		
 		<!-- 异步fonts加载 -->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/modules/webfontloader.js"></script>
+		<script src="./js/modules/webfontloader.js"></script>
 		<script>
 		if (typeof require != "undefined"){ //electron
 			console.log("electron")
@@ -34,13 +34,13 @@ Copyleft by wzh 2020~2022
 			WebFont.load({
 				google: {
 					families: ["kt", "st", "xs", "zyyt"],
-					api: "https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/css/fonts.css"
+					api: "./css/fonts.css"
 				}
 			});
 		}
 		</script>
 		
-		<link href="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/css/bootstrap.css" rel="stylesheet" type="text/css" />
+		<link href="./css/bootstrap.css" rel="stylesheet" type="text/css" />
 		<style>
 			/* 字体缩放方案 */
 			@media screen and (max-width:320px){
@@ -803,7 +803,7 @@ Copyleft by wzh 2020~2022
 		</style>
 		
 		<!-- jquery -->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/modules/jquery.min.js"></script>
+		<script src="./js/modules/jquery.min.js"></script>
 		<script>
 		let ipcRenderer;
 		if (typeof require != "undefined"){ //electron
@@ -848,14 +848,14 @@ Copyleft by wzh 2020~2022
 		}
 		</script>
 		
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/modules/three.min.js"></script> <!-- three.js -->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/modules/OrbitControls.js"></script> <!-- bag deskgood 相机控制 -->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/modules/DeviceOrientationControls.js"></script> <!-- 陀螺仪相机控制 -->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/modules/simplex-noise.js"></script> <!-- 柏林噪声 -->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/modules/dat.gui.min.js"></script> <!-- dat.gui -->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/modules/stats.min.js"></script> <!-- stats.js -->
+		<script src="./js/modules/three.min.js"></script> <!-- three.js -->
+		<script src="./js/modules/OrbitControls.js"></script> <!-- bag deskgood 相机控制 -->
+		<script src="./js/modules/DeviceOrientationControls.js"></script> <!-- 陀螺仪相机控制 -->
+		<script src="./js/modules/simplex-noise.js"></script> <!-- 柏林噪声 -->
+		<script src="./js/modules/dat.gui.min.js"></script> <!-- dat.gui -->
+		<script src="./js/modules/stats.min.js"></script> <!-- stats.js -->
 		
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/modules/js_plus.min.js"></script> <!-- js+ -->
+		<script src="./js/modules/js_plus.min.js"></script> <!-- js+ -->
     	<script src="https://wzh656.github.io/MinecraftWeb/js/modules/dynamic.js" async></script> <!-- dynamic -->
 		
 	</head>
@@ -1007,7 +1007,7 @@ status("command");</textarea>
 		<!-- 6:message -->
 		
 		<!-- bgm -->
-		<audio id="bgm" preload loop style="display: none;" src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/music/1.m4a" ></audio>
+		<audio id="bgm" preload loop style="display: none;" src="./music/1.m4a" ></audio>
 		<!--<audio id="bgm" autoplay perload loop style="display: none;" src="https://vdse.bdstatic.com/876934f28995e8042230ec598237c67e.mp4?authorization=bce-auth-v1/fb297a5cc0fb434c971b8fa103e8dd7b/2017-05-11T09:02:31Z/-1//ab5b458a478fae53b754e194ab270b96f23aa23ba71c2e63b06fc06d0543040c"></audio>-->
 		
 		<!-- 7:不支持js -->
@@ -1019,7 +1019,7 @@ if (!DEBUG){
 	console.log = console.info = console.warn = console.error = function(){};
 }
 </script>
-<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/GameTime.js"></script> <!-- 游戏时间 -->
+<script src="./js/GameTime.js"></script> <!-- 游戏时间 -->
 <script>
 //退出
 function exit(){
@@ -1320,40 +1320,40 @@ function record(canvas, time, opt={}){
 	return ()=>mediaRecord.stop();
 }
 </script>
-		<!-- <script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/sendMessage.js"></script> -->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/playBGM.js"></script> <!-- 播放BGM -->
+		<!-- <script src="./js/sendMessage.js"></script> -->
+		<script src="./js/playBGM.js"></script> <!-- 播放BGM -->
 		
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/try_load.js"></script> <!-- textures贴图、indexDB存档加载完毕后调用加载区块 -->
+		<script src="./js/try_load.js"></script> <!-- textures贴图、indexDB存档加载完毕后调用加载区块 -->
 		
-		<!--<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/SQL.js"></script>
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/sql_init.js"></script>-->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/IndexDB.js"></script> <!-- indexDB模块类 -->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/indexDB_init.js"></script> <!-- 初始化indexDB，开始加载存档 -->
+		<!--<script src="./js/SQL.js"></script>
+		<script src="./js/sql_init.js"></script>-->
+		<script src="./js/IndexDB.js"></script> <!-- indexDB模块类 -->
+		<script src="./js/indexDB_init.js"></script> <!-- 初始化indexDB，开始加载存档 -->
 		
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/stats.js"></script> <!-- stats性能显示模块 -->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/dat.gui.js"></script> <!-- dat.gui控制模块 -->
+		<script src="./js/stats.js"></script> <!-- stats性能显示模块 -->
+		<script src="./js/dat.gui.js"></script> <!-- dat.gui控制模块 -->
 		
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/Thing.js"></script> <!-- Thing,Block,EntityBlock,Entity,Tool物品类 -->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/template.js"></script> <!-- Thing模板；需置于Thing后 -->
+		<script src="./js/Thing.js"></script> <!-- Thing,Block,EntityBlock,Entity,Tool物品类 -->
+		<script src="./js/template.js"></script> <!-- Thing模板；需置于Thing后 -->
 			
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/simplexNoise.js"></script> <!-- 初始化柏林噪声simplexNoise函数 -->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/Weather.js"></script> <!-- Weather天气类 -->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/ChunkMap.js"></script> <!-- ChunkMap区块类 -->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/ChunkMap_init.js"></script> <!-- 初始实例化ChunkMap类；需置于ChunkMap后 -->
+		<script src="./js/simplexNoise.js"></script> <!-- 初始化柏林噪声simplexNoise函数 -->
+		<script src="./js/Weather.js"></script> <!-- Weather天气类 -->
+		<script src="./js/ChunkMap.js"></script> <!-- ChunkMap区块类 -->
+		<script src="./js/ChunkMap_init.js"></script> <!-- 初始实例化ChunkMap类；需置于ChunkMap后 -->
 		
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/Img.js"></script> <!-- 图片操作模块 -->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/loadTexture.js"></script> <!-- 开始加载贴图；需置于templates,Img后 -->
+		<script src="./js/Img.js"></script> <!-- 图片操作模块 -->
+		<script src="./js/loadTexture.js"></script> <!-- 开始加载贴图；需置于templates,Img后 -->
 		
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/ColorUpdater.js"></script> <!-- ColorUpdater自动更新颜色类 -->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/THREE.js"></script> <!-- 初始化Three.js模块；需置于ColorUpdate,stats后 -->
+		<script src="./js/ColorUpdater.js"></script> <!-- ColorUpdater自动更新颜色类 -->
+		<script src="./js/THREE.js"></script> <!-- 初始化Three.js模块；需置于ColorUpdate,stats后 -->
 		
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/deskgood.js"></script> <!-- 初始化角色deskgood；需置于ThingGroup后 -->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/bagView.js"></script> <!-- 角色deskgood背包旋转视图 -->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/changeState.js"></script> <!-- 改变状态 -->
+		<script src="./js/deskgood.js"></script> <!-- 初始化角色deskgood；需置于ThingGroup后 -->
+		<script src="./js/bagView.js"></script> <!-- 角色deskgood背包旋转视图 -->
+		<script src="./js/changeState.js"></script> <!-- 改变状态 -->
 		
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/keyEvents.js"></script> <!-- 键盘key事件 -->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/mouseEvents.js"></script> <!-- 鼠标mouse事件 -->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/touchEvents.js"></script> <!-- 触摸touch事件 -->
+		<script src="./js/keyEvents.js"></script> <!-- 键盘key事件 -->
+		<script src="./js/mouseEvents.js"></script> <!-- 鼠标mouse事件 -->
+		<script src="./js/touchEvents.js"></script> <!-- 触摸touch事件 -->
 		
 	</body>
 </html>

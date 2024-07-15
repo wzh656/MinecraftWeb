@@ -27,7 +27,7 @@ document.addEventListener("mousemove", function (e){
 	if (stop)
 		return;
 	
-	if (e.path[0] != document.body)
+	if (e.target != document.body)
 		return;
 	
 	const dx =
@@ -60,7 +60,7 @@ document.addEventListener("mousemove", function (e){
 	if (deskgood.look.y < 0)
 		deskgood.look.y = deskgood.look.y%360 + 360;
 	
-	//deskgood.look_update(); //刷新
+	//deskgood.look_update(); //刷新	
 	
 	for (let i=mouse_choice.obj.length-1; i>=0; i--){
 		mouse_choice.obj[i].material.dispose();
@@ -200,7 +200,7 @@ document.addEventListener("mousedown", function (e){
 	if (stop)
 		return;
 	
-	if (e.path[0] !== document.body)
+	if (e.target !== document.body)
 		return;
 	
 	if (e.button == 0){ //左键（删除）
@@ -306,7 +306,7 @@ document.addEventListener("mousedown", function (e){
 	if (stop)
 		return;
 	
-	if (e.path[0] !== document.body)
+	if (e.target !== document.body)
 		return;
 	
 	if (e.button == 0){ //左键(onLeftMouseUp)

@@ -21,7 +21,7 @@ Copyleft by wzh 2020~2022
 		<link href="https://pic.imgdb.cn/item/6301e20f16f2c2beb152e797.png" rel="icon" type="image/x-icon"/>
 		
 		<!-- 异步fonts加载 -->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/modules/webfontloader.js"></script>
+		<script src="./js/modules/webfontloader.js"></script>
 		<script>
 		if (typeof require != "undefined"){ //electron
 			console.log("electron")
@@ -34,14 +34,14 @@ Copyleft by wzh 2020~2022
 			WebFont.load({
 				google: {
 					families: ["kt", "st", "xs", "zyyt"],
-					api: "https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/css/fonts.css"
+					api: "./css/fonts.css"
 				}
 			});
 		}
 		</script>
 
 		
-		<link href="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/css/bootstrap.css" rel="stylesheet" type="text/css" />
+		<link href="./css/bootstrap.css" rel="stylesheet" type="text/css" />
 		<style>
 		/* 字体缩放方案 */
 		@media screen and (max-width:320px){
@@ -288,7 +288,7 @@ Copyleft by wzh 2020~2022
 		</style>
 		
 		<!-- jquery -->
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/modules/jquery.min.js"></script>
+		<script src="./js/modules/jquery.min.js"></script>
 		<script>
 		if (typeof require != "undefined") //electron
 			window.$ = window.jQuery = require("./js/modules/jquery.min.js");
@@ -297,7 +297,7 @@ Copyleft by wzh 2020~2022
 		<!-- layui -->
 		<!--<link rel="stylesheet" href="https://unpkg.com/layui@2.6.4/dist/css/layui.css">-->
 		<script src="https://unpkg.com/layui@2.6.8/dist/layui.js"></script>
-		<!--<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/modules/layui.js"></script>-->
+		<!--<script src="./js/modules/layui.js"></script>-->
 
 		<!-- 调试工具 -->
 		<!--<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
@@ -349,7 +349,7 @@ Copyleft by wzh 2020~2022
 		gtag('config', 'G-FFD7GVHXJB');
 		</script>
 		
-		<script src="https://cdn.jsdelivr.net/gh/wzh656/MinecraftWeb@master/old/js/modules/js_plus.min.js"></script> <!-- js+ -->
+		<script src="./js/modules/js_plus.min.js"></script> <!-- js+ -->
     	<script src="https://wzh656.github.io/MinecraftWeb/js/modules/dynamic.js" async></script> <!-- dynamic -->
 		
 	</head>
