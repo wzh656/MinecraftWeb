@@ -1,0 +1,5 @@
+
+User-agent:*
+Disallow:
+
+Sitemap: https://minecraftweb.netlify.app/sitemap.xml
