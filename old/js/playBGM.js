@@ -3,12 +3,12 @@ function playBGM(){
 	if ( bgm.paused ){
 		if ( Math.random(0, 1, 0) ){
 			bgm.volume = 1;
-			bgm.src = "./music/1.m4a";
+			bgm.src = "https://static.kamimika.top/minecraftweb/music/1.m4a";
 			bgm.play();
 			console.info("bgm(BackGround Music)", "begin(1.m4a)", "time:"+new Date());
 		}else{
 			bgm.volume = 1;
-			bgm.src = "./music/2.m4a";
+			bgm.src = "https://static.kamimika.top/minecraftweb/music/2.m4a";
 			bgm.play();
 			console.info("bgm(BackGround Music)", "begin(2.m4a)", "time:"+new Date());
 		}
