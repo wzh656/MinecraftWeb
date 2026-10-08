@@ -100,15 +100,19 @@ app > header, app > footer{
 
 
 
-.intro, .about, .sponsor{
+.intro, .about, .sponsor, .list{
 	margin: 3rem 0;
 	padding: 1rem;
 }
+.list{
+	margin-left: auto;
+	margin-right: auto;
+}
 
-.intro p, .about p, .sponsor p{
+.intro p, .about p, .sponsor p, .list p{
 	text-indent: 2em;
 }
-.intro h1, .about h1, .sponsor h1{
+.intro h1, .about h1, .sponsor h1, .list h1{
 	color: #77c;
 	border-left: 6px solid #77c;
 	padding-left: 6px;
@@ -157,6 +161,64 @@ app > header, app > footer{
 }
 
 
+#version-list{
+	opacity: 0;
+}
+
+.list ul{
+	list-style: none;
+	padding: 0;
+	max-width: 896px;
+	margin: 0 auto;
+}
+
+.list ul li{
+	display: flex;
+	justify-content: space-between;
+	margin: 1rem 0;
+	padding: 1rem;
+	background: linear-gradient(to right, #89a, #9ab);
+	border-radius: 5px;
+	box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.5); /* 阴影效果 */
+}
+
+.list .info p.title{
+	font-size: 1.2rem;
+	font-weight: bold;
+	margin-bottom: 0.5rem;
+}
+
+.list .info p{
+	margin: 0.5rem 0;
+}
+
+.list .info img{
+	width: 100%;
+	max-width: 500px;
+	margin: 1rem;
+	border-radius: 5px;
+	box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.5); /* 阴影效果 */
+}
+
+.list a.btn{
+	display: inline-block;
+	margin-top: 0.5rem;
+	padding: 0.75rem 1.5rem;
+	background: linear-gradient(45deg, #00bfff 0%, #ce87fa 100%);
+	color: white;
+	text-decoration: none;
+	border-radius: 5px;
+	box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.5); /* 阴影效果 */
+	height: fit-content;
+	transition: all 0.3s ease-in-out;
+}
+
+
+.list a.btn:hover{
+	transform: translateY(-3px);
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+}
+
 
 footer{
 	padding: 0.5rem;
@@ -169,7 +231,7 @@ footer{
 
 @media screen and (min-width: 1024px){
 	.main img{
-		margin-top: 2rem;
+		margin-top: 0rem;
 	}
 	.main .btnGroup{
 		position: absolute;
