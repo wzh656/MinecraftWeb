@@ -2,27 +2,32 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
 <url>
   <loc>https://minecraftweb.netlify.app/</loc>
-  <lastmod>2024-12-11T04:44:24+00:00</lastmod>
+  <lastmod>2026-10-10T06:15:15+00:00</lastmod>
   <priority>1.00</priority>
 </url>
 <url>
+  <loc>https://minecraftweb.netlify.app/list</loc>
+  <lastmod>2026-10-10T06:15:15+00:00</lastmod>
+  <priority>0.90</priority>
+</url>
+<url>
   <loc>https://minecraftweb.netlify.app/old/home</loc>
-  <lastmod>2024-12-11T04:44:24+00:00</lastmod>
+  <lastmod>2026-10-10T06:15:15+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://minecraftweb.netlify.app/download</loc>
-  <lastmod>2024-12-11T04:44:24+00:00</lastmod>
+  <lastmod>2026-10-10T06:15:15+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://minecraftweb.netlify.app/community</loc>
-  <lastmod>2024-12-11T04:44:24+00:00</lastmod>
+  <lastmod>2026-10-10T06:15:15+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://minecraftweb.netlify.app/sponsor</loc>
-  <lastmod>2024-12-11T04:44:24+00:00</lastmod>
+  <lastmod>2026-10-10T06:15:15+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 </urlset>
